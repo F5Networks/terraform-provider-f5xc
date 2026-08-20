@@ -480,6 +480,11 @@ func (n *namespaceCustomAPIServer) AllApplicationInventoryWaf(context.Context,
 	return &ves_io_schema_ns.AllApplicationInventoryWafFilterResponse{}, nil
 }
 
+func (n *namespaceCustomAPIServer) OIDCOAuthDiscovery(context.Context,
+	*ves_io_schema_ns.OIDCOAuthDiscoveryReq) (*ves_io_schema_ns.OIDCOAuthDiscoveryResp, error) {
+	return &ves_io_schema_ns.OIDCOAuthDiscoveryResp{}, nil
+}
+
 var _ ves_io_schema_ns.NamespaceCustomAPIServer = &namespaceCustomAPIServer{}
 
 // ves.io.schema.views.gcp_vpc_site.CustomAPI handling - start
@@ -507,7 +512,11 @@ func getTestClientOpts(url, tenant string) ([]vesapi.ConfigOpt, error) {
 	clCert := fmt.Sprintf("file:///%s/tls/client.examplesvc.ves.io.crt", tdRoot)
 	clCACert := fmt.Sprintf("file:///%s/tls/client.ca.crt", tdRoot)
 
-	remapperFn := uriRemapperFn(tenant)
+	policy, err := resolveThrottlingPolicy(nil)
+	if err != nil {
+		return nil, err
+	}
+	remapperFn := uriRemapperFn(tenant, policy, newResourceThrottleRegistry())
 
 	clOpts := []vesapi.ConfigOpt{
 		vesapi.WithCfgKey(clKey),

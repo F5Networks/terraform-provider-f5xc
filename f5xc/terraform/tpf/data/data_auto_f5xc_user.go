@@ -35,24 +35,24 @@ type DataSourceF5XCUser struct {
 type DataSourceF5XCUserModel struct {
 	Annotations        types.Map         `tfsdk:"annotations"`
 	Description        types.String      `tfsdk:"description"`
+	Labels             types.Map         `tfsdk:"labels"`
 	Name               types.String      `tfsdk:"name"`
 	Namespace          types.String      `tfsdk:"namespace"`
 	Uid                types.String      `tfsdk:"uid"`
-	Labels             types.Map         `tfsdk:"labels"`
 	Contacts           types.List        `tfsdk:"contacts"`
+	DomainOwner        types.Bool        `tfsdk:"domain_owner"`
+	Email              types.String      `tfsdk:"email"`
+	FirstName          types.String      `tfsdk:"first_name"`
 	Groups             types.List        `tfsdk:"groups"`
-	TosAcceptedAt      timetypes.RFC3339 `tfsdk:"tos_accepted_at"`
 	IdmType            types.List        `tfsdk:"idm_type"`
 	LastLoginTimestamp timetypes.RFC3339 `tfsdk:"last_login_timestamp"`
-	DomainOwner        types.Bool        `tfsdk:"domain_owner"`
-	Type               types.List        `tfsdk:"type"`
-	Email              types.String      `tfsdk:"email"`
-	TosAccepted        types.String      `tfsdk:"tos_accepted"`
-	TosVersion         types.String      `tfsdk:"tos_version"`
-	SyncMode           types.List        `tfsdk:"sync_mode"`
-	Locale             types.String      `tfsdk:"locale"`
-	FirstName          types.String      `tfsdk:"first_name"`
 	LastName           types.String      `tfsdk:"last_name"`
+	Locale             types.String      `tfsdk:"locale"`
+	SyncMode           types.List        `tfsdk:"sync_mode"`
+	TosAccepted        types.String      `tfsdk:"tos_accepted"`
+	TosAcceptedAt      timetypes.RFC3339 `tfsdk:"tos_accepted_at"`
+	TosVersion         types.String      `tfsdk:"tos_version"`
+	Type               types.List        `tfsdk:"type"`
 	Timeouts           timeouts.Value    `tfsdk:"timeouts"`
 }
 
@@ -60,8 +60,8 @@ type DataSourceF5XCUserModel struct {
 // Attribute map for ArrayOfPointerField --> Contacts
 var UserContactsObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
 	"tenant":    types.StringType,
 }
 
@@ -69,8 +69,8 @@ var UserContactsObjectRefModelAttributeMap = map[string]attr.Type{
 var UserGroupsObjectRefModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -87,8 +87,8 @@ func (d *DataSourceF5XCUser) Metadata(ctx context.Context, request datasource.Me
 func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "User data source",
-		Description:         "User data source",
+		MarkdownDescription: "Billing Feature Indicator Single instance of a billing indicator. It informs the customer of any problems with their billing, including failed payments, overdue invoices, or missing valid payment methods.",
+		Description:         "Billing Feature Indicator Single instance of a billing indicator. It informs the customer of any problems with their billing, including failed payments, overdue invoices, or missing valid payment methods.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -103,6 +103,13 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -122,13 +129,6 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"contacts": schema.ListNestedAttribute{
 				Description: "contacts Contact information for user",
 				Required:    false,
@@ -136,13 +136,13 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"namespace": schema.StringAttribute{
+						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
 						},
-						"name": schema.StringAttribute{
+						"namespace": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -156,6 +156,24 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 						},
 					},
 				},
+			},
+			"domain_owner": schema.BoolAttribute{
+				Description: "Domain Owner Domain owner is the first user who registered or signed up the associated Tenant. User created via signup flow will have this value set to true. Few restrictions apply to this user w.r.t role update and deletion.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"email": schema.StringAttribute{
+				Description: "email user's email",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"first_name": schema.StringAttribute{
+				Description: "first_name user's first name",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
 			},
 			"groups": schema.ListNestedAttribute{
 				Description: "Groups Reference to the user groups.",
@@ -170,13 +188,13 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 							Optional:    false,
 							Computed:    true,
 						},
-						"tenant": schema.StringAttribute{
+						"namespace": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
 						},
-						"namespace": schema.StringAttribute{
+						"tenant": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -184,13 +202,6 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 						},
 					},
 				},
-			},
-			"tos_accepted_at": schema.StringAttribute{
-				Description: "tos_accepted_at tos accepted timestamp.",
-				CustomType:  timetypes.RFC3339Type{},
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
 			},
 			"idm_type": schema.ListAttribute{
 				Description: "IDM Type Type of the identity management who is managing this user.",
@@ -206,33 +217,14 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 				Optional:    false,
 				Computed:    true,
 			},
-			"domain_owner": schema.BoolAttribute{
-				Description: "Domain Owner Domain owner is the first user who registered or signed up the associated Tenant. User created via signup flow will have this value set to true. Few restrictions apply to this user w.r.t role update and deletion.",
+			"last_name": schema.StringAttribute{
+				Description: "last_name user's last name",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 			},
-			"type": schema.ListAttribute{
-				Description: "type type of the user",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"email": schema.StringAttribute{
-				Description: "email user's email",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"tos_accepted": schema.StringAttribute{
-				Description: "tos_accepted tos accepted version, this field is deprecated refer the fields `tos_accepted_at` and `tos_version` instead.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"tos_version": schema.StringAttribute{
-				Description: "tos_version tos accepted version",
+			"locale": schema.StringAttribute{
+				Description: "locale locale of the user (defaults to English)",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -244,23 +236,31 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"locale": schema.StringAttribute{
-				Description: "locale locale of the user (defaults to English)",
+			"tos_accepted": schema.StringAttribute{
+				Description: "tos_accepted tos accepted version, this field is deprecated refer the fields `tos_accepted_at` and `tos_version` instead.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 			},
-			"first_name": schema.StringAttribute{
-				Description: "first_name user's first name",
+			"tos_accepted_at": schema.StringAttribute{
+				Description: "tos_accepted_at tos accepted timestamp.",
+				CustomType:  timetypes.RFC3339Type{},
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 			},
-			"last_name": schema.StringAttribute{
-				Description: "last_name user's last name",
+			"tos_version": schema.StringAttribute{
+				Description: "tos_version tos accepted version",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"type": schema.ListAttribute{
+				Description: "type type of the user",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Read: false, // activate timeouts.read
@@ -309,15 +309,14 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_user.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -334,67 +333,51 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Annotations = annotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
+	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
+	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
+	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
+	// were set from the request config and must not be overwritten with an empty string).
+	if data.Description.IsNull() || data.Description.IsUnknown() {
+		data.Description = types.StringNull()
+	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
+	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
+	if data.Labels.IsNull() || data.Labels.IsUnknown() {
 		data.Labels = types.MapNull(types.StringType)
 	}
 
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
+	// were set from the request config and must not be overwritten with an empty string).
+	if data.Name.IsNull() || data.Name.IsUnknown() {
+		data.Name = types.StringNull()
+	}
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
+	// were set from the request config and must not be overwritten with an empty string).
+	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
+		data.Namespace = types.StringNull()
+	}
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
+	// were set from the request config and must not be overwritten with an empty string).
+	if data.Uid.IsNull() || data.Uid.IsUnknown() {
+		data.Uid = types.StringNull()
+	}
+
 	// data SpecToModelRoot ArrayOfPointerField --> Contacts
-	if len(specData.Contacts) > 0 {
-		contactsElements := make([]ObjectRefTypeModel, 0, len(specData.Contacts))
+	if len(specData.GetContacts()) > 0 {
+		contactsElements := make([]ObjectRefTypeModel, 0, len(specData.GetContacts()))
 
-		for _, contactsElement := range specData.Contacts {
+		for _, contactsElement := range specData.GetContacts() {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if contactsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(contactsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
 
 			// data specToModelNested RequiredStringField --> Name
 			if contactsElement.GetName() != "" {
@@ -402,6 +385,14 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if contactsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(contactsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Tenant
@@ -415,18 +406,20 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 			contactsElements = append(contactsElements, objectRefTypeModelModel)
 		}
 
-		contactsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			UserContactsObjectRefModelAttributeMap,
-			contactsElements,
-		)
+		{
+			contactsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				UserContactsObjectRefModelAttributeMap,
+				contactsElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Contacts = contactsList
 		}
-
-		data.Contacts = contactsList
 	} else {
 		var contactsObjectType = basetypes.ObjectType{
 			AttrTypes: UserContactsObjectRefModelAttributeMap,
@@ -435,98 +428,8 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 		data.Contacts = nullContactsList
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> Groups
-	if len(specData.Groups) > 0 {
-		groupsElements := make([]ObjectRefTypeModel, 0, len(specData.Groups))
-
-		for _, groupsElement := range specData.Groups {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested RequiredStringField --> Name
-			if groupsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(groupsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if groupsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(groupsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if groupsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(groupsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			groupsElements = append(groupsElements, objectRefTypeModelModel)
-		}
-
-		groupsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			UserGroupsObjectRefModelAttributeMap,
-			groupsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.Groups = groupsList
-	} else {
-		var groupsObjectType = basetypes.ObjectType{
-			AttrTypes: UserGroupsObjectRefModelAttributeMap,
-		}
-		nullGroupsList := basetypes.NewListNull(groupsObjectType)
-		data.Groups = nullGroupsList
-	}
-
-	// data SpecToModelRoot TimeStampField --> TosAcceptedAt
-	data.TosAcceptedAt = timetypes.NewRFC3339ProtobufPointerValue(specData.GetTosAcceptedAt())
-
-	// data SpecToModelRoot EnumField --> IdmType
-	if specData.GetIdmType().String() != "" {
-		stringValue := types.StringValue(specData.GetIdmType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.IdmType = listValue
-	} else {
-		// Empty string, set to null
-		data.IdmType = types.ListNull(types.StringType)
-	}
-
-	// data SpecToModelRoot TimeStampField --> LastLoginTimestamp
-	data.LastLoginTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetLastLoginTimestamp())
-
 	// data SpecToModelRoot BoolField --> DomainOwner
 	data.DomainOwner = types.BoolValue(specData.GetDomainOwner())
-
-	// data SpecToModelRoot EnumField --> Type
-	if specData.GetType().String() != "" {
-		stringValue := types.StringValue(specData.GetType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Type = listValue
-	} else {
-		// Empty string, set to null
-		data.Type = types.ListNull(types.StringType)
-	}
 
 	// data SpecToModelRoot StringField --> Email
 	if specData.GetEmail() != "" {
@@ -534,45 +437,6 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 	} else {
 		// Empty string, set to null to avoid "inconsistent result after apply" errors
 		data.Email = types.StringNull()
-	}
-
-	// data SpecToModelRoot StringField --> TosAccepted
-	if specData.GetTosAccepted() != "" {
-		data.TosAccepted = types.StringValue(specData.GetTosAccepted())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TosAccepted = types.StringNull()
-	}
-
-	// data SpecToModelRoot StringField --> TosVersion
-	if specData.GetTosVersion() != "" {
-		data.TosVersion = types.StringValue(specData.GetTosVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TosVersion = types.StringNull()
-	}
-
-	// data SpecToModelRoot EnumField --> SyncMode
-	if specData.GetSyncMode().String() != "" {
-		stringValue := types.StringValue(specData.GetSyncMode().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.SyncMode = listValue
-	} else {
-		// Empty string, set to null
-		data.SyncMode = types.ListNull(types.StringType)
-	}
-
-	// data SpecToModelRoot StringField --> Locale
-	if specData.GetLocale() != "" {
-		data.Locale = types.StringValue(specData.GetLocale())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Locale = types.StringNull()
 	}
 
 	// data SpecToModelRoot StringField --> FirstName
@@ -583,6 +447,82 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 		data.FirstName = types.StringNull()
 	}
 
+	// data SpecToModelRoot ArrayOfPointerField --> Groups
+	if len(specData.GetGroups()) > 0 {
+		groupsElements := make([]ObjectRefTypeModel, 0, len(specData.GetGroups()))
+
+		for _, groupsElement := range specData.GetGroups() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested RequiredStringField --> Name
+			if groupsElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(groupsElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if groupsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(groupsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Tenant
+			if groupsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(groupsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			groupsElements = append(groupsElements, objectRefTypeModelModel)
+		}
+
+		{
+			groupsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				UserGroupsObjectRefModelAttributeMap,
+				groupsElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Groups = groupsList
+		}
+	} else {
+		var groupsObjectType = basetypes.ObjectType{
+			AttrTypes: UserGroupsObjectRefModelAttributeMap,
+		}
+		nullGroupsList := basetypes.NewListNull(groupsObjectType)
+		data.Groups = nullGroupsList
+	}
+
+	// data SpecToModelRoot EnumField --> IdmType
+	{
+		if specData.GetIdmType().String() != "" {
+			stringValue := types.StringValue(specData.GetIdmType().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.IdmType = listValue
+		} else {
+			// Empty string, set to null
+			data.IdmType = types.ListNull(types.StringType)
+		}
+	}
+
+	// data SpecToModelRoot TimeStampField --> LastLoginTimestamp
+	data.LastLoginTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetLastLoginTimestamp())
+
 	// data SpecToModelRoot StringField --> LastName
 	if specData.GetLastName() != "" {
 		data.LastName = types.StringValue(specData.GetLastName())
@@ -591,8 +531,69 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 		data.LastName = types.StringNull()
 	}
 
+	// data SpecToModelRoot StringField --> Locale
+	if specData.GetLocale() != "" {
+		data.Locale = types.StringValue(specData.GetLocale())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.Locale = types.StringNull()
+	}
+
+	// data SpecToModelRoot EnumField --> SyncMode
+	{
+		if specData.GetSyncMode().String() != "" {
+			stringValue := types.StringValue(specData.GetSyncMode().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.SyncMode = listValue
+		} else {
+			// Empty string, set to null
+			data.SyncMode = types.ListNull(types.StringType)
+		}
+	}
+
+	// data SpecToModelRoot StringField --> TosAccepted
+	if specData.GetTosAccepted() != "" {
+		data.TosAccepted = types.StringValue(specData.GetTosAccepted())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.TosAccepted = types.StringNull()
+	}
+
+	// data SpecToModelRoot TimeStampField --> TosAcceptedAt
+	data.TosAcceptedAt = timetypes.NewRFC3339ProtobufPointerValue(specData.GetTosAcceptedAt())
+
+	// data SpecToModelRoot StringField --> TosVersion
+	if specData.GetTosVersion() != "" {
+		data.TosVersion = types.StringValue(specData.GetTosVersion())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.TosVersion = types.StringNull()
+	}
+
+	// data SpecToModelRoot EnumField --> Type
+	{
+		if specData.GetType().String() != "" {
+			stringValue := types.StringValue(specData.GetType().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Type = listValue
+		} else {
+			// Empty string, set to null
+			data.Type = types.ListNull(types.StringType)
+		}
+	}
+
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

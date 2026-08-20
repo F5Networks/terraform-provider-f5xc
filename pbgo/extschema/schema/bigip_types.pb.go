@@ -9,15 +9,16 @@ package schema
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	golang_proto "github.com/golang/protobuf/proto"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -7082,10 +7083,7 @@ func (m *TMMPriorityGroupActivationType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7275,10 +7273,7 @@ func (m *TMMActionOnServiceDownType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7398,10 +7393,7 @@ func (m *TMMRequestQueuingOptionsType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7555,10 +7547,7 @@ func (m *TMMHealthMonitoringType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7713,10 +7702,7 @@ func (m *TMMMemberStateType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7785,10 +7771,7 @@ func (m *TMMPoolHealthMonitorAvailabilityType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7876,10 +7859,7 @@ func (m *TMMPoolRequestQueuingType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7948,10 +7928,7 @@ func (m *TMMPoolReselectType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8020,10 +7997,7 @@ func (m *TMMPoolMemberCountType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8149,10 +8123,7 @@ func (m *TMMPoolMemberSelectionType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8272,10 +8243,7 @@ func (m *TMMStateType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8395,10 +8363,7 @@ func (m *TMMVirtualServerAddressTranslationType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8553,10 +8518,7 @@ func (m *TMMVirtualServerSourcePortType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8711,10 +8673,7 @@ func (m *TMMVirtualServerAutoLastHopType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8834,10 +8793,7 @@ func (m *TMMVirtualServerNAT64Type) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -8992,10 +8948,7 @@ func (m *TMMImmediateActionOnServiceDownType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -9115,10 +9068,7 @@ func (m *TMMVirtualServerPortTranslationType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -9413,10 +9363,7 @@ func (m *TMMVirtualServerConnectionRateLimitMode) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -9485,10 +9432,7 @@ func (m *SourceAddressType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -9557,10 +9501,7 @@ func (m *DestinationAddressType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -9648,10 +9589,7 @@ func (m *SourceDestinationAddressType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthBigipTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthBigipTypes
 			}
 			if (iNdEx + skippy) > l {

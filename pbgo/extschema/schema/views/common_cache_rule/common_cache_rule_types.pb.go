@@ -5,6 +5,12 @@ package common_cache_rule
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
@@ -18,11 +24,6 @@ import (
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/rate_limiter_policy"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -988,10 +989,7 @@ func (m *CustomCacheRule) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCommonCacheRuleTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCommonCacheRuleTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -1175,10 +1173,7 @@ func (m *DefaultCacheAction) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCommonCacheRuleTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCommonCacheRuleTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -1260,10 +1255,7 @@ func (m *DefaultCacheTTLProps) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCommonCacheRuleTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCommonCacheRuleTypes
 			}
 			if (iNdEx + skippy) > l {

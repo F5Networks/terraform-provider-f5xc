@@ -1,1 +1,1 @@
-terraform import f5xc_httploadbalancer.example uid-abcdefgfdhsfjahsdlfdsa
+terraform import f5xc_http_loadbalancer.example <namespace>/<name>

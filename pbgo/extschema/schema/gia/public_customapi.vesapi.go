@@ -434,10 +434,7 @@ var CustomAPISwaggerJSON string = `{
         "title": "Global IP Allocator",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -504,6 +501,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -589,6 +592,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -634,7 +643,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Optional: If not specified, v4 range for this tenant will be used\n\nExample: - false-",
                     "title": "use_v6_range",
-                    "format": "boolean",
                     "x-displayname": "Use IPv6 Range"
                 }
             }
@@ -701,6 +709,39 @@ var CustomAPISwaggerJSON string = `{
                     "title": "message",
                     "x-displayname": "Message",
                     "x-ves-example": "IP de-allocated successfully"
+                }
+            }
+        },
+        "protobufAny": {
+            "type": "object",
+            "properties": {
+                "type_url": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string",
+                    "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         }

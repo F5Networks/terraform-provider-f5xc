@@ -1227,10 +1227,7 @@ var CustomPrivateAPISwaggerJSON string = `{
         "description": "Billing data can be broadly categorized into two buckets.\n1. Feature type - Duration for which the feature type was enabled in the site.\n2. Feature usage - Duration for which an instance or multiple instances per feature type were active.\nBoth feature type and the usage data are adjusted based on the Billing Quanta (BQ). For example, if the\nBQ is 1 hour, then even if the feature was enabled only for 1 minute, then it will be reported as 1 hour.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1297,6 +1294,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1390,6 +1393,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1481,6 +1490,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1574,6 +1589,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1665,6 +1686,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1758,6 +1785,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1850,6 +1883,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1941,6 +1980,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2364,7 +2409,7 @@ var CustomPrivateAPISwaggerJSON string = `{
                 },
                 "group_by": {
                     "type": "array",
-                    "description": " Aggregate data by none or more labels\n\n Optional: If not specified, then the billing data will be aggregated without any label.\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.in: [\\\"site\\\"]\n",
+                    "description": " Aggregate data by none or more labels\n\n Optional: If not specified, then the billing data will be aggregated without any label.\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.in: [\\\"site\\\"]\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "Group by",
                     "maxItems": 5,
                     "items": {
@@ -2372,14 +2417,14 @@ var CustomPrivateAPISwaggerJSON string = `{
                     },
                     "x-displayname": "Group By",
                     "x-ves-validation-rules": {
+                        "ves.io.schema.rules.repeated.items.string.in": "[\\\"site\\\"]",
                         "ves.io.schema.rules.repeated.max_items": "5",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.in": "[\\\"site\\\"]"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 },
                 "metric_selector": {
                     "type": "array",
-                    "description": " List of metrics to be returned in the response\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.in: [\\\"good_requests\\\"]\n",
+                    "description": " List of metrics to be returned in the response\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.in: [\\\"good_requests\\\"]\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "Metric Selector",
                     "minItems": 1,
                     "maxItems": 5,
@@ -2390,10 +2435,10 @@ var CustomPrivateAPISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.items.string.in": "[\\\"good_requests\\\"]",
                         "ves.io.schema.rules.repeated.max_items": "5",
                         "ves.io.schema.rules.repeated.min_items": "1",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.in": "[\\\"good_requests\\\"]"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 },
                 "namespace": {
@@ -2948,7 +2993,7 @@ var CustomPrivateAPISwaggerJSON string = `{
             "properties": {
                 "field_selector": {
                     "type": "array",
-                    "description": " List of objects/resources for which usage is requested.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 32\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.in: [\\\"app_setting\\\",\\\"dns_domain\\\",\\\"dns_load_balancer\\\",\\\"dns_load_balancer.health_check\\\",\\\"fast_acl\\\",\\\"http_loadbalancer\\\",\\\"http_loadbalancer.public\\\",\\\"http_loadbalancer.public.app_firewall\\\",\\\"k8s_cluster\\\",\\\"public_ip\\\",\\\"site\\\",\\\"tcp_loadbalancer\\\",\\\"tcp_loadbalancer.public\\\",\\\"token\\\",\\\"virtual_host\\\",\\\"virtual_k8s\\\",\\\"waf\\\",\\\"udp_loadbalancer\\\",\\\"udp_loadbalancer.public\\\"]\n",
+                    "description": " List of objects/resources for which usage is requested.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.in: [\\\"app_setting\\\",\\\"dns_domain\\\",\\\"dns_load_balancer\\\",\\\"dns_load_balancer.health_check\\\",\\\"fast_acl\\\",\\\"http_loadbalancer\\\",\\\"http_loadbalancer.public\\\",\\\"http_loadbalancer.public.app_firewall\\\",\\\"k8s_cluster\\\",\\\"public_ip\\\",\\\"site\\\",\\\"tcp_loadbalancer\\\",\\\"tcp_loadbalancer.public\\\",\\\"token\\\",\\\"virtual_host\\\",\\\"virtual_k8s\\\",\\\"waf\\\",\\\"udp_loadbalancer\\\",\\\"udp_loadbalancer.public\\\"]\n  ves.io.schema.rules.repeated.max_items: 32\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "Field Selector",
                     "minItems": 1,
                     "maxItems": 32,
@@ -2959,10 +3004,10 @@ var CustomPrivateAPISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.items.string.in": "[\\\"app_setting\\\",\\\"dns_domain\\\",\\\"dns_load_balancer\\\",\\\"dns_load_balancer.health_check\\\",\\\"fast_acl\\\",\\\"http_loadbalancer\\\",\\\"http_loadbalancer.public\\\",\\\"http_loadbalancer.public.app_firewall\\\",\\\"k8s_cluster\\\",\\\"public_ip\\\",\\\"site\\\",\\\"tcp_loadbalancer\\\",\\\"tcp_loadbalancer.public\\\",\\\"token\\\",\\\"virtual_host\\\",\\\"virtual_k8s\\\",\\\"waf\\\",\\\"udp_loadbalancer\\\",\\\"udp_loadbalancer.public\\\"]",
                         "ves.io.schema.rules.repeated.max_items": "32",
                         "ves.io.schema.rules.repeated.min_items": "1",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.in": "[\\\"app_setting\\\",\\\"dns_domain\\\",\\\"dns_load_balancer\\\",\\\"dns_load_balancer.health_check\\\",\\\"fast_acl\\\",\\\"http_loadbalancer\\\",\\\"http_loadbalancer.public\\\",\\\"http_loadbalancer.public.app_firewall\\\",\\\"k8s_cluster\\\",\\\"public_ip\\\",\\\"site\\\",\\\"tcp_loadbalancer\\\",\\\"tcp_loadbalancer.public\\\",\\\"token\\\",\\\"virtual_host\\\",\\\"virtual_k8s\\\",\\\"waf\\\",\\\"udp_loadbalancer\\\",\\\"udp_loadbalancer.public\\\"]"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 },
                 "namespace": {
@@ -3207,6 +3252,42 @@ var CustomPrivateAPISwaggerJSON string = `{
                     "title": "Value",
                     "x-displayname": "Value",
                     "x-ves-example": "15"
+                }
+            }
+        },
+        "protobufAny": {
+            "type": "object",
+            "description": "-Any- contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an -Any- value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field -@type- which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n-value- which holds the custom JSON in addition to the -@type-\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }",
+            "properties": {
+                "type_url": {
+                    "type": "string",
+                    "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n-path/google.protobuf.Duration-). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme -http-, -https-, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, -https- is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than -http-, -https- (or the empty scheme) might be\nused with implementation specific semantics."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Must be a valid serialized protocol buffer of the above specified type.",
+                    "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },

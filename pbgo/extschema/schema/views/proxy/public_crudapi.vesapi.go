@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Proxy view defines a required parameters that can be used in CRUD, to create and manage a Proxy.\n\nView will create following child objects.\n\n* virtual_host\n* advertise_policy\n* service_policy_set",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2253,7 +2280,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable the use of default F5XC error pages.",
                     "title": "Disable the use of default F5XC error pages",
-                    "format": "boolean",
                     "x-displayname": "Disable Default Error Pages"
                 },
                 "disable_path_normalize": {
@@ -2569,7 +2595,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2887,7 +2912,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates proxy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3017,6 +3041,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaBlindfoldSecretInfoType": {
             "type": "object",
             "description": "BlindfoldSecretInfoType specifies information about the Secret managed by F5XC Secret Management",
@@ -3065,7 +3110,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable buffering for a particular route. This is useful when virtual-host\n has buffering, but we need to disable it on a specific route.\n The value of this field is ignored for virtual-host",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "max_request_bytes": {
@@ -3266,7 +3310,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "secret_value": {
@@ -3453,7 +3496,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be appended? If true, the value is appended to existing values.\n Default value is do not append",
                     "title": "append",
-                    "format": "boolean",
                     "x-displayname": "Append"
                 },
                 "name": {
@@ -3560,7 +3602,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3624,7 +3665,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3690,7 +3730,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3901,7 +3940,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "samesite_lax": {
@@ -3997,7 +4035,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -4622,7 +4659,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Client certificate is optional. If the client has provided a certificate,\n the load balancer will verify it. If certification verification fails,\n the connection will be terminated. If the client does not provide a certificate,\n the connection will be accepted.",
                     "title": "client_certificate_optional",
-                    "format": "boolean",
                     "x-displayname": "Client Certificate Optional"
                 },
                 "crl": {
@@ -5130,7 +5166,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If true, disables compression when the response contains an etag header. When it is false,\n weak etags will be preserved and the ones that require strong validation will be removed.\n\nExample: - \"true\"-",
                     "title": "disable_on_etag_header",
-                    "format": "boolean",
                     "x-displayname": "Disable On Etag Header",
                     "x-ves-example": "true"
                 },
@@ -5138,7 +5173,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If true, removes accept-encoding from the request headers before dispatching it to the upstream\n so that responses do not get compressed before reaching the filter.\n\nExample: - \"true\"-",
                     "title": "remove_accept_encoding_header",
-                    "format": "boolean",
                     "x-displayname": "Remove Accept-Encoding Header",
                     "x-ves-example": "true"
                 }

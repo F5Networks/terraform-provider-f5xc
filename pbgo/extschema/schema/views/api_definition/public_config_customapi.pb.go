@@ -14,6 +14,12 @@ package api_definition
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -25,11 +31,6 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1750,10 +1751,7 @@ func (m *ListAvailableAPIDefinitionsReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicConfigCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicConfigCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -1837,10 +1835,7 @@ func (m *ListAvailableAPIDefinitionsResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicConfigCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicConfigCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -1954,10 +1949,7 @@ func (m *GetReferencingLoadbalancersReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicConfigCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicConfigCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -2041,10 +2033,7 @@ func (m *GetReferencingLoadbalancersResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicConfigCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicConfigCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -2128,10 +2117,7 @@ func (m *GetReferencingAllLoadbalancersResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicConfigCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicConfigCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -2279,10 +2265,7 @@ func (m *APInventoryReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicConfigCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicConfigCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -2366,10 +2349,7 @@ func (m *APInventoryResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicConfigCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicConfigCustomapi
 			}
 			if (iNdEx + skippy) > l {

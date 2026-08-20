@@ -279,10 +279,7 @@ var CustomPrivateAPISwaggerJSON string = `{
         "title": "ves.io/schema/report_config/private_customapi.proto",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -349,6 +346,12 @@ var CustomPrivateAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -546,6 +549,27 @@ var CustomPrivateAPISwaggerJSON string = `{
             "title": "Store And Email Report Response",
             "x-displayname": "Store And Email Report Response",
             "x-ves-proto-message": "ves.io.schema.report_config.StoreAndEmailReportResponse"
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "schemaErrorCode": {
             "type": "string",

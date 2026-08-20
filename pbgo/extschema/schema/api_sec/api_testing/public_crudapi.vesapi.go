@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "This is the api testing type",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1758,6 +1755,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1849,6 +1852,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1949,6 +1958,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2065,6 +2080,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2167,6 +2188,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2457,7 +2484,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2487,7 +2513,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable to allow API Testing to execute against destructive methods. Use with caution as these may modify or delete data",
                     "title": "Destructive Methods",
-                    "format": "boolean",
                     "x-displayname": "Run API tests for destructive methods (e.g., DELETE, PUT)."
                 },
                 "credentials": {
@@ -2705,7 +2730,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates api_testing is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3002,6 +3026,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaBlindfoldSecretInfoType": {
             "type": "object",
             "description": "BlindfoldSecretInfoType specifies information about the Secret managed by F5XC Secret Management",
@@ -3265,7 +3310,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3329,7 +3373,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3395,7 +3438,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3513,7 +3555,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

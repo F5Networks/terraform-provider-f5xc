@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"golang.org/x/time/rate"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
@@ -28,7 +27,6 @@ import (
 
 	client "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	dataSources "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/data"
-	dataSourcesManual "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/data/manual"
 	resources "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource"
 	resourcesManual "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/manual"
 	utils "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -42,25 +40,29 @@ type F5XCProvider struct {
 	version string
 }
 
-// F5XCProviderModelLimiter maps provider limiter schema data to a Go type.
-type F5XCProviderLimiterModel struct {
-	Rate  types.Float64 `tfsdk:"rate"`
-	Burst types.Int32   `tfsdk:"burst"`
+// F5XCProviderThrottlingModel maps provider throttling schema data to a Go type.
+type F5XCProviderThrottlingModel struct {
+	MaxRetries        types.Int32   `tfsdk:"max_retries"`
+	InitialBackoff    types.String  `tfsdk:"initial_backoff"`
+	MaxBackoff        types.String  `tfsdk:"max_backoff"`
+	Multiplier        types.Float64 `tfsdk:"multiplier"`
+	JitterRatio       types.Float64 `tfsdk:"jitter_ratio"`
+	RespectRetryAfter types.Bool    `tfsdk:"respect_retry_after"`
 }
 
 // F5XCProvider maps provider schema data to a Go type.
 type F5XCProviderModel struct {
-	Url        types.String              `tfsdk:"url"`
-	Test       types.Bool                `tfsdk:"test"`
-	Vesenv     types.Bool                `tfsdk:"vesenv"`
-	Tenant     types.String              `tfsdk:"tenant"`
-	Timeout    types.String              `tfsdk:"timeout"`
-	Limiter    *F5XCProviderLimiterModel `tfsdk:"limiter"`
-	ApiKey     types.String              `tfsdk:"api_key"`
-	ApiCert    types.String              `tfsdk:"api_cert"`
-	ApiToken   types.String              `tfsdk:"api_token"`
-	ApiCaCert  types.String              `tfsdk:"api_ca_cert"`
-	ApiP12File types.String              `tfsdk:"api_p12_file"`
+	Url        types.String                 `tfsdk:"url"`
+	Test       types.Bool                   `tfsdk:"test"`
+	Vesenv     types.Bool                   `tfsdk:"vesenv"`
+	Tenant     types.String                 `tfsdk:"tenant"`
+	Timeout    types.String                 `tfsdk:"timeout"`
+	Throttling *F5XCProviderThrottlingModel `tfsdk:"throttling"`
+	ApiKey     types.String                 `tfsdk:"api_key"`
+	ApiCert    types.String                 `tfsdk:"api_cert"`
+	ApiToken   types.String                 `tfsdk:"api_token"`
+	ApiCaCert  types.String                 `tfsdk:"api_ca_cert"`
+	ApiP12File types.String                 `tfsdk:"api_p12_file"`
 }
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -128,25 +130,42 @@ func (p *F5XCProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				Optional:    true,
 				Description: "Absolute path to p12 file.",
 			},
-			"limiter": schema.SingleNestedAttribute{
+			"throttling": schema.SingleNestedAttribute{
 				Optional:    true,
-				Description: "The F5XC API configuration block for API rate limiting.",
+				Description: "Backend-driven request throttling and retry configuration.",
 				Attributes: map[string]schema.Attribute{
-					"rate": schema.Float64Attribute{
-						Required:    true,
-						Optional:    false,
-						Description: "The maximum number of requests per minute. This value will be converted to requests per second internally (rate/60). Minimum value: 1.0. Example: rate=60 allows 1 request per second.",
+					"max_retries": schema.Int32Attribute{
+						Optional:    true,
+						Description: "Maximum number of retry attempts after a 429 response.",
+						Validators: []validator.Int32{
+							int32validator.AtLeast(0),
+						},
+					},
+					"initial_backoff": schema.StringAttribute{
+						Optional:    true,
+						Description: "Initial retry backoff duration (for example, 250ms).",
+					},
+					"max_backoff": schema.StringAttribute{
+						Optional:    true,
+						Description: "Maximum retry backoff duration (for example, 8s).",
+					},
+					"multiplier": schema.Float64Attribute{
+						Optional:    true,
+						Description: "Exponential backoff multiplier.",
 						Validators: []validator.Float64{
 							float64validator.AtLeast(1.0),
 						},
 					},
-					"burst": schema.Int32Attribute{
-						Required:    true,
-						Optional:    false,
-						Description: "The maximum burst size for requests. Allows short bursts up to this many requests before rate limiting applies. Minimum value: 1.",
-						Validators: []validator.Int32{
-							int32validator.AtLeast(1),
+					"jitter_ratio": schema.Float64Attribute{
+						Optional:    true,
+						Description: "Jitter ratio applied to retry backoff. Must be between 0 and 1.",
+						Validators: []validator.Float64{
+							float64validator.Between(0.0, 1.0),
 						},
+					},
+					"respect_retry_after": schema.BoolAttribute{
+						Optional:    true,
+						Description: "Respect Retry-After header values on 429 responses when provided by backend.",
 					},
 				},
 			},
@@ -276,16 +295,45 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		api_p12_file = utils.FormatToAbsolutePath(api_p12_file)
 	}
 
-	// Rate Limiter configuration
-	var limiterRate rate.Limit = rate.Inf
-	var limiterBurst int32 = 1
+	var throttlingCfg *client.ThrottlingConfig
+	throttlingEnabled := false
+	throttlingMaxRetries := int32(0)
 
-	if config.Limiter != nil {
-		if !config.Limiter.Rate.IsNull() {
-			limiterRate = rate.Limit(config.Limiter.Rate.ValueFloat64())
+	if config.Throttling != nil {
+		throttlingEnabled = true
+		throttlingMaxRetries = int32(5)
+		throttlingInitialBackoff := "250ms"
+		throttlingMaxBackoff := "8s"
+		throttlingMultiplier := 2.0
+		throttlingJitterRatio := 0.2
+		throttlingRespectRetryAfter := true
+
+		if !config.Throttling.MaxRetries.IsNull() {
+			throttlingMaxRetries = config.Throttling.MaxRetries.ValueInt32()
 		}
-		if !config.Limiter.Burst.IsNull() {
-			limiterBurst = config.Limiter.Burst.ValueInt32()
+		if !config.Throttling.InitialBackoff.IsNull() {
+			throttlingInitialBackoff = config.Throttling.InitialBackoff.ValueString()
+		}
+		if !config.Throttling.MaxBackoff.IsNull() {
+			throttlingMaxBackoff = config.Throttling.MaxBackoff.ValueString()
+		}
+		if !config.Throttling.Multiplier.IsNull() {
+			throttlingMultiplier = config.Throttling.Multiplier.ValueFloat64()
+		}
+		if !config.Throttling.JitterRatio.IsNull() {
+			throttlingJitterRatio = config.Throttling.JitterRatio.ValueFloat64()
+		}
+		if !config.Throttling.RespectRetryAfter.IsNull() {
+			throttlingRespectRetryAfter = config.Throttling.RespectRetryAfter.ValueBool()
+		}
+
+		throttlingCfg = &client.ThrottlingConfig{
+			MaxRetries:        int(throttlingMaxRetries),
+			InitialBackoff:    throttlingInitialBackoff,
+			MaxBackoff:        throttlingMaxBackoff,
+			Multiplier:        throttlingMultiplier,
+			JitterRatio:       throttlingJitterRatio,
+			RespectRetryAfter: throttlingRespectRetryAfter,
 		}
 	}
 
@@ -315,6 +363,8 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	ctx = tflog.SetField(ctx, "apiToken", api_token)
 	ctx = tflog.SetField(ctx, "apiCaCert", api_ca_cert)
 	ctx = tflog.SetField(ctx, "apiP12File", api_p12_file)
+	ctx = tflog.SetField(ctx, "throttlingEnabled", throttlingEnabled)
+	ctx = tflog.SetField(ctx, "throttlingMaxRetries", throttlingMaxRetries)
 	tflog.Info(ctx, "Global Variables")
 
 	ctx = tflog.SetField(ctx, "Url", config.Url.ValueString())
@@ -327,6 +377,8 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	ctx = tflog.SetField(ctx, "ApiToken", config.ApiToken.ValueString())
 	ctx = tflog.SetField(ctx, "ApiCaCert", config.ApiCaCert.ValueString())
 	ctx = tflog.SetField(ctx, "ApiP12File", config.ApiP12File.ValueString())
+	ctx = tflog.SetField(ctx, "ThrottlingEnabled", throttlingEnabled)
+	ctx = tflog.SetField(ctx, "ThrottlingMaxRetries", throttlingMaxRetries)
 	tflog.Info(ctx, "Model Fields")
 
 	// Create a new F5XCProvider client using the configuration values
@@ -341,10 +393,7 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		ApiCACert:      api_ca_cert,
 		ApiP12File:     api_p12_file,
 		ApiP12Password: api_p12_password,
-		Limiter: &client.ProviderLimiter{
-			Rate:  limiterRate,
-			Burst: limiterBurst,
-		},
+		Throttling:     throttlingCfg,
 	})
 
 	if err != nil {
@@ -369,70 +418,140 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *F5XCProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		// Manual Data Sources
-		dataSourcesManual.NewDataSourceF5XCDnsZone,
 
 		// Auto Generated Data Sources
-		dataSources.NewDataSourceF5XCEnhancedFirewallPolicy,
-		dataSources.NewDataSourceF5XCNetworkPolicyRule,
-		dataSources.NewDataSourceF5XCLogReceiver,
-		dataSources.NewDataSourceF5XCNamespace,
-		dataSources.NewDataSourceF5XCToken,
-		dataSources.NewDataSourceF5XCRateLimiterPolicy,
-		dataSources.NewDataSourceF5XCIke2,
-		dataSources.NewDataSourceF5XCWorkload,
-		dataSources.NewDataSourceF5XCV1DnsMonitor,
-		dataSources.NewDataSourceF5XCSecretPolicy,
-		dataSources.NewDataSourceF5XCRoute,
-		dataSources.NewDataSourceF5XCDnsLoadBalancer,
-		dataSources.NewDataSourceF5XCNetworkInterface,
-		dataSources.NewDataSourceF5XCFastAcl,
-		dataSources.NewDataSourceF5XCVirtualNetwork,
-		dataSources.NewDataSourceF5XCCloudElasticIp,
-		dataSources.NewDataSourceF5XCFastAclRule,
-		dataSources.NewDataSourceF5XCVoltstackSite,
-		dataSources.NewDataSourceF5XCApiDefinition,
-		dataSources.NewDataSourceF5XCAppType,
-		dataSources.NewDataSourceF5XCUdpLoadbalancer,
-		dataSources.NewDataSourceF5XCSegment,
-		dataSources.NewDataSourceF5XCNetworkPolicySet,
-		dataSources.NewDataSourceF5XCUser,
-		dataSources.NewDataSourceF5XCCdnCacheRule,
-		dataSources.NewDataSourceF5XCDnsLbPool,
-		dataSources.NewDataSourceF5XCAppSetting,
-		dataSources.NewDataSourceF5XCSiteMeshGroup,
-		dataSources.NewDataSourceF5XCCloudCredentials,
-		dataSources.NewDataSourceF5XCIkePhase2Profile,
-		dataSources.NewDataSourceF5XCIkePhase1Profile,
-		dataSources.NewDataSourceF5XCHttpLoadbalancer,
-		dataSources.NewDataSourceF5XCOriginPool,
-		dataSources.NewDataSourceF5XCNatPolicy,
-		dataSources.NewDataSourceF5XCNetworkFirewall,
-		dataSources.NewDataSourceF5XCSubnet,
-		dataSources.NewDataSourceF5XCDcClusterGroup,
-		dataSources.NewDataSourceF5XCVirtualSite,
-		dataSources.NewDataSourceF5XCNetworkConnector,
-		dataSources.NewDataSourceF5XCNetworkPolicy,
-		dataSources.NewDataSourceF5XCHealthcheck,
-		dataSources.NewDataSourceF5XCApiDiscovery,
-		dataSources.NewDataSourceF5XCDnsDomain,
-		dataSources.NewDataSourceF5XCWafExclusionPolicy,
-		dataSources.NewDataSourceF5XCV1HttpMonitor,
-		dataSources.NewDataSourceF5XCInfraprotectAsnPrefix,
-		dataSources.NewDataSourceF5XCAlertReceiver,
-		dataSources.NewDataSourceF5XCVirtualK8S,
-		dataSources.NewDataSourceF5XCShapeBotDefenseInstance,
-		dataSources.NewDataSourceF5XCTcpLoadbalancer,
-		dataSources.NewDataSourceF5XCIke1,
-		dataSources.NewDataSourceF5XCServicePolicy,
-		dataSources.NewDataSourceF5XCForwardProxyPolicy,
-		dataSources.NewDataSourceF5XCSecuremeshSiteV2,
-		dataSources.NewDataSourceF5XCInfraprotectAsn,
-		dataSources.NewDataSourceF5XCServicePolicyRule,
-		dataSources.NewDataSourceF5XCAppFirewall,
-		dataSources.NewDataSourceF5XCServicePolicySet,
+		dataSources.NewDataSourceF5XCAdvertisePolicy,
 		dataSources.NewDataSourceF5XCAlertPolicy,
-		dataSources.NewDataSourceF5XCWorkloadFlavor,
+		dataSources.NewDataSourceF5XCAlertReceiver,
+		dataSources.NewDataSourceF5XCApiCredential,
+		dataSources.NewDataSourceF5XCServiceCredential,
+		dataSources.NewDataSourceF5XCApiCrawler,
+		dataSources.NewDataSourceF5XCApiDiscovery,
+		dataSources.NewDataSourceF5XCApiTesting,
+		dataSources.NewDataSourceF5XCCodeBaseIntegration,
+		dataSources.NewDataSourceF5XCAppFirewall,
+		dataSources.NewDataSourceF5XCAppSetting,
+		dataSources.NewDataSourceF5XCAppType,
+		dataSources.NewDataSourceF5XCAuthorizationServer,
+		dataSources.NewDataSourceF5XCBgp,
+		dataSources.NewDataSourceF5XCBgpAsnSet,
+		dataSources.NewDataSourceF5XCBgpRoutingPolicy,
+		dataSources.NewDataSourceF5XCIrule,
+		dataSources.NewDataSourceF5XCBigipIrule,
+		dataSources.NewDataSourceF5XCCdnCacheRule,
+		dataSources.NewDataSourceF5XCCertificate,
+		dataSources.NewDataSourceF5XCCertificateChain,
+		dataSources.NewDataSourceF5XCCloudCredentials,
+		dataSources.NewDataSourceF5XCCloudElasticIp,
+		dataSources.NewDataSourceF5XCCloudLink,
+		dataSources.NewDataSourceF5XCCluster,
+		dataSources.NewDataSourceF5XCContainerRegistry,
+		dataSources.NewDataSourceF5XCCrl,
+		dataSources.NewDataSourceF5XCDataType,
+		dataSources.NewDataSourceF5XCDcClusterGroup,
+		dataSources.NewDataSourceF5XCDiscovery,
+		dataSources.NewDataSourceF5XCDiscoveryDownloadCertificates,
+		dataSources.NewDataSourceF5XCDnsComplianceChecks,
+		dataSources.NewDataSourceF5XCDnsDomain,
 		dataSources.NewDataSourceF5XCDnsLbHealthCheck,
+		dataSources.NewDataSourceF5XCDnsLbPool,
+		dataSources.NewDataSourceF5XCDnsLoadBalancer,
+		dataSources.NewDataSourceF5XCDnsProxy,
+		dataSources.NewDataSourceF5XCDnsZone,
+		dataSources.NewDataSourceF5XCDnsZoneRecord,
+		dataSources.NewDataSourceF5XCEndpoint,
+		dataSources.NewDataSourceF5XCEnhancedFirewallPolicy,
+		dataSources.NewDataSourceF5XCFastAcl,
+		dataSources.NewDataSourceF5XCFastAclRule,
+		dataSources.NewDataSourceF5XCFleet,
+		dataSources.NewDataSourceF5XCGeoLocationSet,
+		dataSources.NewDataSourceF5XCGlobalLogReceiver,
+		dataSources.NewDataSourceF5XCHealthcheck,
+		dataSources.NewDataSourceF5XCIke1,
+		dataSources.NewDataSourceF5XCIke2,
+		dataSources.NewDataSourceF5XCInfraprotectAsn,
+		dataSources.NewDataSourceF5XCInfraprotectAsnPrefix,
+		dataSources.NewDataSourceF5XCInfraprotectFirewallRuleGroup,
+		dataSources.NewDataSourceF5XCIpPrefixSet,
+		dataSources.NewDataSourceF5XCKnownLabel,
+		dataSources.NewDataSourceF5XCKnownLabelKey,
+		dataSources.NewDataSourceF5XCLogReceiver,
+		dataSources.NewDataSourceF5XCMaliciousUserMitigation,
+		dataSources.NewDataSourceF5XCNamespace,
+		dataSources.NewDataSourceF5XCActiveAlertPolicies,
+		dataSources.NewDataSourceF5XCActiveNetworkPolicies,
+		dataSources.NewDataSourceF5XCActiveServicePolicies,
+		dataSources.NewDataSourceF5XCFastAclsForInternetVips,
+		dataSources.NewDataSourceF5XCNatPolicy,
+		dataSources.NewDataSourceF5XCNetworkConnector,
+		dataSources.NewDataSourceF5XCNetworkFirewall,
+		dataSources.NewDataSourceF5XCNetworkInterface,
+		dataSources.NewDataSourceF5XCNetworkPolicy,
+		dataSources.NewDataSourceF5XCNetworkPolicyRule,
+		dataSources.NewDataSourceF5XCNetworkPolicySet,
+		dataSources.NewDataSourceF5XCNginxServiceDiscovery,
+		dataSources.NewDataSourceF5XCV1DnsMonitor,
+		dataSources.NewDataSourceF5XCV1HttpMonitor,
+		dataSources.NewDataSourceF5XCPolicer,
+		dataSources.NewDataSourceF5XCProtocolInspection,
+		dataSources.NewDataSourceF5XCProtocolPolicer,
+		dataSources.NewDataSourceF5XCPublicIp,
+		dataSources.NewDataSourceF5XCRateLimiter,
+		dataSources.NewDataSourceF5XCRole,
+		dataSources.NewDataSourceF5XCRoute,
+		dataSources.NewDataSourceF5XCSecretPolicy,
+		dataSources.NewDataSourceF5XCSecretPolicyRule,
+		dataSources.NewDataSourceF5XCSegment,
+		dataSources.NewDataSourceF5XCSegmentConnection,
+		dataSources.NewDataSourceF5XCSensitiveDataPolicy,
+		dataSources.NewDataSourceF5XCServicePolicy,
+		dataSources.NewDataSourceF5XCServicePolicyRule,
+		dataSources.NewDataSourceF5XCServicePolicySet,
+		dataSources.NewDataSourceF5XCBotAllowlistPolicy,
+		dataSources.NewDataSourceF5XCBotEndpointPolicy,
+		dataSources.NewDataSourceF5XCBotInfrastructure,
+		dataSources.NewDataSourceF5XCBotNetworkPolicy,
+		dataSources.NewDataSourceF5XCMobileBaseConfig,
+		dataSources.NewDataSourceF5XCProtectedApplication,
+		dataSources.NewDataSourceF5XCAllowedDomain,
+		dataSources.NewDataSourceF5XCMitigatedDomain,
+		dataSources.NewDataSourceF5XCProtectedDomain,
+		dataSources.NewDataSourceF5XCShapeBotDefenseInstance,
+		dataSources.NewDataSourceF5XCSiteMeshGroup,
+		dataSources.NewDataSourceF5XCSubnet,
+		dataSources.NewDataSourceF5XCToken,
+		dataSources.NewDataSourceF5XCTrustedCaList,
+		dataSources.NewDataSourceF5XCUser,
+		dataSources.NewDataSourceF5XCUserGroup,
+		dataSources.NewDataSourceF5XCUserIdentification,
+		dataSources.NewDataSourceF5XCApiDefinition,
+		dataSources.NewDataSourceF5XCAppApiGroup,
+		dataSources.NewDataSourceF5XCAwsTgwSite,
+		dataSources.NewDataSourceF5XCAwsVpcSite,
+		dataSources.NewDataSourceF5XCAzureVnetSite,
+		dataSources.NewDataSourceF5XCCdnLoadbalancer,
+		dataSources.NewDataSourceF5XCExternalConnector,
+		dataSources.NewDataSourceF5XCForwardProxyPolicy,
+		dataSources.NewDataSourceF5XCGcpVpcSite,
+		dataSources.NewDataSourceF5XCHttpLoadbalancer,
+		dataSources.NewDataSourceF5XCIkePhase1Profile,
+		dataSources.NewDataSourceF5XCIkePhase2Profile,
+		dataSources.NewDataSourceF5XCNetworkPolicyView,
+		dataSources.NewDataSourceF5XCOriginPool,
+		dataSources.NewDataSourceF5XCPolicyBasedRouting,
+		dataSources.NewDataSourceF5XCProxy,
+		dataSources.NewDataSourceF5XCRateLimiterPolicy,
+		dataSources.NewDataSourceF5XCSecuremeshSite,
+		dataSources.NewDataSourceF5XCSecuremeshSiteV2,
+		dataSources.NewDataSourceF5XCTcpLoadbalancer,
+		dataSources.NewDataSourceF5XCUdpLoadbalancer,
+		dataSources.NewDataSourceF5XCAppstackSite,
+		dataSources.NewDataSourceF5XCWorkload,
+		dataSources.NewDataSourceF5XCVirtualK8S,
+		dataSources.NewDataSourceF5XCVirtualNetwork,
+		dataSources.NewDataSourceF5XCVirtualSite,
+		dataSources.NewDataSourceF5XCWafExclusionPolicy,
+		dataSources.NewDataSourceF5XCWorkloadFlavor,
 	}
 }
 
@@ -440,68 +559,145 @@ func (p *F5XCProvider) DataSources(_ context.Context) []func() datasource.DataSo
 func (p *F5XCProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		// Manual Resources
-		resourcesManual.NewResourceF5XCDnsZone,
 		resourcesManual.NewResourceF5XCApiDefinitionUploader,
+		resourcesManual.NewResourceF5XCRegistrationApproval,
 
 		// Auto Generated Resources
-		resources.NewResourceF5XCEnhancedFirewallPolicy,
-		resources.NewResourceF5XCNetworkPolicyRule,
-		resources.NewResourceF5XCLogReceiver,
-		resources.NewResourceF5XCNamespace,
-		resources.NewResourceF5XCToken,
-		resources.NewResourceF5XCRateLimiterPolicy,
-		resources.NewResourceF5XCIke2,
-		resources.NewResourceF5XCWorkload,
-		resources.NewResourceF5XCV1DnsMonitor,
-		resources.NewResourceF5XCSecretPolicy,
-		resources.NewResourceF5XCRoute,
-		resources.NewResourceF5XCDnsLoadBalancer,
-		resources.NewResourceF5XCNetworkInterface,
-		resources.NewResourceF5XCFastAcl,
-		resources.NewResourceF5XCVirtualNetwork,
-		resources.NewResourceF5XCCloudElasticIp,
-		resources.NewResourceF5XCFastAclRule,
-		resources.NewResourceF5XCVoltstackSite,
-		resources.NewResourceF5XCApiDefinition,
-		resources.NewResourceF5XCAppType,
-		resources.NewResourceF5XCUdpLoadbalancer,
-		resources.NewResourceF5XCSegment,
-		resources.NewResourceF5XCUser,
-		resources.NewResourceF5XCCdnCacheRule,
-		resources.NewResourceF5XCDnsLbPool,
-		resources.NewResourceF5XCAppSetting,
-		resources.NewResourceF5XCSiteMeshGroup,
-		resources.NewResourceF5XCCloudCredentials,
-		resources.NewResourceF5XCIkePhase2Profile,
-		resources.NewResourceF5XCIkePhase1Profile,
-		resources.NewResourceF5XCHttpLoadbalancer,
-		resources.NewResourceF5XCOriginPool,
-		resources.NewResourceF5XCNatPolicy,
-		resources.NewResourceF5XCNetworkFirewall,
-		resources.NewResourceF5XCSubnet,
-		resources.NewResourceF5XCDcClusterGroup,
-		resources.NewResourceF5XCVirtualSite,
-		resources.NewResourceF5XCNetworkConnector,
-		resources.NewResourceF5XCNetworkPolicy,
-		resources.NewResourceF5XCHealthcheck,
-		resources.NewResourceF5XCApiDiscovery,
-		resources.NewResourceF5XCDnsDomain,
-		resources.NewResourceF5XCWafExclusionPolicy,
-		resources.NewResourceF5XCV1HttpMonitor,
-		resources.NewResourceF5XCInfraprotectAsnPrefix,
-		resources.NewResourceF5XCAlertReceiver,
-		resources.NewResourceF5XCVirtualK8S,
-		resources.NewResourceF5XCTcpLoadbalancer,
-		resources.NewResourceF5XCIke1,
-		resources.NewResourceF5XCServicePolicy,
-		resources.NewResourceF5XCForwardProxyPolicy,
-		resources.NewResourceF5XCSecuremeshSiteV2,
-		resources.NewResourceF5XCInfraprotectAsn,
-		resources.NewResourceF5XCServicePolicyRule,
-		resources.NewResourceF5XCAppFirewall,
+		resources.NewResourceF5XCActiveAlertPolicies,
+		resources.NewResourceF5XCActiveNetworkPolicies,
+		resources.NewResourceF5XCActiveServicePolicies,
+		resources.NewResourceF5XCAdvertisePolicy,
 		resources.NewResourceF5XCAlertPolicy,
-		resources.NewResourceF5XCWorkloadFlavor,
+		resources.NewResourceF5XCAlertReceiver,
+		resources.NewResourceF5XCAllowedDomain,
+		resources.NewResourceF5XCApiCrawler,
+		resources.NewResourceF5XCApiCredential,
+		resources.NewResourceF5XCApiDefinition,
+		resources.NewResourceF5XCApiDiscovery,
+		resources.NewResourceF5XCApiTesting,
+		resources.NewResourceF5XCAppApiGroup,
+		resources.NewResourceF5XCAppFirewall,
+		resources.NewResourceF5XCAppSetting,
+		resources.NewResourceF5XCAppType,
+		resources.NewResourceF5XCAppstackSite,
+		resources.NewResourceF5XCAuthorizationServer,
+		resources.NewResourceF5XCAwsTgwSite,
+		resources.NewResourceF5XCAwsTgwSiteSetVipInfo,
+		resources.NewResourceF5XCAwsVpcSite,
+		resources.NewResourceF5XCAwsVpcSiteSetCloudSiteInfo,
+		resources.NewResourceF5XCAwsVpcSiteSetVipInfo,
+		resources.NewResourceF5XCAzureVnetSite,
+		resources.NewResourceF5XCAzureVnetSiteSetCloudSiteInfo,
+		resources.NewResourceF5XCAzureVnetSiteSetVipInfo,
+		resources.NewResourceF5XCBgp,
+		resources.NewResourceF5XCBgpAsnSet,
+		resources.NewResourceF5XCBgpRoutingPolicy,
+		resources.NewResourceF5XCBigipIrule,
+		resources.NewResourceF5XCBotInfrastructure,
+		resources.NewResourceF5XCCdnCacheRule,
+		resources.NewResourceF5XCCdnLoadbalancer,
+		resources.NewResourceF5XCCertificate,
+		resources.NewResourceF5XCCertificateChain,
+		resources.NewResourceF5XCCloudCredentials,
+		resources.NewResourceF5XCCloudElasticIp,
+		resources.NewResourceF5XCCloudLink,
+		resources.NewResourceF5XCCluster,
+		resources.NewResourceF5XCCodeBaseIntegration,
+		resources.NewResourceF5XCContainerRegistry,
+		resources.NewResourceF5XCCrl,
+		resources.NewResourceF5XCDataType,
+		resources.NewResourceF5XCDcClusterGroup,
+		resources.NewResourceF5XCDiscovery,
+		resources.NewResourceF5XCDnsComplianceChecks,
+		resources.NewResourceF5XCDnsDomain,
 		resources.NewResourceF5XCDnsLbHealthCheck,
+		resources.NewResourceF5XCDnsLbPool,
+		resources.NewResourceF5XCDnsLoadBalancer,
+		resources.NewResourceF5XCDnsProxy,
+		resources.NewResourceF5XCDnsZone,
+		resources.NewResourceF5XCDnsZoneRecord,
+		resources.NewResourceF5XCEndpoint,
+		resources.NewResourceF5XCEnhancedFirewallPolicy,
+		resources.NewResourceF5XCExternalConnector,
+		resources.NewResourceF5XCFastAcl,
+		resources.NewResourceF5XCFastAclRule,
+		resources.NewResourceF5XCFastAclsForInternetVips,
+		resources.NewResourceF5XCFleet,
+		resources.NewResourceF5XCForwardProxyPolicy,
+		resources.NewResourceF5XCGcpVpcSite,
+		resources.NewResourceF5XCGcpVpcSiteSetCloudSiteInfo,
+		resources.NewResourceF5XCGeoLocationSet,
+		resources.NewResourceF5XCGlobalLogReceiver,
+		resources.NewResourceF5XCHealthcheck,
+		resources.NewResourceF5XCHttpLoadbalancer,
+		resources.NewResourceF5XCIke1,
+		resources.NewResourceF5XCIke2,
+		resources.NewResourceF5XCIkePhase1Profile,
+		resources.NewResourceF5XCIkePhase2Profile,
+		resources.NewResourceF5XCInfraprotectAsn,
+		resources.NewResourceF5XCInfraprotectAsnPrefix,
+		resources.NewResourceF5XCInfraprotectFirewallRuleGroup,
+		resources.NewResourceF5XCIpPrefixSet,
+		resources.NewResourceF5XCIrule,
+		resources.NewResourceF5XCKnownLabel,
+		resources.NewResourceF5XCKnownLabelKey,
+		resources.NewResourceF5XCLogReceiver,
+		resources.NewResourceF5XCMaliciousUserMitigation,
+		resources.NewResourceF5XCMitigatedDomain,
+		resources.NewResourceF5XCMobileBaseConfig,
+		resources.NewResourceF5XCNamespace,
+		resources.NewResourceF5XCNatPolicy,
+		resources.NewResourceF5XCNetworkConnector,
+		resources.NewResourceF5XCNetworkFirewall,
+		resources.NewResourceF5XCNetworkInterface,
+		resources.NewResourceF5XCNetworkPolicy,
+		resources.NewResourceF5XCNetworkPolicyRule,
+		resources.NewResourceF5XCNetworkPolicyView,
+		resources.NewResourceF5XCNginxServiceDiscovery,
+		resources.NewResourceF5XCOriginPool,
+		resources.NewResourceF5XCPolicer,
+		resources.NewResourceF5XCPolicyBasedRouting,
+		resources.NewResourceF5XCProtectedApplication,
+		resources.NewResourceF5XCProtectedDomain,
+		resources.NewResourceF5XCProtocolInspection,
+		resources.NewResourceF5XCProtocolPolicer,
+		resources.NewResourceF5XCProxy,
+		resources.NewResourceF5XCRateLimiter,
+		resources.NewResourceF5XCRateLimiterPolicy,
+		resources.NewResourceF5XCRole,
+		resources.NewResourceF5XCRoute,
+		resources.NewResourceF5XCSecretPolicy,
+		resources.NewResourceF5XCSecretPolicyRule,
+		resources.NewResourceF5XCSecuremeshSite,
+		resources.NewResourceF5XCSecuremeshSiteV2,
+		resources.NewResourceF5XCSegment,
+		resources.NewResourceF5XCSegmentConnection,
+		resources.NewResourceF5XCSensitiveDataPolicy,
+		resources.NewResourceF5XCServiceCredential,
+		resources.NewResourceF5XCServicePolicy,
+		resources.NewResourceF5XCServicePolicyRule,
+		resources.NewResourceF5XCSiteMeshGroup,
+		resources.NewResourceF5XCSubnet,
+		resources.NewResourceF5XCTcpLoadbalancer,
+		resources.NewResourceF5XCTfParamsAction,
+		resources.NewResourceF5XCTgwInfo,
+		resources.NewResourceF5XCTgwVpcIpPrefixes,
+		resources.NewResourceF5XCTgwVpnTunnels,
+		resources.NewResourceF5XCToken,
+		resources.NewResourceF5XCTrustedCaList,
+		resources.NewResourceF5XCUdpLoadbalancer,
+		resources.NewResourceF5XCUser,
+		resources.NewResourceF5XCUserGroup,
+		resources.NewResourceF5XCUserIdentification,
+		resources.NewResourceF5XCV1DnsMonitor,
+		resources.NewResourceF5XCV1HttpMonitor,
+		resources.NewResourceF5XCVirtualK8S,
+		resources.NewResourceF5XCVirtualNetwork,
+		resources.NewResourceF5XCVirtualSite,
+		resources.NewResourceF5XCWafExclusionPolicy,
+		resources.NewResourceF5XCWorkload,
+		resources.NewResourceF5XCWorkloadFlavor,
+		resources.NewResourceF5xcHttpLoadbalancerServicePolicyAttachments,
 	}
 }
 

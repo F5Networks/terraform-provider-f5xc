@@ -29,54 +29,52 @@ type DataSourceF5XCAppType struct {
 	client *client.APIClient
 }
 
-type AppTypeAppTypeFeature struct {
-	Type types.List `tfsdk:"type"`
-}
-
 type AppTypeAppTypeBusinessLogicMarkupSetting struct {
-	LearnFromRedirectTrafficChoice types.Object `tfsdk:"learn_from_redirect_traffic_choice"`
 	DiscoveredApiSettings          types.Object `tfsdk:"discovered_api_settings"`
-}
-
-type AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+	LearnFromRedirectTrafficChoice types.Object `tfsdk:"learn_from_redirect_traffic_choice"`
 }
 
 type AppTypeAppTypeDiscoveredAPISettings struct {
 	PurgeDurationForInactiveDiscoveredApis types.Int64 `tfsdk:"purge_duration_for_inactive_discovered_apis"`
 }
 
+type AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficChoice struct {
+	Enable types.Bool `tfsdk:"enable"`
+}
+
+type AppTypeAppTypeFeature struct {
+	Type types.List `tfsdk:"type"`
+}
+
 // DataSourceF5XCAppTypeModel describes the resource data model.
 type DataSourceF5XCAppTypeModel struct {
 	Annotations                types.Map      `tfsdk:"annotations"`
 	Description                types.String   `tfsdk:"description"`
+	Labels                     types.Map      `tfsdk:"labels"`
 	Name                       types.String   `tfsdk:"name"`
 	Namespace                  types.String   `tfsdk:"namespace"`
 	Uid                        types.String   `tfsdk:"uid"`
-	Labels                     types.Map      `tfsdk:"labels"`
-	Features                   types.List     `tfsdk:"features"`
 	BusinessLogicMarkupSetting types.Object   `tfsdk:"business_logic_markup_setting"`
+	Features                   types.List     `tfsdk:"features"`
 	Timeouts                   timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> Features
-var AppTypeFeaturesModelAttributeMap = map[string]attr.Type{
-
-	"type": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
 // Attribute map for PointerField --> BusinessLogicMarkupSetting
 var AppTypeBusinessLogicMarkupSettingModelAttributeMap = map[string]attr.Type{
-
-	"learn_from_redirect_traffic_choice": types.ObjectType{
-		AttrTypes: AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap,
-	}, "discovered_api_settings": types.ObjectType{
+	"discovered_api_settings": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"purge_duration_for_inactive_discovered_apis": types.Int64Type},
 	},
+	"learn_from_redirect_traffic_choice": types.ObjectType{
+		AttrTypes: AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerField --> DiscoveredApiSettings
+var AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap = map[string]attr.Type{
+
+	"purge_duration_for_inactive_discovered_apis": types.Int64Type,
 }
 
 // Attribute map for OneOfField --> LearnFromRedirectTraffic
@@ -85,10 +83,12 @@ var AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap =
 	"enable": types.BoolType,
 }
 
-// Attribute map for PointerField --> DiscoveredApiSettings
-var AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> Features
+var AppTypeFeaturesModelAttributeMap = map[string]attr.Type{
 
-	"purge_duration_for_inactive_discovered_apis": types.Int64Type,
+	"type": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -105,8 +105,8 @@ func (d *DataSourceF5XCAppType) Metadata(ctx context.Context, request datasource
 func (r *DataSourceF5XCAppType) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "AppType data source",
-		Description:         "AppType data source",
+		MarkdownDescription: "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
+		Description:         "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -121,6 +121,13 @@ func (r *DataSourceF5XCAppType) Schema(ctx context.Context, request datasource.S
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -140,36 +147,26 @@ func (r *DataSourceF5XCAppType) Schema(ctx context.Context, request datasource.S
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"features": schema.ListNestedAttribute{
-				Description: "Features List of various AI/ML features enabled",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"type": schema.ListAttribute{
-							Description: "Enable type of Feature Feature type to be enabled",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
 			"business_logic_markup_setting": schema.SingleNestedAttribute{
 				Description: "API Discovery Settings Setting specifying how API Discovery will be performed",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
+					"discovered_api_settings": schema.SingleNestedAttribute{
+						Description: "Discovered API Settings",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"purge_duration_for_inactive_discovered_apis": schema.Int64Attribute{
+								Description: "purge_duration_for_inactive_discovered_apis Inactive discovered API will be deleted after configured duration.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
 					"learn_from_redirect_traffic_choice": schema.SingleNestedAttribute{
 						Description: "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
 						Required:    false,
@@ -184,18 +181,21 @@ func (r *DataSourceF5XCAppType) Schema(ctx context.Context, request datasource.S
 							},
 						},
 					},
-					"discovered_api_settings": schema.SingleNestedAttribute{
-						Description: "Discovered API Settings",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"purge_duration_for_inactive_discovered_apis": schema.Int64Attribute{
-								Description: "purge_duration_for_inactive_discovered_apis Inactive discovered API will be deleted after configured duration.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
+				},
+			},
+			"features": schema.ListNestedAttribute{
+				Description: "Features List of various advanced security features enabled",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.ListAttribute{
+							Description: "Enable type of Feature Feature type to be enabled",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
 						},
 					},
 				},
@@ -247,15 +247,14 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -292,15 +291,6 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -319,54 +309,48 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> Features
-	if len(specData.Features) > 0 {
-		featuresElements := make([]AppTypeAppTypeFeature, 0, len(specData.Features))
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-		for _, featuresElement := range specData.Features {
-			appTypeAppTypeFeatureModel := AppTypeAppTypeFeature{}
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-			// data specToModelNested RequiredEnumField --> Type
-			if featuresElement.GetType().String() != "" {
-				stringValue := types.StringValue(featuresElement.GetType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				appTypeAppTypeFeatureModel.Type = listValue
-			} else {
-				appTypeAppTypeFeatureModel.Type = types.ListNull(types.StringType)
-			}
-
-			featuresElements = append(featuresElements, appTypeAppTypeFeatureModel)
-		}
-
-		featuresList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			AppTypeFeaturesModelAttributeMap,
-			featuresElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.Features = featuresList
-	} else {
-		var featuresObjectType = basetypes.ObjectType{
-			AttrTypes: AppTypeFeaturesModelAttributeMap,
-		}
-		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
-		data.Features = nullFeaturesList
-	}
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot PointerField --> BusinessLogicMarkupSetting
 	if specData.GetBusinessLogicMarkupSetting() != nil {
 		var appTypeAppTypeBusinessLogicMarkupSettingModel = &AppTypeAppTypeBusinessLogicMarkupSetting{}
 		businessLogicMarkupSettingElement := specData.GetBusinessLogicMarkupSetting()
+
+		// data specToModelNested PointerField --> DiscoveredApiSettings
+		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
+			// Create the nested Go struct
+			appTypeAppTypeDiscoveredAPISettingsModel := &AppTypeAppTypeDiscoveredAPISettings{}
+			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
+
+			// Recursively populate the nested struct
+
+			// data specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
+			appTypeAppTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
+
+			// This field needs to be converted to a types.ObjectValue before assignment.
+			appTypeAppTypeDiscoveredAPISettingsModelObj, objDiags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeAppTypeDiscoveredAPISettingsModel)
+			response.Diagnostics.Append(objDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeAppTypeDiscoveredAPISettingsModelObj
+
+		} else {
+			// The source field is nil (e.g. redacted by the API).
+			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+			// because the API may always return a non-nil struct (with REDACTED values) for this field,
+			// making this else-branch unreachable. The child OneOf handles the actual healing.
+			// The target is a types.Object, so we use types.ObjectNull.
+			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+		}
 
 		// data specToModelNested OneOfField --> LearnFromRedirectTraffic
 		if businessLogicMarkupSettingElement.GetLearnFromRedirectTraffic() != nil {
@@ -407,51 +391,65 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
 		}
 
-		// data specToModelNested PointerField --> DiscoveredApiSettings
-		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
-			// Create the nested Go struct
-			appTypeAppTypeDiscoveredAPISettingsModel := &AppTypeAppTypeDiscoveredAPISettings{}
-			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
-
-			// Recursively populate the nested struct
-
-			// data specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
-			appTypeAppTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appTypeAppTypeDiscoveredAPISettingsModelObj, diags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeAppTypeDiscoveredAPISettingsModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeAppTypeDiscoveredAPISettingsModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
-		}
-
 		businessLogicMarkupSettingObj, businessLogicMarkupSettingDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppTypeBusinessLogicMarkupSettingModelAttributeMap,
 			appTypeAppTypeBusinessLogicMarkupSettingModel,
 		)
 		response.Diagnostics.Append(businessLogicMarkupSettingDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
 		data.BusinessLogicMarkupSetting = businessLogicMarkupSettingObj
 	} else {
 		data.BusinessLogicMarkupSetting = types.ObjectNull(AppTypeBusinessLogicMarkupSettingModelAttributeMap)
 	}
 
+	// data SpecToModelRoot ArrayOfPointerField --> Features
+	if len(specData.GetFeatures()) > 0 {
+		featuresElements := make([]AppTypeAppTypeFeature, 0, len(specData.GetFeatures()))
+
+		for _, featuresElement := range specData.GetFeatures() {
+			appTypeAppTypeFeatureModel := AppTypeAppTypeFeature{}
+
+			// data specToModelNested RequiredEnumField --> Type
+			if featuresElement.GetType().String() != "" {
+				stringValue := types.StringValue(featuresElement.GetType().String())
+				stringSlice := []types.String{stringValue}
+				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+				response.Diagnostics.Append(listDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				appTypeAppTypeFeatureModel.Type = listValue
+			} else {
+				appTypeAppTypeFeatureModel.Type = types.ListNull(types.StringType)
+			}
+
+			featuresElements = append(featuresElements, appTypeAppTypeFeatureModel)
+		}
+
+		{
+			featuresList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				AppTypeFeaturesModelAttributeMap,
+				featuresElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Features = featuresList
+		}
+	} else {
+		var featuresObjectType = basetypes.ObjectType{
+			AttrTypes: AppTypeFeaturesModelAttributeMap,
+		}
+		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
+		data.Features = nullFeaturesList
+	}
+
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

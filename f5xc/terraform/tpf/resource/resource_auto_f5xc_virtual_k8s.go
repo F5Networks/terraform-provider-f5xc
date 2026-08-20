@@ -20,18 +20,22 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -42,7 +46,6 @@ import (
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	ves_io_schema_virtual_k8s "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_k8s"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCVirtualK8S defines the resource implementation.
@@ -50,22 +53,22 @@ type ResourceF5XCVirtualK8S struct {
 	client *client.APIClient
 }
 
-type VirtualK8SGlobalSpecTypeServiceIsolationChoice struct {
-	Isolated types.Bool `tfsdk:"isolated"`
+type VirtualK8SSvcIsolationChoice struct {
 	Disabled types.Bool `tfsdk:"disabled"`
+	Isolated types.Bool `tfsdk:"isolated"`
 }
 
 // ResourceF5XCVirtualK8SModel describes the resource data model.
 type ResourceF5XCVirtualK8SModel struct {
+	Annotations            types.Map      `tfsdk:"annotations"`
+	Description            types.String   `tfsdk:"description"`
+	Labels                 types.Map      `tfsdk:"labels"`
 	Name                   types.String   `tfsdk:"name"`
 	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
-	Labels                 types.Map      `tfsdk:"labels"`
-	Annotations            types.Map      `tfsdk:"annotations"`
-	Description            types.String   `tfsdk:"description"`
-	VsiteRefs              types.List     `tfsdk:"vsite_refs"`
-	ServiceIsolationChoice types.Object   `tfsdk:"service_isolation_choice"`
 	DefaultFlavorRef       types.Object   `tfsdk:"default_flavor_ref"`
+	ServiceIsolationChoice types.Object   `tfsdk:"service_isolation_choice"`
+	VsiteRefs              types.List     `tfsdk:"vsite_refs"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -79,27 +82,27 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> VsiteRefs
-var VirtualK8sVsiteRefsObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> DefaultFlavorRef
+var VirtualK8sDefaultFlavorRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
 	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> ServiceIsolationChoice
 var VirtualK8sServiceIsolationChoiceModelAttributeMap = map[string]attr.Type{
 
-	"isolated": types.BoolType,
 	"disabled": types.BoolType,
+	"isolated": types.BoolType,
 }
 
-// Attribute map for PointerField --> DefaultFlavorRef
-var VirtualK8sDefaultFlavorRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> VsiteRefs
+var VirtualK8sVsiteRefsObjectRefModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 func NewResourceF5XCVirtualK8S() resource.Resource {
@@ -113,27 +116,66 @@ func (r *ResourceF5XCVirtualK8S) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "VirtualK8S resource",
-		Description:         "VirtualK8S resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a virtual_k8s This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_k8s) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a virtual_k8s This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_k8s) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -141,53 +183,93 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
+			"default_flavor_ref": schema.SingleNestedAttribute{
+				Description:         "Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s",
+				MarkdownDescription: "Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				Attributes: map[string]schema.Attribute{
+					"name": schema.StringAttribute{
+						Description:         "",
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+					},
+					"namespace": schema.StringAttribute{
+						Description:         "",
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+					},
+					"tenant": schema.StringAttribute{
+						Description:         "",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            false,
+						Computed:            true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
 				},
 			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
+			"service_isolation_choice": schema.SingleNestedAttribute{
+				Description:         "service_isolation_choice Service isolation choice",
+				MarkdownDescription: "service_isolation_choice Service isolation choice",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.ExactlyOneOf(
+						"disabled",
+						"isolated",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"disabled": schema.BoolAttribute{
+						Description:         "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
+						MarkdownDescription: "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"isolated": schema.BoolAttribute{
+						Description:         "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
+						MarkdownDescription: "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+				},
 			},
 			"vsite_refs": schema.ListNestedAttribute{
 				Description:         "vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object",
-				MarkdownDescription: "",
+				MarkdownDescription: "vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(32),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"namespace": schema.StringAttribute{
+						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
 						},
-						"name": schema.StringAttribute{
+						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
 							Required:            true,
@@ -207,77 +289,9 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 					},
 				},
 			},
-			"service_isolation_choice": schema.SingleNestedAttribute{
-				Description:         "service_isolation_choice Service isolation choice",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"isolated",
-						"disabled",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"isolated": schema.BoolAttribute{
-						Description:         "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"disabled": schema.BoolAttribute{
-						Description:         "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
-			"default_flavor_ref": schema.SingleNestedAttribute{
-				Description:         "Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Attributes: map[string]schema.Attribute{
-					"name": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-					},
-					"tenant": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            false,
-						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"namespace": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-					},
-				},
-			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -377,23 +391,13 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -406,59 +410,28 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	{
-		// resource modelToSpecRoot ArrayOfPointerField --> VsiteRefs
-		if !data.VsiteRefs.IsNull() && !data.VsiteRefs.IsUnknown() {
-			var vsiteRefsElements []ObjectRefTypeModel
-			response.Diagnostics.Append(data.VsiteRefs.ElementsAs(ctx, &vsiteRefsElements, false)...)
-
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			vsiteRefsSpec := make([]*ves_io_schema.ObjectRefType, len(vsiteRefsElements))
-
-			for i, vsiteRefsElement := range vsiteRefsElements {
-				vsiteRefsSpec[i] = &ves_io_schema.ObjectRefType{}
-
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !vsiteRefsElement.Namespace.IsNull() && !vsiteRefsElement.Namespace.IsUnknown() {
-					vsiteRefsSpec[i].Namespace = string(vsiteRefsElement.Namespace.ValueString())
-				}
-
-				// resource modelToSpecNested RequiredStringField --> Name
-				if !vsiteRefsElement.Name.IsNull() && !vsiteRefsElement.Name.IsUnknown() {
-					vsiteRefsSpec[i].Name = string(vsiteRefsElement.Name.ValueString())
-				}
-
-			}
-
-			spec.VsiteRefs = vsiteRefsSpec
-		}
-	}
-
-	// resource modelToSpecRoot OneOfField --> ServiceIsolationChoice
-	if !data.ServiceIsolationChoice.IsNull() && !data.ServiceIsolationChoice.IsUnknown() {
-		serviceIsolationChoiceModel := VirtualK8SGlobalSpecTypeServiceIsolationChoice{}
-		response.Diagnostics.Append(data.ServiceIsolationChoice.As(ctx, &serviceIsolationChoiceModel, basetypes.ObjectAsOptions{})...)
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
 			return
 		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Isolated
-		if !serviceIsolationChoiceModel.Isolated.IsNull() && !serviceIsolationChoiceModel.Isolated.IsUnknown() {
-			isolatedSpecBool := &ves_io_schema_virtual_k8s.CreateSpecType_Isolated{}
-			isolatedSpecBool.Isolated = &ves_io_schema.Empty{}
-			spec.ServiceIsolationChoice = isolatedSpecBool
-		}
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
-		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
-			disabledSpecBool := &ves_io_schema_virtual_k8s.CreateSpecType_Disabled{}
-			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
-			spec.ServiceIsolationChoice = disabledSpecBool
-		}
-
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -488,11 +461,73 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		}
 	}
 
+	// resource modelToSpecRoot OneOfField --> ServiceIsolationChoice
+	if !data.ServiceIsolationChoice.IsNull() && !data.ServiceIsolationChoice.IsUnknown() {
+		serviceIsolationChoiceModel := VirtualK8SSvcIsolationChoice{}
+		response.Diagnostics.Append(data.ServiceIsolationChoice.As(ctx, &serviceIsolationChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
+		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
+			disabledSpecBool := &ves_io_schema_virtual_k8s.CreateSpecType_Disabled{}
+			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
+			spec.ServiceIsolationChoice = disabledSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Isolated
+		if !serviceIsolationChoiceModel.Isolated.IsNull() && !serviceIsolationChoiceModel.Isolated.IsUnknown() {
+			isolatedSpecBool := &ves_io_schema_virtual_k8s.CreateSpecType_Isolated{}
+			isolatedSpecBool.Isolated = &ves_io_schema.Empty{}
+			spec.ServiceIsolationChoice = isolatedSpecBool
+		}
+
+	}
+
+	{
+		// resource modelToSpecRoot ArrayOfPointerField --> VsiteRefs
+		if !data.VsiteRefs.IsNull() && !data.VsiteRefs.IsUnknown() {
+			var vsiteRefsElements []ObjectRefTypeModel
+			response.Diagnostics.Append(data.VsiteRefs.ElementsAs(ctx, &vsiteRefsElements, false)...)
+
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			vsiteRefsSpec := make([]*ves_io_schema.ObjectRefType, len(vsiteRefsElements))
+
+			for i, vsiteRefsElement := range vsiteRefsElements {
+				vsiteRefsSpec[i] = &ves_io_schema.ObjectRefType{}
+
+				// resource modelToSpecNested RequiredStringField --> Name
+				if !vsiteRefsElement.Name.IsNull() && !vsiteRefsElement.Name.IsUnknown() {
+					vsiteRefsSpec[i].Name = string(vsiteRefsElement.Name.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !vsiteRefsElement.Namespace.IsNull() && !vsiteRefsElement.Namespace.IsUnknown() {
+					vsiteRefsSpec[i].Namespace = string(vsiteRefsElement.Namespace.ValueString())
+				}
+
+			}
+
+			spec.VsiteRefs = vsiteRefsSpec
+		}
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_virtual_k8s.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -518,9 +553,9 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		data.Namespace.ValueString(),
 		data.Uid.ValueString(),
 		func(ctx context.Context, namespace, name string) (*ves_io_schema_virtual_k8s.DBObject, error) {
-			resp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, namespace, name, opts...)
-			if err != nil {
-				return nil, err
+			resp, getErr := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, namespace, name, opts...)
+			if getErr != nil {
+				return nil, getErr
 			}
 			// Extract the DBObject from the response
 			dbObj, ok := resp.(*ves_io_schema_virtual_k8s.DBObject)
@@ -549,6 +584,101 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -557,190 +687,6 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
-	if len(specData.VsiteRefs) > 0 {
-		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
-
-		for _, vsiteRefsElement := range specData.VsiteRefs {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if vsiteRefsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if vsiteRefsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
-		}
-
-		vsiteRefsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-			vsiteRefsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.VsiteRefs = vsiteRefsList
-	} else {
-		var vsiteRefsObjectType = basetypes.ObjectType{
-			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-		}
-		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		data.VsiteRefs = nullVsiteRefsList
-	}
-
-	// resource SpecToModelRoot OneOfField --> ServiceIsolationChoice
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetServiceIsolationChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		serviceIsolationChoiceChoices := specData.GetServiceIsolationChoice()
-
-		// The model struct that will be populated by the nested template.
-		var serviceIsolationChoiceChoicesModel = &VirtualK8SGlobalSpecTypeServiceIsolationChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
-		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
-
-		if isIsolated {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
-		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
-
-		if isDisabled {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		serviceIsolationChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			VirtualK8sServiceIsolationChoiceModelAttributeMap,
-			serviceIsolationChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ServiceIsolationChoice = serviceIsolationChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ServiceIsolationChoice = types.ObjectNull(VirtualK8sServiceIsolationChoiceModelAttributeMap)
-	}
 
 	// resource SpecToModelRoot PointerField --> DefaultFlavorRef
 	if specData.GetDefaultFlavorRef() != nil {
@@ -755,20 +701,20 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if defaultFlavorRefElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if defaultFlavorRefElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if defaultFlavorRefElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
@@ -783,6 +729,119 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		data.DefaultFlavorRef = defaultFlavorRefObj
 	} else {
 		data.DefaultFlavorRef = types.ObjectNull(VirtualK8sDefaultFlavorRefModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> ServiceIsolationChoice
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetServiceIsolationChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		serviceIsolationChoiceChoices := specData.GetServiceIsolationChoice()
+
+		// The model struct that will be populated by the nested template.
+		var serviceIsolationChoiceChoicesModel = &VirtualK8SSvcIsolationChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
+
+		if isDisabled {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
+		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
+
+		if isIsolated {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			serviceIsolationChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				VirtualK8sServiceIsolationChoiceModelAttributeMap,
+				serviceIsolationChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ServiceIsolationChoice = serviceIsolationChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.ServiceIsolationChoice = types.ObjectNull(VirtualK8sServiceIsolationChoiceModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
+	if len(specData.GetVsiteRefs()) > 0 {
+		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.GetVsiteRefs()))
+		for _, vsiteRefsElement := range specData.GetVsiteRefs() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if vsiteRefsElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if vsiteRefsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
+		}
+
+		{
+			vsiteRefsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+				vsiteRefsElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.VsiteRefs = vsiteRefsList
+		}
+	} else {
+		var vsiteRefsObjectType = basetypes.ObjectType{
+			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+		}
+		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
+		var priorValVsiteRefs types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("vsite_refs"), &priorValVsiteRefs)
+		if !priorValVsiteRefs.IsNull() && !priorValVsiteRefs.IsUnknown() {
+			data.VsiteRefs = priorValVsiteRefs
+		} else {
+			data.VsiteRefs = nullVsiteRefsList
+		}
+
 	}
 
 	if response.Diagnostics.HasError() {
@@ -848,6 +907,102 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -856,206 +1011,6 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
-	if len(specData.VsiteRefs) > 0 {
-		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
-
-		for _, vsiteRefsElement := range specData.VsiteRefs {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if vsiteRefsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if vsiteRefsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
-		}
-
-		vsiteRefsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-			vsiteRefsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.VsiteRefs = vsiteRefsList
-	} else {
-		var vsiteRefsObjectType = basetypes.ObjectType{
-			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-		}
-		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		data.VsiteRefs = nullVsiteRefsList
-	}
-
-	// resource SpecToModelRoot OneOfField --> ServiceIsolationChoice
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetServiceIsolationChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		serviceIsolationChoiceChoices := specData.GetServiceIsolationChoice()
-
-		// The model struct that will be populated by the nested template.
-		var serviceIsolationChoiceChoicesModel = &VirtualK8SGlobalSpecTypeServiceIsolationChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
-		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
-
-		if isIsolated {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
-		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
-
-		if isDisabled {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		serviceIsolationChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			VirtualK8sServiceIsolationChoiceModelAttributeMap,
-			serviceIsolationChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ServiceIsolationChoice = serviceIsolationChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ServiceIsolationChoice = types.ObjectNull(VirtualK8sServiceIsolationChoiceModelAttributeMap)
-	}
 
 	// resource SpecToModelRoot PointerField --> DefaultFlavorRef
 	if specData.GetDefaultFlavorRef() != nil {
@@ -1070,20 +1025,20 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if defaultFlavorRefElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if defaultFlavorRefElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if defaultFlavorRefElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
@@ -1098,6 +1053,119 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 		data.DefaultFlavorRef = defaultFlavorRefObj
 	} else {
 		data.DefaultFlavorRef = types.ObjectNull(VirtualK8sDefaultFlavorRefModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> ServiceIsolationChoice
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetServiceIsolationChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		serviceIsolationChoiceChoices := specData.GetServiceIsolationChoice()
+
+		// The model struct that will be populated by the nested template.
+		var serviceIsolationChoiceChoicesModel = &VirtualK8SSvcIsolationChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
+
+		if isDisabled {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
+		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
+
+		if isIsolated {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			serviceIsolationChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				VirtualK8sServiceIsolationChoiceModelAttributeMap,
+				serviceIsolationChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ServiceIsolationChoice = serviceIsolationChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.ServiceIsolationChoice = types.ObjectNull(VirtualK8sServiceIsolationChoiceModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
+	if len(specData.GetVsiteRefs()) > 0 {
+		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.GetVsiteRefs()))
+		for _, vsiteRefsElement := range specData.GetVsiteRefs() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if vsiteRefsElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if vsiteRefsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
+		}
+
+		{
+			vsiteRefsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+				vsiteRefsElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.VsiteRefs = vsiteRefsList
+		}
+	} else {
+		var vsiteRefsObjectType = basetypes.ObjectType{
+			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+		}
+		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
+		var priorValVsiteRefs types.List
+		_ = request.State.GetAttribute(ctx, path.Root("vsite_refs"), &priorValVsiteRefs)
+		if !priorValVsiteRefs.IsNull() && !priorValVsiteRefs.IsUnknown() {
+			data.VsiteRefs = priorValVsiteRefs
+		} else {
+			data.VsiteRefs = nullVsiteRefsList
+		}
+
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1117,6 +1185,25 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCVirtualK8SModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1147,23 +1234,13 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1176,59 +1253,28 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	{
-		// resource modelToSpecRoot ArrayOfPointerField --> VsiteRefs
-		if !data.VsiteRefs.IsNull() && !data.VsiteRefs.IsUnknown() {
-			var vsiteRefsElements []ObjectRefTypeModel
-			response.Diagnostics.Append(data.VsiteRefs.ElementsAs(ctx, &vsiteRefsElements, false)...)
-
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			vsiteRefsSpec := make([]*ves_io_schema.ObjectRefType, len(vsiteRefsElements))
-
-			for i, vsiteRefsElement := range vsiteRefsElements {
-				vsiteRefsSpec[i] = &ves_io_schema.ObjectRefType{}
-
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !vsiteRefsElement.Namespace.IsNull() && !vsiteRefsElement.Namespace.IsUnknown() {
-					vsiteRefsSpec[i].Namespace = string(vsiteRefsElement.Namespace.ValueString())
-				}
-
-				// resource modelToSpecNested RequiredStringField --> Name
-				if !vsiteRefsElement.Name.IsNull() && !vsiteRefsElement.Name.IsUnknown() {
-					vsiteRefsSpec[i].Name = string(vsiteRefsElement.Name.ValueString())
-				}
-
-			}
-
-			spec.VsiteRefs = vsiteRefsSpec
-		}
-	}
-
-	// resource modelToSpecRoot OneOfField --> ServiceIsolationChoice
-	if !data.ServiceIsolationChoice.IsNull() && !data.ServiceIsolationChoice.IsUnknown() {
-		serviceIsolationChoiceModel := VirtualK8SGlobalSpecTypeServiceIsolationChoice{}
-		response.Diagnostics.Append(data.ServiceIsolationChoice.As(ctx, &serviceIsolationChoiceModel, basetypes.ObjectAsOptions{})...)
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
 			return
 		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Isolated
-		if !serviceIsolationChoiceModel.Isolated.IsNull() && !serviceIsolationChoiceModel.Isolated.IsUnknown() {
-			isolatedSpecBool := &ves_io_schema_virtual_k8s.ReplaceSpecType_Isolated{}
-			isolatedSpecBool.Isolated = &ves_io_schema.Empty{}
-			spec.ServiceIsolationChoice = isolatedSpecBool
-		}
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
-		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
-			disabledSpecBool := &ves_io_schema_virtual_k8s.ReplaceSpecType_Disabled{}
-			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
-			spec.ServiceIsolationChoice = disabledSpecBool
-		}
-
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -1256,6 +1302,68 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 			}
 
 		}
+	}
+
+	// resource modelToSpecRoot OneOfField --> ServiceIsolationChoice
+	if !data.ServiceIsolationChoice.IsNull() && !data.ServiceIsolationChoice.IsUnknown() {
+		serviceIsolationChoiceModel := VirtualK8SSvcIsolationChoice{}
+		response.Diagnostics.Append(data.ServiceIsolationChoice.As(ctx, &serviceIsolationChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
+		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
+			disabledSpecBool := &ves_io_schema_virtual_k8s.ReplaceSpecType_Disabled{}
+			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
+			spec.ServiceIsolationChoice = disabledSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Isolated
+		if !serviceIsolationChoiceModel.Isolated.IsNull() && !serviceIsolationChoiceModel.Isolated.IsUnknown() {
+			isolatedSpecBool := &ves_io_schema_virtual_k8s.ReplaceSpecType_Isolated{}
+			isolatedSpecBool.Isolated = &ves_io_schema.Empty{}
+			spec.ServiceIsolationChoice = isolatedSpecBool
+		}
+
+	}
+
+	{
+		// resource modelToSpecRoot ArrayOfPointerField --> VsiteRefs
+		if !data.VsiteRefs.IsNull() && !data.VsiteRefs.IsUnknown() {
+			var vsiteRefsElements []ObjectRefTypeModel
+			response.Diagnostics.Append(data.VsiteRefs.ElementsAs(ctx, &vsiteRefsElements, false)...)
+
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			vsiteRefsSpec := make([]*ves_io_schema.ObjectRefType, len(vsiteRefsElements))
+
+			for i, vsiteRefsElement := range vsiteRefsElements {
+				vsiteRefsSpec[i] = &ves_io_schema.ObjectRefType{}
+
+				// resource modelToSpecNested RequiredStringField --> Name
+				if !vsiteRefsElement.Name.IsNull() && !vsiteRefsElement.Name.IsUnknown() {
+					vsiteRefsSpec[i].Name = string(vsiteRefsElement.Name.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !vsiteRefsElement.Namespace.IsNull() && !vsiteRefsElement.Namespace.IsUnknown() {
+					vsiteRefsSpec[i].Namespace = string(vsiteRefsElement.Namespace.ValueString())
+				}
+
+			}
+
+			spec.VsiteRefs = vsiteRefsSpec
+		}
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1292,6 +1400,101 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1300,206 +1503,6 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
-	if len(specData.VsiteRefs) > 0 {
-		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
-
-		for _, vsiteRefsElement := range specData.VsiteRefs {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if vsiteRefsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if vsiteRefsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
-		}
-
-		vsiteRefsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-			vsiteRefsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.VsiteRefs = vsiteRefsList
-	} else {
-		var vsiteRefsObjectType = basetypes.ObjectType{
-			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-		}
-		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		data.VsiteRefs = nullVsiteRefsList
-	}
-
-	// resource SpecToModelRoot OneOfField --> ServiceIsolationChoice
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetServiceIsolationChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		serviceIsolationChoiceChoices := specData.GetServiceIsolationChoice()
-
-		// The model struct that will be populated by the nested template.
-		var serviceIsolationChoiceChoicesModel = &VirtualK8SGlobalSpecTypeServiceIsolationChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
-		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
-
-		if isIsolated {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
-		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
-
-		if isDisabled {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		serviceIsolationChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			VirtualK8sServiceIsolationChoiceModelAttributeMap,
-			serviceIsolationChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ServiceIsolationChoice = serviceIsolationChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ServiceIsolationChoice = types.ObjectNull(VirtualK8sServiceIsolationChoiceModelAttributeMap)
-	}
 
 	// resource SpecToModelRoot PointerField --> DefaultFlavorRef
 	if specData.GetDefaultFlavorRef() != nil {
@@ -1514,20 +1517,20 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if defaultFlavorRefElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if defaultFlavorRefElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if defaultFlavorRefElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
@@ -1542,6 +1545,145 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		data.DefaultFlavorRef = defaultFlavorRefObj
 	} else {
 		data.DefaultFlavorRef = types.ObjectNull(VirtualK8sDefaultFlavorRefModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> ServiceIsolationChoice
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetServiceIsolationChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		serviceIsolationChoiceChoices := specData.GetServiceIsolationChoice()
+
+		// The model struct that will be populated by the nested template.
+		var serviceIsolationChoiceChoicesModel = &VirtualK8SSvcIsolationChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
+
+		if isDisabled {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
+		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
+
+		if isIsolated {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			serviceIsolationChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				VirtualK8sServiceIsolationChoiceModelAttributeMap,
+				serviceIsolationChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ServiceIsolationChoice = serviceIsolationChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.ServiceIsolationChoice = types.ObjectNull(VirtualK8sServiceIsolationChoiceModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
+	if len(specData.GetVsiteRefs()) > 0 {
+		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.GetVsiteRefs()))
+		for _, vsiteRefsElement := range specData.GetVsiteRefs() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if vsiteRefsElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if vsiteRefsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
+		}
+
+		{
+			vsiteRefsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+				vsiteRefsElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.VsiteRefs = vsiteRefsList
+		}
+	} else {
+		var vsiteRefsObjectType = basetypes.ObjectType{
+			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+		}
+		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
+		var priorValVsiteRefs types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("vsite_refs"), &priorValVsiteRefs)
+		if !priorValVsiteRefs.IsNull() && !priorValVsiteRefs.IsUnknown() {
+			data.VsiteRefs = priorValVsiteRefs
+		} else {
+			data.VsiteRefs = nullVsiteRefsList
+		}
+
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -1578,9 +1720,8 @@ func (r *ResourceF5XCVirtualK8S) Delete(ctx context.Context, request resource.De
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -1595,19 +1736,56 @@ func (r *ResourceF5XCVirtualK8S) Delete(ctx context.Context, request resource.De
 		)
 		return
 	}
-}
+	err = utils.WaitForPendingFinalizers(
+		ctx,
+		data.Name.ValueString(),
+		data.Namespace.ValueString(),
+		data.Uid.ValueString(),
+		func(ctx context.Context, namespace, name string) (*ves_io_schema_virtual_k8s.DBObject, error) {
+			resp, getErr := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, namespace, name, opts...)
+			if getErr != nil {
+				return nil, getErr
+			}
+			// Extract the DBObject from the response
+			dbObj, ok := resp.(*ves_io_schema_virtual_k8s.DBObject)
+			if !ok {
+				return nil, fmt.Errorf("unexpected response type: %T", resp)
+			}
+			return dbObj, nil
+		},
+	)
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Pending Finalizers Error", fmt.Sprintf("Error waiting for finalizers on %s: %s", "virtual_k8s", err),
+		)
+		return
+	}
 
+}
 func (r *ResourceF5XCVirtualK8S) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Network Connector is used to create connection between two virtual networks on a given site.\n\n   Outside Network is the unsecured network\n\n   Inside Network is secured network\n\nInside network can have connectivity to outside network in the following ways\n\n    Snat: There are 2 Snat modes\n\n         Default Gateway Snat:\n          A default route is added in inside network with CE as gateway. As outside network does not have any visibility\n          of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either\n          interface IP of out side virtual network interface Snat pool\n\n         Dynamic Gateway Snat:\n          Non default routes from out side network are pushed to inside network with CE as gateway. As outside network\n          does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside.\n          SNAT IP can be either interface IP of out side virtual network interface Snat pool\n          This mode is currently not supported\n\n    Dynamic Gateway:\n\n       Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has\n       reachability information of inside network, no SNAT is required\n       This mode is currently not supported\n\n Proxy Configuration:\n     In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity.\n     There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would\n     take effect\n\n         Dynamic Reverse Proxy:\n          There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is\n          attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network\n          to select the destination. This dynamic resolution is done using a pre defined field in the received packet.\n          This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https,\n          DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS\n          resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the\n          outside network\n\n         Forward Proxy:\n          Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated\n          to actual IPs towards outside network\n\nConstraint: There are no overlapping ip(s) between outside and inside network.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2362,7 +2389,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2579,7 +2605,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates network_connector is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2806,6 +2831,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3219,7 +3265,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3283,7 +3328,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3349,7 +3393,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3467,7 +3510,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

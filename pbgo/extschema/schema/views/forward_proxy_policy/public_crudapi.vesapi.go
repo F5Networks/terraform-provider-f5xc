@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Forward Proxy policy defines access control rules for connections going via forward\nProxy. It is view type of config object that uses service policy mechanism to achieve\nRequired functionality.\n\nView will create following child objects.\n\n* Service Policy\n* Service Policy Rule",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1847,6 +1850,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1943,6 +1952,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2056,6 +2071,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2155,6 +2176,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2250,7 +2277,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2654,7 +2680,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates forward_proxy_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3174,6 +3199,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaConditionType": {
             "type": "object",
             "description": "Conditions are used in the object status to describe the current state of the\nobject, e.g. Ready, Succeeded, etc.",
@@ -3376,7 +3422,7 @@ var APISwaggerJSON string = `{
             "properties": {
                 "ipv6_prefixes": {
                     "type": "array",
-                    "description": " Destination IPv6 prefixes.\n\nExample: - \"2001::1/64\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.ipv6_prefix: true\n  ves.io.schema.rules.repeated.items.string.not_empty: true\n  ves.io.schema.rules.repeated.max_items: 32\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "description": " Destination IPv6 prefixes.\n\nExample: - \"2001::1/64\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.ipv6_prefix: true\n  ves.io.schema.rules.repeated.max_items: 32\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "ipv6 prefixes",
                     "maxItems": 32,
                     "items": {
@@ -3386,7 +3432,6 @@ var APISwaggerJSON string = `{
                     "x-ves-example": "2001::1/64",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.repeated.items.string.ipv6_prefix": "true",
-                        "ves.io.schema.rules.repeated.items.string.not_empty": "true",
                         "ves.io.schema.rules.repeated.max_items": "32",
                         "ves.io.schema.rules.repeated.unique": "true"
                     }
@@ -3409,7 +3454,7 @@ var APISwaggerJSON string = `{
                 },
                 "prefixes": {
                     "type": "array",
-                    "description": " Destination IPv4 prefixes.\n\nExample: - \"10.0.0.1/24\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.ipv4_prefix: true\n  ves.io.schema.rules.repeated.items.string.not_empty: true\n  ves.io.schema.rules.repeated.max_items: 32\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "description": " Destination IPv4 prefixes.\n\nExample: - \"10.0.0.1/24\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.ipv4_prefix: true\n  ves.io.schema.rules.repeated.max_items: 32\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "prefixes",
                     "maxItems": 32,
                     "items": {
@@ -3419,7 +3464,6 @@ var APISwaggerJSON string = `{
                     "x-ves-example": "10.0.0.1/24",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.repeated.items.string.ipv4_prefix": "true",
-                        "ves.io.schema.rules.repeated.items.string.not_empty": "true",
                         "ves.io.schema.rules.repeated.max_items": "32",
                         "ves.io.schema.rules.repeated.unique": "true"
                     }
@@ -3524,7 +3568,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3588,7 +3631,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3654,7 +3696,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3740,7 +3781,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -3931,7 +3971,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Port Matcher"
                 },
                 "ports": {

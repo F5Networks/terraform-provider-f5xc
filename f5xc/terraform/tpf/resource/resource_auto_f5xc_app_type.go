@@ -21,20 +21,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -44,7 +48,6 @@ import (
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_app_type "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/app_type"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCAppType defines the resource implementation.
@@ -52,33 +55,33 @@ type ResourceF5XCAppType struct {
 	client *client.APIClient
 }
 
-type AppTypeAppTypeFeature struct {
-	Type types.List `tfsdk:"type"`
-}
-
-type AppTypeAppTypeBusinessLogicMarkupSetting struct {
-	LearnFromRedirectTrafficChoice types.Object `tfsdk:"learn_from_redirect_traffic_choice"`
+type AppTypeBusinessLogicMarkupSetting struct {
 	DiscoveredApiSettings          types.Object `tfsdk:"discovered_api_settings"`
+	LearnFromRedirectTrafficChoice types.Object `tfsdk:"learn_from_redirect_traffic_choice"`
 }
 
-type AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficChoice struct {
+type AppTypeDiscoveredAPISettings struct {
+	PurgeDurationForInactiveDiscoveredApis types.Int64 `tfsdk:"purge_duration_for_inactive_discovered_apis"`
+}
+
+type AppTypeLearnFromRedirectTrafficChoice struct {
 	Enable types.Bool `tfsdk:"enable"`
 }
 
-type AppTypeAppTypeDiscoveredAPISettings struct {
-	PurgeDurationForInactiveDiscoveredApis types.Int64 `tfsdk:"purge_duration_for_inactive_discovered_apis"`
+type AppTypeFeature struct {
+	Type types.List `tfsdk:"type"`
 }
 
 // ResourceF5XCAppTypeModel describes the resource data model.
 type ResourceF5XCAppTypeModel struct {
+	Annotations                types.Map      `tfsdk:"annotations"`
 	Description                types.String   `tfsdk:"description"`
+	Labels                     types.Map      `tfsdk:"labels"`
 	Name                       types.String   `tfsdk:"name"`
 	Namespace                  types.String   `tfsdk:"namespace"`
 	Uid                        types.String   `tfsdk:"uid"`
-	Labels                     types.Map      `tfsdk:"labels"`
-	Annotations                types.Map      `tfsdk:"annotations"`
-	Features                   types.List     `tfsdk:"features"`
 	BusinessLogicMarkupSetting types.Object   `tfsdk:"business_logic_markup_setting"`
+	Features                   types.List     `tfsdk:"features"`
 	Timeouts                   timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -92,23 +95,21 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> Features
-var AppTypeFeaturesModelAttributeMap = map[string]attr.Type{
-
-	"type": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
 // Attribute map for PointerField --> BusinessLogicMarkupSetting
 var AppTypeBusinessLogicMarkupSettingModelAttributeMap = map[string]attr.Type{
-
-	"learn_from_redirect_traffic_choice": types.ObjectType{
-		AttrTypes: AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap,
-	}, "discovered_api_settings": types.ObjectType{
+	"discovered_api_settings": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"purge_duration_for_inactive_discovered_apis": types.Int64Type},
 	},
+	"learn_from_redirect_traffic_choice": types.ObjectType{
+		AttrTypes: AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerField --> DiscoveredApiSettings
+var AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap = map[string]attr.Type{
+
+	"purge_duration_for_inactive_discovered_apis": types.Int64Type,
 }
 
 // Attribute map for OneOfField --> LearnFromRedirectTraffic
@@ -117,10 +118,12 @@ var AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap =
 	"enable": types.BoolType,
 }
 
-// Attribute map for PointerField --> DiscoveredApiSettings
-var AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> Features
+var AppTypeFeaturesModelAttributeMap = map[string]attr.Type{
 
-	"purge_duration_for_inactive_discovered_apis": types.Int64Type,
+	"type": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 func NewResourceF5XCAppType() resource.Resource {
@@ -134,35 +137,69 @@ func (r *ResourceF5XCAppType) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "AppType resource",
-		Description:         "AppType resource",
+		MarkdownDescription: "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
+		Description:         "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"description": schema.StringAttribute{
 				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
+				MarkdownDescription: "description Human readable description for the object",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"shared"}...),
+				},
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -170,93 +207,23 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"features": schema.ListNestedAttribute{
-				Description:         "Features List of various AI/ML features enabled",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"type": schema.ListAttribute{
-							Description:         "Enable type of Feature Feature type to be enabled",
-							MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"BUSINESS_LOGIC_MARKUP\", \"TIMESERIES_ANOMALY_DETECTION\", \"PER_REQ_ANOMALY_DETECTION\", \"USER_BEHAVIOR_ANALYSIS\"]`",
-							ElementType:         types.StringType,
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BUSINESS_LOGIC_MARKUP", "TIMESERIES_ANOMALY_DETECTION", "PER_REQ_ANOMALY_DETECTION", "USER_BEHAVIOR_ANALYSIS"}...)),
-								listvalidator.SizeAtMost(1),
-							},
-						},
-					},
-				},
-			},
 			"business_logic_markup_setting": schema.SingleNestedAttribute{
 				Description:         "API Discovery Settings Setting specifying how API Discovery will be performed",
-				MarkdownDescription: "",
+				MarkdownDescription: "API Discovery Settings Setting specifying how API Discovery will be performed",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
-					"learn_from_redirect_traffic_choice": schema.SingleNestedAttribute{
-						Description:         "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
-								"enable",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"enable": schema.BoolAttribute{
-								Description:         "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-						},
-					},
 					"discovered_api_settings": schema.SingleNestedAttribute{
 						Description:         "Discovered API Settings",
-						MarkdownDescription: "",
+						MarkdownDescription: "Discovered API Settings",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"purge_duration_for_inactive_discovered_apis": schema.Int64Attribute{
 								Description:         "purge_duration_for_inactive_discovered_apis Inactive discovered API will be deleted after configured duration.",
-								MarkdownDescription: "<br>**Default:** `2`",
+								MarkdownDescription: "purge_duration_for_inactive_discovered_apis Inactive discovered API will be deleted after configured duration.<br>**Default:** `2`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -267,11 +234,61 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 							},
 						},
 					},
+					"learn_from_redirect_traffic_choice": schema.SingleNestedAttribute{
+						Description:         "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
+						MarkdownDescription: "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Object{
+							exactlyoneofvalidator.ExactlyOneOf(
+								"enable",
+							),
+						},
+						Attributes: map[string]schema.Attribute{
+							"enable": schema.BoolAttribute{
+								Description:         "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
+								MarkdownDescription: "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+						},
+					},
+				},
+			},
+			"features": schema.ListNestedAttribute{
+				Description:         "Features List of various advanced security features enabled",
+				MarkdownDescription: "Features List of various advanced security features enabled",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Validators: []validator.List{
+					listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.ListAttribute{
+							Description:         "Enable type of Feature Feature type to be enabled",
+							MarkdownDescription: "Enable type of Feature Feature type to be enabled<br>**Allowed Values (choose one):** `['BUSINESS_LOGIC_MARKUP', 'PER_REQ_ANOMALY_DETECTION', 'USER_BEHAVIOR_ANALYSIS']`",
+							ElementType:         types.StringType,
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.List{
+								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BUSINESS_LOGIC_MARKUP", "PER_REQ_ANOMALY_DETECTION", "USER_BEHAVIOR_ANALYSIS"}...)),
+								listvalidator.SizeAtMost(1),
+							},
+						},
+					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -371,9 +388,37 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 
 	// Populate createReq from data model
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -386,24 +431,64 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
+	{
+		// resource modelToSpecRoot PointerField --> BusinessLogicMarkupSetting
+		if !data.BusinessLogicMarkupSetting.IsNull() && !data.BusinessLogicMarkupSetting.IsUnknown() {
+			businessLogicMarkupSettingSpec := &ves_io_schema_app_type.BusinessLogicMarkupSetting{}
+			spec.BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
+			var businessLogicMarkupSettingModel AppTypeBusinessLogicMarkupSetting
+
+			// Populate the nested model from the main data model
+			diags.Append(data.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested PointerField --> DiscoveredApiSettings
+			if !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsNull() && !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsUnknown() {
+				var discoveredApiSettingsModel AppTypeDiscoveredAPISettings
+				response.Diagnostics.Append(businessLogicMarkupSettingModel.DiscoveredApiSettings.As(ctx, &discoveredApiSettingsModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				discoveredApiSettingsSpec := &ves_io_schema_app_type.DiscoveredAPISettings{}
+				businessLogicMarkupSettingSpec.DiscoveredApiSettings = discoveredApiSettingsSpec
+
+				// resource modelToSpecNested UintField --> PurgeDurationForInactiveDiscoveredApis
+				if !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsNull() && !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsUnknown() {
+					discoveredApiSettingsSpec.PurgeDurationForInactiveDiscoveredApis = uint32(uint32(discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.ValueInt64()))
+				} else {
+					discoveredApiSettingsSpec.PurgeDurationForInactiveDiscoveredApis = uint32(2)
+				}
+
+			}
+
+			// resource modelToSpecNested OneOfField --> LearnFromRedirectTraffic
+			if !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsUnknown() {
+				businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel := AppTypeLearnFromRedirectTrafficChoice{}
+				response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.As(ctx, &businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
+				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsUnknown() {
+					enableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable{}
+					enableSpecBool.Enable = &ves_io_schema.Empty{}
+					businessLogicMarkupSettingSpec.LearnFromRedirectTraffic = enableSpecBool
+				}
+
+			}
+
 		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
 	}
 
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> Features
 		if !data.Features.IsNull() && !data.Features.IsUnknown() {
-			var featuresElements []AppTypeAppTypeFeature
+			var featuresElements []AppTypeFeature
 			response.Diagnostics.Append(data.Features.ElementsAs(ctx, &featuresElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -445,63 +530,18 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 		}
 	}
 
-	{
-		// resource modelToSpecRoot PointerField --> BusinessLogicMarkupSetting
-		if !data.BusinessLogicMarkupSetting.IsNull() && !data.BusinessLogicMarkupSetting.IsUnknown() {
-			businessLogicMarkupSettingSpec := &ves_io_schema_app_type.BusinessLogicMarkupSetting{}
-			spec.BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
-			var businessLogicMarkupSettingModel AppTypeAppTypeBusinessLogicMarkupSetting
-
-			// Populate the nested model from the main data model
-			diags.Append(data.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested OneOfField --> LearnFromRedirectTraffic
-			if !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsUnknown() {
-				businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel := AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficChoice{}
-				response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.As(ctx, &businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
-				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsUnknown() {
-					enableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable{}
-					enableSpecBool.Enable = &ves_io_schema.Empty{}
-					businessLogicMarkupSettingSpec.LearnFromRedirectTraffic = enableSpecBool
-				}
-
-			}
-
-			// resource modelToSpecNested PointerField --> DiscoveredApiSettings
-			if !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsNull() && !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsUnknown() {
-				var discoveredApiSettingsModel AppTypeAppTypeDiscoveredAPISettings
-				response.Diagnostics.Append(businessLogicMarkupSettingModel.DiscoveredApiSettings.As(ctx, &discoveredApiSettingsModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				discoveredApiSettingsSpec := &ves_io_schema_app_type.DiscoveredAPISettings{}
-				businessLogicMarkupSettingSpec.DiscoveredApiSettings = discoveredApiSettingsSpec
-
-				// resource modelToSpecNested UintField --> PurgeDurationForInactiveDiscoveredApis
-				if !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsNull() && !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsUnknown() {
-					discoveredApiSettingsSpec.PurgeDurationForInactiveDiscoveredApis = uint32(uint32(discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.ValueInt64()))
-				}
-
-			}
-
-		}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_app_type.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -530,8 +570,100 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -542,132 +674,39 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> Features
-	if len(specData.Features) > 0 {
-		featuresElements := make([]AppTypeAppTypeFeature, 0, len(specData.Features))
-
-		for _, featuresElement := range specData.Features {
-			appTypeAppTypeFeatureModel := AppTypeAppTypeFeature{}
-
-			// resource specToModelNested RequiredEnumField --> Type
-			if featuresElement.GetType().String() != "" {
-				stringValue := types.StringValue(featuresElement.GetType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				appTypeAppTypeFeatureModel.Type = listValue
-			} else {
-				appTypeAppTypeFeatureModel.Type = types.ListNull(types.StringType)
-			}
-
-			featuresElements = append(featuresElements, appTypeAppTypeFeatureModel)
-		}
-
-		featuresList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			AppTypeFeaturesModelAttributeMap,
-			featuresElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.Features = featuresList
-	} else {
-		var featuresObjectType = basetypes.ObjectType{
-			AttrTypes: AppTypeFeaturesModelAttributeMap,
-		}
-		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
-		data.Features = nullFeaturesList
-	}
-
 	// resource SpecToModelRoot PointerField --> BusinessLogicMarkupSetting
 	if specData.GetBusinessLogicMarkupSetting() != nil {
-		var appTypeAppTypeBusinessLogicMarkupSettingModel = &AppTypeAppTypeBusinessLogicMarkupSetting{}
+		var appTypeBusinessLogicMarkupSettingModel = &AppTypeBusinessLogicMarkupSetting{}
 		businessLogicMarkupSettingElement := specData.GetBusinessLogicMarkupSetting()
+
+		// resource specToModelNested PointerField --> DiscoveredApiSettings
+		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
+			// Create the nested Go struct
+			appTypeDiscoveredAPISettingsModel := &AppTypeDiscoveredAPISettings{}
+			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
+
+			// Recursively populate the nested struct
+
+			// resource specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
+			appTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
+
+			// This field needs to be converted to a types.ObjectValue before assignment.
+			appTypeDiscoveredAPISettingsModelObj, appTypeDiscoveredAPISettingsModelObjDiags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeDiscoveredAPISettingsModel)
+			response.Diagnostics.Append(appTypeDiscoveredAPISettingsModelObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeDiscoveredAPISettingsModelObj
+
+		} else {
+			// The source field is nil (e.g. redacted by the API).
+			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+			// because the API may always return a non-nil struct (with REDACTED values) for this field,
+			// making this else-branch unreachable. The child OneOf handles the actual healing.
+			// The target is a types.Object, so we use types.ObjectNull.
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+		}
 
 		// resource specToModelNested OneOfField --> LearnFromRedirectTraffic
 		if businessLogicMarkupSettingElement.GetLearnFromRedirectTraffic() != nil {
@@ -701,45 +740,16 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
-		}
-
-		// resource specToModelNested PointerField --> DiscoveredApiSettings
-		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
-			// Create the nested Go struct
-			appTypeAppTypeDiscoveredAPISettingsModel := &AppTypeAppTypeDiscoveredAPISettings{}
-			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
-			appTypeAppTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appTypeAppTypeDiscoveredAPISettingsModelObj, diags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeAppTypeDiscoveredAPISettingsModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeAppTypeDiscoveredAPISettingsModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
 		}
 
 		businessLogicMarkupSettingObj, businessLogicMarkupSettingDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppTypeBusinessLogicMarkupSettingModelAttributeMap,
-			appTypeAppTypeBusinessLogicMarkupSettingModel,
+			appTypeBusinessLogicMarkupSettingModel,
 		)
 		response.Diagnostics.Append(businessLogicMarkupSettingDiags...)
 		if response.Diagnostics.HasError() {
@@ -748,6 +758,60 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 		data.BusinessLogicMarkupSetting = businessLogicMarkupSettingObj
 	} else {
 		data.BusinessLogicMarkupSetting = types.ObjectNull(AppTypeBusinessLogicMarkupSettingModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> Features
+	if len(specData.GetFeatures()) > 0 {
+		featuresElements := make([]AppTypeFeature, 0, len(specData.GetFeatures()))
+		for _, featuresElement := range specData.GetFeatures() {
+			appTypeFeatureModel := AppTypeFeature{}
+
+			// resource specToModelNested RequiredEnumField --> Type
+			{
+				if featuresElement.GetType().String() != "" {
+					stringValue := types.StringValue(featuresElement.GetType().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					appTypeFeatureModel.Type = listValue
+				} else {
+					appTypeFeatureModel.Type = types.ListNull(types.StringType)
+				}
+			}
+
+			featuresElements = append(featuresElements, appTypeFeatureModel)
+		}
+
+		{
+			featuresList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				AppTypeFeaturesModelAttributeMap,
+				featuresElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Features = featuresList
+		}
+	} else {
+		var featuresObjectType = basetypes.ObjectType{
+			AttrTypes: AppTypeFeaturesModelAttributeMap,
+		}
+		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
+		var priorValFeatures types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("features"), &priorValFeatures)
+		if !priorValFeatures.IsNull() && !priorValFeatures.IsUnknown() {
+			data.Features = priorValFeatures
+		} else {
+			data.Features = nullFeaturesList
+		}
+
 	}
 
 	if response.Diagnostics.HasError() {
@@ -813,8 +877,101 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -825,148 +982,39 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> Features
-	if len(specData.Features) > 0 {
-		featuresElements := make([]AppTypeAppTypeFeature, 0, len(specData.Features))
-
-		for _, featuresElement := range specData.Features {
-			appTypeAppTypeFeatureModel := AppTypeAppTypeFeature{}
-
-			// resource specToModelNested RequiredEnumField --> Type
-			if featuresElement.GetType().String() != "" {
-				stringValue := types.StringValue(featuresElement.GetType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				appTypeAppTypeFeatureModel.Type = listValue
-			} else {
-				appTypeAppTypeFeatureModel.Type = types.ListNull(types.StringType)
-			}
-
-			featuresElements = append(featuresElements, appTypeAppTypeFeatureModel)
-		}
-
-		featuresList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			AppTypeFeaturesModelAttributeMap,
-			featuresElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.Features = featuresList
-	} else {
-		var featuresObjectType = basetypes.ObjectType{
-			AttrTypes: AppTypeFeaturesModelAttributeMap,
-		}
-		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
-		data.Features = nullFeaturesList
-	}
-
 	// resource SpecToModelRoot PointerField --> BusinessLogicMarkupSetting
 	if specData.GetBusinessLogicMarkupSetting() != nil {
-		var appTypeAppTypeBusinessLogicMarkupSettingModel = &AppTypeAppTypeBusinessLogicMarkupSetting{}
+		var appTypeBusinessLogicMarkupSettingModel = &AppTypeBusinessLogicMarkupSetting{}
 		businessLogicMarkupSettingElement := specData.GetBusinessLogicMarkupSetting()
+
+		// resource specToModelNested PointerField --> DiscoveredApiSettings
+		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
+			// Create the nested Go struct
+			appTypeDiscoveredAPISettingsModel := &AppTypeDiscoveredAPISettings{}
+			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
+
+			// Recursively populate the nested struct
+
+			// resource specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
+			appTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
+
+			// This field needs to be converted to a types.ObjectValue before assignment.
+			appTypeDiscoveredAPISettingsModelObj, appTypeDiscoveredAPISettingsModelObjDiags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeDiscoveredAPISettingsModel)
+			response.Diagnostics.Append(appTypeDiscoveredAPISettingsModelObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeDiscoveredAPISettingsModelObj
+
+		} else {
+			// The source field is nil (e.g. redacted by the API).
+			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+			// because the API may always return a non-nil struct (with REDACTED values) for this field,
+			// making this else-branch unreachable. The child OneOf handles the actual healing.
+			// The target is a types.Object, so we use types.ObjectNull.
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+		}
 
 		// resource specToModelNested OneOfField --> LearnFromRedirectTraffic
 		if businessLogicMarkupSettingElement.GetLearnFromRedirectTraffic() != nil {
@@ -1000,45 +1048,16 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
-		}
-
-		// resource specToModelNested PointerField --> DiscoveredApiSettings
-		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
-			// Create the nested Go struct
-			appTypeAppTypeDiscoveredAPISettingsModel := &AppTypeAppTypeDiscoveredAPISettings{}
-			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
-			appTypeAppTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appTypeAppTypeDiscoveredAPISettingsModelObj, diags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeAppTypeDiscoveredAPISettingsModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeAppTypeDiscoveredAPISettingsModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
 		}
 
 		businessLogicMarkupSettingObj, businessLogicMarkupSettingDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppTypeBusinessLogicMarkupSettingModelAttributeMap,
-			appTypeAppTypeBusinessLogicMarkupSettingModel,
+			appTypeBusinessLogicMarkupSettingModel,
 		)
 		response.Diagnostics.Append(businessLogicMarkupSettingDiags...)
 		if response.Diagnostics.HasError() {
@@ -1047,6 +1066,60 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 		data.BusinessLogicMarkupSetting = businessLogicMarkupSettingObj
 	} else {
 		data.BusinessLogicMarkupSetting = types.ObjectNull(AppTypeBusinessLogicMarkupSettingModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> Features
+	if len(specData.GetFeatures()) > 0 {
+		featuresElements := make([]AppTypeFeature, 0, len(specData.GetFeatures()))
+		for _, featuresElement := range specData.GetFeatures() {
+			appTypeFeatureModel := AppTypeFeature{}
+
+			// resource specToModelNested RequiredEnumField --> Type
+			{
+				if featuresElement.GetType().String() != "" {
+					stringValue := types.StringValue(featuresElement.GetType().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					appTypeFeatureModel.Type = listValue
+				} else {
+					appTypeFeatureModel.Type = types.ListNull(types.StringType)
+				}
+			}
+
+			featuresElements = append(featuresElements, appTypeFeatureModel)
+		}
+
+		{
+			featuresList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				AppTypeFeaturesModelAttributeMap,
+				featuresElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Features = featuresList
+		}
+	} else {
+		var featuresObjectType = basetypes.ObjectType{
+			AttrTypes: AppTypeFeaturesModelAttributeMap,
+		}
+		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
+		var priorValFeatures types.List
+		_ = request.State.GetAttribute(ctx, path.Root("features"), &priorValFeatures)
+		if !priorValFeatures.IsNull() && !priorValFeatures.IsUnknown() {
+			data.Features = priorValFeatures
+		} else {
+			data.Features = nullFeaturesList
+		}
+
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1066,6 +1139,25 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCAppTypeModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1096,9 +1188,37 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 
 	// Populate updateReq from data model
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -1111,24 +1231,64 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
+	{
+		// resource modelToSpecRoot PointerField --> BusinessLogicMarkupSetting
+		if !data.BusinessLogicMarkupSetting.IsNull() && !data.BusinessLogicMarkupSetting.IsUnknown() {
+			businessLogicMarkupSettingSpec := &ves_io_schema_app_type.BusinessLogicMarkupSetting{}
+			spec.BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
+			var businessLogicMarkupSettingModel AppTypeBusinessLogicMarkupSetting
+
+			// Populate the nested model from the main data model
+			diags.Append(data.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested PointerField --> DiscoveredApiSettings
+			if !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsNull() && !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsUnknown() {
+				var discoveredApiSettingsModel AppTypeDiscoveredAPISettings
+				response.Diagnostics.Append(businessLogicMarkupSettingModel.DiscoveredApiSettings.As(ctx, &discoveredApiSettingsModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				discoveredApiSettingsSpec := &ves_io_schema_app_type.DiscoveredAPISettings{}
+				businessLogicMarkupSettingSpec.DiscoveredApiSettings = discoveredApiSettingsSpec
+
+				// resource modelToSpecNested UintField --> PurgeDurationForInactiveDiscoveredApis
+				if !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsNull() && !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsUnknown() {
+					discoveredApiSettingsSpec.PurgeDurationForInactiveDiscoveredApis = uint32(uint32(discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.ValueInt64()))
+				} else {
+					discoveredApiSettingsSpec.PurgeDurationForInactiveDiscoveredApis = uint32(2)
+				}
+
+			}
+
+			// resource modelToSpecNested OneOfField --> LearnFromRedirectTraffic
+			if !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsUnknown() {
+				businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel := AppTypeLearnFromRedirectTrafficChoice{}
+				response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.As(ctx, &businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
+				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsUnknown() {
+					enableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable{}
+					enableSpecBool.Enable = &ves_io_schema.Empty{}
+					businessLogicMarkupSettingSpec.LearnFromRedirectTraffic = enableSpecBool
+				}
+
+			}
+
 		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
 	}
 
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> Features
 		if !data.Features.IsNull() && !data.Features.IsUnknown() {
-			var featuresElements []AppTypeAppTypeFeature
+			var featuresElements []AppTypeFeature
 			response.Diagnostics.Append(data.Features.ElementsAs(ctx, &featuresElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -1170,56 +1330,11 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 		}
 	}
 
-	{
-		// resource modelToSpecRoot PointerField --> BusinessLogicMarkupSetting
-		if !data.BusinessLogicMarkupSetting.IsNull() && !data.BusinessLogicMarkupSetting.IsUnknown() {
-			businessLogicMarkupSettingSpec := &ves_io_schema_app_type.BusinessLogicMarkupSetting{}
-			spec.BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
-			var businessLogicMarkupSettingModel AppTypeAppTypeBusinessLogicMarkupSetting
-
-			// Populate the nested model from the main data model
-			diags.Append(data.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested OneOfField --> LearnFromRedirectTraffic
-			if !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.IsUnknown() {
-				businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel := AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficChoice{}
-				response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice.As(ctx, &businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
-				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsUnknown() {
-					enableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable{}
-					enableSpecBool.Enable = &ves_io_schema.Empty{}
-					businessLogicMarkupSettingSpec.LearnFromRedirectTraffic = enableSpecBool
-				}
-
-			}
-
-			// resource modelToSpecNested PointerField --> DiscoveredApiSettings
-			if !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsNull() && !businessLogicMarkupSettingModel.DiscoveredApiSettings.IsUnknown() {
-				var discoveredApiSettingsModel AppTypeAppTypeDiscoveredAPISettings
-				response.Diagnostics.Append(businessLogicMarkupSettingModel.DiscoveredApiSettings.As(ctx, &discoveredApiSettingsModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				discoveredApiSettingsSpec := &ves_io_schema_app_type.DiscoveredAPISettings{}
-				businessLogicMarkupSettingSpec.DiscoveredApiSettings = discoveredApiSettingsSpec
-
-				// resource modelToSpecNested UintField --> PurgeDurationForInactiveDiscoveredApis
-				if !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsNull() && !discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.IsUnknown() {
-					discoveredApiSettingsSpec.PurgeDurationForInactiveDiscoveredApis = uint32(uint32(discoveredApiSettingsModel.PurgeDurationForInactiveDiscoveredApis.ValueInt64()))
-				}
-
-			}
-
-		}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1256,8 +1371,100 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1268,148 +1475,39 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> Features
-	if len(specData.Features) > 0 {
-		featuresElements := make([]AppTypeAppTypeFeature, 0, len(specData.Features))
-
-		for _, featuresElement := range specData.Features {
-			appTypeAppTypeFeatureModel := AppTypeAppTypeFeature{}
-
-			// resource specToModelNested RequiredEnumField --> Type
-			if featuresElement.GetType().String() != "" {
-				stringValue := types.StringValue(featuresElement.GetType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				appTypeAppTypeFeatureModel.Type = listValue
-			} else {
-				appTypeAppTypeFeatureModel.Type = types.ListNull(types.StringType)
-			}
-
-			featuresElements = append(featuresElements, appTypeAppTypeFeatureModel)
-		}
-
-		featuresList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			AppTypeFeaturesModelAttributeMap,
-			featuresElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.Features = featuresList
-	} else {
-		var featuresObjectType = basetypes.ObjectType{
-			AttrTypes: AppTypeFeaturesModelAttributeMap,
-		}
-		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
-		data.Features = nullFeaturesList
-	}
-
 	// resource SpecToModelRoot PointerField --> BusinessLogicMarkupSetting
 	if specData.GetBusinessLogicMarkupSetting() != nil {
-		var appTypeAppTypeBusinessLogicMarkupSettingModel = &AppTypeAppTypeBusinessLogicMarkupSetting{}
+		var appTypeBusinessLogicMarkupSettingModel = &AppTypeBusinessLogicMarkupSetting{}
 		businessLogicMarkupSettingElement := specData.GetBusinessLogicMarkupSetting()
+
+		// resource specToModelNested PointerField --> DiscoveredApiSettings
+		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
+			// Create the nested Go struct
+			appTypeDiscoveredAPISettingsModel := &AppTypeDiscoveredAPISettings{}
+			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
+
+			// Recursively populate the nested struct
+
+			// resource specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
+			appTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
+
+			// This field needs to be converted to a types.ObjectValue before assignment.
+			appTypeDiscoveredAPISettingsModelObj, appTypeDiscoveredAPISettingsModelObjDiags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeDiscoveredAPISettingsModel)
+			response.Diagnostics.Append(appTypeDiscoveredAPISettingsModelObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeDiscoveredAPISettingsModelObj
+
+		} else {
+			// The source field is nil (e.g. redacted by the API).
+			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+			// because the API may always return a non-nil struct (with REDACTED values) for this field,
+			// making this else-branch unreachable. The child OneOf handles the actual healing.
+			// The target is a types.Object, so we use types.ObjectNull.
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+		}
 
 		// resource specToModelNested OneOfField --> LearnFromRedirectTraffic
 		if businessLogicMarkupSettingElement.GetLearnFromRedirectTraffic() != nil {
@@ -1443,45 +1541,16 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
-		}
-
-		// resource specToModelNested PointerField --> DiscoveredApiSettings
-		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
-			// Create the nested Go struct
-			appTypeAppTypeDiscoveredAPISettingsModel := &AppTypeAppTypeDiscoveredAPISettings{}
-			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
-			appTypeAppTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appTypeAppTypeDiscoveredAPISettingsModelObj, diags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeAppTypeDiscoveredAPISettingsModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeAppTypeDiscoveredAPISettingsModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
 		}
 
 		businessLogicMarkupSettingObj, businessLogicMarkupSettingDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppTypeBusinessLogicMarkupSettingModelAttributeMap,
-			appTypeAppTypeBusinessLogicMarkupSettingModel,
+			appTypeBusinessLogicMarkupSettingModel,
 		)
 		response.Diagnostics.Append(businessLogicMarkupSettingDiags...)
 		if response.Diagnostics.HasError() {
@@ -1490,6 +1559,86 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 		data.BusinessLogicMarkupSetting = businessLogicMarkupSettingObj
 	} else {
 		data.BusinessLogicMarkupSetting = types.ObjectNull(AppTypeBusinessLogicMarkupSettingModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> Features
+	if len(specData.GetFeatures()) > 0 {
+		featuresElements := make([]AppTypeFeature, 0, len(specData.GetFeatures()))
+		for _, featuresElement := range specData.GetFeatures() {
+			appTypeFeatureModel := AppTypeFeature{}
+
+			// resource specToModelNested RequiredEnumField --> Type
+			{
+				if featuresElement.GetType().String() != "" {
+					stringValue := types.StringValue(featuresElement.GetType().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					appTypeFeatureModel.Type = listValue
+				} else {
+					appTypeFeatureModel.Type = types.ListNull(types.StringType)
+				}
+			}
+
+			featuresElements = append(featuresElements, appTypeFeatureModel)
+		}
+
+		{
+			featuresList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				AppTypeFeaturesModelAttributeMap,
+				featuresElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Features = featuresList
+		}
+	} else {
+		var featuresObjectType = basetypes.ObjectType{
+			AttrTypes: AppTypeFeaturesModelAttributeMap,
+		}
+		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
+		var priorValFeatures types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("features"), &priorValFeatures)
+		if !priorValFeatures.IsNull() && !priorValFeatures.IsUnknown() {
+			data.Features = priorValFeatures
+		} else {
+			data.Features = nullFeaturesList
+		}
+
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -1526,9 +1675,8 @@ func (r *ResourceF5XCAppType) Delete(ctx context.Context, request resource.Delet
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -1543,19 +1691,32 @@ func (r *ResourceF5XCAppType) Delete(ctx context.Context, request resource.Delet
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCAppType) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

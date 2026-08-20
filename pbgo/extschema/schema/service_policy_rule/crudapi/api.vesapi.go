@@ -1423,10 +1423,7 @@ var APISwaggerJSON string = `{
         "title": "ves.io/schema/service_policy_rule/crudapi/api.proto",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1492,6 +1489,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1505,8 +1508,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -1523,8 +1525,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -1591,6 +1592,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1666,6 +1673,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1757,6 +1770,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1805,16 +1824,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -1897,6 +1914,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1931,7 +1954,16 @@ var APISwaggerJSON string = `{
                     "200": {
                         "description": "A successful response.(streaming responses)",
                         "schema": {
-                            "$ref": "#/x-stream-definitions/crudapiObjectListRsp"
+                            "type": "object",
+                            "title": "Stream result of crudapiObjectListRsp",
+                            "properties": {
+                                "error": {
+                                    "$ref": "#/definitions/runtimeStreamError"
+                                },
+                                "result": {
+                                    "$ref": "#/definitions/crudapiObjectListRsp"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -1981,6 +2013,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2029,16 +2067,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2128,6 +2164,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2141,8 +2183,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -2159,8 +2200,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -2235,6 +2275,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2283,16 +2329,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2382,6 +2426,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2456,6 +2506,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2546,6 +2602,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3112,7 +3174,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert Match of the expression defined",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Matcher"
                 },
                 "item": {
@@ -3275,7 +3336,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert Match of the expression defined",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Matcher"
                 },
                 "item": {
@@ -3399,7 +3459,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Method Matcher"
                 },
                 "methods": {
@@ -3453,7 +3512,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert IP Matcher"
                 },
                 "prefix_sets": {
@@ -3522,7 +3580,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Matcher"
                 },
                 "item": {
@@ -3709,20 +3766,17 @@ var APISwaggerJSON string = `{
                 "mobile_identifier": {
                     "type": "boolean",
                     "description": "x-displayName: \"Mobile Identifier\"\nIf request matches mobile identifier service policy, mobile identifier is true",
-                    "title": "Mobile Identifier",
-                    "format": "boolean"
+                    "title": "Mobile Identifier"
                 },
                 "mobile_traffic": {
                     "type": "boolean",
                     "description": "x-displayName: \"Mobile Traffic\"\nIf request matches mobile endpoint service policy, mobile traffic is true",
-                    "title": "Mobile Traffic",
-                    "format": "boolean"
+                    "title": "Mobile Traffic"
                 },
                 "web_traffic": {
                     "type": "boolean",
                     "description": "x-displayName: \"Web Traffic\"\nIf request matches web endpoint service policy, web traffic is true",
-                    "title": "Web Traffic",
-                    "format": "boolean"
+                    "title": "Web Traffic"
                 }
             }
         },
@@ -3805,7 +3859,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Match Result"
                 },
                 "ip_prefixes": {
@@ -4268,8 +4321,7 @@ var APISwaggerJSON string = `{
                 "allow_goodbot": {
                     "type": "boolean",
                     "description": "x-displayName: \"Good bot\"\nx-required\nGood bot",
-                    "title": "GoodBot",
-                    "format": "boolean"
+                    "title": "GoodBot"
                 },
                 "app_traffic_type": {
                     "description": "x-displayName: \"Traffic type\"\nx-required\nTraffic type",
@@ -4294,8 +4346,7 @@ var APISwaggerJSON string = `{
                 "web_scraping": {
                     "type": "boolean",
                     "description": "x-displayName: \"Web scraping\"\nx-required\nWeb scraping protection enabled for protected endpoint",
-                    "title": "Web scraping",
-                    "format": "boolean"
+                    "title": "Web scraping"
                 }
             }
         },
@@ -4310,7 +4361,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert String Matcher"
                 },
                 "match": {
@@ -4448,8 +4498,7 @@ var APISwaggerJSON string = `{
                 "invert_matcher": {
                     "type": "boolean",
                     "description": "x-displayName: \"Invert URL Matcher\"\nInvert the match result.",
-                    "title": "invert_matcher",
-                    "format": "boolean"
+                    "title": "invert_matcher"
                 },
                 "url_items": {
                     "type": "array",
@@ -4504,6 +4553,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -4867,7 +4937,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -4978,7 +5047,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -5142,7 +5210,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -5177,7 +5244,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -5266,7 +5332,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Header Matcher"
                 },
                 "item": {
@@ -5302,7 +5367,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Match against the encoded, escaped path\n\nExample: - \"match \\\"/path/%20another%20path\\\" instead of default \\\"/path/ another path\\\"\"-",
                     "title": "Encoded_Path",
-                    "format": "boolean",
                     "x-displayname": "Match Encoded Path",
                     "x-ves-example": "match \\\"/path/%20another%20path\\\" instead of default \\\"/path/ another path\\\""
                 },
@@ -5329,7 +5393,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Path Matcher"
                 },
                 "prefix_values": {
@@ -5415,7 +5478,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Port Matcher"
                 },
                 "ports": {
@@ -5463,7 +5525,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Query Parameter Matcher"
                 },
                 "item": {
@@ -5536,7 +5597,7 @@ var APISwaggerJSON string = `{
                 },
                 "arg_matchers": {
                     "type": "array",
-                    "description": " A list of predicates for all POST args that need to be matched. The criteria for matching each arg are described in individual instances\n of ArgMatcherType. The actual arg values are extracted from the request API as a list of strings for each arg selector name.\n Note that all specified arg matcher predicates must evaluate to true.\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 16\n",
+                    "description": " A list of predicates for all POST args that need to be matched. The criteria for matching each arg are described in individual instances\n of ArgMatcherType. The actual arg values are extracted from the request API as a list of strings for each arg selector name.\n Note that all specified arg matcher predicates must evaluate to true. A request body greater than 64KB will not be evaluated.\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 16\n",
                     "title": "arg matchers",
                     "maxItems": 16,
                     "items": {
@@ -5560,7 +5621,7 @@ var APISwaggerJSON string = `{
                     "x-displayname": "BGP ASN Sets"
                 },
                 "body_matcher": {
-                    "description": " Predicate for matching the request body string. The criteria for matching the request body is described in MatcherType.\n The actual request body value is extracted from the request API as a string.",
+                    "description": " Predicate for matching the request body string. The criteria for matching the request body is described in MatcherType.\n The actual request body value is extracted from the request API as a string. A request body greater than 64KB will not be evaluated.",
                     "title": "request body matcher",
                     "$ref": "#/definitions/policyMatcherType",
                     "x-displayname": "Request Body Matcher"
@@ -5688,7 +5749,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Log the rule match details along with the request and continue to evaluate rules in the sequence.",
                     "title": "Log Rule Evaluation",
-                    "format": "boolean",
                     "x-displayname": "Log Rule Evaluation"
                 },
                 "mum_action": {
@@ -5913,19 +5973,5 @@ var APISwaggerJSON string = `{
         }
     },
     "x-displayname": "",
-    "x-stream-definitions": {
-        "crudapiObjectListRsp": {
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/runtimeStreamError"
-                },
-                "result": {
-                    "$ref": "#/definitions/crudapiObjectListRsp"
-                }
-            },
-            "title": "Stream result of crudapiObjectListRsp",
-            "type": "object"
-        }
-    },
     "x-ves-proto-file": "ves.io/schema/service_policy_rule/crudapi/api.proto"
 }`

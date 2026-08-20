@@ -13,20 +13,25 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/golang/protobuf/descriptor"
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
+// Suppress "imported and not used" errors
 var _ codes.Code
 var _ io.Reader
 var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
+var _ = descriptor.ForMessage
+var _ = metadata.Join
 
 func request_AppSecurityMonitoringAPI_SecurityEventsQuery_0(ctx context.Context, marshaler runtime.Marshaler, client AppSecurityMonitoringAPIClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq SecurityEventsRequest
@@ -192,7 +197,10 @@ func local_request_AppSecurityMonitoringAPI_SecurityEventsScrollQuery_0(ctx cont
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_AppSecurityMonitoringAPI_SecurityEventsScrollQuery_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AppSecurityMonitoringAPI_SecurityEventsScrollQuery_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -505,7 +513,10 @@ func local_request_AppSecurityMonitoringAPI_SuspiciousUserLogsScrollQuery_0(ctx 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_AppSecurityMonitoringAPI_SuspiciousUserLogsScrollQuery_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AppSecurityMonitoringAPI_SuspiciousUserLogsScrollQuery_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -854,7 +865,10 @@ func local_request_AppSecurityMonitoringAPI_SecurityIncidentsScrollQuery_0(ctx c
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_AppSecurityMonitoringAPI_SecurityIncidentsScrollQuery_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AppSecurityMonitoringAPI_SecurityIncidentsScrollQuery_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1107,14 +1121,87 @@ func local_request_AppSecurityMonitoringAPI_SearchLoadBalancersAllNamespaces_0(c
 
 }
 
+func request_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0(ctx context.Context, marshaler runtime.Marshaler, client AppSecurityMonitoringAPIClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SecurityEvidenceRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["namespace"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "namespace")
+	}
+
+	protoReq.Namespace, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
+	}
+
+	msg, err := client.SecurityEvidenceQuery(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0(ctx context.Context, marshaler runtime.Marshaler, server AppSecurityMonitoringAPIServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq SecurityEvidenceRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["namespace"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "namespace")
+	}
+
+	protoReq.Namespace, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
+	}
+
+	msg, err := server.SecurityEvidenceQuery(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 // RegisterAppSecurityMonitoringAPIHandlerServer registers the http handlers for service AppSecurityMonitoringAPI to "mux".
 // UnaryRPC     :call AppSecurityMonitoringAPIServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterAppSecurityMonitoringAPIHandlerFromEndpoint instead.
 func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *runtime.ServeMux, server AppSecurityMonitoringAPIServer) error {
 
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEventsQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1122,6 +1209,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEventsQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1135,6 +1223,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEventsQueryAllNamespaces_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1142,6 +1232,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEventsQueryAllNamespaces_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1155,6 +1246,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("GET", pattern_AppSecurityMonitoringAPI_SecurityEventsScrollQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1162,6 +1255,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEventsScrollQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1175,6 +1269,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEventsScrollQuery_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1182,6 +1278,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEventsScrollQuery_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1195,6 +1292,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEventsAggregationQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1202,6 +1301,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEventsAggregationQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1215,6 +1315,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEventsAggregationQueryAllNamespaces_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1222,6 +1324,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEventsAggregationQueryAllNamespaces_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1235,6 +1338,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SuspiciousUserLogsQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1242,6 +1347,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SuspiciousUserLogsQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1255,6 +1361,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("GET", pattern_AppSecurityMonitoringAPI_SuspiciousUserLogsScrollQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1262,6 +1370,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SuspiciousUserLogsScrollQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1275,6 +1384,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SuspiciousUserLogsScrollQuery_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1282,6 +1393,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SuspiciousUserLogsScrollQuery_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1295,6 +1407,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SuspiciousUserLogsAggregationQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1302,6 +1416,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SuspiciousUserLogsAggregationQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1315,6 +1430,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEventsMetrics_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1322,6 +1439,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEventsMetrics_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1335,6 +1453,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityIncidentsQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1342,6 +1462,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityIncidentsQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1355,6 +1476,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("GET", pattern_AppSecurityMonitoringAPI_SecurityIncidentsScrollQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1362,6 +1485,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityIncidentsScrollQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1375,6 +1499,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityIncidentsScrollQuery_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1382,6 +1508,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityIncidentsScrollQuery_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1395,6 +1522,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityIncidentsAggregationQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1402,6 +1531,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityIncidentsAggregationQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1415,6 +1545,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SearchLoadBalancers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1422,6 +1554,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SearchLoadBalancers_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1435,6 +1568,8 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SearchLoadBalancersAllNamespaces_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -1442,6 +1577,7 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityMonitoringAPI_SearchLoadBalancersAllNamespaces_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1449,6 +1585,29 @@ func RegisterAppSecurityMonitoringAPIHandlerServer(ctx context.Context, mux *run
 		}
 
 		forward_AppSecurityMonitoringAPI_SearchLoadBalancersAllNamespaces_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1833,6 +1992,26 @@ func RegisterAppSecurityMonitoringAPIHandlerClient(ctx context.Context, mux *run
 
 	})
 
+	mux.Handle("POST", pattern_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -1870,6 +2049,8 @@ var (
 	pattern_AppSecurityMonitoringAPI_SearchLoadBalancers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 2, 5}, []string{"public", "namespaces", "namespace", "app_security", "search", "loadbalancers"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_AppSecurityMonitoringAPI_SearchLoadBalancersAllNamespaces_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"public", "namespaces", "system", "app_security", "all_ns_search", "loadbalancers"}, "", runtime.AssumeColonVerbOpt(false)))
+
+	pattern_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"public", "namespaces", "namespace", "app_security", "evidence"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (
@@ -1906,4 +2087,6 @@ var (
 	forward_AppSecurityMonitoringAPI_SearchLoadBalancers_0 = runtime.ForwardResponseMessage
 
 	forward_AppSecurityMonitoringAPI_SearchLoadBalancersAllNamespaces_0 = runtime.ForwardResponseMessage
+
+	forward_AppSecurityMonitoringAPI_SecurityEvidenceQuery_0 = runtime.ForwardResponseMessage
 )

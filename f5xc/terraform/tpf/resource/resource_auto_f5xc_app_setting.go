@@ -19,22 +19,28 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -44,7 +50,6 @@ import (
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_app_setting "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/app_setting"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCAppSetting defines the resource implementation.
@@ -52,105 +57,105 @@ type ResourceF5XCAppSetting struct {
 	client *client.APIClient
 }
 
-type AppSettingAppSettingAppTypeSettings struct {
-	TimeseriesAnalysesSetting   types.Object `tfsdk:"timeseries_analyses_setting"`
-	BusinessLogicMarkupSetting  types.Object `tfsdk:"business_logic_markup_setting"`
-	UserBehaviorAnalysisSetting types.Object `tfsdk:"user_behavior_analysis_setting"`
+type AppSettingAppTypeSettings struct {
 	AppTypeRef                  types.List   `tfsdk:"app_type_ref"`
+	BusinessLogicMarkupSetting  types.Object `tfsdk:"business_logic_markup_setting"`
+	TimeseriesAnalysesSetting   types.Object `tfsdk:"timeseries_analyses_setting"`
+	UserBehaviorAnalysisSetting types.Object `tfsdk:"user_behavior_analysis_setting"`
 }
 
-type AppSettingAppSettingTimeseriesAnalysesSetting struct {
-	MetricSelectors types.List `tfsdk:"metric_selectors"`
-}
-
-type AppSettingAppSettingMetricSelector struct {
-	MetricsSource types.List `tfsdk:"metrics_source"`
-	Metric        types.List `tfsdk:"metric"`
-}
-
-type AppSettingAppSettingBusinessLogicMarkupSetting struct {
+type AppSettingBusinessLogicMarkupSetting struct {
 	LearnFromNamespaceChoice types.Object `tfsdk:"learn_from_namespace_choice"`
 }
 
-type AppSettingBusinessLogicMarkupSettingLearnFromNamespaceChoice struct {
+type AppSettingLearnFromNsChoice struct {
 	Enable types.Bool `tfsdk:"enable"`
 }
 
-type AppSettingAppSettingUserBehaviorAnalysisSetting struct {
+type AppSettingTimeseriesAnalysesSetting struct {
+	MetricSelectors types.List `tfsdk:"metric_selectors"`
+}
+
+type AppSettingMetricSelector struct {
+	Metric        types.List `tfsdk:"metric"`
+	MetricsSource types.List `tfsdk:"metrics_source"`
+}
+
+type AppSettingUserBehaviorAnalysisSetting struct {
 	LearnFromNamespaceChoice     types.Object `tfsdk:"learn_from_namespace_choice"`
 	MaliciousUserDetectionChoice types.Object `tfsdk:"malicious_user_detection_choice"`
 }
 
-type AppSettingUserBehaviorAnalysisSettingLearnFromNamespaceChoice struct {
-	EnableLearning  types.Bool `tfsdk:"enable_learning"`
+type AppSettingUserBehaviorAnalysisSettingLearnFromNsChoice struct {
 	DisableLearning types.Bool `tfsdk:"disable_learning"`
+	EnableLearning  types.Bool `tfsdk:"enable_learning"`
 }
 
-type AppSettingUserBehaviorAnalysisSettingMaliciousUserDetectionChoice struct {
-	EnableDetection  types.Object `tfsdk:"enable_detection"`
+type AppSettingMaliciousUserDetectionChoice struct {
 	DisableDetection types.Bool   `tfsdk:"disable_detection"`
+	EnableDetection  types.Object `tfsdk:"enable_detection"`
 }
 
-type AppSettingUserBehaviorAnalysisSettingEnableDetection struct {
-	WafActivityChoice             types.Object `tfsdk:"waf_activity_choice"`
-	IpReputationChoice            types.Object `tfsdk:"ip_reputation_choice"`
+type AppSettingEnableDetection struct {
 	BotDefenseActivityChoice      types.Object `tfsdk:"bot_defense_activity_choice"`
-	RateLimitChoice               types.Object `tfsdk:"rate_limit_choice"`
-	ForbiddenActivityChoice       types.Object `tfsdk:"forbidden_activity_choice"`
-	FailedLoginActivityChoice     types.Object `tfsdk:"failed_login_activity_choice"`
 	CoolingOffPeriodSettingChoice types.Object `tfsdk:"cooling_off_period_setting_choice"`
+	FailedLoginActivityChoice     types.Object `tfsdk:"failed_login_activity_choice"`
+	ForbiddenActivityChoice       types.Object `tfsdk:"forbidden_activity_choice"`
+	IpReputationChoice            types.Object `tfsdk:"ip_reputation_choice"`
+	RateLimitChoice               types.Object `tfsdk:"rate_limit_choice"`
+	WafActivityChoice             types.Object `tfsdk:"waf_activity_choice"`
 }
 
-type AppSettingMaliciousUserDetectionSettingWafActivityChoice struct {
-	ExcludeWafActivity types.Bool `tfsdk:"exclude_waf_activity"`
-	IncludeWafActivity types.Bool `tfsdk:"include_waf_activity"`
-}
-
-type AppSettingMaliciousUserDetectionSettingIpReputationChoice struct {
-	ExcludeIpReputation types.Bool `tfsdk:"exclude_ip_reputation"`
-	IncludeIpReputation types.Bool `tfsdk:"include_ip_reputation"`
-}
-
-type AppSettingMaliciousUserDetectionSettingBotDefenseActivityChoice struct {
-	IncludeBotDefenseActivity types.Bool `tfsdk:"include_bot_defense_activity"`
+type AppSettingBotDefenseActivityChoice struct {
 	ExcludeBotDefenseActivity types.Bool `tfsdk:"exclude_bot_defense_activity"`
+	IncludeBotDefenseActivity types.Bool `tfsdk:"include_bot_defense_activity"`
 }
 
-type AppSettingMaliciousUserDetectionSettingRateLimitChoice struct {
-	IncludeRateLimit types.Bool `tfsdk:"include_rate_limit"`
-	ExcludeRateLimit types.Bool `tfsdk:"exclude_rate_limit"`
+type AppSettingCoolingOffPeriodSettingChoice struct {
+	CoolingOffPeriod types.Int64 `tfsdk:"cooling_off_period"`
 }
 
-type AppSettingMaliciousUserDetectionSettingForbiddenActivityChoice struct {
-	ExcludeForbiddenActivity types.Bool   `tfsdk:"exclude_forbidden_activity"`
-	IncludeForbiddenActivity types.Object `tfsdk:"include_forbidden_activity"`
-}
-
-type AppSettingMaliciousUserDetectionSettingIncludeForbiddenActivity struct {
-	ForbiddenRequestsThreshold types.Int64 `tfsdk:"forbidden_requests_threshold"`
-}
-
-type AppSettingMaliciousUserDetectionSettingFailedLoginActivityChoice struct {
+type AppSettingFailedLoginActivityChoice struct {
 	ExcludeFailedLoginActivity types.Bool   `tfsdk:"exclude_failed_login_activity"`
 	IncludeFailedLoginActivity types.Object `tfsdk:"include_failed_login_activity"`
 }
 
-type AppSettingMaliciousUserDetectionSettingIncludeFailedLoginActivity struct {
+type AppSettingIncludeFailedLoginActivity struct {
 	LoginFailuresThreshold types.Int64 `tfsdk:"login_failures_threshold"`
 }
 
-type AppSettingMaliciousUserDetectionSettingCoolingOffPeriodSettingChoice struct {
-	CoolingOffPeriod types.Int64 `tfsdk:"cooling_off_period"`
+type AppSettingForbiddenActivityChoice struct {
+	ExcludeForbiddenActivity types.Bool   `tfsdk:"exclude_forbidden_activity"`
+	IncludeForbiddenActivity types.Object `tfsdk:"include_forbidden_activity"`
+}
+
+type AppSettingIncludeForbiddenActivity struct {
+	ForbiddenRequestsThreshold types.Int64 `tfsdk:"forbidden_requests_threshold"`
+}
+
+type AppSettingIpReputationChoice struct {
+	ExcludeIpReputation types.Bool `tfsdk:"exclude_ip_reputation"`
+	IncludeIpReputation types.Bool `tfsdk:"include_ip_reputation"`
+}
+
+type AppSettingRateLimitChoice struct {
+	ExcludeRateLimit types.Bool `tfsdk:"exclude_rate_limit"`
+	IncludeRateLimit types.Bool `tfsdk:"include_rate_limit"`
+}
+
+type AppSettingWafActivityChoice struct {
+	ExcludeWafActivity types.Bool `tfsdk:"exclude_waf_activity"`
+	IncludeWafActivity types.Bool `tfsdk:"include_waf_activity"`
 }
 
 // ResourceF5XCAppSettingModel describes the resource data model.
 type ResourceF5XCAppSettingModel struct {
+	Annotations     types.Map      `tfsdk:"annotations"`
+	Description     types.String   `tfsdk:"description"`
+	Labels          types.Map      `tfsdk:"labels"`
 	Name            types.String   `tfsdk:"name"`
 	Namespace       types.String   `tfsdk:"namespace"`
 	Uid             types.String   `tfsdk:"uid"`
-	Labels          types.Map      `tfsdk:"labels"`
-	Annotations     types.Map      `tfsdk:"annotations"`
-	Description     types.String   `tfsdk:"description"`
 	AppTypeSettings types.List     `tfsdk:"app_type_settings"`
 	Timeouts        timeouts.Value `tfsdk:"timeouts"`
 }
@@ -167,25 +172,35 @@ var (
 // --- Attribute Maps for Nested Structs ---
 // Attribute map for RequiredArrayOfPointerField --> AppTypeSettings
 var AppSettingAppTypeSettingsModelAttributeMap = map[string]attr.Type{
-	"timeseries_analyses_setting": types.ObjectType{
+
+	"app_type_ref": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	}, "business_logic_markup_setting": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"learn_from_namespace_choice": types.ObjectType{
+				AttrTypes: AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap,
+			}},
+	}, "timeseries_analyses_setting": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"metric_selectors": types.ListType{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"metrics_source": types.ListType{
+						"metric": types.ListType{
 							ElemType: types.StringType,
 						},
-						"metric": types.ListType{
+						"metrics_source": types.ListType{
 							ElemType: types.StringType,
 						},
 					},
 				},
-			}},
-	}, "business_logic_markup_setting": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"learn_from_namespace_choice": types.ObjectType{
-				AttrTypes: AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap,
 			}},
 	}, "user_behavior_analysis_setting": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
@@ -196,45 +211,14 @@ var AppSettingAppTypeSettingsModelAttributeMap = map[string]attr.Type{
 				AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap,
 			}},
 	},
-	"app_type_ref": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-				"name":      types.StringType,
-			},
-		},
-	},
 }
 
-// Attribute map for PointerField --> TimeseriesAnalysesSetting
-var AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredArrayOfPointerField --> AppTypeRef
+var AppSettingAppTypeRefObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"metric_selectors": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"metrics_source": types.ListType{
-					ElemType: types.StringType,
-				},
-				"metric": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> MetricSelectors
-var AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap = map[string]attr.Type{
-
-	"metrics_source": types.ListType{
-		ElemType: types.StringType,
-	},
-	"metric": types.ListType{
-		ElemType: types.StringType,
-	},
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerField --> BusinessLogicMarkupSetting
@@ -251,6 +235,35 @@ var AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAt
 	"enable": types.BoolType,
 }
 
+// Attribute map for PointerField --> TimeseriesAnalysesSetting
+var AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap = map[string]attr.Type{
+
+	"metric_selectors": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"metric": types.ListType{
+					ElemType: types.StringType,
+				},
+				"metrics_source": types.ListType{
+					ElemType: types.StringType,
+				},
+			},
+		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> MetricSelectors
+var AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap = map[string]attr.Type{
+
+	"metric": types.ListType{
+		ElemType: types.StringType,
+	},
+	"metrics_source": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Attribute map for PointerField --> UserBehaviorAnalysisSetting
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap = map[string]attr.Type{
 
@@ -265,86 +278,56 @@ var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap = map[
 // Attribute map for RequiredOneOfField --> LearnFromNamespace
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap = map[string]attr.Type{
 
-	"enable_learning":  types.BoolType,
 	"disable_learning": types.BoolType,
+	"enable_learning":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> MaliciousUserDetection
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap = map[string]attr.Type{
 
+	"disable_detection": types.BoolType,
 	"enable_detection": types.ObjectType{
 		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap,
 	},
-	"disable_detection": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> EnableDetection
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap = map[string]attr.Type{
 
-	"waf_activity_choice": types.ObjectType{
-		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap,
-	},
-	"ip_reputation_choice": types.ObjectType{
-		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap,
-	},
 	"bot_defense_activity_choice": types.ObjectType{
 		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap,
-	},
-	"rate_limit_choice": types.ObjectType{
-		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap,
-	},
-	"forbidden_activity_choice": types.ObjectType{
-		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap,
-	},
-	"failed_login_activity_choice": types.ObjectType{
-		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap,
 	},
 	"cooling_off_period_setting_choice": types.ObjectType{
 		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap,
 	},
-}
-
-// Attribute map for RequiredOneOfField --> WafActivityChoice
-var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap = map[string]attr.Type{
-
-	"exclude_waf_activity": types.BoolType,
-	"include_waf_activity": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> IpReputationChoice
-var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap = map[string]attr.Type{
-
-	"exclude_ip_reputation": types.BoolType,
-	"include_ip_reputation": types.BoolType,
+	"failed_login_activity_choice": types.ObjectType{
+		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap,
+	},
+	"forbidden_activity_choice": types.ObjectType{
+		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap,
+	},
+	"ip_reputation_choice": types.ObjectType{
+		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap,
+	},
+	"rate_limit_choice": types.ObjectType{
+		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap,
+	},
+	"waf_activity_choice": types.ObjectType{
+		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap,
+	},
 }
 
 // Attribute map for RequiredOneOfField --> BotDefenseActivityChoice
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap = map[string]attr.Type{
 
-	"include_bot_defense_activity": types.BoolType,
 	"exclude_bot_defense_activity": types.BoolType,
+	"include_bot_defense_activity": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> RateLimitChoice
-var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> CoolingOffPeriodSetting
+var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap = map[string]attr.Type{
 
-	"include_rate_limit": types.BoolType,
-	"exclude_rate_limit": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> ForbiddenActivityChoice
-var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap = map[string]attr.Type{
-
-	"exclude_forbidden_activity": types.BoolType,
-	"include_forbidden_activity": types.ObjectType{
-		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> IncludeForbiddenActivity
-var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap = map[string]attr.Type{
-
-	"forbidden_requests_threshold": types.Int64Type,
+	"cooling_off_period": types.Int64Type,
 }
 
 // Attribute map for RequiredOneOfField --> FailedLoginActivityChoice
@@ -362,18 +345,40 @@ var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEn
 	"login_failures_threshold": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> CoolingOffPeriodSetting
-var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> ForbiddenActivityChoice
+var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap = map[string]attr.Type{
 
-	"cooling_off_period": types.Int64Type,
+	"exclude_forbidden_activity": types.BoolType,
+	"include_forbidden_activity": types.ObjectType{
+		AttrTypes: AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap,
+	},
 }
 
-// Attribute map for RequiredArrayOfPointerField --> AppTypeRef
-var AppSettingAppTypeRefObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> IncludeForbiddenActivity
+var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
+	"forbidden_requests_threshold": types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> IpReputationChoice
+var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap = map[string]attr.Type{
+
+	"exclude_ip_reputation": types.BoolType,
+	"include_ip_reputation": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> RateLimitChoice
+var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap = map[string]attr.Type{
+
+	"exclude_rate_limit": types.BoolType,
+	"include_rate_limit": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> WafActivityChoice
+var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap = map[string]attr.Type{
+
+	"exclude_waf_activity": types.BoolType,
+	"include_waf_activity": types.BoolType,
 }
 
 func NewResourceF5XCAppSetting() resource.Resource {
@@ -387,27 +392,69 @@ func (r *ResourceF5XCAppSetting) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "AppSetting resource",
-		Description:         "AppSetting resource",
+		MarkdownDescription: "Forbidden Activity Setting When L7 policy rules are set up to disallow certain types of requests, the system monitors persistent attempts from a user to send requests which result in policy denies. These settings specify how to use disallowed request activity from a user to determine suspicious behavior",
+		Description:         "Forbidden Activity Setting When L7 policy rules are set up to disallow certain types of requests, the system monitors persistent attempts from a user to send requests which result in policy denies. These settings specify how to use disallowed request activity from a user to determine suspicious behavior",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"default"}...),
+				},
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -415,83 +462,50 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
 			"app_type_settings": schema.ListNestedAttribute{
 				Description:         "List of App Type Settings List of settings to enable for each AppType, given instance of AppType Exist in this Namespace",
-				MarkdownDescription: "",
+				MarkdownDescription: "List of App Type Settings List of settings to enable for each AppType, given instance of AppType Exist in this Namespace",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.List{
+					listvalidator.SizeBetween(1, 16),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"timeseries_analyses_setting": schema.SingleNestedAttribute{
-							Description:         "DDoS Detection Settings Time series anomaly detection is performed using advanced machine learning based on metrics such as request rate, error rate, latency, throughput etc. The clients are flagged if anomalies are observed",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            true,
+						"app_type_ref": schema.ListNestedAttribute{
+							Description:         "app_type_ref The AppType of App instance in current Namespace. Associating an AppType reference, will enable analysis on this instance's generated data",
+							MarkdownDescription: "app_type_ref The AppType of App instance in current Namespace. Associating an AppType reference, will enable analysis on this instance's generated data",
+							Required:            true,
+							Optional:            false,
 							Computed:            false,
-							Attributes: map[string]schema.Attribute{
-								"metric_selectors": schema.ListNestedAttribute{
-									Description:         "Metric Selector Define the metric selection criteria, i.e. the metrics source and the actual metrics that should be included in the detection logic",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											"metrics_source": schema.ListAttribute{
-												Description:         "Metrics Sources Choose the source for the metrics to be included in the detection logic",
-												MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EDGES\", \"VIRTUAL_HOSTS\", \"NONE\", \"NODES\"]`",
-												ElementType:         types.StringType,
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.List{
-													listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EDGES", "VIRTUAL_HOSTS", "NONE", "NODES"}...)),
-													listvalidator.SizeAtMost(1),
-												},
-											},
-											"metric": schema.ListAttribute{
-												Description:         "Metrics Choose one or more metrics to be included in the detection logic",
-												MarkdownDescription: "<br>**Valid Options:** `[\"LATENCY\", \"THROUGHPUT\", \"NO_METRICS\", \"REQUEST_RATE\", \"ERROR_RATE\"]` (Multiple selection allowed)",
-												ElementType:         types.StringType,
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.List{
-													listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"LATENCY", "THROUGHPUT", "NO_METRICS", "REQUEST_RATE", "ERROR_RATE"}...)),
-												},
-											},
+							Validators: []validator.List{
+								listvalidator.SizeAtMost(1),
+							},
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+									},
+									"namespace": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+									},
+									"tenant": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            false,
+										Computed:            true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
 										},
 									},
 								},
@@ -499,31 +513,79 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 						},
 						"business_logic_markup_setting": schema.SingleNestedAttribute{
 							Description:         "API Discovery Settings Setting specifying how API Discovery will be performed.",
-							MarkdownDescription: "",
+							MarkdownDescription: "API Discovery Settings Setting specifying how API Discovery will be performed.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
 							Attributes: map[string]schema.Attribute{
 								"learn_from_namespace_choice": schema.SingleNestedAttribute{
 									Description:         "Include or Exclude data generated from this namespace in learning By default, API Endpoints are discovered by inspecting logs generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable API Discovery in the namespace in which this app_setting object is created. On disabling this, the AI engine will skip discovering API Endpoints from this namespace.",
-									MarkdownDescription: "",
+									MarkdownDescription: "Include or Exclude data generated from this namespace in learning By default, API Endpoints are discovered by inspecting logs generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable API Discovery in the namespace in which this app_setting object is created. On disabling this, the AI engine will skip discovering API Endpoints from this namespace.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Validators: []validator.Object{
-										atmostoneofvalidator.AtMostOneOf(
+										exactlyoneofvalidator.ExactlyOneOf(
 											"enable",
 										),
 									},
 									Attributes: map[string]schema.Attribute{
 										"enable": schema.BoolAttribute{
 											Description:         "Enable learning from this namespace API Endpoints are discovered in this namespace",
-											MarkdownDescription: "",
+											MarkdownDescription: "Enable learning from this namespace API Endpoints are discovered in this namespace",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Validators: []validator.Bool{
 												boolvalidator.Equals(true),
+											},
+										},
+									},
+								},
+							},
+						},
+						"timeseries_analyses_setting": schema.SingleNestedAttribute{
+							Description:         "DDoS Detection Settings Time series anomaly detection is performed using advanced machine learning based on metrics such as request rate, error rate, latency, throughput etc. The clients are flagged if anomalies are observed",
+							MarkdownDescription: "DDoS Detection Settings Time series anomaly detection is performed using advanced machine learning based on metrics such as request rate, error rate, latency, throughput etc. The clients are flagged if anomalies are observed",
+							Required:            false,
+							Optional:            true,
+							Computed:            false,
+							Attributes: map[string]schema.Attribute{
+								"metric_selectors": schema.ListNestedAttribute{
+									Description:         "Metric Selector Define the metric selection criteria, i.e. the metrics source and the actual metrics that should be included in the detection logic",
+									MarkdownDescription: "Metric Selector Define the metric selection criteria, i.e. the metrics source and the actual metrics that should be included in the detection logic",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Validators: []validator.List{
+										listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+									},
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"metric": schema.ListAttribute{
+												Description:         "Metrics Choose one or more metrics to be included in the detection logic",
+												MarkdownDescription: "Metrics Choose one or more metrics to be included in the detection logic<br>**Valid Options:** `['ERROR_RATE', 'LATENCY', 'REQUEST_RATE', 'THROUGHPUT']` (Multiple selection allowed)<br>**Default:** `NO_METRICS`",
+												ElementType:         types.StringType,
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
+												Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("NO_METRICS")),
+												Validators: []validator.List{
+													listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ERROR_RATE", "LATENCY", "REQUEST_RATE", "THROUGHPUT"}...)),
+												},
+											},
+											"metrics_source": schema.ListAttribute{
+												Description:         "Metrics Sources Choose the source for the metrics to be included in the detection logic",
+												MarkdownDescription: "Metrics Sources Choose the source for the metrics to be included in the detection logic<br>**Allowed Values (choose one):** `['EDGES', 'NODES', 'NONE', 'VIRTUAL_HOSTS']`<br>**Default:** `NONE`",
+												ElementType:         types.StringType,
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
+												Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("NONE")),
+												Validators: []validator.List{
+													listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EDGES", "NODES", "NONE", "VIRTUAL_HOSTS"}...)),
+													listvalidator.SizeAtMost(1),
+												},
 											},
 										},
 									},
@@ -532,27 +594,27 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 						},
 						"user_behavior_analysis_setting": schema.SingleNestedAttribute{
 							Description:         "Malicious User Detection Settings Malicious User Detection performs user behavior analysis and assigns a risk score and threat level of low, medium, or high based on suspicious activity of the user. The risk score of the user decays over time, if no further suspicious activity is noted",
-							MarkdownDescription: "",
+							MarkdownDescription: "Malicious User Detection Settings Malicious User Detection performs user behavior analysis and assigns a risk score and threat level of low, medium, or high based on suspicious activity of the user. The risk score of the user decays over time, if no further suspicious activity is noted",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
 							Attributes: map[string]schema.Attribute{
 								"learn_from_namespace_choice": schema.SingleNestedAttribute{
 									Description:         "Include or Exclude data generated from this namespace in learning By default, the AI engine learns user behavior from traffic generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable learning from traffic generated by the namespace in which this app_setting object is created. On disabling this, the AI engine will skip learning user behavior patterns from this namespace.",
-									MarkdownDescription: "",
+									MarkdownDescription: "Include or Exclude data generated from this namespace in learning By default, the AI engine learns user behavior from traffic generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable learning from traffic generated by the namespace in which this app_setting object is created. On disabling this, the AI engine will skip learning user behavior patterns from this namespace.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
 									Validators: []validator.Object{
-										atmostoneofvalidator.AtMostOneOf(
-											"enable_learning",
+										exactlyoneofvalidator.RequiredExactlyOneOf(
 											"disable_learning",
+											"enable_learning",
 										),
 									},
 									Attributes: map[string]schema.Attribute{
-										"enable_learning": schema.BoolAttribute{
-											Description:         "Enable learning from this namespace Enable learning user behavior patterns from this namespace",
-											MarkdownDescription: "",
+										"disable_learning": schema.BoolAttribute{
+											Description:         "Disable learning from this namespace Disable learning user behavior patterns from this namespace",
+											MarkdownDescription: "Disable learning from this namespace Disable learning user behavior patterns from this namespace",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -560,9 +622,9 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												boolvalidator.Equals(true),
 											},
 										},
-										"disable_learning": schema.BoolAttribute{
-											Description:         "Disable learning from this namespace Disable learning user behavior patterns from this namespace",
-											MarkdownDescription: "",
+										"enable_learning": schema.BoolAttribute{
+											Description:         "Enable learning from this namespace Enable learning user behavior patterns from this namespace",
+											MarkdownDescription: "Enable learning from this namespace Enable learning user behavior patterns from this namespace",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -574,40 +636,50 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 								},
 								"malicious_user_detection_choice": schema.SingleNestedAttribute{
 									Description:         "Malicious User Detection Settings to configure malicious user detection",
-									MarkdownDescription: "",
+									MarkdownDescription: "Malicious User Detection Settings to configure malicious user detection",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
 									Validators: []validator.Object{
-										atmostoneofvalidator.AtMostOneOf(
-											"enable_detection",
+										exactlyoneofvalidator.RequiredExactlyOneOf(
 											"disable_detection",
+											"enable_detection",
 										),
 									},
 									Attributes: map[string]schema.Attribute{
+										"disable_detection": schema.BoolAttribute{
+											Description:         "Disable malicious user detection Disable malicious user detection",
+											MarkdownDescription: "Disable malicious user detection Disable malicious user detection",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.Bool{
+												boolvalidator.Equals(true),
+											},
+										},
 										"enable_detection": schema.SingleNestedAttribute{
 											Description:         "Enable AI based malicious user detection Enable AI based malicious user detection",
-											MarkdownDescription: "",
+											MarkdownDescription: "Enable AI based malicious user detection Enable AI based malicious user detection",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
-												"waf_activity_choice": schema.SingleNestedAttribute{
-													Description:         "WAF activity choice Consider WAF activity for Malicious User Detection",
-													MarkdownDescription: "",
+												"bot_defense_activity_choice": schema.SingleNestedAttribute{
+													Description:         "Bot Defense activity choice Consider Bot Defense activity for Malicious User Detection",
+													MarkdownDescription: "Bot Defense activity choice Consider Bot Defense activity for Malicious User Detection",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
-															"exclude_waf_activity",
-															"include_waf_activity",
+														exactlyoneofvalidator.RequiredExactlyOneOf(
+															"exclude_bot_defense_activity",
+															"include_bot_defense_activity",
 														),
 													},
 													Attributes: map[string]schema.Attribute{
-														"exclude_waf_activity": schema.BoolAttribute{
-															Description:         "exclude WAF activity Exclude WAF activity in malicious user detection",
-															MarkdownDescription: "",
+														"exclude_bot_defense_activity": schema.BoolAttribute{
+															Description:         "exclude Bot Defense activity Exclude Bot Defense activity in malicious user detection",
+															MarkdownDescription: "exclude Bot Defense activity Exclude Bot Defense activity in malicious user detection",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -615,9 +687,9 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 																boolvalidator.Equals(true),
 															},
 														},
-														"include_waf_activity": schema.BoolAttribute{
-															Description:         "include WAF activity Include WAF activity in malicious user detection",
-															MarkdownDescription: "",
+														"include_bot_defense_activity": schema.BoolAttribute{
+															Description:         "include Bot Defense activity Include Bot Defense activity in malicious user detection",
+															MarkdownDescription: "include Bot Defense activity Include Bot Defense activity in malicious user detection",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -627,14 +699,131 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 													},
 												},
-												"ip_reputation_choice": schema.SingleNestedAttribute{
-													Description:         "ip reputation choice Consider IP Reputation for Malicious User Detection",
-													MarkdownDescription: "",
+												"cooling_off_period_setting_choice": schema.SingleNestedAttribute{
+													Description:         "Cooling off period settings Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assessment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
+													MarkdownDescription: "Cooling off period settings Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assessment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
+														exactlyoneofvalidator.RequiredExactlyOneOf(
+															"cooling_off_period",
+														),
+													},
+													Attributes: map[string]schema.Attribute{
+														"cooling_off_period": schema.Int64Attribute{
+															Description:         "Cooling Off Period Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assesment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
+															MarkdownDescription: "Cooling Off Period Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assesment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.Int64{
+																int64validator.Between(5, 120),
+															},
+															PlanModifiers: []planmodifier.Int64{
+																defaultvaluemodifier.NewDefaultValueModifierInt64(),
+															},
+														},
+													},
+												},
+												"failed_login_activity_choice": schema.SingleNestedAttribute{
+													Description:         "failed login activity choice Consider failed login activity for Malicious User Detection",
+													MarkdownDescription: "failed login activity choice Consider failed login activity for Malicious User Detection",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.Object{
+														exactlyoneofvalidator.RequiredExactlyOneOf(
+															"exclude_failed_login_activity",
+															"include_failed_login_activity",
+														),
+													},
+													Attributes: map[string]schema.Attribute{
+														"exclude_failed_login_activity": schema.BoolAttribute{
+															Description:         "exclude failed login activity Exclude persistent login failures activity (401 response code) in malicious user detection",
+															MarkdownDescription: "exclude failed login activity Exclude persistent login failures activity (401 response code) in malicious user detection",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.Bool{
+																boolvalidator.Equals(true),
+															},
+														},
+														"include_failed_login_activity": schema.SingleNestedAttribute{
+															Description:         "include failed login activity Include persistent login failures activity (401 response code) in malicious user detection",
+															MarkdownDescription: "include failed login activity Include persistent login failures activity (401 response code) in malicious user detection",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Attributes: map[string]schema.Attribute{
+																"login_failures_threshold": schema.Int64Attribute{
+																	Description:         "Login failures threshold The number of failed logins beyond which the system will flag this user as malicious",
+																	MarkdownDescription: "Login failures threshold The number of failed logins beyond which the system will flag this user as malicious<br>**Default:** `10`",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
+																	Default:             int64default.StaticInt64(10),
+																	Validators: []validator.Int64{
+																		int64validator.AtLeast(1),
+																	},
+																},
+															},
+														},
+													},
+												},
+												"forbidden_activity_choice": schema.SingleNestedAttribute{
+													Description:         "forbidden activity choice Requests denied (i.e. 403 response code) by service policies and API protection rules are categorized as forbidden activity",
+													MarkdownDescription: "forbidden activity choice Requests denied (i.e. 403 response code) by service policies and API protection rules are categorized as forbidden activity",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.Object{
+														exactlyoneofvalidator.RequiredExactlyOneOf(
+															"exclude_forbidden_activity",
+															"include_forbidden_activity",
+														),
+													},
+													Attributes: map[string]schema.Attribute{
+														"exclude_forbidden_activity": schema.BoolAttribute{
+															Description:         "exclude disallowed activity Exclude forbidden activity by policy in malicious user detection",
+															MarkdownDescription: "exclude disallowed activity Exclude forbidden activity by policy in malicious user detection",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.Bool{
+																boolvalidator.Equals(true),
+															},
+														},
+														"include_forbidden_activity": schema.SingleNestedAttribute{
+															Description:         "include forbidden activity Include forbidden activity by policy in malicious user detection",
+															MarkdownDescription: "include forbidden activity Include forbidden activity by policy in malicious user detection",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Attributes: map[string]schema.Attribute{
+																"forbidden_requests_threshold": schema.Int64Attribute{
+																	Description:         "forbidden requests threshold The number of forbidden requests beyond which the system will flag this user as malicious",
+																	MarkdownDescription: "forbidden requests threshold The number of forbidden requests beyond which the system will flag this user as malicious<br>**Default:** `10`",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
+																	Default:             int64default.StaticInt64(10),
+																	Validators: []validator.Int64{
+																		int64validator.AtLeast(1),
+																	},
+																},
+															},
+														},
+													},
+												},
+												"ip_reputation_choice": schema.SingleNestedAttribute{
+													Description:         "ip reputation choice Consider IP Reputation for Malicious User Detection",
+													MarkdownDescription: "ip reputation choice Consider IP Reputation for Malicious User Detection",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.Object{
+														exactlyoneofvalidator.RequiredExactlyOneOf(
 															"exclude_ip_reputation",
 															"include_ip_reputation",
 														),
@@ -642,7 +831,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"exclude_ip_reputation": schema.BoolAttribute{
 															Description:         "exclude disallowed activity Exclude IP Reputation in malicious user detection",
-															MarkdownDescription: "",
+															MarkdownDescription: "exclude disallowed activity Exclude IP Reputation in malicious user detection",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -652,42 +841,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 														"include_ip_reputation": schema.BoolAttribute{
 															Description:         "include IP Reputation Include IP Reputation in malicious user detection",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.Bool{
-																boolvalidator.Equals(true),
-															},
-														},
-													},
-												},
-												"bot_defense_activity_choice": schema.SingleNestedAttribute{
-													Description:         "Bot Defense activity choice Consider Bot Defense activity for Malicious User Detection",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
-															"include_bot_defense_activity",
-															"exclude_bot_defense_activity",
-														),
-													},
-													Attributes: map[string]schema.Attribute{
-														"include_bot_defense_activity": schema.BoolAttribute{
-															Description:         "include Bot Defense activity Include Bot Defense activity in malicious user detection",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.Bool{
-																boolvalidator.Equals(true),
-															},
-														},
-														"exclude_bot_defense_activity": schema.BoolAttribute{
-															Description:         "exclude Bot Defense activity Exclude Bot Defense activity in malicious user detection",
-															MarkdownDescription: "",
+															MarkdownDescription: "include IP Reputation Include IP Reputation in malicious user detection",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -699,30 +853,30 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												},
 												"rate_limit_choice": schema.SingleNestedAttribute{
 													Description:         "Rate Limiting choice Consider Rate Limiting activity for Malicious User Detection",
-													MarkdownDescription: "",
+													MarkdownDescription: "Rate Limiting choice Consider Rate Limiting activity for Malicious User Detection",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
-															"include_rate_limit",
+														exactlyoneofvalidator.RequiredExactlyOneOf(
 															"exclude_rate_limit",
+															"include_rate_limit",
 														),
 													},
 													Attributes: map[string]schema.Attribute{
-														"include_rate_limit": schema.BoolAttribute{
-															Description:         "include Rate Limiting Include Rate Limiting in malicious user detection",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.Bool{
-																boolvalidator.Equals(true),
-															},
-														},
 														"exclude_rate_limit": schema.BoolAttribute{
 															Description:         "exclude Rate Limiting Exclude Rate Limiting in malicious user detection",
-															MarkdownDescription: "",
+															MarkdownDescription: "exclude Rate Limiting Exclude Rate Limiting in malicious user detection",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.Bool{
+																boolvalidator.Equals(true),
+															},
+														},
+														"include_rate_limit": schema.BoolAttribute{
+															Description:         "include Rate Limiting Include Rate Limiting in malicious user detection",
+															MarkdownDescription: "include Rate Limiting Include Rate Limiting in malicious user detection",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -732,22 +886,22 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 													},
 												},
-												"forbidden_activity_choice": schema.SingleNestedAttribute{
-													Description:         "forbidden activity choice Requests denied (i.e. 403 response code) by service policies and API protection rules are categorized as forbidden activity",
-													MarkdownDescription: "",
+												"waf_activity_choice": schema.SingleNestedAttribute{
+													Description:         "WAF activity choice Consider WAF activity for Malicious User Detection",
+													MarkdownDescription: "WAF activity choice Consider WAF activity for Malicious User Detection",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
-															"exclude_forbidden_activity",
-															"include_forbidden_activity",
+														exactlyoneofvalidator.RequiredExactlyOneOf(
+															"exclude_waf_activity",
+															"include_waf_activity",
 														),
 													},
 													Attributes: map[string]schema.Attribute{
-														"exclude_forbidden_activity": schema.BoolAttribute{
-															Description:         "exclude disallowed activity Exclude forbidden activity by policy in malicious user detection",
-															MarkdownDescription: "",
+														"exclude_waf_activity": schema.BoolAttribute{
+															Description:         "exclude WAF activity Exclude WAF activity in malicious user detection",
+															MarkdownDescription: "exclude WAF activity Exclude WAF activity in malicious user detection",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -755,138 +909,20 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 																boolvalidator.Equals(true),
 															},
 														},
-														"include_forbidden_activity": schema.SingleNestedAttribute{
-															Description:         "include forbidden activity Include forbidden activity by policy in malicious user detection",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"forbidden_requests_threshold": schema.Int64Attribute{
-																	Description:         "forbidden requests threshold The number of forbidden requests beyond which the system will flag this user as malicious",
-																	MarkdownDescription: "<br>**Default:** `10`",
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            true,
-																	Default:             int64default.StaticInt64(10),
-																},
-															},
-														},
-													},
-												},
-												"failed_login_activity_choice": schema.SingleNestedAttribute{
-													Description:         "failed login activity choice Consider failed login activity for Malicious User Detection",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
-															"include_failed_login_activity",
-															"exclude_failed_login_activity",
-														),
-													},
-													Attributes: map[string]schema.Attribute{
-														"exclude_failed_login_activity": schema.BoolAttribute{
-															Description:         "exclude failed login activity Exclude persistent login failures activity (401 response code) in malicious user detection",
-															MarkdownDescription: "",
+														"include_waf_activity": schema.BoolAttribute{
+															Description:         "include WAF activity Include WAF activity in malicious user detection",
+															MarkdownDescription: "include WAF activity Include WAF activity in malicious user detection",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Validators: []validator.Bool{
 																boolvalidator.Equals(true),
-															},
-														},
-														"include_failed_login_activity": schema.SingleNestedAttribute{
-															Description:         "include failed login activity Include persistent login failures activity (401 response code) in malicious user detection",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"login_failures_threshold": schema.Int64Attribute{
-																	Description:         "Login failures threshold The number of failed logins beyond which the system will flag this user as malicious",
-																	MarkdownDescription: "<br>**Default:** `10`",
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            true,
-																	Default:             int64default.StaticInt64(10),
-																},
-															},
-														},
-													},
-												},
-												"cooling_off_period_setting_choice": schema.SingleNestedAttribute{
-													Description:         "Cooling off period settings Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assessment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
-															"cooling_off_period",
-														),
-													},
-													Attributes: map[string]schema.Attribute{
-														"cooling_off_period": schema.Int64Attribute{
-															Description:         "Cooling Off Period Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assesment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															PlanModifiers: []planmodifier.Int64{
-																defaultvaluemodifier.NewDefaultValueModifierInt64(),
 															},
 														},
 													},
 												},
 											},
 										},
-										"disable_detection": schema.BoolAttribute{
-											Description:         "Disable malicious user detection Disable malicious user detection",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.Bool{
-												boolvalidator.Equals(true),
-											},
-										},
-									},
-								},
-							},
-						},
-						"app_type_ref": schema.ListNestedAttribute{
-							Description:         "app_type_ref The AppType of App instance in current Namespace. Associating an AppType reference, will enable analysis on this instance's generated data",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"tenant": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            false,
-										Computed:            true,
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
-										},
-									},
-									"namespace": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-									},
-									"name": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
 									},
 								},
 							},
@@ -896,7 +932,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -996,23 +1032,13 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1025,9 +1051,33 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot RequiredArrayOfPointerField --> AppTypeSettings
-		var appTypeSettingsElementsModelToSpec []AppSettingAppSettingAppTypeSettings
+		var appTypeSettingsElementsModelToSpec []AppSettingAppTypeSettings
 		response.Diagnostics.Append(data.AppTypeSettings.ElementsAs(ctx, &appTypeSettingsElementsModelToSpec, false)...)
 		if response.Diagnostics.HasError() {
 			return
@@ -1038,9 +1088,72 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 		for i, appTypeSettingsElement := range appTypeSettingsElementsModelToSpec {
 			appTypeSettingsSpec[i] = &ves_io_schema_app_setting.AppTypeSettings{}
 
+			// resource modelToSpecNested RequiredArrayOfPointerField --> AppTypeRef
+			if !appTypeSettingsElement.AppTypeRef.IsNull() && !appTypeSettingsElement.AppTypeRef.IsUnknown() && len(appTypeSettingsElement.AppTypeRef.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var appTypeRefElements []ObjectRefTypeModel
+				response.Diagnostics.Append(appTypeSettingsElement.AppTypeRef.ElementsAs(ctx, &appTypeRefElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				appTypeRefSpec := make([]*ves_io_schema.ObjectRefType, len(appTypeRefElements))
+				appTypeSettingsSpec[i].AppTypeRef = appTypeRefSpec
+
+				// 3. Iterate over the converted Go slice
+				for ii, appTypeRefElement := range appTypeRefElements {
+					// Initialize the spec struct for the current element
+					appTypeSettingsSpec[i].AppTypeRef[ii] = &ves_io_schema.ObjectRefType{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> Name
+					if !appTypeRefElement.Name.IsNull() && !appTypeRefElement.Name.IsUnknown() {
+						appTypeSettingsSpec[i].AppTypeRef[ii].Name = string(appTypeRefElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Namespace
+					if !appTypeRefElement.Namespace.IsNull() && !appTypeRefElement.Namespace.IsUnknown() {
+						appTypeSettingsSpec[i].AppTypeRef[ii].Namespace = string(appTypeRefElement.Namespace.ValueString())
+					}
+
+				}
+			}
+
+			// resource modelToSpecNested PointerField --> BusinessLogicMarkupSetting
+			if !appTypeSettingsElement.BusinessLogicMarkupSetting.IsNull() && !appTypeSettingsElement.BusinessLogicMarkupSetting.IsUnknown() {
+				var businessLogicMarkupSettingModel AppSettingBusinessLogicMarkupSetting
+				response.Diagnostics.Append(appTypeSettingsElement.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				businessLogicMarkupSettingSpec := &ves_io_schema_app_setting.BusinessLogicMarkupSetting{}
+				appTypeSettingsSpec[i].BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
+
+				// resource modelToSpecNested OneOfField --> LearnFromNamespace
+				if !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsUnknown() {
+					businessLogicMarkupSettingLearnFromNamespaceChoiceModel := AppSettingLearnFromNsChoice{}
+					response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromNamespaceChoice.As(ctx, &businessLogicMarkupSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
+					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsUnknown() {
+						enableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable{}
+						enableSpecBool.Enable = &ves_io_schema.Empty{}
+						businessLogicMarkupSettingSpec.LearnFromNamespace = enableSpecBool
+					}
+
+				}
+
+			}
+
 			// resource modelToSpecNested PointerField --> TimeseriesAnalysesSetting
 			if !appTypeSettingsElement.TimeseriesAnalysesSetting.IsNull() && !appTypeSettingsElement.TimeseriesAnalysesSetting.IsUnknown() {
-				var timeseriesAnalysesSettingModel AppSettingAppSettingTimeseriesAnalysesSetting
+				var timeseriesAnalysesSettingModel AppSettingTimeseriesAnalysesSetting
 				response.Diagnostics.Append(appTypeSettingsElement.TimeseriesAnalysesSetting.As(ctx, &timeseriesAnalysesSettingModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
@@ -1052,7 +1165,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 				// resource modelToSpecNested ArrayOfPointerField --> MetricSelectors
 				if !timeseriesAnalysesSettingModel.MetricSelectors.IsNull() && !timeseriesAnalysesSettingModel.MetricSelectors.IsUnknown() && len(timeseriesAnalysesSettingModel.MetricSelectors.Elements()) > 0 {
 					// 1. Convert the types.List into a slice of the model's Go struct
-					var metricSelectorsElements []AppSettingAppSettingMetricSelector
+					var metricSelectorsElements []AppSettingMetricSelector
 					response.Diagnostics.Append(timeseriesAnalysesSettingModel.MetricSelectors.ElementsAs(ctx, &metricSelectorsElements, false)...)
 					if response.Diagnostics.HasError() {
 						return
@@ -1068,26 +1181,6 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						timeseriesAnalysesSettingSpec.MetricSelectors[ii] = &ves_io_schema_app_setting.MetricSelector{}
 
 						// Recursively process nested elements
-
-						// resource modelToSpecNested EnumField --> MetricsSource
-						if !metricSelectorsElement.MetricsSource.IsNull() && !metricSelectorsElement.MetricsSource.IsUnknown() {
-							var metricsSourceTfStrings []types.String
-							diags = metricSelectorsElement.MetricsSource.ElementsAs(ctx, &metricsSourceTfStrings, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							if len(metricsSourceTfStrings) > 0 {
-								valStr := metricsSourceTfStrings[0].ValueString()
-								if v, ok := ves_io_schema_app_setting.MetricsSource_value[valStr]; ok {
-									metricSelectorsSpec[i].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
-								} else {
-									response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MetricsSource", valStr))
-									return
-								}
-							}
-						}
 
 						// resource modelToSpecNested ArrayOfEnumField --> Metric
 						if !metricSelectorsElement.Metric.IsNull() && !metricSelectorsElement.Metric.IsUnknown() {
@@ -1111,7 +1204,31 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 									)
 								}
 							}
-							metricSelectorsSpec[i].Metric = metricSpec
+							metricSelectorsSpec[ii].Metric = metricSpec
+						}
+
+						// resource modelToSpecNested EnumField --> MetricsSource
+						if !metricSelectorsElement.MetricsSource.IsNull() && !metricSelectorsElement.MetricsSource.IsUnknown() {
+							var metricsSourceTfStrings []types.String
+							diags = metricSelectorsElement.MetricsSource.ElementsAs(ctx, &metricsSourceTfStrings, false)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							if len(metricsSourceTfStrings) > 0 {
+								valStr := metricsSourceTfStrings[0].ValueString()
+								if v, ok := ves_io_schema_app_setting.MetricsSource_value[valStr]; ok {
+									metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
+								} else {
+									response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MetricsSource", valStr))
+									return
+								}
+							}
+						} else {
+							if v, ok := ves_io_schema_app_setting.MetricsSource_value["NONE"]; ok {
+								metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
+							}
 						}
 
 					}
@@ -1119,39 +1236,9 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested PointerField --> BusinessLogicMarkupSetting
-			if !appTypeSettingsElement.BusinessLogicMarkupSetting.IsNull() && !appTypeSettingsElement.BusinessLogicMarkupSetting.IsUnknown() {
-				var businessLogicMarkupSettingModel AppSettingAppSettingBusinessLogicMarkupSetting
-				response.Diagnostics.Append(appTypeSettingsElement.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				businessLogicMarkupSettingSpec := &ves_io_schema_app_setting.BusinessLogicMarkupSetting{}
-				appTypeSettingsSpec[i].BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
-
-				// resource modelToSpecNested OneOfField --> LearnFromNamespace
-				if !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsUnknown() {
-					businessLogicMarkupSettingLearnFromNamespaceChoiceModel := AppSettingBusinessLogicMarkupSettingLearnFromNamespaceChoice{}
-					response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromNamespaceChoice.As(ctx, &businessLogicMarkupSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
-					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsUnknown() {
-						enableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable{}
-						enableSpecBool.Enable = &ves_io_schema.Empty{}
-						businessLogicMarkupSettingSpec.LearnFromNamespace = enableSpecBool
-					}
-
-				}
-
-			}
-
 			// resource modelToSpecNested PointerField --> UserBehaviorAnalysisSetting
 			if !appTypeSettingsElement.UserBehaviorAnalysisSetting.IsNull() && !appTypeSettingsElement.UserBehaviorAnalysisSetting.IsUnknown() {
-				var userBehaviorAnalysisSettingModel AppSettingAppSettingUserBehaviorAnalysisSetting
+				var userBehaviorAnalysisSettingModel AppSettingUserBehaviorAnalysisSetting
 				response.Diagnostics.Append(appTypeSettingsElement.UserBehaviorAnalysisSetting.As(ctx, &userBehaviorAnalysisSettingModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
@@ -1162,17 +1249,10 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 				// resource modelToSpecNested RequiredOneOfField --> LearnFromNamespace
 				if !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsNull() && !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsUnknown() {
-					userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel := AppSettingUserBehaviorAnalysisSettingLearnFromNamespaceChoice{}
+					userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel := AppSettingUserBehaviorAnalysisSettingLearnFromNsChoice{}
 					response.Diagnostics.Append(userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.As(ctx, &userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> EnableLearning
-					if !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsNull() && !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsUnknown() {
-						enableLearningSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning{}
-						enableLearningSpecBool.EnableLearning = &ves_io_schema.Empty{}
-						userBehaviorAnalysisSettingSpec.LearnFromNamespace = enableLearningSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> DisableLearning
@@ -1182,20 +1262,34 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						userBehaviorAnalysisSettingSpec.LearnFromNamespace = disableLearningSpecBool
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> EnableLearning
+					if !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsNull() && !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsUnknown() {
+						enableLearningSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning{}
+						enableLearningSpecBool.EnableLearning = &ves_io_schema.Empty{}
+						userBehaviorAnalysisSettingSpec.LearnFromNamespace = enableLearningSpecBool
+					}
+
 				}
 
 				// resource modelToSpecNested RequiredOneOfField --> MaliciousUserDetection
 				if !userBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice.IsNull() && !userBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice.IsUnknown() {
-					userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel := AppSettingUserBehaviorAnalysisSettingMaliciousUserDetectionChoice{}
+					userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel := AppSettingMaliciousUserDetectionChoice{}
 					response.Diagnostics.Append(userBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice.As(ctx, &userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> DisableDetection
+					if !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsNull() && !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsUnknown() {
+						disableDetectionSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection{}
+						disableDetectionSpecBool.DisableDetection = &ves_io_schema.Empty{}
+						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = disableDetectionSpecBool
+					}
+
 					// resource modelToSpecNested PointerOfOneOfField --> EnableDetection
 					if !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.IsNull() && !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.IsUnknown() {
-						var appSettingUserBehaviorAnalysisSettingEnableDetectionModel AppSettingUserBehaviorAnalysisSettingEnableDetection
-						response.Diagnostics.Append(userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.As(ctx, &appSettingUserBehaviorAnalysisSettingEnableDetectionModel, basetypes.ObjectAsOptions{})...)
+						var appSettingEnableDetectionModel AppSettingEnableDetection
+						response.Diagnostics.Append(userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.As(ctx, &appSettingEnableDetectionModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
 						}
@@ -1203,34 +1297,117 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						enableDetectionOneOfSpec.EnableDetection = &ves_io_schema_app_setting.MaliciousUserDetectionSetting{}
 						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = enableDetectionOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> WafActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.WafActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.WafActivityChoice.IsUnknown() {
-							enableDetectionWafActivityChoiceModel := AppSettingMaliciousUserDetectionSettingWafActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.WafActivityChoice.As(ctx, &enableDetectionWafActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
+						if !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsNull() && !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsUnknown() {
+							enableDetectionBotDefenseActivityChoiceModel := AppSettingBotDefenseActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.BotDefenseActivityChoice.As(ctx, &enableDetectionBotDefenseActivityChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeWafActivity
-							if !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsUnknown() {
-								excludeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity{}
-								excludeWafActivitySpecBool.ExcludeWafActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = excludeWafActivitySpecBool
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
+							if !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsUnknown() {
+								excludeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity{}
+								excludeBotDefenseActivitySpecBool.ExcludeBotDefenseActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = excludeBotDefenseActivitySpecBool
 							}
 
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeWafActivity
-							if !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsUnknown() {
-								includeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity{}
-								includeWafActivitySpecBool.IncludeWafActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = includeWafActivitySpecBool
+							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
+							if !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsUnknown() {
+								includeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity{}
+								includeBotDefenseActivitySpecBool.IncludeBotDefenseActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = includeBotDefenseActivitySpecBool
+							}
+
+						}
+
+						// resource modelToSpecNested RequiredOneOfField --> CoolingOffPeriodSetting
+						if !appSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsNull() && !appSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsUnknown() {
+							enableDetectionCoolingOffPeriodSettingChoiceModel := AppSettingCoolingOffPeriodSettingChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.As(ctx, &enableDetectionCoolingOffPeriodSettingChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested UintOfOneOfField --> CoolingOffPeriod
+							if !enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.IsNull() {
+								coolingOffPeriodSpecUint := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod{}
+								coolingOffPeriodSpecUint.CoolingOffPeriod = uint32(enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.ValueInt64())
+								enableDetectionOneOfSpec.EnableDetection.CoolingOffPeriodSetting = coolingOffPeriodSpecUint
+							}
+
+						}
+
+						// resource modelToSpecNested RequiredOneOfField --> FailedLoginActivityChoice
+						if !appSettingEnableDetectionModel.FailedLoginActivityChoice.IsNull() && !appSettingEnableDetectionModel.FailedLoginActivityChoice.IsUnknown() {
+							enableDetectionFailedLoginActivityChoiceModel := AppSettingFailedLoginActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.FailedLoginActivityChoice.As(ctx, &enableDetectionFailedLoginActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
+							if !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsUnknown() {
+								excludeFailedLoginActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity{}
+								excludeFailedLoginActivitySpecBool.ExcludeFailedLoginActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = excludeFailedLoginActivitySpecBool
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> IncludeFailedLoginActivity
+							if !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsUnknown() {
+								var appSettingIncludeFailedLoginActivityModel AppSettingIncludeFailedLoginActivity
+								response.Diagnostics.Append(enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.As(ctx, &appSettingIncludeFailedLoginActivityModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								includeFailedLoginActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity{}
+								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity = &ves_io_schema_app_setting.FailedLoginActivitySetting{}
+								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = includeFailedLoginActivityOneOfSpec
+
+								// resource modelToSpecNested RequiredUintField --> LoginFailuresThreshold
+								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity.LoginFailuresThreshold = uint32(uint32(appSettingIncludeFailedLoginActivityModel.LoginFailuresThreshold.ValueInt64()))
+
+							}
+
+						}
+
+						// resource modelToSpecNested RequiredOneOfField --> ForbiddenActivityChoice
+						if !appSettingEnableDetectionModel.ForbiddenActivityChoice.IsNull() && !appSettingEnableDetectionModel.ForbiddenActivityChoice.IsUnknown() {
+							enableDetectionForbiddenActivityChoiceModel := AppSettingForbiddenActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.ForbiddenActivityChoice.As(ctx, &enableDetectionForbiddenActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
+							if !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsUnknown() {
+								excludeForbiddenActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity{}
+								excludeForbiddenActivitySpecBool.ExcludeForbiddenActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = excludeForbiddenActivitySpecBool
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> IncludeForbiddenActivity
+							if !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsUnknown() {
+								var appSettingIncludeForbiddenActivityModel AppSettingIncludeForbiddenActivity
+								response.Diagnostics.Append(enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.As(ctx, &appSettingIncludeForbiddenActivityModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								includeForbiddenActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity{}
+								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity = &ves_io_schema_app_setting.ForbiddenActivitySetting{}
+								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = includeForbiddenActivityOneOfSpec
+
+								// resource modelToSpecNested RequiredUintField --> ForbiddenRequestsThreshold
+								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity.ForbiddenRequestsThreshold = uint32(uint32(appSettingIncludeForbiddenActivityModel.ForbiddenRequestsThreshold.ValueInt64()))
+
 							}
 
 						}
 
 						// resource modelToSpecNested RequiredOneOfField --> IpReputationChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.IpReputationChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.IpReputationChoice.IsUnknown() {
-							enableDetectionIpReputationChoiceModel := AppSettingMaliciousUserDetectionSettingIpReputationChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.IpReputationChoice.As(ctx, &enableDetectionIpReputationChoiceModel, basetypes.ObjectAsOptions{})...)
+						if !appSettingEnableDetectionModel.IpReputationChoice.IsNull() && !appSettingEnableDetectionModel.IpReputationChoice.IsUnknown() {
+							enableDetectionIpReputationChoiceModel := AppSettingIpReputationChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.IpReputationChoice.As(ctx, &enableDetectionIpReputationChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -1251,43 +1428,12 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.BotDefenseActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.BotDefenseActivityChoice.IsUnknown() {
-							enableDetectionBotDefenseActivityChoiceModel := AppSettingMaliciousUserDetectionSettingBotDefenseActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.BotDefenseActivityChoice.As(ctx, &enableDetectionBotDefenseActivityChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
-							if !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsUnknown() {
-								includeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity{}
-								includeBotDefenseActivitySpecBool.IncludeBotDefenseActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = includeBotDefenseActivitySpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
-							if !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsUnknown() {
-								excludeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity{}
-								excludeBotDefenseActivitySpecBool.ExcludeBotDefenseActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = excludeBotDefenseActivitySpecBool
-							}
-
-						}
-
 						// resource modelToSpecNested RequiredOneOfField --> RateLimitChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.RateLimitChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.RateLimitChoice.IsUnknown() {
-							enableDetectionRateLimitChoiceModel := AppSettingMaliciousUserDetectionSettingRateLimitChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.RateLimitChoice.As(ctx, &enableDetectionRateLimitChoiceModel, basetypes.ObjectAsOptions{})...)
+						if !appSettingEnableDetectionModel.RateLimitChoice.IsNull() && !appSettingEnableDetectionModel.RateLimitChoice.IsUnknown() {
+							enableDetectionRateLimitChoiceModel := AppSettingRateLimitChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.RateLimitChoice.As(ctx, &enableDetectionRateLimitChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeRateLimit
-							if !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsNull() && !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsUnknown() {
-								includeRateLimitSpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit{}
-								includeRateLimitSpecBool.IncludeRateLimit = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = includeRateLimitSpecBool
 							}
 
 							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeRateLimit
@@ -1297,135 +1443,43 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 								enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = excludeRateLimitSpecBool
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeRateLimit
+							if !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsNull() && !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsUnknown() {
+								includeRateLimitSpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit{}
+								includeRateLimitSpecBool.IncludeRateLimit = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = includeRateLimitSpecBool
+							}
+
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> ForbiddenActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.ForbiddenActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.ForbiddenActivityChoice.IsUnknown() {
-							enableDetectionForbiddenActivityChoiceModel := AppSettingMaliciousUserDetectionSettingForbiddenActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.ForbiddenActivityChoice.As(ctx, &enableDetectionForbiddenActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+						// resource modelToSpecNested RequiredOneOfField --> WafActivityChoice
+						if !appSettingEnableDetectionModel.WafActivityChoice.IsNull() && !appSettingEnableDetectionModel.WafActivityChoice.IsUnknown() {
+							enableDetectionWafActivityChoiceModel := AppSettingWafActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.WafActivityChoice.As(ctx, &enableDetectionWafActivityChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
-							if !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsUnknown() {
-								excludeForbiddenActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity{}
-								excludeForbiddenActivitySpecBool.ExcludeForbiddenActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = excludeForbiddenActivitySpecBool
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeWafActivity
+							if !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsUnknown() {
+								excludeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity{}
+								excludeWafActivitySpecBool.ExcludeWafActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = excludeWafActivitySpecBool
 							}
 
-							// resource modelToSpecNested PointerOfOneOfField --> IncludeForbiddenActivity
-							if !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsUnknown() {
-								var appSettingMaliciousUserDetectionSettingIncludeForbiddenActivityModel AppSettingMaliciousUserDetectionSettingIncludeForbiddenActivity
-								response.Diagnostics.Append(enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.As(ctx, &appSettingMaliciousUserDetectionSettingIncludeForbiddenActivityModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								includeForbiddenActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity{}
-								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity = &ves_io_schema_app_setting.ForbiddenActivitySetting{}
-								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = includeForbiddenActivityOneOfSpec
-
-								// resource modelToSpecNested RequiredUintField --> ForbiddenRequestsThreshold
-								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity.ForbiddenRequestsThreshold = uint32(uint32(appSettingMaliciousUserDetectionSettingIncludeForbiddenActivityModel.ForbiddenRequestsThreshold.ValueInt64()))
-
-							}
-
-						}
-
-						// resource modelToSpecNested RequiredOneOfField --> FailedLoginActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.FailedLoginActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.FailedLoginActivityChoice.IsUnknown() {
-							enableDetectionFailedLoginActivityChoiceModel := AppSettingMaliciousUserDetectionSettingFailedLoginActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.FailedLoginActivityChoice.As(ctx, &enableDetectionFailedLoginActivityChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
-							if !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsUnknown() {
-								excludeFailedLoginActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity{}
-								excludeFailedLoginActivitySpecBool.ExcludeFailedLoginActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = excludeFailedLoginActivitySpecBool
-							}
-
-							// resource modelToSpecNested PointerOfOneOfField --> IncludeFailedLoginActivity
-							if !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsUnknown() {
-								var appSettingMaliciousUserDetectionSettingIncludeFailedLoginActivityModel AppSettingMaliciousUserDetectionSettingIncludeFailedLoginActivity
-								response.Diagnostics.Append(enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.As(ctx, &appSettingMaliciousUserDetectionSettingIncludeFailedLoginActivityModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								includeFailedLoginActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity{}
-								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity = &ves_io_schema_app_setting.FailedLoginActivitySetting{}
-								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = includeFailedLoginActivityOneOfSpec
-
-								// resource modelToSpecNested RequiredUintField --> LoginFailuresThreshold
-								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity.LoginFailuresThreshold = uint32(uint32(appSettingMaliciousUserDetectionSettingIncludeFailedLoginActivityModel.LoginFailuresThreshold.ValueInt64()))
-
-							}
-
-						}
-
-						// resource modelToSpecNested RequiredOneOfField --> CoolingOffPeriodSetting
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsUnknown() {
-							enableDetectionCoolingOffPeriodSettingChoiceModel := AppSettingMaliciousUserDetectionSettingCoolingOffPeriodSettingChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.As(ctx, &enableDetectionCoolingOffPeriodSettingChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested UintOfOneOfField --> CoolingOffPeriod
-							if !enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.IsNull() {
-								coolingOffPeriodSpecUint := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod{}
-								coolingOffPeriodSpecUint.CoolingOffPeriod = uint32(enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.ValueInt64())
-								enableDetectionOneOfSpec.EnableDetection.CoolingOffPeriodSetting = coolingOffPeriodSpecUint
+							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeWafActivity
+							if !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsUnknown() {
+								includeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity{}
+								includeWafActivitySpecBool.IncludeWafActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = includeWafActivitySpecBool
 							}
 
 						}
 
 					}
 
-					// resource modelToSpecNested BoolOfOneOfPointerField --> DisableDetection
-					if !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsNull() && !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsUnknown() {
-						disableDetectionSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection{}
-						disableDetectionSpecBool.DisableDetection = &ves_io_schema.Empty{}
-						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = disableDetectionSpecBool
-					}
-
 				}
 
-			}
-
-			// resource modelToSpecNested RequiredArrayOfPointerField --> AppTypeRef
-			if !appTypeSettingsElement.AppTypeRef.IsNull() && !appTypeSettingsElement.AppTypeRef.IsUnknown() && len(appTypeSettingsElement.AppTypeRef.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var appTypeRefElements []ObjectRefTypeModel
-				response.Diagnostics.Append(appTypeSettingsElement.AppTypeRef.ElementsAs(ctx, &appTypeRefElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				appTypeRefSpec := make([]*ves_io_schema.ObjectRefType, len(appTypeRefElements))
-				appTypeSettingsSpec[i].AppTypeRef = appTypeRefSpec
-
-				// 3. Iterate over the converted Go slice
-				for ii, appTypeRefElement := range appTypeRefElements {
-					// Initialize the spec struct for the current element
-					appTypeSettingsSpec[i].AppTypeRef[ii] = &ves_io_schema.ObjectRefType{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested RequiredStringField --> Namespace
-					if !appTypeRefElement.Namespace.IsNull() && !appTypeRefElement.Namespace.IsUnknown() {
-						appTypeRefSpec[i].Namespace = string(appTypeRefElement.Namespace.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredStringField --> Name
-					if !appTypeRefElement.Name.IsNull() && !appTypeRefElement.Name.IsUnknown() {
-						appTypeRefSpec[i].Name = string(appTypeRefElement.Name.ValueString())
-					}
-
-				}
 			}
 
 		}
@@ -1433,11 +1487,18 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 		spec.AppTypeSettings = appTypeSettingsSpec
 	}
 
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_app_setting.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -1466,6 +1527,101 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1475,795 +1631,722 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> AppTypeSettings
-	appTypeSettingsElementsSpectToModel := make([]AppSettingAppSettingAppTypeSettings, 0, len(specData.AppTypeSettings))
+	{
+		appTypeSettingsElementsSpectToModel := make([]AppSettingAppTypeSettings, 0, len(specData.GetAppTypeSettings()))
+		for _, appTypeSettingsElement := range specData.GetAppTypeSettings() {
+			appSettingAppTypeSettingsModel := AppSettingAppTypeSettings{}
 
-	for _, appTypeSettingsElement := range specData.AppTypeSettings {
-		appSettingAppSettingAppTypeSettingsModel := AppSettingAppSettingAppTypeSettings{}
-
-		// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
-		if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingTimeseriesAnalysesSettingModel := &AppSettingAppSettingTimeseriesAnalysesSetting{}
-			timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested ArrayOfPointerField --> MetricSelectors
-			if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
+			// resource specToModelNested RequiredArrayOfPointerField --> AppTypeRef
+			if len(appTypeSettingsElement.GetAppTypeRef()) > 0 {
 				// Step 1: Always create a slice of model structs from the spec data.
 				// This slice serves as an intermediate representation.
-				metricSelectorsElements := make([]AppSettingAppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
-				for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
-					appSettingAppSettingMetricSelectorModel := AppSettingAppSettingMetricSelector{}
+				appTypeRefElements := make([]ObjectRefTypeModel, 0, len(appTypeSettingsElement.GetAppTypeRef()))
+				for _, appTypeRefElement := range appTypeSettingsElement.GetAppTypeRef() {
+					objectRefTypeModelModel := ObjectRefTypeModel{}
 
-					// resource specToModelNested EnumField --> MetricsSource
-					if metricSelectorsElement.GetMetricsSource().String() != "" {
-						stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appSettingAppSettingMetricSelectorModel.MetricsSource = listValue
+					// resource specToModelNested RequiredStringField --> Name
+					if appTypeRefElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(appTypeRefElement.GetName())
 					} else {
-						appSettingAppSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
-					// resource SpecToModelNested ArrayOfEnumField --> Metric
-					if len(metricSelectorsElement.GetMetric()) > 0 {
-						metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
-						for _, v := range metricSelectorsElement.GetMetric() {
-							if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
-								metricStrings = append(metricStrings, strVal)
-							}
-						}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, metricStrings)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appSettingAppSettingMetricSelectorModel.Metric = listValue
+					// resource specToModelNested RequiredStringField --> Namespace
+					if appTypeRefElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(appTypeRefElement.GetNamespace())
 					} else {
-						appSettingAppSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
 					}
 
-					metricSelectorsElements = append(metricSelectorsElements, appSettingAppSettingMetricSelectorModel)
+					// resource specToModelNested StringField --> Tenant
+					if appTypeRefElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(appTypeRefElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					appTypeRefElements = append(appTypeRefElements, objectRefTypeModelModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// The intermediate slice of structs must be converted to a `types.ListValue`.
-				metricSelectorsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
-				response.Diagnostics.Append(diags...)
+				appTypeRefListValue, appTypeRefListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap}, appTypeRefElements)
+				response.Diagnostics.Append(appTypeRefListDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				appSettingAppSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
+				appSettingAppTypeSettingsModel.AppTypeRef = appTypeRefListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				appSettingAppSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
+				appSettingAppTypeSettingsModel.AppTypeRef = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap})
 			}
 
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingTimeseriesAnalysesSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingAppSettingTimeseriesAnalysesSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingAppSettingTimeseriesAnalysesSettingModelObj
+			// resource specToModelNested PointerField --> BusinessLogicMarkupSetting
+			if appTypeSettingsElement.GetBusinessLogicMarkupSetting() != nil {
+				// Create the nested Go struct
+				appSettingBusinessLogicMarkupSettingModel := &AppSettingBusinessLogicMarkupSetting{}
+				businessLogicMarkupSettingElement := appTypeSettingsElement.GetBusinessLogicMarkupSetting()
 
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
-		}
+				// Recursively populate the nested struct
 
-		// resource specToModelNested PointerField --> BusinessLogicMarkupSetting
-		if appTypeSettingsElement.GetBusinessLogicMarkupSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingBusinessLogicMarkupSettingModel := &AppSettingAppSettingBusinessLogicMarkupSetting{}
-			businessLogicMarkupSettingElement := appTypeSettingsElement.GetBusinessLogicMarkupSetting()
+				// resource specToModelNested OneOfField --> LearnFromNamespace
+				if businessLogicMarkupSettingElement.GetLearnFromNamespace() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-			// Recursively populate the nested struct
+					// Define a variable for the spec choices to be passed down to nested templates
+					businessLogicMarkupSettinglearnFromNamespaceChoiceChoices := businessLogicMarkupSettingElement.GetLearnFromNamespace()
 
-			// resource specToModelNested OneOfField --> LearnFromNamespace
-			if businessLogicMarkupSettingElement.GetLearnFromNamespace() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+					// Process nested choices, populating the temporary attribute map
 
-				// Define a variable for the spec choices to be passed down to nested templates
-				businessLogicMarkupSettinglearnFromNamespaceChoiceChoices := businessLogicMarkupSettingElement.GetLearnFromNamespace()
+					// resource specToModelNested BoolOfOneOfPointerField --> Enable
+					_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
 
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> Enable
-				_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
-
-				if isEnable {
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolValue(true)
-				} else {
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap)
-			}
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingBusinessLogicMarkupSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap, appSettingAppSettingBusinessLogicMarkupSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = appSettingAppSettingBusinessLogicMarkupSettingModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
-		}
-
-		// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
-		if appTypeSettingsElement.GetUserBehaviorAnalysisSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingUserBehaviorAnalysisSettingModel := &AppSettingAppSettingUserBehaviorAnalysisSetting{}
-			userBehaviorAnalysisSettingElement := appTypeSettingsElement.GetUserBehaviorAnalysisSetting()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
-			// GlobalSpecType
-			if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices := userBehaviorAnalysisSettingElement.GetLearnFromNamespace()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> EnableLearning
-				_, isEnableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning)
-
-				if isEnableLearning {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolValue(true)
-				} else {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> DisableLearning
-				_, isDisableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableLearning)
-
-				if isDisableLearning {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolValue(true)
-				} else {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap)
-			}
-
-			// resource specToModelNested RequiredOneOfField --> MaliciousUserDetection
-			// GlobalSpecType
-			if userBehaviorAnalysisSettingElement.GetMaliciousUserDetection() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices := userBehaviorAnalysisSettingElement.GetMaliciousUserDetection()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested PointerOfOneOfField --> EnableDetection
-				// GlobalSpecType
-				// false
-				{
-					enableDetectionOptions, isEnableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection)
-					enableDetectionAttributeMap := make(map[string]attr.Value)
-
-					if isEnableDetection && enableDetectionOptions != nil {
-
-						// resource specToModelNested RequiredOneOfField --> WafActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetWafActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionwafActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetWafActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeWafActivity
-							_, isExcludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity)
-
-							if isExcludeWafActivity {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeWafActivity
-							_, isIncludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity)
-
-							if isIncludeWafActivity {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionwafActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionwafActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionwafActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["waf_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> IpReputationChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetIpReputationChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionipReputationChoiceChoices := enableDetectionOptions.EnableDetection.GetIpReputationChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeIpReputation
-							_, isExcludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeIpReputation)
-
-							if isExcludeIpReputation {
-								enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolValue(true)
-							} else {
-								enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeIpReputation
-							_, isIncludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation)
-
-							if isIncludeIpReputation {
-								enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolValue(true)
-							} else {
-								enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionipReputationChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionipReputationChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionipReputationChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["ip_reputation_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetBotDefenseActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionbotDefenseActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetBotDefenseActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
-							_, isIncludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity)
-
-							if isIncludeBotDefenseActivity {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
-							_, isExcludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity)
-
-							if isExcludeBotDefenseActivity {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionbotDefenseActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionbotDefenseActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["bot_defense_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> RateLimitChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetRateLimitChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionrateLimitChoiceChoices := enableDetectionOptions.EnableDetection.GetRateLimitChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeRateLimit
-							_, isIncludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit)
-
-							if isIncludeRateLimit {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolValue(true)
-							} else {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeRateLimit
-							_, isExcludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeRateLimit)
-
-							if isExcludeRateLimit {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolValue(true)
-							} else {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionrateLimitChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionrateLimitChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionrateLimitChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["rate_limit_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> ForbiddenActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetForbiddenActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionforbiddenActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionforbiddenActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetForbiddenActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
-							_, isExcludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity)
-
-							if isExcludeForbiddenActivity {
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> IncludeForbiddenActivity
-							// GlobalSpecType
-							// false
-							{
-								includeForbiddenActivityOptions, isIncludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity)
-								includeForbiddenActivityAttributeMap := make(map[string]attr.Value)
-
-								if isIncludeForbiddenActivity && includeForbiddenActivityOptions != nil {
-
-									// resource specToModelNested RequiredUintField --> ForbiddenRequestsThreshold
-									includeForbiddenActivityAttributeMap["forbidden_requests_threshold"] = types.Int64Value(int64(includeForbiddenActivityOptions.IncludeForbiddenActivity.GetForbiddenRequestsThreshold()))
-
-									includeForbiddenActivityObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap, includeForbiddenActivityAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = includeForbiddenActivityObj
-								} else {
-									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionforbiddenActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionforbiddenActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["forbidden_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> FailedLoginActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetFailedLoginActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionfailedLoginActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionfailedLoginActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetFailedLoginActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
-							_, isExcludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity)
-
-							if isExcludeFailedLoginActivity {
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> IncludeFailedLoginActivity
-							// GlobalSpecType
-							// false
-							{
-								includeFailedLoginActivityOptions, isIncludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity)
-								includeFailedLoginActivityAttributeMap := make(map[string]attr.Value)
-
-								if isIncludeFailedLoginActivity && includeFailedLoginActivityOptions != nil {
-
-									// resource specToModelNested RequiredUintField --> LoginFailuresThreshold
-									includeFailedLoginActivityAttributeMap["login_failures_threshold"] = types.Int64Value(int64(includeFailedLoginActivityOptions.IncludeFailedLoginActivity.GetLoginFailuresThreshold()))
-
-									includeFailedLoginActivityObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap, includeFailedLoginActivityAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = includeFailedLoginActivityObj
-								} else {
-									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionfailedLoginActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionfailedLoginActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["failed_login_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> CoolingOffPeriodSetting
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetCoolingOffPeriodSetting() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectioncoolingOffPeriodSettingChoiceChoices := enableDetectionOptions.EnableDetection.GetCoolingOffPeriodSetting()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested UintOfOneOfField --> CoolingOffPeriod
-							coolingOffPeriodItem, isCoolingOffPeriod := enableDetectioncoolingOffPeriodSettingChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod)
-
-							if isCoolingOffPeriod {
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Value(int64(coolingOffPeriodItem.CoolingOffPeriod))
-							} else {
-								// Empty uint, set to null
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Null()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["cooling_off_period_setting_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap)
-						}
-
-						enableDetectionObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap, enableDetectionAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = enableDetectionObj
+					if isEnable {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolValue(true)
 					} else {
-						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap)
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolNull()
 					}
-				}
 
-				// resource specToModelNested BoolOfOneOfPointerField --> DisableDetection
-				_, isDisableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection)
+					// --- End of Choices ---
 
-				if isDisableDetection {
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolValue(true)
+					// Create the final ObjectValue for this OneOf field
+					finalObj, businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = finalObj
 				} else {
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolNull()
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap)
 				}
 
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap, // The attribute schema for the OneOf choices
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags...)
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingBusinessLogicMarkupSettingModelObj, appSettingBusinessLogicMarkupSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap, appSettingBusinessLogicMarkupSettingModel)
+				response.Diagnostics.Append(appSettingBusinessLogicMarkupSettingModelObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
+				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = appSettingBusinessLogicMarkupSettingModelObj
 
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = finalObj
 			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap)
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
 			}
 
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingUserBehaviorAnalysisSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap, appSettingAppSettingUserBehaviorAnalysisSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = appSettingAppSettingUserBehaviorAnalysisSettingModelObj
+			// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
+			if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
+				// Create the nested Go struct
+				appSettingTimeseriesAnalysesSettingModel := &AppSettingTimeseriesAnalysesSetting{}
+				timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
 
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap)
+				// Recursively populate the nested struct
+
+				// resource specToModelNested ArrayOfPointerField --> MetricSelectors
+				if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					metricSelectorsElements := make([]AppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
+					for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
+						appSettingMetricSelectorModel := AppSettingMetricSelector{}
+
+						// resource SpecToModelNested ArrayOfEnumField --> Metric
+						{
+							if len(metricSelectorsElement.GetMetric()) > 0 {
+								metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
+								for _, v := range metricSelectorsElement.GetMetric() {
+									if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
+										metricStrings = append(metricStrings, strVal)
+									}
+								}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, metricStrings)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								appSettingMetricSelectorModel.Metric = listValue
+							} else {
+								appSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
+							}
+						}
+
+						// resource specToModelNested EnumField --> MetricsSource
+						{
+							if metricSelectorsElement.GetMetricsSource().String() != "" {
+								stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
+								stringSlice := []types.String{stringValue}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								appSettingMetricSelectorModel.MetricsSource = listValue
+							} else {
+								appSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
+							}
+						}
+
+						metricSelectorsElements = append(metricSelectorsElements, appSettingMetricSelectorModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					metricSelectorsListValue, metricSelectorsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
+					response.Diagnostics.Append(metricSelectorsListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingTimeseriesAnalysesSettingModelObj, appSettingTimeseriesAnalysesSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingTimeseriesAnalysesSettingModel)
+				response.Diagnostics.Append(appSettingTimeseriesAnalysesSettingModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingTimeseriesAnalysesSettingModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
+			}
+
+			// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
+			if appTypeSettingsElement.GetUserBehaviorAnalysisSetting() != nil {
+				// Create the nested Go struct
+				appSettingUserBehaviorAnalysisSettingModel := &AppSettingUserBehaviorAnalysisSetting{}
+				userBehaviorAnalysisSettingElement := appTypeSettingsElement.GetUserBehaviorAnalysisSetting()
+
+				// Recursively populate the nested struct
+
+				// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
+				// GlobalSpecType
+				if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices := userBehaviorAnalysisSettingElement.GetLearnFromNamespace()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DisableLearning
+					_, isDisableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableLearning)
+
+					if isDisableLearning {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> EnableLearning
+					_, isEnableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning)
+
+					if isEnableLearning {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredOneOfField --> MaliciousUserDetection
+				// GlobalSpecType
+				if userBehaviorAnalysisSettingElement.GetMaliciousUserDetection() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices := userBehaviorAnalysisSettingElement.GetMaliciousUserDetection()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DisableDetection
+					_, isDisableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection)
+
+					if isDisableDetection {
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolNull()
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> EnableDetection
+					// GlobalSpecType
+					// false
+					{
+						enableDetectionOptionsWrapper, isEnableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection)
+						enableDetectionAttributeMap := make(map[string]attr.Value)
+
+						if isEnableDetection && enableDetectionOptionsWrapper != nil && enableDetectionOptionsWrapper.EnableDetection != nil {
+							enableDetectionElement := enableDetectionOptionsWrapper.EnableDetection
+
+							// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetBotDefenseActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionbotDefenseActivityChoiceChoices := enableDetectionElement.GetBotDefenseActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
+								_, isExcludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity)
+
+								if isExcludeBotDefenseActivity {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
+								_, isIncludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity)
+
+								if isIncludeBotDefenseActivity {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionbotDefenseActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionbotDefenseActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["bot_defense_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> CoolingOffPeriodSetting
+							// GlobalSpecType
+							if enableDetectionElement.GetCoolingOffPeriodSetting() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectioncoolingOffPeriodSettingChoiceChoices := enableDetectionElement.GetCoolingOffPeriodSetting()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested UintOfOneOfField --> CoolingOffPeriod
+								coolingOffPeriodItem, isCoolingOffPeriod := enableDetectioncoolingOffPeriodSettingChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod)
+
+								if isCoolingOffPeriod {
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Value(int64(coolingOffPeriodItem.CoolingOffPeriod))
+								} else {
+									// Empty uint, set to null
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Null()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> FailedLoginActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetFailedLoginActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionfailedLoginActivityChoiceChoices := enableDetectionElement.GetFailedLoginActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
+								_, isExcludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity)
+
+								if isExcludeFailedLoginActivity {
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> IncludeFailedLoginActivity
+								// GlobalSpecType
+								// false
+								{
+									includeFailedLoginActivityOptionsWrapper, isIncludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity)
+									includeFailedLoginActivityAttributeMap := make(map[string]attr.Value)
+
+									if isIncludeFailedLoginActivity && includeFailedLoginActivityOptionsWrapper != nil && includeFailedLoginActivityOptionsWrapper.IncludeFailedLoginActivity != nil {
+										includeFailedLoginActivityElement := includeFailedLoginActivityOptionsWrapper.IncludeFailedLoginActivity
+
+										// resource specToModelNested RequiredUintField --> LoginFailuresThreshold
+										includeFailedLoginActivityAttributeMap["login_failures_threshold"] = types.Int64Value(int64(includeFailedLoginActivityElement.GetLoginFailuresThreshold()))
+
+										includeFailedLoginActivityObj, includeFailedLoginActivityObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap, includeFailedLoginActivityAttributeMap)
+										response.Diagnostics.Append(includeFailedLoginActivityObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = includeFailedLoginActivityObj
+									} else {
+										enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionfailedLoginActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionfailedLoginActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["failed_login_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> ForbiddenActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetForbiddenActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionforbiddenActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionforbiddenActivityChoiceChoices := enableDetectionElement.GetForbiddenActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
+								_, isExcludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity)
+
+								if isExcludeForbiddenActivity {
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> IncludeForbiddenActivity
+								// GlobalSpecType
+								// false
+								{
+									includeForbiddenActivityOptionsWrapper, isIncludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity)
+									includeForbiddenActivityAttributeMap := make(map[string]attr.Value)
+
+									if isIncludeForbiddenActivity && includeForbiddenActivityOptionsWrapper != nil && includeForbiddenActivityOptionsWrapper.IncludeForbiddenActivity != nil {
+										includeForbiddenActivityElement := includeForbiddenActivityOptionsWrapper.IncludeForbiddenActivity
+
+										// resource specToModelNested RequiredUintField --> ForbiddenRequestsThreshold
+										includeForbiddenActivityAttributeMap["forbidden_requests_threshold"] = types.Int64Value(int64(includeForbiddenActivityElement.GetForbiddenRequestsThreshold()))
+
+										includeForbiddenActivityObj, includeForbiddenActivityObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap, includeForbiddenActivityAttributeMap)
+										response.Diagnostics.Append(includeForbiddenActivityObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = includeForbiddenActivityObj
+									} else {
+										enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionforbiddenActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionforbiddenActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["forbidden_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> IpReputationChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetIpReputationChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionipReputationChoiceChoices := enableDetectionElement.GetIpReputationChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeIpReputation
+								_, isExcludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeIpReputation)
+
+								if isExcludeIpReputation {
+									enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolValue(true)
+								} else {
+									enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeIpReputation
+								_, isIncludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation)
+
+								if isIncludeIpReputation {
+									enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolValue(true)
+								} else {
+									enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionipReputationChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionipReputationChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionipReputationChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["ip_reputation_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> RateLimitChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetRateLimitChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionrateLimitChoiceChoices := enableDetectionElement.GetRateLimitChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeRateLimit
+								_, isExcludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeRateLimit)
+
+								if isExcludeRateLimit {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolValue(true)
+								} else {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeRateLimit
+								_, isIncludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit)
+
+								if isIncludeRateLimit {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolValue(true)
+								} else {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionrateLimitChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionrateLimitChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionrateLimitChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["rate_limit_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> WafActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetWafActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionwafActivityChoiceChoices := enableDetectionElement.GetWafActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeWafActivity
+								_, isExcludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity)
+
+								if isExcludeWafActivity {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeWafActivity
+								_, isIncludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity)
+
+								if isIncludeWafActivity {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionwafActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionwafActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionwafActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["waf_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap)
+							}
+
+							enableDetectionObj, enableDetectionObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap, enableDetectionAttributeMap)
+							response.Diagnostics.Append(enableDetectionObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = enableDetectionObj
+						} else {
+							userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap, // The attribute schema for the OneOf choices
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap)
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingUserBehaviorAnalysisSettingModelObj, appSettingUserBehaviorAnalysisSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap, appSettingUserBehaviorAnalysisSettingModel)
+				response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				appSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = appSettingUserBehaviorAnalysisSettingModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap)
+			}
+
+			appTypeSettingsElementsSpectToModel = append(appTypeSettingsElementsSpectToModel, appSettingAppTypeSettingsModel)
 		}
 
-		// resource specToModelNested RequiredArrayOfPointerField --> AppTypeRef
-		if len(appTypeSettingsElement.GetAppTypeRef()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			appTypeRefElements := make([]ObjectRefTypeModel, 0, len(appTypeSettingsElement.GetAppTypeRef()))
-			for _, appTypeRefElement := range appTypeSettingsElement.GetAppTypeRef() {
-				objectRefTypeModelModel := ObjectRefTypeModel{}
+		appTypeSettingsList, listDiags := utils.GoStructSliceToListValue(
+			ctx,
+			AppSettingAppTypeSettingsModelAttributeMap,
+			appTypeSettingsElementsSpectToModel,
+		)
 
-				// resource specToModelNested StringField --> Tenant
-				if appTypeRefElement.GetTenant() != "" {
-					objectRefTypeModelModel.Tenant = types.StringValue(appTypeRefElement.GetTenant())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Tenant = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Namespace
-				if appTypeRefElement.GetNamespace() != "" {
-					objectRefTypeModelModel.Namespace = types.StringValue(appTypeRefElement.GetNamespace())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Namespace = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Name
-				if appTypeRefElement.GetName() != "" {
-					objectRefTypeModelModel.Name = types.StringValue(appTypeRefElement.GetName())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Name = types.StringNull()
-				}
-
-				appTypeRefElements = append(appTypeRefElements, objectRefTypeModelModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			appTypeRefListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap}, appTypeRefElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.AppTypeRef = appTypeRefListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			appSettingAppSettingAppTypeSettingsModel.AppTypeRef = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap})
+		response.Diagnostics.Append(listDiags...)
+		if response.Diagnostics.HasError() {
+			return
 		}
 
-		appTypeSettingsElementsSpectToModel = append(appTypeSettingsElementsSpectToModel, appSettingAppSettingAppTypeSettingsModel)
+		data.AppTypeSettings = appTypeSettingsList
 	}
-
-	appTypeSettingsList, diags := utils.GoStructSliceToListValue(
-		ctx,
-		AppSettingAppTypeSettingsModelAttributeMap,
-		appTypeSettingsElementsSpectToModel,
-	)
-
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
-		return
-	}
-
-	data.AppTypeSettings = appTypeSettingsList
 
 	if response.Diagnostics.HasError() {
 		return
@@ -2328,6 +2411,102 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -2337,811 +2516,722 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> AppTypeSettings
-	appTypeSettingsElementsSpectToModel := make([]AppSettingAppSettingAppTypeSettings, 0, len(specData.AppTypeSettings))
+	{
+		appTypeSettingsElementsSpectToModel := make([]AppSettingAppTypeSettings, 0, len(specData.GetAppTypeSettings()))
+		for _, appTypeSettingsElement := range specData.GetAppTypeSettings() {
+			appSettingAppTypeSettingsModel := AppSettingAppTypeSettings{}
 
-	for _, appTypeSettingsElement := range specData.AppTypeSettings {
-		appSettingAppSettingAppTypeSettingsModel := AppSettingAppSettingAppTypeSettings{}
-
-		// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
-		if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingTimeseriesAnalysesSettingModel := &AppSettingAppSettingTimeseriesAnalysesSetting{}
-			timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested ArrayOfPointerField --> MetricSelectors
-			if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
+			// resource specToModelNested RequiredArrayOfPointerField --> AppTypeRef
+			if len(appTypeSettingsElement.GetAppTypeRef()) > 0 {
 				// Step 1: Always create a slice of model structs from the spec data.
 				// This slice serves as an intermediate representation.
-				metricSelectorsElements := make([]AppSettingAppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
-				for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
-					appSettingAppSettingMetricSelectorModel := AppSettingAppSettingMetricSelector{}
+				appTypeRefElements := make([]ObjectRefTypeModel, 0, len(appTypeSettingsElement.GetAppTypeRef()))
+				for _, appTypeRefElement := range appTypeSettingsElement.GetAppTypeRef() {
+					objectRefTypeModelModel := ObjectRefTypeModel{}
 
-					// resource specToModelNested EnumField --> MetricsSource
-					if metricSelectorsElement.GetMetricsSource().String() != "" {
-						stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appSettingAppSettingMetricSelectorModel.MetricsSource = listValue
+					// resource specToModelNested RequiredStringField --> Name
+					if appTypeRefElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(appTypeRefElement.GetName())
 					} else {
-						appSettingAppSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
-					// resource SpecToModelNested ArrayOfEnumField --> Metric
-					if len(metricSelectorsElement.GetMetric()) > 0 {
-						metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
-						for _, v := range metricSelectorsElement.GetMetric() {
-							if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
-								metricStrings = append(metricStrings, strVal)
-							}
-						}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, metricStrings)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appSettingAppSettingMetricSelectorModel.Metric = listValue
+					// resource specToModelNested RequiredStringField --> Namespace
+					if appTypeRefElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(appTypeRefElement.GetNamespace())
 					} else {
-						appSettingAppSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
 					}
 
-					metricSelectorsElements = append(metricSelectorsElements, appSettingAppSettingMetricSelectorModel)
+					// resource specToModelNested StringField --> Tenant
+					if appTypeRefElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(appTypeRefElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					appTypeRefElements = append(appTypeRefElements, objectRefTypeModelModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// The intermediate slice of structs must be converted to a `types.ListValue`.
-				metricSelectorsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
-				response.Diagnostics.Append(diags...)
+				appTypeRefListValue, appTypeRefListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap}, appTypeRefElements)
+				response.Diagnostics.Append(appTypeRefListDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				appSettingAppSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
+				appSettingAppTypeSettingsModel.AppTypeRef = appTypeRefListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				appSettingAppSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
+				appSettingAppTypeSettingsModel.AppTypeRef = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap})
 			}
 
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingTimeseriesAnalysesSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingAppSettingTimeseriesAnalysesSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingAppSettingTimeseriesAnalysesSettingModelObj
+			// resource specToModelNested PointerField --> BusinessLogicMarkupSetting
+			if appTypeSettingsElement.GetBusinessLogicMarkupSetting() != nil {
+				// Create the nested Go struct
+				appSettingBusinessLogicMarkupSettingModel := &AppSettingBusinessLogicMarkupSetting{}
+				businessLogicMarkupSettingElement := appTypeSettingsElement.GetBusinessLogicMarkupSetting()
 
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
-		}
+				// Recursively populate the nested struct
 
-		// resource specToModelNested PointerField --> BusinessLogicMarkupSetting
-		if appTypeSettingsElement.GetBusinessLogicMarkupSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingBusinessLogicMarkupSettingModel := &AppSettingAppSettingBusinessLogicMarkupSetting{}
-			businessLogicMarkupSettingElement := appTypeSettingsElement.GetBusinessLogicMarkupSetting()
+				// resource specToModelNested OneOfField --> LearnFromNamespace
+				if businessLogicMarkupSettingElement.GetLearnFromNamespace() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-			// Recursively populate the nested struct
+					// Define a variable for the spec choices to be passed down to nested templates
+					businessLogicMarkupSettinglearnFromNamespaceChoiceChoices := businessLogicMarkupSettingElement.GetLearnFromNamespace()
 
-			// resource specToModelNested OneOfField --> LearnFromNamespace
-			if businessLogicMarkupSettingElement.GetLearnFromNamespace() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+					// Process nested choices, populating the temporary attribute map
 
-				// Define a variable for the spec choices to be passed down to nested templates
-				businessLogicMarkupSettinglearnFromNamespaceChoiceChoices := businessLogicMarkupSettingElement.GetLearnFromNamespace()
+					// resource specToModelNested BoolOfOneOfPointerField --> Enable
+					_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
 
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> Enable
-				_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
-
-				if isEnable {
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolValue(true)
-				} else {
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap)
-			}
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingBusinessLogicMarkupSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap, appSettingAppSettingBusinessLogicMarkupSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = appSettingAppSettingBusinessLogicMarkupSettingModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
-		}
-
-		// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
-		if appTypeSettingsElement.GetUserBehaviorAnalysisSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingUserBehaviorAnalysisSettingModel := &AppSettingAppSettingUserBehaviorAnalysisSetting{}
-			userBehaviorAnalysisSettingElement := appTypeSettingsElement.GetUserBehaviorAnalysisSetting()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
-			// <no value>
-			if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices := userBehaviorAnalysisSettingElement.GetLearnFromNamespace()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> EnableLearning
-				_, isEnableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning)
-
-				if isEnableLearning {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolValue(true)
-				} else {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> DisableLearning
-				_, isDisableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableLearning)
-
-				if isDisableLearning {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolValue(true)
-				} else {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap)
-			}
-
-			// resource specToModelNested RequiredOneOfField --> MaliciousUserDetection
-			// <no value>
-			if userBehaviorAnalysisSettingElement.GetMaliciousUserDetection() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices := userBehaviorAnalysisSettingElement.GetMaliciousUserDetection()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested PointerOfOneOfField --> EnableDetection
-				// <no value>
-				// false
-				{
-					enableDetectionOptions, isEnableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection)
-					enableDetectionAttributeMap := make(map[string]attr.Value)
-
-					if isEnableDetection && enableDetectionOptions != nil {
-
-						// resource specToModelNested RequiredOneOfField --> WafActivityChoice
-						// <no value>
-						if enableDetectionOptions.EnableDetection.GetWafActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionwafActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetWafActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeWafActivity
-							_, isExcludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity)
-
-							if isExcludeWafActivity {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeWafActivity
-							_, isIncludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity)
-
-							if isIncludeWafActivity {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionwafActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionwafActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionwafActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["waf_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> IpReputationChoice
-						// <no value>
-						if enableDetectionOptions.EnableDetection.GetIpReputationChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionipReputationChoiceChoices := enableDetectionOptions.EnableDetection.GetIpReputationChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeIpReputation
-							_, isExcludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeIpReputation)
-
-							if isExcludeIpReputation {
-								enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolValue(true)
-							} else {
-								enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeIpReputation
-							_, isIncludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation)
-
-							if isIncludeIpReputation {
-								enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolValue(true)
-							} else {
-								enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionipReputationChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionipReputationChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionipReputationChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["ip_reputation_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
-						// <no value>
-						if enableDetectionOptions.EnableDetection.GetBotDefenseActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionbotDefenseActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetBotDefenseActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
-							_, isIncludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity)
-
-							if isIncludeBotDefenseActivity {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
-							_, isExcludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity)
-
-							if isExcludeBotDefenseActivity {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionbotDefenseActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionbotDefenseActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["bot_defense_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> RateLimitChoice
-						// <no value>
-						if enableDetectionOptions.EnableDetection.GetRateLimitChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionrateLimitChoiceChoices := enableDetectionOptions.EnableDetection.GetRateLimitChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeRateLimit
-							_, isIncludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit)
-
-							if isIncludeRateLimit {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolValue(true)
-							} else {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeRateLimit
-							_, isExcludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeRateLimit)
-
-							if isExcludeRateLimit {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolValue(true)
-							} else {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionrateLimitChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionrateLimitChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionrateLimitChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["rate_limit_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> ForbiddenActivityChoice
-						// <no value>
-						if enableDetectionOptions.EnableDetection.GetForbiddenActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionforbiddenActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionforbiddenActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetForbiddenActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
-							_, isExcludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity)
-
-							if isExcludeForbiddenActivity {
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> IncludeForbiddenActivity
-							// <no value>
-							// false
-							{
-								includeForbiddenActivityOptions, isIncludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity)
-								includeForbiddenActivityAttributeMap := make(map[string]attr.Value)
-
-								if isIncludeForbiddenActivity && includeForbiddenActivityOptions != nil {
-
-									// resource specToModelNested RequiredUintField --> ForbiddenRequestsThreshold
-									includeForbiddenActivityAttributeMap["forbidden_requests_threshold"] = types.Int64Value(int64(includeForbiddenActivityOptions.IncludeForbiddenActivity.GetForbiddenRequestsThreshold()))
-
-									includeForbiddenActivityObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap, includeForbiddenActivityAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = includeForbiddenActivityObj
-								} else {
-									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionforbiddenActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionforbiddenActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["forbidden_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> FailedLoginActivityChoice
-						// <no value>
-						if enableDetectionOptions.EnableDetection.GetFailedLoginActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionfailedLoginActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionfailedLoginActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetFailedLoginActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
-							_, isExcludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity)
-
-							if isExcludeFailedLoginActivity {
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> IncludeFailedLoginActivity
-							// <no value>
-							// false
-							{
-								includeFailedLoginActivityOptions, isIncludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity)
-								includeFailedLoginActivityAttributeMap := make(map[string]attr.Value)
-
-								if isIncludeFailedLoginActivity && includeFailedLoginActivityOptions != nil {
-
-									// resource specToModelNested RequiredUintField --> LoginFailuresThreshold
-									includeFailedLoginActivityAttributeMap["login_failures_threshold"] = types.Int64Value(int64(includeFailedLoginActivityOptions.IncludeFailedLoginActivity.GetLoginFailuresThreshold()))
-
-									includeFailedLoginActivityObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap, includeFailedLoginActivityAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = includeFailedLoginActivityObj
-								} else {
-									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionfailedLoginActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionfailedLoginActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["failed_login_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> CoolingOffPeriodSetting
-						// <no value>
-						if enableDetectionOptions.EnableDetection.GetCoolingOffPeriodSetting() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectioncoolingOffPeriodSettingChoiceChoices := enableDetectionOptions.EnableDetection.GetCoolingOffPeriodSetting()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested UintOfOneOfField --> CoolingOffPeriod
-							coolingOffPeriodItem, isCoolingOffPeriod := enableDetectioncoolingOffPeriodSettingChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod)
-
-							if isCoolingOffPeriod {
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Value(int64(coolingOffPeriodItem.CoolingOffPeriod))
-							} else {
-								// Empty uint, set to null
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Null()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["cooling_off_period_setting_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap)
-						}
-
-						enableDetectionObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap, enableDetectionAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = enableDetectionObj
+					if isEnable {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolValue(true)
 					} else {
-						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap)
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolNull()
 					}
-				}
 
-				// resource specToModelNested BoolOfOneOfPointerField --> DisableDetection
-				_, isDisableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection)
+					// --- End of Choices ---
 
-				if isDisableDetection {
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolValue(true)
+					// Create the final ObjectValue for this OneOf field
+					finalObj, businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = finalObj
 				} else {
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolNull()
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap)
 				}
 
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap, // The attribute schema for the OneOf choices
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags...)
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingBusinessLogicMarkupSettingModelObj, appSettingBusinessLogicMarkupSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap, appSettingBusinessLogicMarkupSettingModel)
+				response.Diagnostics.Append(appSettingBusinessLogicMarkupSettingModelObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
+				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = appSettingBusinessLogicMarkupSettingModelObj
 
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = finalObj
 			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap)
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
 			}
 
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingUserBehaviorAnalysisSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap, appSettingAppSettingUserBehaviorAnalysisSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = appSettingAppSettingUserBehaviorAnalysisSettingModelObj
+			// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
+			if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
+				// Create the nested Go struct
+				appSettingTimeseriesAnalysesSettingModel := &AppSettingTimeseriesAnalysesSetting{}
+				timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
 
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap)
+				// Recursively populate the nested struct
+
+				// resource specToModelNested ArrayOfPointerField --> MetricSelectors
+				if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					metricSelectorsElements := make([]AppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
+					for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
+						appSettingMetricSelectorModel := AppSettingMetricSelector{}
+
+						// resource SpecToModelNested ArrayOfEnumField --> Metric
+						{
+							if len(metricSelectorsElement.GetMetric()) > 0 {
+								metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
+								for _, v := range metricSelectorsElement.GetMetric() {
+									if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
+										metricStrings = append(metricStrings, strVal)
+									}
+								}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, metricStrings)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								appSettingMetricSelectorModel.Metric = listValue
+							} else {
+								appSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
+							}
+						}
+
+						// resource specToModelNested EnumField --> MetricsSource
+						{
+							if metricSelectorsElement.GetMetricsSource().String() != "" {
+								stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
+								stringSlice := []types.String{stringValue}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								appSettingMetricSelectorModel.MetricsSource = listValue
+							} else {
+								appSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
+							}
+						}
+
+						metricSelectorsElements = append(metricSelectorsElements, appSettingMetricSelectorModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					metricSelectorsListValue, metricSelectorsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
+					response.Diagnostics.Append(metricSelectorsListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingTimeseriesAnalysesSettingModelObj, appSettingTimeseriesAnalysesSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingTimeseriesAnalysesSettingModel)
+				response.Diagnostics.Append(appSettingTimeseriesAnalysesSettingModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingTimeseriesAnalysesSettingModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
+			}
+
+			// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
+			if appTypeSettingsElement.GetUserBehaviorAnalysisSetting() != nil {
+				// Create the nested Go struct
+				appSettingUserBehaviorAnalysisSettingModel := &AppSettingUserBehaviorAnalysisSetting{}
+				userBehaviorAnalysisSettingElement := appTypeSettingsElement.GetUserBehaviorAnalysisSetting()
+
+				// Recursively populate the nested struct
+
+				// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
+				// <no value>
+				if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices := userBehaviorAnalysisSettingElement.GetLearnFromNamespace()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DisableLearning
+					_, isDisableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableLearning)
+
+					if isDisableLearning {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> EnableLearning
+					_, isEnableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning)
+
+					if isEnableLearning {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredOneOfField --> MaliciousUserDetection
+				// <no value>
+				if userBehaviorAnalysisSettingElement.GetMaliciousUserDetection() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices := userBehaviorAnalysisSettingElement.GetMaliciousUserDetection()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DisableDetection
+					_, isDisableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection)
+
+					if isDisableDetection {
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolNull()
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> EnableDetection
+					// <no value>
+					// false
+					{
+						enableDetectionOptionsWrapper, isEnableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection)
+						enableDetectionAttributeMap := make(map[string]attr.Value)
+
+						if isEnableDetection && enableDetectionOptionsWrapper != nil && enableDetectionOptionsWrapper.EnableDetection != nil {
+							enableDetectionElement := enableDetectionOptionsWrapper.EnableDetection
+
+							// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
+							// <no value>
+							if enableDetectionElement.GetBotDefenseActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionbotDefenseActivityChoiceChoices := enableDetectionElement.GetBotDefenseActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
+								_, isExcludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity)
+
+								if isExcludeBotDefenseActivity {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
+								_, isIncludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity)
+
+								if isIncludeBotDefenseActivity {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionbotDefenseActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionbotDefenseActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["bot_defense_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> CoolingOffPeriodSetting
+							// <no value>
+							if enableDetectionElement.GetCoolingOffPeriodSetting() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectioncoolingOffPeriodSettingChoiceChoices := enableDetectionElement.GetCoolingOffPeriodSetting()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested UintOfOneOfField --> CoolingOffPeriod
+								coolingOffPeriodItem, isCoolingOffPeriod := enableDetectioncoolingOffPeriodSettingChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod)
+
+								if isCoolingOffPeriod {
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Value(int64(coolingOffPeriodItem.CoolingOffPeriod))
+								} else {
+									// Empty uint, set to null
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Null()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> FailedLoginActivityChoice
+							// <no value>
+							if enableDetectionElement.GetFailedLoginActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionfailedLoginActivityChoiceChoices := enableDetectionElement.GetFailedLoginActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
+								_, isExcludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity)
+
+								if isExcludeFailedLoginActivity {
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> IncludeFailedLoginActivity
+								// <no value>
+								// false
+								{
+									includeFailedLoginActivityOptionsWrapper, isIncludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity)
+									includeFailedLoginActivityAttributeMap := make(map[string]attr.Value)
+
+									if isIncludeFailedLoginActivity && includeFailedLoginActivityOptionsWrapper != nil && includeFailedLoginActivityOptionsWrapper.IncludeFailedLoginActivity != nil {
+										includeFailedLoginActivityElement := includeFailedLoginActivityOptionsWrapper.IncludeFailedLoginActivity
+
+										// resource specToModelNested RequiredUintField --> LoginFailuresThreshold
+										includeFailedLoginActivityAttributeMap["login_failures_threshold"] = types.Int64Value(int64(includeFailedLoginActivityElement.GetLoginFailuresThreshold()))
+
+										includeFailedLoginActivityObj, includeFailedLoginActivityObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap, includeFailedLoginActivityAttributeMap)
+										response.Diagnostics.Append(includeFailedLoginActivityObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = includeFailedLoginActivityObj
+									} else {
+										enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionfailedLoginActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionfailedLoginActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["failed_login_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> ForbiddenActivityChoice
+							// <no value>
+							if enableDetectionElement.GetForbiddenActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionforbiddenActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionforbiddenActivityChoiceChoices := enableDetectionElement.GetForbiddenActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
+								_, isExcludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity)
+
+								if isExcludeForbiddenActivity {
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> IncludeForbiddenActivity
+								// <no value>
+								// false
+								{
+									includeForbiddenActivityOptionsWrapper, isIncludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity)
+									includeForbiddenActivityAttributeMap := make(map[string]attr.Value)
+
+									if isIncludeForbiddenActivity && includeForbiddenActivityOptionsWrapper != nil && includeForbiddenActivityOptionsWrapper.IncludeForbiddenActivity != nil {
+										includeForbiddenActivityElement := includeForbiddenActivityOptionsWrapper.IncludeForbiddenActivity
+
+										// resource specToModelNested RequiredUintField --> ForbiddenRequestsThreshold
+										includeForbiddenActivityAttributeMap["forbidden_requests_threshold"] = types.Int64Value(int64(includeForbiddenActivityElement.GetForbiddenRequestsThreshold()))
+
+										includeForbiddenActivityObj, includeForbiddenActivityObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap, includeForbiddenActivityAttributeMap)
+										response.Diagnostics.Append(includeForbiddenActivityObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = includeForbiddenActivityObj
+									} else {
+										enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionforbiddenActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionforbiddenActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["forbidden_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> IpReputationChoice
+							// <no value>
+							if enableDetectionElement.GetIpReputationChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionipReputationChoiceChoices := enableDetectionElement.GetIpReputationChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeIpReputation
+								_, isExcludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeIpReputation)
+
+								if isExcludeIpReputation {
+									enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolValue(true)
+								} else {
+									enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeIpReputation
+								_, isIncludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation)
+
+								if isIncludeIpReputation {
+									enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolValue(true)
+								} else {
+									enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionipReputationChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionipReputationChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionipReputationChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["ip_reputation_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> RateLimitChoice
+							// <no value>
+							if enableDetectionElement.GetRateLimitChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionrateLimitChoiceChoices := enableDetectionElement.GetRateLimitChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeRateLimit
+								_, isExcludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeRateLimit)
+
+								if isExcludeRateLimit {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolValue(true)
+								} else {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeRateLimit
+								_, isIncludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit)
+
+								if isIncludeRateLimit {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolValue(true)
+								} else {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionrateLimitChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionrateLimitChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionrateLimitChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["rate_limit_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> WafActivityChoice
+							// <no value>
+							if enableDetectionElement.GetWafActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionwafActivityChoiceChoices := enableDetectionElement.GetWafActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeWafActivity
+								_, isExcludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity)
+
+								if isExcludeWafActivity {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeWafActivity
+								_, isIncludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity)
+
+								if isIncludeWafActivity {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionwafActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionwafActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionwafActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["waf_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap)
+							}
+
+							enableDetectionObj, enableDetectionObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap, enableDetectionAttributeMap)
+							response.Diagnostics.Append(enableDetectionObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = enableDetectionObj
+						} else {
+							userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap, // The attribute schema for the OneOf choices
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap)
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingUserBehaviorAnalysisSettingModelObj, appSettingUserBehaviorAnalysisSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap, appSettingUserBehaviorAnalysisSettingModel)
+				response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				appSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = appSettingUserBehaviorAnalysisSettingModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap)
+			}
+
+			appTypeSettingsElementsSpectToModel = append(appTypeSettingsElementsSpectToModel, appSettingAppTypeSettingsModel)
 		}
 
-		// resource specToModelNested RequiredArrayOfPointerField --> AppTypeRef
-		if len(appTypeSettingsElement.GetAppTypeRef()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			appTypeRefElements := make([]ObjectRefTypeModel, 0, len(appTypeSettingsElement.GetAppTypeRef()))
-			for _, appTypeRefElement := range appTypeSettingsElement.GetAppTypeRef() {
-				objectRefTypeModelModel := ObjectRefTypeModel{}
+		appTypeSettingsList, listDiags := utils.GoStructSliceToListValue(
+			ctx,
+			AppSettingAppTypeSettingsModelAttributeMap,
+			appTypeSettingsElementsSpectToModel,
+		)
 
-				// resource specToModelNested StringField --> Tenant
-				if appTypeRefElement.GetTenant() != "" {
-					objectRefTypeModelModel.Tenant = types.StringValue(appTypeRefElement.GetTenant())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Tenant = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Namespace
-				if appTypeRefElement.GetNamespace() != "" {
-					objectRefTypeModelModel.Namespace = types.StringValue(appTypeRefElement.GetNamespace())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Namespace = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Name
-				if appTypeRefElement.GetName() != "" {
-					objectRefTypeModelModel.Name = types.StringValue(appTypeRefElement.GetName())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Name = types.StringNull()
-				}
-
-				appTypeRefElements = append(appTypeRefElements, objectRefTypeModelModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			appTypeRefListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap}, appTypeRefElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.AppTypeRef = appTypeRefListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			appSettingAppSettingAppTypeSettingsModel.AppTypeRef = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap})
+		response.Diagnostics.Append(listDiags...)
+		if response.Diagnostics.HasError() {
+			return
 		}
 
-		appTypeSettingsElementsSpectToModel = append(appTypeSettingsElementsSpectToModel, appSettingAppSettingAppTypeSettingsModel)
+		data.AppTypeSettings = appTypeSettingsList
 	}
-
-	appTypeSettingsList, diags := utils.GoStructSliceToListValue(
-		ctx,
-		AppSettingAppTypeSettingsModelAttributeMap,
-		appTypeSettingsElementsSpectToModel,
-	)
-
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
-		return
-	}
-
-	data.AppTypeSettings = appTypeSettingsList
 
 	if response.Diagnostics.HasError() {
 		return
@@ -3160,6 +3250,25 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCAppSettingModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -3190,23 +3299,13 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -3219,9 +3318,33 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot RequiredArrayOfPointerField --> AppTypeSettings
-		var appTypeSettingsElementsModelToSpec []AppSettingAppSettingAppTypeSettings
+		var appTypeSettingsElementsModelToSpec []AppSettingAppTypeSettings
 		response.Diagnostics.Append(data.AppTypeSettings.ElementsAs(ctx, &appTypeSettingsElementsModelToSpec, false)...)
 		if response.Diagnostics.HasError() {
 			return
@@ -3232,9 +3355,72 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 		for i, appTypeSettingsElement := range appTypeSettingsElementsModelToSpec {
 			appTypeSettingsSpec[i] = &ves_io_schema_app_setting.AppTypeSettings{}
 
+			// resource modelToSpecNested RequiredArrayOfPointerField --> AppTypeRef
+			if !appTypeSettingsElement.AppTypeRef.IsNull() && !appTypeSettingsElement.AppTypeRef.IsUnknown() && len(appTypeSettingsElement.AppTypeRef.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var appTypeRefElements []ObjectRefTypeModel
+				response.Diagnostics.Append(appTypeSettingsElement.AppTypeRef.ElementsAs(ctx, &appTypeRefElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				appTypeRefSpec := make([]*ves_io_schema.ObjectRefType, len(appTypeRefElements))
+				appTypeSettingsSpec[i].AppTypeRef = appTypeRefSpec
+
+				// 3. Iterate over the converted Go slice
+				for ii, appTypeRefElement := range appTypeRefElements {
+					// Initialize the spec struct for the current element
+					appTypeSettingsSpec[i].AppTypeRef[ii] = &ves_io_schema.ObjectRefType{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> Name
+					if !appTypeRefElement.Name.IsNull() && !appTypeRefElement.Name.IsUnknown() {
+						appTypeSettingsSpec[i].AppTypeRef[ii].Name = string(appTypeRefElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Namespace
+					if !appTypeRefElement.Namespace.IsNull() && !appTypeRefElement.Namespace.IsUnknown() {
+						appTypeSettingsSpec[i].AppTypeRef[ii].Namespace = string(appTypeRefElement.Namespace.ValueString())
+					}
+
+				}
+			}
+
+			// resource modelToSpecNested PointerField --> BusinessLogicMarkupSetting
+			if !appTypeSettingsElement.BusinessLogicMarkupSetting.IsNull() && !appTypeSettingsElement.BusinessLogicMarkupSetting.IsUnknown() {
+				var businessLogicMarkupSettingModel AppSettingBusinessLogicMarkupSetting
+				response.Diagnostics.Append(appTypeSettingsElement.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				businessLogicMarkupSettingSpec := &ves_io_schema_app_setting.BusinessLogicMarkupSetting{}
+				appTypeSettingsSpec[i].BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
+
+				// resource modelToSpecNested OneOfField --> LearnFromNamespace
+				if !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsUnknown() {
+					businessLogicMarkupSettingLearnFromNamespaceChoiceModel := AppSettingLearnFromNsChoice{}
+					response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromNamespaceChoice.As(ctx, &businessLogicMarkupSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
+					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsUnknown() {
+						enableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable{}
+						enableSpecBool.Enable = &ves_io_schema.Empty{}
+						businessLogicMarkupSettingSpec.LearnFromNamespace = enableSpecBool
+					}
+
+				}
+
+			}
+
 			// resource modelToSpecNested PointerField --> TimeseriesAnalysesSetting
 			if !appTypeSettingsElement.TimeseriesAnalysesSetting.IsNull() && !appTypeSettingsElement.TimeseriesAnalysesSetting.IsUnknown() {
-				var timeseriesAnalysesSettingModel AppSettingAppSettingTimeseriesAnalysesSetting
+				var timeseriesAnalysesSettingModel AppSettingTimeseriesAnalysesSetting
 				response.Diagnostics.Append(appTypeSettingsElement.TimeseriesAnalysesSetting.As(ctx, &timeseriesAnalysesSettingModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
@@ -3246,7 +3432,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 				// resource modelToSpecNested ArrayOfPointerField --> MetricSelectors
 				if !timeseriesAnalysesSettingModel.MetricSelectors.IsNull() && !timeseriesAnalysesSettingModel.MetricSelectors.IsUnknown() && len(timeseriesAnalysesSettingModel.MetricSelectors.Elements()) > 0 {
 					// 1. Convert the types.List into a slice of the model's Go struct
-					var metricSelectorsElements []AppSettingAppSettingMetricSelector
+					var metricSelectorsElements []AppSettingMetricSelector
 					response.Diagnostics.Append(timeseriesAnalysesSettingModel.MetricSelectors.ElementsAs(ctx, &metricSelectorsElements, false)...)
 					if response.Diagnostics.HasError() {
 						return
@@ -3262,26 +3448,6 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						timeseriesAnalysesSettingSpec.MetricSelectors[ii] = &ves_io_schema_app_setting.MetricSelector{}
 
 						// Recursively process nested elements
-
-						// resource modelToSpecNested EnumField --> MetricsSource
-						if !metricSelectorsElement.MetricsSource.IsNull() && !metricSelectorsElement.MetricsSource.IsUnknown() {
-							var metricsSourceTfStrings []types.String
-							diags = metricSelectorsElement.MetricsSource.ElementsAs(ctx, &metricsSourceTfStrings, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							if len(metricsSourceTfStrings) > 0 {
-								valStr := metricsSourceTfStrings[0].ValueString()
-								if v, ok := ves_io_schema_app_setting.MetricsSource_value[valStr]; ok {
-									metricSelectorsSpec[i].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
-								} else {
-									response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MetricsSource", valStr))
-									return
-								}
-							}
-						}
 
 						// resource modelToSpecNested ArrayOfEnumField --> Metric
 						if !metricSelectorsElement.Metric.IsNull() && !metricSelectorsElement.Metric.IsUnknown() {
@@ -3305,7 +3471,31 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 									)
 								}
 							}
-							metricSelectorsSpec[i].Metric = metricSpec
+							metricSelectorsSpec[ii].Metric = metricSpec
+						}
+
+						// resource modelToSpecNested EnumField --> MetricsSource
+						if !metricSelectorsElement.MetricsSource.IsNull() && !metricSelectorsElement.MetricsSource.IsUnknown() {
+							var metricsSourceTfStrings []types.String
+							diags = metricSelectorsElement.MetricsSource.ElementsAs(ctx, &metricsSourceTfStrings, false)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							if len(metricsSourceTfStrings) > 0 {
+								valStr := metricsSourceTfStrings[0].ValueString()
+								if v, ok := ves_io_schema_app_setting.MetricsSource_value[valStr]; ok {
+									metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
+								} else {
+									response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MetricsSource", valStr))
+									return
+								}
+							}
+						} else {
+							if v, ok := ves_io_schema_app_setting.MetricsSource_value["NONE"]; ok {
+								metricSelectorsSpec[ii].MetricsSource = ves_io_schema_app_setting.MetricsSource(v)
+							}
 						}
 
 					}
@@ -3313,39 +3503,9 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested PointerField --> BusinessLogicMarkupSetting
-			if !appTypeSettingsElement.BusinessLogicMarkupSetting.IsNull() && !appTypeSettingsElement.BusinessLogicMarkupSetting.IsUnknown() {
-				var businessLogicMarkupSettingModel AppSettingAppSettingBusinessLogicMarkupSetting
-				response.Diagnostics.Append(appTypeSettingsElement.BusinessLogicMarkupSetting.As(ctx, &businessLogicMarkupSettingModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				businessLogicMarkupSettingSpec := &ves_io_schema_app_setting.BusinessLogicMarkupSetting{}
-				appTypeSettingsSpec[i].BusinessLogicMarkupSetting = businessLogicMarkupSettingSpec
-
-				// resource modelToSpecNested OneOfField --> LearnFromNamespace
-				if !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsNull() && !businessLogicMarkupSettingModel.LearnFromNamespaceChoice.IsUnknown() {
-					businessLogicMarkupSettingLearnFromNamespaceChoiceModel := AppSettingBusinessLogicMarkupSettingLearnFromNamespaceChoice{}
-					response.Diagnostics.Append(businessLogicMarkupSettingModel.LearnFromNamespaceChoice.As(ctx, &businessLogicMarkupSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
-					if !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromNamespaceChoiceModel.Enable.IsUnknown() {
-						enableSpecBool := &ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable{}
-						enableSpecBool.Enable = &ves_io_schema.Empty{}
-						businessLogicMarkupSettingSpec.LearnFromNamespace = enableSpecBool
-					}
-
-				}
-
-			}
-
 			// resource modelToSpecNested PointerField --> UserBehaviorAnalysisSetting
 			if !appTypeSettingsElement.UserBehaviorAnalysisSetting.IsNull() && !appTypeSettingsElement.UserBehaviorAnalysisSetting.IsUnknown() {
-				var userBehaviorAnalysisSettingModel AppSettingAppSettingUserBehaviorAnalysisSetting
+				var userBehaviorAnalysisSettingModel AppSettingUserBehaviorAnalysisSetting
 				response.Diagnostics.Append(appTypeSettingsElement.UserBehaviorAnalysisSetting.As(ctx, &userBehaviorAnalysisSettingModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
@@ -3356,17 +3516,10 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 				// resource modelToSpecNested RequiredOneOfField --> LearnFromNamespace
 				if !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsNull() && !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsUnknown() {
-					userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel := AppSettingUserBehaviorAnalysisSettingLearnFromNamespaceChoice{}
+					userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel := AppSettingUserBehaviorAnalysisSettingLearnFromNsChoice{}
 					response.Diagnostics.Append(userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.As(ctx, &userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> EnableLearning
-					if !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsNull() && !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsUnknown() {
-						enableLearningSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning{}
-						enableLearningSpecBool.EnableLearning = &ves_io_schema.Empty{}
-						userBehaviorAnalysisSettingSpec.LearnFromNamespace = enableLearningSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> DisableLearning
@@ -3376,20 +3529,34 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						userBehaviorAnalysisSettingSpec.LearnFromNamespace = disableLearningSpecBool
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> EnableLearning
+					if !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsNull() && !userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel.EnableLearning.IsUnknown() {
+						enableLearningSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning{}
+						enableLearningSpecBool.EnableLearning = &ves_io_schema.Empty{}
+						userBehaviorAnalysisSettingSpec.LearnFromNamespace = enableLearningSpecBool
+					}
+
 				}
 
 				// resource modelToSpecNested RequiredOneOfField --> MaliciousUserDetection
 				if !userBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice.IsNull() && !userBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice.IsUnknown() {
-					userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel := AppSettingUserBehaviorAnalysisSettingMaliciousUserDetectionChoice{}
+					userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel := AppSettingMaliciousUserDetectionChoice{}
 					response.Diagnostics.Append(userBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice.As(ctx, &userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> DisableDetection
+					if !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsNull() && !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsUnknown() {
+						disableDetectionSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection{}
+						disableDetectionSpecBool.DisableDetection = &ves_io_schema.Empty{}
+						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = disableDetectionSpecBool
+					}
+
 					// resource modelToSpecNested PointerOfOneOfField --> EnableDetection
 					if !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.IsNull() && !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.IsUnknown() {
-						var appSettingUserBehaviorAnalysisSettingEnableDetectionModel AppSettingUserBehaviorAnalysisSettingEnableDetection
-						response.Diagnostics.Append(userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.As(ctx, &appSettingUserBehaviorAnalysisSettingEnableDetectionModel, basetypes.ObjectAsOptions{})...)
+						var appSettingEnableDetectionModel AppSettingEnableDetection
+						response.Diagnostics.Append(userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.EnableDetection.As(ctx, &appSettingEnableDetectionModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
 						}
@@ -3397,34 +3564,117 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						enableDetectionOneOfSpec.EnableDetection = &ves_io_schema_app_setting.MaliciousUserDetectionSetting{}
 						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = enableDetectionOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> WafActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.WafActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.WafActivityChoice.IsUnknown() {
-							enableDetectionWafActivityChoiceModel := AppSettingMaliciousUserDetectionSettingWafActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.WafActivityChoice.As(ctx, &enableDetectionWafActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
+						if !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsNull() && !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsUnknown() {
+							enableDetectionBotDefenseActivityChoiceModel := AppSettingBotDefenseActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.BotDefenseActivityChoice.As(ctx, &enableDetectionBotDefenseActivityChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeWafActivity
-							if !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsUnknown() {
-								excludeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity{}
-								excludeWafActivitySpecBool.ExcludeWafActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = excludeWafActivitySpecBool
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
+							if !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsUnknown() {
+								excludeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity{}
+								excludeBotDefenseActivitySpecBool.ExcludeBotDefenseActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = excludeBotDefenseActivitySpecBool
 							}
 
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeWafActivity
-							if !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsUnknown() {
-								includeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity{}
-								includeWafActivitySpecBool.IncludeWafActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = includeWafActivitySpecBool
+							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
+							if !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsUnknown() {
+								includeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity{}
+								includeBotDefenseActivitySpecBool.IncludeBotDefenseActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = includeBotDefenseActivitySpecBool
+							}
+
+						}
+
+						// resource modelToSpecNested RequiredOneOfField --> CoolingOffPeriodSetting
+						if !appSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsNull() && !appSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsUnknown() {
+							enableDetectionCoolingOffPeriodSettingChoiceModel := AppSettingCoolingOffPeriodSettingChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.As(ctx, &enableDetectionCoolingOffPeriodSettingChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested UintOfOneOfField --> CoolingOffPeriod
+							if !enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.IsNull() {
+								coolingOffPeriodSpecUint := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod{}
+								coolingOffPeriodSpecUint.CoolingOffPeriod = uint32(enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.ValueInt64())
+								enableDetectionOneOfSpec.EnableDetection.CoolingOffPeriodSetting = coolingOffPeriodSpecUint
+							}
+
+						}
+
+						// resource modelToSpecNested RequiredOneOfField --> FailedLoginActivityChoice
+						if !appSettingEnableDetectionModel.FailedLoginActivityChoice.IsNull() && !appSettingEnableDetectionModel.FailedLoginActivityChoice.IsUnknown() {
+							enableDetectionFailedLoginActivityChoiceModel := AppSettingFailedLoginActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.FailedLoginActivityChoice.As(ctx, &enableDetectionFailedLoginActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
+							if !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsUnknown() {
+								excludeFailedLoginActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity{}
+								excludeFailedLoginActivitySpecBool.ExcludeFailedLoginActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = excludeFailedLoginActivitySpecBool
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> IncludeFailedLoginActivity
+							if !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsUnknown() {
+								var appSettingIncludeFailedLoginActivityModel AppSettingIncludeFailedLoginActivity
+								response.Diagnostics.Append(enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.As(ctx, &appSettingIncludeFailedLoginActivityModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								includeFailedLoginActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity{}
+								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity = &ves_io_schema_app_setting.FailedLoginActivitySetting{}
+								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = includeFailedLoginActivityOneOfSpec
+
+								// resource modelToSpecNested RequiredUintField --> LoginFailuresThreshold
+								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity.LoginFailuresThreshold = uint32(uint32(appSettingIncludeFailedLoginActivityModel.LoginFailuresThreshold.ValueInt64()))
+
+							}
+
+						}
+
+						// resource modelToSpecNested RequiredOneOfField --> ForbiddenActivityChoice
+						if !appSettingEnableDetectionModel.ForbiddenActivityChoice.IsNull() && !appSettingEnableDetectionModel.ForbiddenActivityChoice.IsUnknown() {
+							enableDetectionForbiddenActivityChoiceModel := AppSettingForbiddenActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.ForbiddenActivityChoice.As(ctx, &enableDetectionForbiddenActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
+							if !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsUnknown() {
+								excludeForbiddenActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity{}
+								excludeForbiddenActivitySpecBool.ExcludeForbiddenActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = excludeForbiddenActivitySpecBool
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> IncludeForbiddenActivity
+							if !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsUnknown() {
+								var appSettingIncludeForbiddenActivityModel AppSettingIncludeForbiddenActivity
+								response.Diagnostics.Append(enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.As(ctx, &appSettingIncludeForbiddenActivityModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								includeForbiddenActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity{}
+								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity = &ves_io_schema_app_setting.ForbiddenActivitySetting{}
+								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = includeForbiddenActivityOneOfSpec
+
+								// resource modelToSpecNested RequiredUintField --> ForbiddenRequestsThreshold
+								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity.ForbiddenRequestsThreshold = uint32(uint32(appSettingIncludeForbiddenActivityModel.ForbiddenRequestsThreshold.ValueInt64()))
+
 							}
 
 						}
 
 						// resource modelToSpecNested RequiredOneOfField --> IpReputationChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.IpReputationChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.IpReputationChoice.IsUnknown() {
-							enableDetectionIpReputationChoiceModel := AppSettingMaliciousUserDetectionSettingIpReputationChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.IpReputationChoice.As(ctx, &enableDetectionIpReputationChoiceModel, basetypes.ObjectAsOptions{})...)
+						if !appSettingEnableDetectionModel.IpReputationChoice.IsNull() && !appSettingEnableDetectionModel.IpReputationChoice.IsUnknown() {
+							enableDetectionIpReputationChoiceModel := AppSettingIpReputationChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.IpReputationChoice.As(ctx, &enableDetectionIpReputationChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -3445,43 +3695,12 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.BotDefenseActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.BotDefenseActivityChoice.IsUnknown() {
-							enableDetectionBotDefenseActivityChoiceModel := AppSettingMaliciousUserDetectionSettingBotDefenseActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.BotDefenseActivityChoice.As(ctx, &enableDetectionBotDefenseActivityChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
-							if !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.IncludeBotDefenseActivity.IsUnknown() {
-								includeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity{}
-								includeBotDefenseActivitySpecBool.IncludeBotDefenseActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = includeBotDefenseActivitySpecBool
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
-							if !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsNull() && !enableDetectionBotDefenseActivityChoiceModel.ExcludeBotDefenseActivity.IsUnknown() {
-								excludeBotDefenseActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity{}
-								excludeBotDefenseActivitySpecBool.ExcludeBotDefenseActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = excludeBotDefenseActivitySpecBool
-							}
-
-						}
-
 						// resource modelToSpecNested RequiredOneOfField --> RateLimitChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.RateLimitChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.RateLimitChoice.IsUnknown() {
-							enableDetectionRateLimitChoiceModel := AppSettingMaliciousUserDetectionSettingRateLimitChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.RateLimitChoice.As(ctx, &enableDetectionRateLimitChoiceModel, basetypes.ObjectAsOptions{})...)
+						if !appSettingEnableDetectionModel.RateLimitChoice.IsNull() && !appSettingEnableDetectionModel.RateLimitChoice.IsUnknown() {
+							enableDetectionRateLimitChoiceModel := AppSettingRateLimitChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.RateLimitChoice.As(ctx, &enableDetectionRateLimitChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeRateLimit
-							if !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsNull() && !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsUnknown() {
-								includeRateLimitSpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit{}
-								includeRateLimitSpecBool.IncludeRateLimit = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = includeRateLimitSpecBool
 							}
 
 							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeRateLimit
@@ -3491,140 +3710,55 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 								enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = excludeRateLimitSpecBool
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeRateLimit
+							if !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsNull() && !enableDetectionRateLimitChoiceModel.IncludeRateLimit.IsUnknown() {
+								includeRateLimitSpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit{}
+								includeRateLimitSpecBool.IncludeRateLimit = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = includeRateLimitSpecBool
+							}
+
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> ForbiddenActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.ForbiddenActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.ForbiddenActivityChoice.IsUnknown() {
-							enableDetectionForbiddenActivityChoiceModel := AppSettingMaliciousUserDetectionSettingForbiddenActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.ForbiddenActivityChoice.As(ctx, &enableDetectionForbiddenActivityChoiceModel, basetypes.ObjectAsOptions{})...)
+						// resource modelToSpecNested RequiredOneOfField --> WafActivityChoice
+						if !appSettingEnableDetectionModel.WafActivityChoice.IsNull() && !appSettingEnableDetectionModel.WafActivityChoice.IsUnknown() {
+							enableDetectionWafActivityChoiceModel := AppSettingWafActivityChoice{}
+							response.Diagnostics.Append(appSettingEnableDetectionModel.WafActivityChoice.As(ctx, &enableDetectionWafActivityChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
-							if !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.ExcludeForbiddenActivity.IsUnknown() {
-								excludeForbiddenActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity{}
-								excludeForbiddenActivitySpecBool.ExcludeForbiddenActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = excludeForbiddenActivitySpecBool
+							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeWafActivity
+							if !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.ExcludeWafActivity.IsUnknown() {
+								excludeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity{}
+								excludeWafActivitySpecBool.ExcludeWafActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = excludeWafActivitySpecBool
 							}
 
-							// resource modelToSpecNested PointerOfOneOfField --> IncludeForbiddenActivity
-							if !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsNull() && !enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.IsUnknown() {
-								var appSettingMaliciousUserDetectionSettingIncludeForbiddenActivityModel AppSettingMaliciousUserDetectionSettingIncludeForbiddenActivity
-								response.Diagnostics.Append(enableDetectionForbiddenActivityChoiceModel.IncludeForbiddenActivity.As(ctx, &appSettingMaliciousUserDetectionSettingIncludeForbiddenActivityModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								includeForbiddenActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity{}
-								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity = &ves_io_schema_app_setting.ForbiddenActivitySetting{}
-								enableDetectionOneOfSpec.EnableDetection.ForbiddenActivityChoice = includeForbiddenActivityOneOfSpec
-
-								// resource modelToSpecNested RequiredUintField --> ForbiddenRequestsThreshold
-								includeForbiddenActivityOneOfSpec.IncludeForbiddenActivity.ForbiddenRequestsThreshold = uint32(uint32(appSettingMaliciousUserDetectionSettingIncludeForbiddenActivityModel.ForbiddenRequestsThreshold.ValueInt64()))
-
-							}
-
-						}
-
-						// resource modelToSpecNested RequiredOneOfField --> FailedLoginActivityChoice
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.FailedLoginActivityChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.FailedLoginActivityChoice.IsUnknown() {
-							enableDetectionFailedLoginActivityChoiceModel := AppSettingMaliciousUserDetectionSettingFailedLoginActivityChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.FailedLoginActivityChoice.As(ctx, &enableDetectionFailedLoginActivityChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
-							if !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.ExcludeFailedLoginActivity.IsUnknown() {
-								excludeFailedLoginActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity{}
-								excludeFailedLoginActivitySpecBool.ExcludeFailedLoginActivity = &ves_io_schema.Empty{}
-								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = excludeFailedLoginActivitySpecBool
-							}
-
-							// resource modelToSpecNested PointerOfOneOfField --> IncludeFailedLoginActivity
-							if !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsNull() && !enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.IsUnknown() {
-								var appSettingMaliciousUserDetectionSettingIncludeFailedLoginActivityModel AppSettingMaliciousUserDetectionSettingIncludeFailedLoginActivity
-								response.Diagnostics.Append(enableDetectionFailedLoginActivityChoiceModel.IncludeFailedLoginActivity.As(ctx, &appSettingMaliciousUserDetectionSettingIncludeFailedLoginActivityModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								includeFailedLoginActivityOneOfSpec := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity{}
-								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity = &ves_io_schema_app_setting.FailedLoginActivitySetting{}
-								enableDetectionOneOfSpec.EnableDetection.FailedLoginActivityChoice = includeFailedLoginActivityOneOfSpec
-
-								// resource modelToSpecNested RequiredUintField --> LoginFailuresThreshold
-								includeFailedLoginActivityOneOfSpec.IncludeFailedLoginActivity.LoginFailuresThreshold = uint32(uint32(appSettingMaliciousUserDetectionSettingIncludeFailedLoginActivityModel.LoginFailuresThreshold.ValueInt64()))
-
-							}
-
-						}
-
-						// resource modelToSpecNested RequiredOneOfField --> CoolingOffPeriodSetting
-						if !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsNull() && !appSettingUserBehaviorAnalysisSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.IsUnknown() {
-							enableDetectionCoolingOffPeriodSettingChoiceModel := AppSettingMaliciousUserDetectionSettingCoolingOffPeriodSettingChoice{}
-							response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingEnableDetectionModel.CoolingOffPeriodSettingChoice.As(ctx, &enableDetectionCoolingOffPeriodSettingChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested UintOfOneOfField --> CoolingOffPeriod
-							if !enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.IsNull() {
-								coolingOffPeriodSpecUint := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod{}
-								coolingOffPeriodSpecUint.CoolingOffPeriod = uint32(enableDetectionCoolingOffPeriodSettingChoiceModel.CoolingOffPeriod.ValueInt64())
-								enableDetectionOneOfSpec.EnableDetection.CoolingOffPeriodSetting = coolingOffPeriodSpecUint
+							// resource modelToSpecNested BoolOfOneOfPointerField --> IncludeWafActivity
+							if !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsNull() && !enableDetectionWafActivityChoiceModel.IncludeWafActivity.IsUnknown() {
+								includeWafActivitySpecBool := &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity{}
+								includeWafActivitySpecBool.IncludeWafActivity = &ves_io_schema.Empty{}
+								enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = includeWafActivitySpecBool
 							}
 
 						}
 
 					}
 
-					// resource modelToSpecNested BoolOfOneOfPointerField --> DisableDetection
-					if !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsNull() && !userBehaviorAnalysisSettingMaliciousUserDetectionChoiceModel.DisableDetection.IsUnknown() {
-						disableDetectionSpecBool := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection{}
-						disableDetectionSpecBool.DisableDetection = &ves_io_schema.Empty{}
-						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = disableDetectionSpecBool
-					}
-
 				}
 
-			}
-
-			// resource modelToSpecNested RequiredArrayOfPointerField --> AppTypeRef
-			if !appTypeSettingsElement.AppTypeRef.IsNull() && !appTypeSettingsElement.AppTypeRef.IsUnknown() && len(appTypeSettingsElement.AppTypeRef.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var appTypeRefElements []ObjectRefTypeModel
-				response.Diagnostics.Append(appTypeSettingsElement.AppTypeRef.ElementsAs(ctx, &appTypeRefElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				appTypeRefSpec := make([]*ves_io_schema.ObjectRefType, len(appTypeRefElements))
-				appTypeSettingsSpec[i].AppTypeRef = appTypeRefSpec
-
-				// 3. Iterate over the converted Go slice
-				for ii, appTypeRefElement := range appTypeRefElements {
-					// Initialize the spec struct for the current element
-					appTypeSettingsSpec[i].AppTypeRef[ii] = &ves_io_schema.ObjectRefType{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested RequiredStringField --> Namespace
-					if !appTypeRefElement.Namespace.IsNull() && !appTypeRefElement.Namespace.IsUnknown() {
-						appTypeRefSpec[i].Namespace = string(appTypeRefElement.Namespace.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredStringField --> Name
-					if !appTypeRefElement.Name.IsNull() && !appTypeRefElement.Name.IsUnknown() {
-						appTypeRefSpec[i].Name = string(appTypeRefElement.Name.ValueString())
-					}
-
-				}
 			}
 
 		}
 
 		spec.AppTypeSettings = appTypeSettingsSpec
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3661,6 +3795,101 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -3670,811 +3899,748 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> AppTypeSettings
-	appTypeSettingsElementsSpectToModel := make([]AppSettingAppSettingAppTypeSettings, 0, len(specData.AppTypeSettings))
+	{
+		appTypeSettingsElementsSpectToModel := make([]AppSettingAppTypeSettings, 0, len(specData.GetAppTypeSettings()))
+		for _, appTypeSettingsElement := range specData.GetAppTypeSettings() {
+			appSettingAppTypeSettingsModel := AppSettingAppTypeSettings{}
 
-	for _, appTypeSettingsElement := range specData.AppTypeSettings {
-		appSettingAppSettingAppTypeSettingsModel := AppSettingAppSettingAppTypeSettings{}
-
-		// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
-		if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingTimeseriesAnalysesSettingModel := &AppSettingAppSettingTimeseriesAnalysesSetting{}
-			timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested ArrayOfPointerField --> MetricSelectors
-			if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
+			// resource specToModelNested RequiredArrayOfPointerField --> AppTypeRef
+			if len(appTypeSettingsElement.GetAppTypeRef()) > 0 {
 				// Step 1: Always create a slice of model structs from the spec data.
 				// This slice serves as an intermediate representation.
-				metricSelectorsElements := make([]AppSettingAppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
-				for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
-					appSettingAppSettingMetricSelectorModel := AppSettingAppSettingMetricSelector{}
+				appTypeRefElements := make([]ObjectRefTypeModel, 0, len(appTypeSettingsElement.GetAppTypeRef()))
+				for _, appTypeRefElement := range appTypeSettingsElement.GetAppTypeRef() {
+					objectRefTypeModelModel := ObjectRefTypeModel{}
 
-					// resource specToModelNested EnumField --> MetricsSource
-					if metricSelectorsElement.GetMetricsSource().String() != "" {
-						stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appSettingAppSettingMetricSelectorModel.MetricsSource = listValue
+					// resource specToModelNested RequiredStringField --> Name
+					if appTypeRefElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(appTypeRefElement.GetName())
 					} else {
-						appSettingAppSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
-					// resource SpecToModelNested ArrayOfEnumField --> Metric
-					if len(metricSelectorsElement.GetMetric()) > 0 {
-						metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
-						for _, v := range metricSelectorsElement.GetMetric() {
-							if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
-								metricStrings = append(metricStrings, strVal)
-							}
-						}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, metricStrings)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appSettingAppSettingMetricSelectorModel.Metric = listValue
+					// resource specToModelNested RequiredStringField --> Namespace
+					if appTypeRefElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(appTypeRefElement.GetNamespace())
 					} else {
-						appSettingAppSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
 					}
 
-					metricSelectorsElements = append(metricSelectorsElements, appSettingAppSettingMetricSelectorModel)
+					// resource specToModelNested StringField --> Tenant
+					if appTypeRefElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(appTypeRefElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					appTypeRefElements = append(appTypeRefElements, objectRefTypeModelModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// The intermediate slice of structs must be converted to a `types.ListValue`.
-				metricSelectorsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
-				response.Diagnostics.Append(diags...)
+				appTypeRefListValue, appTypeRefListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap}, appTypeRefElements)
+				response.Diagnostics.Append(appTypeRefListDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				appSettingAppSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
+				appSettingAppTypeSettingsModel.AppTypeRef = appTypeRefListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				appSettingAppSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
+				appSettingAppTypeSettingsModel.AppTypeRef = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap})
 			}
 
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingTimeseriesAnalysesSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingAppSettingTimeseriesAnalysesSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingAppSettingTimeseriesAnalysesSettingModelObj
+			// resource specToModelNested PointerField --> BusinessLogicMarkupSetting
+			if appTypeSettingsElement.GetBusinessLogicMarkupSetting() != nil {
+				// Create the nested Go struct
+				appSettingBusinessLogicMarkupSettingModel := &AppSettingBusinessLogicMarkupSetting{}
+				businessLogicMarkupSettingElement := appTypeSettingsElement.GetBusinessLogicMarkupSetting()
 
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
-		}
+				// Recursively populate the nested struct
 
-		// resource specToModelNested PointerField --> BusinessLogicMarkupSetting
-		if appTypeSettingsElement.GetBusinessLogicMarkupSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingBusinessLogicMarkupSettingModel := &AppSettingAppSettingBusinessLogicMarkupSetting{}
-			businessLogicMarkupSettingElement := appTypeSettingsElement.GetBusinessLogicMarkupSetting()
+				// resource specToModelNested OneOfField --> LearnFromNamespace
+				if businessLogicMarkupSettingElement.GetLearnFromNamespace() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-			// Recursively populate the nested struct
+					// Define a variable for the spec choices to be passed down to nested templates
+					businessLogicMarkupSettinglearnFromNamespaceChoiceChoices := businessLogicMarkupSettingElement.GetLearnFromNamespace()
 
-			// resource specToModelNested OneOfField --> LearnFromNamespace
-			if businessLogicMarkupSettingElement.GetLearnFromNamespace() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+					// Process nested choices, populating the temporary attribute map
 
-				// Define a variable for the spec choices to be passed down to nested templates
-				businessLogicMarkupSettinglearnFromNamespaceChoiceChoices := businessLogicMarkupSettingElement.GetLearnFromNamespace()
+					// resource specToModelNested BoolOfOneOfPointerField --> Enable
+					_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
 
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> Enable
-				_, isEnable := businessLogicMarkupSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.BusinessLogicMarkupSetting_Enable)
-
-				if isEnable {
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolValue(true)
-				} else {
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
-					businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap)
-			}
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingBusinessLogicMarkupSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap, appSettingAppSettingBusinessLogicMarkupSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = appSettingAppSettingBusinessLogicMarkupSettingModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
-		}
-
-		// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
-		if appTypeSettingsElement.GetUserBehaviorAnalysisSetting() != nil {
-			// Create the nested Go struct
-			appSettingAppSettingUserBehaviorAnalysisSettingModel := &AppSettingAppSettingUserBehaviorAnalysisSetting{}
-			userBehaviorAnalysisSettingElement := appTypeSettingsElement.GetUserBehaviorAnalysisSetting()
-
-			// Recursively populate the nested struct
-
-			// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
-			// GlobalSpecType
-			if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices := userBehaviorAnalysisSettingElement.GetLearnFromNamespace()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> EnableLearning
-				_, isEnableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning)
-
-				if isEnableLearning {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolValue(true)
-				} else {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> DisableLearning
-				_, isDisableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableLearning)
-
-				if isDisableLearning {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolValue(true)
-				} else {
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
-					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap)
-			}
-
-			// resource specToModelNested RequiredOneOfField --> MaliciousUserDetection
-			// GlobalSpecType
-			if userBehaviorAnalysisSettingElement.GetMaliciousUserDetection() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates
-				userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices := userBehaviorAnalysisSettingElement.GetMaliciousUserDetection()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested PointerOfOneOfField --> EnableDetection
-				// GlobalSpecType
-				// false
-				{
-					enableDetectionOptions, isEnableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection)
-					enableDetectionAttributeMap := make(map[string]attr.Value)
-
-					if isEnableDetection && enableDetectionOptions != nil {
-
-						// resource specToModelNested RequiredOneOfField --> WafActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetWafActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionwafActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetWafActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeWafActivity
-							_, isExcludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity)
-
-							if isExcludeWafActivity {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeWafActivity
-							_, isIncludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity)
-
-							if isIncludeWafActivity {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionwafActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionwafActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionwafActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["waf_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> IpReputationChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetIpReputationChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionipReputationChoiceChoices := enableDetectionOptions.EnableDetection.GetIpReputationChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeIpReputation
-							_, isExcludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeIpReputation)
-
-							if isExcludeIpReputation {
-								enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolValue(true)
-							} else {
-								enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeIpReputation
-							_, isIncludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation)
-
-							if isIncludeIpReputation {
-								enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolValue(true)
-							} else {
-								enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionipReputationChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionipReputationChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionipReputationChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["ip_reputation_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetBotDefenseActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionbotDefenseActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetBotDefenseActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
-							_, isIncludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity)
-
-							if isIncludeBotDefenseActivity {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
-							_, isExcludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity)
-
-							if isExcludeBotDefenseActivity {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionbotDefenseActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionbotDefenseActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["bot_defense_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> RateLimitChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetRateLimitChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionrateLimitChoiceChoices := enableDetectionOptions.EnableDetection.GetRateLimitChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> IncludeRateLimit
-							_, isIncludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit)
-
-							if isIncludeRateLimit {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolValue(true)
-							} else {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeRateLimit
-							_, isExcludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeRateLimit)
-
-							if isExcludeRateLimit {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolValue(true)
-							} else {
-								enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionrateLimitChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionrateLimitChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionrateLimitChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["rate_limit_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> ForbiddenActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetForbiddenActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionforbiddenActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionforbiddenActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetForbiddenActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
-							_, isExcludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity)
-
-							if isExcludeForbiddenActivity {
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> IncludeForbiddenActivity
-							// GlobalSpecType
-							// false
-							{
-								includeForbiddenActivityOptions, isIncludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity)
-								includeForbiddenActivityAttributeMap := make(map[string]attr.Value)
-
-								if isIncludeForbiddenActivity && includeForbiddenActivityOptions != nil {
-
-									// resource specToModelNested RequiredUintField --> ForbiddenRequestsThreshold
-									includeForbiddenActivityAttributeMap["forbidden_requests_threshold"] = types.Int64Value(int64(includeForbiddenActivityOptions.IncludeForbiddenActivity.GetForbiddenRequestsThreshold()))
-
-									includeForbiddenActivityObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap, includeForbiddenActivityAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = includeForbiddenActivityObj
-								} else {
-									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionforbiddenActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionforbiddenActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionforbiddenActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["forbidden_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> FailedLoginActivityChoice
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetFailedLoginActivityChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectionfailedLoginActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectionfailedLoginActivityChoiceChoices := enableDetectionOptions.EnableDetection.GetFailedLoginActivityChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
-							_, isExcludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity)
-
-							if isExcludeFailedLoginActivity {
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolValue(true)
-							} else {
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolNull()
-							}
-
-							// resource specToModelNested PointerOfOneOfField --> IncludeFailedLoginActivity
-							// GlobalSpecType
-							// false
-							{
-								includeFailedLoginActivityOptions, isIncludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity)
-								includeFailedLoginActivityAttributeMap := make(map[string]attr.Value)
-
-								if isIncludeFailedLoginActivity && includeFailedLoginActivityOptions != nil {
-
-									// resource specToModelNested RequiredUintField --> LoginFailuresThreshold
-									includeFailedLoginActivityAttributeMap["login_failures_threshold"] = types.Int64Value(int64(includeFailedLoginActivityOptions.IncludeFailedLoginActivity.GetLoginFailuresThreshold()))
-
-									includeFailedLoginActivityObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap, includeFailedLoginActivityAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = includeFailedLoginActivityObj
-								} else {
-									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectionfailedLoginActivityChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectionfailedLoginActivityChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["failed_login_activity_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap)
-						}
-
-						// resource specToModelNested RequiredOneOfField --> CoolingOffPeriodSetting
-						// GlobalSpecType
-						if enableDetectionOptions.EnableDetection.GetCoolingOffPeriodSetting() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates
-							enableDetectioncoolingOffPeriodSettingChoiceChoices := enableDetectionOptions.EnableDetection.GetCoolingOffPeriodSetting()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// resource specToModelNested UintOfOneOfField --> CoolingOffPeriod
-							coolingOffPeriodItem, isCoolingOffPeriod := enableDetectioncoolingOffPeriodSettingChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod)
-
-							if isCoolingOffPeriod {
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Value(int64(coolingOffPeriodItem.CoolingOffPeriod))
-							} else {
-								// Empty uint, set to null
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Null()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags := types.ObjectValue(
-								AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap, // The attribute schema for the OneOf choices
-								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enableDetectionAttributeMap["cooling_off_period_setting_choice"] = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap)
-						}
-
-						enableDetectionObj, diags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap, enableDetectionAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = enableDetectionObj
+					if isEnable {
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolValue(true)
 					} else {
-						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap)
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable"] = types.BoolNull()
 					}
-				}
 
-				// resource specToModelNested BoolOfOneOfPointerField --> DisableDetection
-				_, isDisableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection)
+					// --- End of Choices ---
 
-				if isDisableDetection {
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolValue(true)
+					// Create the final ObjectValue for this OneOf field
+					finalObj, businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
+						businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(businessLogicMarkupSettinglearnFromNamespaceChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = finalObj
 				} else {
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolNull()
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingBusinessLogicMarkupSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingLearnFromNamespaceModelAttributeMap)
 				}
 
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags := types.ObjectValue(
-					AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap, // The attribute schema for the OneOf choices
-					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags...)
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingBusinessLogicMarkupSettingModelObj, appSettingBusinessLogicMarkupSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap, appSettingBusinessLogicMarkupSettingModel)
+				response.Diagnostics.Append(appSettingBusinessLogicMarkupSettingModelObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
+				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = appSettingBusinessLogicMarkupSettingModelObj
 
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = finalObj
 			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				appSettingAppSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap)
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.BusinessLogicMarkupSetting = types.ObjectNull(AppSettingAppTypeSettingsBusinessLogicMarkupSettingModelAttributeMap)
 			}
 
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			appSettingAppSettingUserBehaviorAnalysisSettingModelObj, diags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap, appSettingAppSettingUserBehaviorAnalysisSettingModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = appSettingAppSettingUserBehaviorAnalysisSettingModelObj
+			// resource specToModelNested PointerField --> TimeseriesAnalysesSetting
+			if appTypeSettingsElement.GetTimeseriesAnalysesSetting() != nil {
+				// Create the nested Go struct
+				appSettingTimeseriesAnalysesSettingModel := &AppSettingTimeseriesAnalysesSetting{}
+				timeseriesAnalysesSettingElement := appTypeSettingsElement.GetTimeseriesAnalysesSetting()
 
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			appSettingAppSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap)
+				// Recursively populate the nested struct
+
+				// resource specToModelNested ArrayOfPointerField --> MetricSelectors
+				if len(timeseriesAnalysesSettingElement.GetMetricSelectors()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					metricSelectorsElements := make([]AppSettingMetricSelector, 0, len(timeseriesAnalysesSettingElement.GetMetricSelectors()))
+					for _, metricSelectorsElement := range timeseriesAnalysesSettingElement.GetMetricSelectors() {
+						appSettingMetricSelectorModel := AppSettingMetricSelector{}
+
+						// resource SpecToModelNested ArrayOfEnumField --> Metric
+						{
+							if len(metricSelectorsElement.GetMetric()) > 0 {
+								metricStrings := make([]string, 0, len(metricSelectorsElement.GetMetric()))
+								for _, v := range metricSelectorsElement.GetMetric() {
+									if strVal, exists := ves_io_schema_app_setting.Metric_name[int32(v)]; exists {
+										metricStrings = append(metricStrings, strVal)
+									}
+								}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, metricStrings)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								appSettingMetricSelectorModel.Metric = listValue
+							} else {
+								appSettingMetricSelectorModel.Metric = types.ListNull(types.StringType)
+							}
+						}
+
+						// resource specToModelNested EnumField --> MetricsSource
+						{
+							if metricSelectorsElement.GetMetricsSource().String() != "" {
+								stringValue := types.StringValue(metricSelectorsElement.GetMetricsSource().String())
+								stringSlice := []types.String{stringValue}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								appSettingMetricSelectorModel.MetricsSource = listValue
+							} else {
+								appSettingMetricSelectorModel.MetricsSource = types.ListNull(types.StringType)
+							}
+						}
+
+						metricSelectorsElements = append(metricSelectorsElements, appSettingMetricSelectorModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					metricSelectorsListValue, metricSelectorsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap}, metricSelectorsElements)
+					response.Diagnostics.Append(metricSelectorsListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = metricSelectorsListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					appSettingTimeseriesAnalysesSettingModel.MetricSelectors = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeSettingsTimeseriesAnalysesSettingMetricSelectorsModelAttributeMap})
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingTimeseriesAnalysesSettingModelObj, appSettingTimeseriesAnalysesSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap, appSettingTimeseriesAnalysesSettingModel)
+				response.Diagnostics.Append(appSettingTimeseriesAnalysesSettingModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = appSettingTimeseriesAnalysesSettingModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.TimeseriesAnalysesSetting = types.ObjectNull(AppSettingAppTypeSettingsTimeseriesAnalysesSettingModelAttributeMap)
+			}
+
+			// resource specToModelNested PointerField --> UserBehaviorAnalysisSetting
+			if appTypeSettingsElement.GetUserBehaviorAnalysisSetting() != nil {
+				// Create the nested Go struct
+				appSettingUserBehaviorAnalysisSettingModel := &AppSettingUserBehaviorAnalysisSetting{}
+				userBehaviorAnalysisSettingElement := appTypeSettingsElement.GetUserBehaviorAnalysisSetting()
+
+				// Recursively populate the nested struct
+
+				// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
+				// GlobalSpecType
+				if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices := userBehaviorAnalysisSettingElement.GetLearnFromNamespace()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DisableLearning
+					_, isDisableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableLearning)
+
+					if isDisableLearning {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["disable_learning"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> EnableLearning
+					_, isEnableLearning := userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning)
+
+					if isEnableLearning {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap["enable_learning"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap, // The attribute schema for the OneOf choices
+						userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingUserBehaviorAnalysisSettingModel.LearnFromNamespaceChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredOneOfField --> MaliciousUserDetection
+				// GlobalSpecType
+				if userBehaviorAnalysisSettingElement.GetMaliciousUserDetection() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices := userBehaviorAnalysisSettingElement.GetMaliciousUserDetection()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DisableDetection
+					_, isDisableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_DisableDetection)
+
+					if isDisableDetection {
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolValue(true)
+					} else {
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["disable_detection"] = types.BoolNull()
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> EnableDetection
+					// GlobalSpecType
+					// false
+					{
+						enableDetectionOptionsWrapper, isEnableDetection := userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoices.(*ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableDetection)
+						enableDetectionAttributeMap := make(map[string]attr.Value)
+
+						if isEnableDetection && enableDetectionOptionsWrapper != nil && enableDetectionOptionsWrapper.EnableDetection != nil {
+							enableDetectionElement := enableDetectionOptionsWrapper.EnableDetection
+
+							// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetBotDefenseActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionbotDefenseActivityChoiceChoices := enableDetectionElement.GetBotDefenseActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeBotDefenseActivity
+								_, isExcludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeBotDefenseActivity)
+
+								if isExcludeBotDefenseActivity {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["exclude_bot_defense_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeBotDefenseActivity
+								_, isIncludeBotDefenseActivity := enableDetectionbotDefenseActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity)
+
+								if isIncludeBotDefenseActivity {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap["include_bot_defense_activity"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionbotDefenseActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionbotDefenseActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionbotDefenseActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["bot_defense_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["bot_defense_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> CoolingOffPeriodSetting
+							// GlobalSpecType
+							if enableDetectionElement.GetCoolingOffPeriodSetting() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectioncoolingOffPeriodSettingChoiceChoices := enableDetectionElement.GetCoolingOffPeriodSetting()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested UintOfOneOfField --> CoolingOffPeriod
+								coolingOffPeriodItem, isCoolingOffPeriod := enableDetectioncoolingOffPeriodSettingChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_CoolingOffPeriod)
+
+								if isCoolingOffPeriod {
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Value(int64(coolingOffPeriodItem.CoolingOffPeriod))
+								} else {
+									// Empty uint, set to null
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap["cooling_off_period"] = types.Int64Null()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectioncoolingOffPeriodSettingChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectioncoolingOffPeriodSettingChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["cooling_off_period_setting_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionCoolingOffPeriodSettingModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> FailedLoginActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetFailedLoginActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionfailedLoginActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionfailedLoginActivityChoiceChoices := enableDetectionElement.GetFailedLoginActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeFailedLoginActivity
+								_, isExcludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeFailedLoginActivity)
+
+								if isExcludeFailedLoginActivity {
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["exclude_failed_login_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> IncludeFailedLoginActivity
+								// GlobalSpecType
+								// false
+								{
+									includeFailedLoginActivityOptionsWrapper, isIncludeFailedLoginActivity := enableDetectionfailedLoginActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeFailedLoginActivity)
+									includeFailedLoginActivityAttributeMap := make(map[string]attr.Value)
+
+									if isIncludeFailedLoginActivity && includeFailedLoginActivityOptionsWrapper != nil && includeFailedLoginActivityOptionsWrapper.IncludeFailedLoginActivity != nil {
+										includeFailedLoginActivityElement := includeFailedLoginActivityOptionsWrapper.IncludeFailedLoginActivity
+
+										// resource specToModelNested RequiredUintField --> LoginFailuresThreshold
+										includeFailedLoginActivityAttributeMap["login_failures_threshold"] = types.Int64Value(int64(includeFailedLoginActivityElement.GetLoginFailuresThreshold()))
+
+										includeFailedLoginActivityObj, includeFailedLoginActivityObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap, includeFailedLoginActivityAttributeMap)
+										response.Diagnostics.Append(includeFailedLoginActivityObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = includeFailedLoginActivityObj
+									} else {
+										enableDetectionfailedLoginActivityChoiceChoicesAttributeMap["include_failed_login_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceIncludeFailedLoginActivityModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionfailedLoginActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionfailedLoginActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionfailedLoginActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["failed_login_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["failed_login_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionFailedLoginActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> ForbiddenActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetForbiddenActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionforbiddenActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionforbiddenActivityChoiceChoices := enableDetectionElement.GetForbiddenActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeForbiddenActivity
+								_, isExcludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeForbiddenActivity)
+
+								if isExcludeForbiddenActivity {
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap["exclude_forbidden_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> IncludeForbiddenActivity
+								// GlobalSpecType
+								// false
+								{
+									includeForbiddenActivityOptionsWrapper, isIncludeForbiddenActivity := enableDetectionforbiddenActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeForbiddenActivity)
+									includeForbiddenActivityAttributeMap := make(map[string]attr.Value)
+
+									if isIncludeForbiddenActivity && includeForbiddenActivityOptionsWrapper != nil && includeForbiddenActivityOptionsWrapper.IncludeForbiddenActivity != nil {
+										includeForbiddenActivityElement := includeForbiddenActivityOptionsWrapper.IncludeForbiddenActivity
+
+										// resource specToModelNested RequiredUintField --> ForbiddenRequestsThreshold
+										includeForbiddenActivityAttributeMap["forbidden_requests_threshold"] = types.Int64Value(int64(includeForbiddenActivityElement.GetForbiddenRequestsThreshold()))
+
+										includeForbiddenActivityObj, includeForbiddenActivityObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap, includeForbiddenActivityAttributeMap)
+										response.Diagnostics.Append(includeForbiddenActivityObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = includeForbiddenActivityObj
+									} else {
+										enableDetectionforbiddenActivityChoiceChoicesAttributeMap["include_forbidden_activity"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceIncludeForbiddenActivityModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionforbiddenActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionforbiddenActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionforbiddenActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["forbidden_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> IpReputationChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetIpReputationChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionipReputationChoiceChoices := enableDetectionElement.GetIpReputationChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeIpReputation
+								_, isExcludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeIpReputation)
+
+								if isExcludeIpReputation {
+									enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolValue(true)
+								} else {
+									enableDetectionipReputationChoiceChoicesAttributeMap["exclude_ip_reputation"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeIpReputation
+								_, isIncludeIpReputation := enableDetectionipReputationChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation)
+
+								if isIncludeIpReputation {
+									enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolValue(true)
+								} else {
+									enableDetectionipReputationChoiceChoicesAttributeMap["include_ip_reputation"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionipReputationChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionipReputationChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionipReputationChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["ip_reputation_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> RateLimitChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetRateLimitChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionrateLimitChoiceChoices := enableDetectionElement.GetRateLimitChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeRateLimit
+								_, isExcludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeRateLimit)
+
+								if isExcludeRateLimit {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolValue(true)
+								} else {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["exclude_rate_limit"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeRateLimit
+								_, isIncludeRateLimit := enableDetectionrateLimitChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit)
+
+								if isIncludeRateLimit {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolValue(true)
+								} else {
+									enableDetectionrateLimitChoiceChoicesAttributeMap["include_rate_limit"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionrateLimitChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionrateLimitChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionrateLimitChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["rate_limit_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> WafActivityChoice
+							// GlobalSpecType
+							if enableDetectionElement.GetWafActivityChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								enableDetectionwafActivityChoiceChoices := enableDetectionElement.GetWafActivityChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> ExcludeWafActivity
+								_, isExcludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_ExcludeWafActivity)
+
+								if isExcludeWafActivity {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["exclude_waf_activity"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> IncludeWafActivity
+								_, isIncludeWafActivity := enableDetectionwafActivityChoiceChoices.(*ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity)
+
+								if isIncludeWafActivity {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolValue(true)
+								} else {
+									enableDetectionwafActivityChoiceChoicesAttributeMap["include_waf_activity"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, enableDetectionwafActivityChoiceChoicesObjDiags := types.ObjectValue(
+									AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									enableDetectionwafActivityChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(enableDetectionwafActivityChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								enableDetectionAttributeMap["waf_activity_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								enableDetectionAttributeMap["waf_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap)
+							}
+
+							enableDetectionObj, enableDetectionObjDiags := types.ObjectValue(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap, enableDetectionAttributeMap)
+							response.Diagnostics.Append(enableDetectionObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = enableDetectionObj
+						} else {
+							userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap["enable_detection"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags := types.ObjectValue(
+						AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap, // The attribute schema for the OneOf choices
+						userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(userBehaviorAnalysisSettingmaliciousUserDetectionChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					appSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					appSettingUserBehaviorAnalysisSettingModel.MaliciousUserDetectionChoice = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionModelAttributeMap)
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				appSettingUserBehaviorAnalysisSettingModelObj, appSettingUserBehaviorAnalysisSettingModelObjDiags := types.ObjectValueFrom(ctx, AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap, appSettingUserBehaviorAnalysisSettingModel)
+				response.Diagnostics.Append(appSettingUserBehaviorAnalysisSettingModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				appSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = appSettingUserBehaviorAnalysisSettingModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				appSettingAppTypeSettingsModel.UserBehaviorAnalysisSetting = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap)
+			}
+
+			appTypeSettingsElementsSpectToModel = append(appTypeSettingsElementsSpectToModel, appSettingAppTypeSettingsModel)
 		}
 
-		// resource specToModelNested RequiredArrayOfPointerField --> AppTypeRef
-		if len(appTypeSettingsElement.GetAppTypeRef()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			appTypeRefElements := make([]ObjectRefTypeModel, 0, len(appTypeSettingsElement.GetAppTypeRef()))
-			for _, appTypeRefElement := range appTypeSettingsElement.GetAppTypeRef() {
-				objectRefTypeModelModel := ObjectRefTypeModel{}
+		appTypeSettingsList, listDiags := utils.GoStructSliceToListValue(
+			ctx,
+			AppSettingAppTypeSettingsModelAttributeMap,
+			appTypeSettingsElementsSpectToModel,
+		)
 
-				// resource specToModelNested StringField --> Tenant
-				if appTypeRefElement.GetTenant() != "" {
-					objectRefTypeModelModel.Tenant = types.StringValue(appTypeRefElement.GetTenant())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Tenant = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Namespace
-				if appTypeRefElement.GetNamespace() != "" {
-					objectRefTypeModelModel.Namespace = types.StringValue(appTypeRefElement.GetNamespace())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Namespace = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Name
-				if appTypeRefElement.GetName() != "" {
-					objectRefTypeModelModel.Name = types.StringValue(appTypeRefElement.GetName())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Name = types.StringNull()
-				}
-
-				appTypeRefElements = append(appTypeRefElements, objectRefTypeModelModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			appTypeRefListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap}, appTypeRefElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			appSettingAppSettingAppTypeSettingsModel.AppTypeRef = appTypeRefListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			appSettingAppSettingAppTypeSettingsModel.AppTypeRef = types.ListNull(types.ObjectType{AttrTypes: AppSettingAppTypeRefObjectRefModelAttributeMap})
+		response.Diagnostics.Append(listDiags...)
+		if response.Diagnostics.HasError() {
+			return
 		}
 
-		appTypeSettingsElementsSpectToModel = append(appTypeSettingsElementsSpectToModel, appSettingAppSettingAppTypeSettingsModel)
+		data.AppTypeSettings = appTypeSettingsList
 	}
 
-	appTypeSettingsList, diags := utils.GoStructSliceToListValue(
-		ctx,
-		AppSettingAppTypeSettingsModelAttributeMap,
-		appTypeSettingsElementsSpectToModel,
-	)
-
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
-		return
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
 	}
-
-	data.AppTypeSettings = appTypeSettingsList
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
+	}
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -4510,9 +4676,8 @@ func (r *ResourceF5XCAppSetting) Delete(ctx context.Context, request resource.De
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_app_setting.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -4527,19 +4692,32 @@ func (r *ResourceF5XCAppSetting) Delete(ctx context.Context, request resource.De
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCAppSetting) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

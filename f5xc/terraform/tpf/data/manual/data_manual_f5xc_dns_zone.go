@@ -388,7 +388,7 @@ var defaultRrSetGroupObjectType attr.Type = types.ObjectType{
 }
 
 // Define the global variable using the concrete type
-var nsRecordObjectType types.ObjectType = types.ObjectType{
+var nsRecordObjectType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
 		"name": types.StringType,
 		"values": attr.Type(basetypes.ListType{
@@ -1806,7 +1806,7 @@ func (d *DataSourceF5XCDnsZone) Read(ctx context.Context, request datasource.Rea
 		}
 
 		// resource specToModelNested ArrayOfPointerField --> DefaultRrSetGroup
-		var defaultRrSetGroup []DefaultRrSetGroupModel = make([]DefaultRrSetGroupModel, len(primaryOptions.Primary.GetDefaultRrSetGroup()))
+		var defaultRrSetGroup = make([]DefaultRrSetGroupModel, len(primaryOptions.Primary.GetDefaultRrSetGroup()))
 		a := primaryOptions.Primary.GetDefaultRrSetGroup()
 		tflog.Info(ctx, fmt.Sprintf("DefaultRrSetGroup length: %v", len(a)))
 

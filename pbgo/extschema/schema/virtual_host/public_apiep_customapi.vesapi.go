@@ -2667,10 +2667,7 @@ var ApiepCustomAPISwaggerJSON string = `{
         "description": "Virtual host is main anchor configuration for a proxy. Primary application for virtual host configuration is\nreverse proxy.  Virtual host object is used to create a Loadbalancer, virtual service Or API gateway.\nIt can also be viewed as base object to define application routing.\n\nTerminology\n\nDownstream: A downstream host connects to F5XC ADC, sends requests, and receives responses.\nUpstream: An upstream host receives connections and requests from F5XC ADC and returns responses.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -2737,6 +2734,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2837,6 +2840,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2974,6 +2983,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3081,6 +3096,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3198,6 +3219,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3297,6 +3324,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3451,6 +3484,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3542,6 +3581,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3643,6 +3688,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3743,6 +3794,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3842,6 +3899,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3947,6 +4010,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4046,6 +4115,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4147,6 +4222,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4246,6 +4327,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4347,6 +4434,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4446,6 +4539,12 @@ var ApiepCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4687,7 +4786,6 @@ var ApiepCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Has Learnt Schema flag for request API endpoint.\n\nExample: - true-",
                     "title": "Has Learnt Schema",
-                    "format": "boolean",
                     "x-displayname": "Has Learnt Schema"
                 },
                 "last_tested": {
@@ -5384,6 +5482,27 @@ var ApiepCustomAPISwaggerJSON string = `{
                 "NULL_VALUE"
             ],
             "default": "NULL_VALUE"
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "schemaErrorCode": {
             "type": "string",
@@ -6998,11 +7117,34 @@ var ApiepCustomAPISwaggerJSON string = `{
                     "format": "date-time",
                     "x-displayname": "End Time"
                 },
+                "evidence_id": {
+                    "type": "string",
+                    "description": " UUID of the evidence document stored in ElasticSearch",
+                    "title": "evidence_id",
+                    "x-displayname": "Evidence ID"
+                },
                 "evidence_type": {
                     "description": " Type of evidence where vulnerability was found.",
                     "title": "evidence_type",
                     "$ref": "#/definitions/virtual_hostVulnEvidenceType",
-                    "x-displayname": "Evidence type"
+                    "x-displayname": "Evidence type",
+                    "x-ves-deprecated": "Not used in updated evidence model. Retained for backward compatibility"
+                },
+                "incident_ids": {
+                    "type": "array",
+                    "description": " List of security incident IDs that triggered this vulnerability.\n Populated only for incident-based vulnerabilities\n Empty for request-based vulnerabilities.",
+                    "title": "incident_ids",
+                    "items": {
+                        "type": "string"
+                    },
+                    "x-displayname": "Incident IDs"
+                },
+                "message": {
+                    "type": "string",
+                    "description": " Vulnerability message derived from a security incident\n\nExample: - \"References to Broken Function Level Authorization Incident\"-",
+                    "title": "message",
+                    "x-displayname": "Message",
+                    "x-ves-example": "References to Broken Function Level Authorization Incident"
                 },
                 "samples": {
                     "type": "array",
@@ -7011,7 +7153,8 @@ var ApiepCustomAPISwaggerJSON string = `{
                     "items": {
                         "$ref": "#/definitions/virtual_hostVulnEvidenceSample"
                     },
-                    "x-displayname": "Samples"
+                    "x-displayname": "Samples",
+                    "x-ves-deprecated": "Not used in the updated evidence model. Retained for backward compatibility"
                 },
                 "start_time": {
                     "type": "string",

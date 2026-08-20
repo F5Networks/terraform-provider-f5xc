@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "cluster object represent common set of endpoints (providers of service) that can serve given route for virtual_host\nCluster has list of references to Endpoint which forms the set\nCluster has common properties for this collection\n * Reference to healthcheck object\n * load balancer algorithm\n * Circuit breaker based on\n    * Number of concurrent connections\n    * Outstanding requests\n    * Number of retries\n * Subset of endpoints\n * TLS parameter for the endpoints\n * Protocol Timeouts",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2501,7 +2528,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2857,7 +2883,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable/disable HTTP2 Protocol for upstream connections",
                     "title": "enabled",
-                    "format": "boolean",
                     "x-displayname": "HTTP2 Enabled"
                 }
             }
@@ -2912,7 +2937,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates cluster is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3328,6 +3352,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaBlindfoldSecretInfoType": {
             "type": "object",
             "description": "BlindfoldSecretInfoType specifies information about the Secret managed by F5XC Secret Management",
@@ -3565,7 +3610,7 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Preserve Case"
                 },
                 "proper_case_header_transformation": {
-                    "description": "Exclusive with [default_header_transformation legacy_header_transformation preserve_case_header_transformation]\n Normalize the headers to proper case words. The fist character and any character\n following a special character will be capitalized if it’s an alpha character.\n For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
+                    "description": "Exclusive with [default_header_transformation legacy_header_transformation preserve_case_header_transformation]\n Normalize the headers to proper case words. The first character and any character\n following a special character will be capitalized if it’s an alpha character.\n For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
                     "title": "Proper case header transformation",
                     "$ref": "#/definitions/ioschemaEmpty",
                     "x-displayname": "Proper Case"
@@ -3645,7 +3690,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3709,7 +3753,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3819,7 +3862,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3949,7 +3991,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -4231,7 +4272,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " When True, skip verification of hostname i.e. CN/Subject Alt Name of certificate\n is not matched to the connecting hostname",
                     "title": "skip_hostname_verification",
-                    "format": "boolean",
                     "x-displayname": "Skip verification of hostname"
                 },
                 "trusted_ca": {
@@ -4290,7 +4330,8 @@ var APISwaggerJSON string = `{
             "description": "Certificate Parameters for authentication, TLS ciphers, and trust store",
             "title": "UpstreamCertificateParamsType",
             "x-displayname": "Upstream Certificate Parameters",
-            "x-ves-displayorder": "1,2,3,4,5",
+            "x-ves-displayorder": "1,6,3,4,5",
+            "x-ves-oneof-field-server_validation_choice": "[\"skip_server_verification\",\"tls_validation_params\",\"volterra_trusted_ca\"]",
             "x-ves-proto-message": "ves.io.schema.UpstreamCertificateParamsType",
             "properties": {
                 "certificates": {
@@ -4336,11 +4377,23 @@ var APISwaggerJSON string = `{
                     "$ref": "#/definitions/schemaTlsProtocol",
                     "x-displayname": "Minimum TLS Version"
                 },
-                "validation_params": {
-                    "description": " This includes URL for a trust store, whether SAN verification is required\n and list of Subject Alt Names for verification",
-                    "title": "validation_params",
+                "skip_server_verification": {
+                    "description": "Exclusive with [tls_validation_params volterra_trusted_ca]\n Skip server verification",
+                    "title": "Skip Server Verification",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Skip Verification"
+                },
+                "tls_validation_params": {
+                    "description": "Exclusive with [skip_server_verification volterra_trusted_ca]\n This includes URL for a trust store, whether SAN verification is required\n and list of Subject Alt Names for verification",
+                    "title": "tls_validation_params",
                     "$ref": "#/definitions/schemaTlsValidationParamsType",
                     "x-displayname": "Root CA Validation parameters"
+                },
+                "volterra_trusted_ca": {
+                    "description": "Exclusive with [skip_server_verification tls_validation_params]\n Perform origin server verification using F5XC Default Root CA Certificate",
+                    "title": "F5XC Root CA",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Use Default Root CA Certificate"
                 }
             }
         },

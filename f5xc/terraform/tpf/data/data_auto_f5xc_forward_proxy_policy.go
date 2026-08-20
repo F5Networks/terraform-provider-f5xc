@@ -31,10 +31,10 @@ type DataSourceF5XCForwardProxyPolicy struct {
 }
 
 type ForwardProxyPolicyGlobalSpecTypeProxyChoice struct {
+	AnyProxy           types.Bool   `tfsdk:"any_proxy"`
+	DrpHttpConnect     types.Bool   `tfsdk:"drp_http_connect"`
 	NetworkConnector   types.Object `tfsdk:"network_connector"`
 	ProxyLabelSelector types.Object `tfsdk:"proxy_label_selector"`
-	DrpHttpConnect     types.Bool   `tfsdk:"drp_http_connect"`
-	AnyProxy           types.Bool   `tfsdk:"any_proxy"`
 }
 
 type ForwardProxyPolicyGlobalSpecTypeProxyLabelSelector struct {
@@ -49,20 +49,22 @@ type ForwardProxyPolicyGlobalSpecTypeRuleChoice struct {
 }
 
 type ForwardProxyPolicyGlobalSpecTypeAllowList struct {
-	TlsList             types.List   `tfsdk:"tls_list"`
-	HttpList            types.List   `tfsdk:"http_list"`
-	DestList            types.List   `tfsdk:"dest_list"`
 	DefaultActionChoice types.Object `tfsdk:"default_action_choice"`
+	DestList            types.List   `tfsdk:"dest_list"`
+	HttpList            types.List   `tfsdk:"http_list"`
+	TlsList             types.List   `tfsdk:"tls_list"`
 }
 
-type ForwardProxyPolicyDomainType struct {
-	DomainChoice types.Object `tfsdk:"domain_choice"`
+type ForwardProxyPolicyForwardProxySimpleRuleTypeDefaultActionChoice struct {
+	DefaultActionAllow      types.Bool `tfsdk:"default_action_allow"`
+	DefaultActionDeny       types.Bool `tfsdk:"default_action_deny"`
+	DefaultActionNextPolicy types.Bool `tfsdk:"default_action_next_policy"`
 }
 
-type ForwardProxyPolicyDomainTypeDomainChoice struct {
-	SuffixValue types.String `tfsdk:"suffix_value"`
-	RegexValue  types.String `tfsdk:"regex_value"`
-	ExactValue  types.String `tfsdk:"exact_value"`
+type ForwardProxyPolicyL4DestType struct {
+	Ipv6Prefixes types.List   `tfsdk:"ipv6_prefixes"`
+	PortRanges   types.String `tfsdk:"port_ranges"`
+	Prefixes     types.List   `tfsdk:"prefixes"`
 }
 
 type ForwardProxyPolicyForwardProxyPolicyURLType struct {
@@ -72,34 +74,32 @@ type ForwardProxyPolicyForwardProxyPolicyURLType struct {
 
 type ForwardProxyPolicyURLTypeDomainChoice struct {
 	ExactValue  types.String `tfsdk:"exact_value"`
-	SuffixValue types.String `tfsdk:"suffix_value"`
 	RegexValue  types.String `tfsdk:"regex_value"`
+	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
 type ForwardProxyPolicyURLTypePathChoice struct {
-	PathPrefixValue types.String `tfsdk:"path_prefix_value"`
-	PathRegexValue  types.String `tfsdk:"path_regex_value"`
 	AnyPath         types.Bool   `tfsdk:"any_path"`
 	PathExactValue  types.String `tfsdk:"path_exact_value"`
+	PathPrefixValue types.String `tfsdk:"path_prefix_value"`
+	PathRegexValue  types.String `tfsdk:"path_regex_value"`
 }
 
-type ForwardProxyPolicyL4DestType struct {
-	Prefixes     types.List   `tfsdk:"prefixes"`
-	Ipv6Prefixes types.List   `tfsdk:"ipv6_prefixes"`
-	PortRanges   types.String `tfsdk:"port_ranges"`
+type ForwardProxyPolicyDomainType struct {
+	DomainChoice types.Object `tfsdk:"domain_choice"`
 }
 
-type ForwardProxyPolicyForwardProxySimpleRuleTypeDefaultActionChoice struct {
-	DefaultActionNextPolicy types.Bool `tfsdk:"default_action_next_policy"`
-	DefaultActionDeny       types.Bool `tfsdk:"default_action_deny"`
-	DefaultActionAllow      types.Bool `tfsdk:"default_action_allow"`
+type ForwardProxyPolicyDomainTypeDomainChoice struct {
+	ExactValue  types.String `tfsdk:"exact_value"`
+	RegexValue  types.String `tfsdk:"regex_value"`
+	SuffixValue types.String `tfsdk:"suffix_value"`
 }
 
 type ForwardProxyPolicyGlobalSpecTypeDenyList struct {
 	DefaultActionChoice types.Object `tfsdk:"default_action_choice"`
-	TlsList             types.List   `tfsdk:"tls_list"`
-	HttpList            types.List   `tfsdk:"http_list"`
 	DestList            types.List   `tfsdk:"dest_list"`
+	HttpList            types.List   `tfsdk:"http_list"`
+	TlsList             types.List   `tfsdk:"tls_list"`
 }
 
 type ForwardProxyPolicyGlobalSpecTypeRuleList struct {
@@ -107,48 +107,40 @@ type ForwardProxyPolicyGlobalSpecTypeRuleList struct {
 }
 
 type ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType struct {
-	SourceChoice      types.Object `tfsdk:"source_choice"`
+	Action            types.List   `tfsdk:"action"`
 	DestinationChoice types.Object `tfsdk:"destination_choice"`
 	HttpConnectChoice types.Object `tfsdk:"http_connect_choice"`
 	Metadata          types.Object `tfsdk:"metadata"`
-	Action            types.List   `tfsdk:"action"`
-}
-
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeSourceChoice struct {
-	LabelSelector types.Object `tfsdk:"label_selector"`
-	IpPrefixSet   types.Object `tfsdk:"ip_prefix_set"`
-	AllSources    types.Bool   `tfsdk:"all_sources"`
-	PrefixList    types.Object `tfsdk:"prefix_list"`
-}
-
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeLabelSelector struct {
-	Expressions types.List `tfsdk:"expressions"`
-}
-
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypePrefixList struct {
-	Prefixes     types.List `tfsdk:"prefixes"`
-	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
+	SourceChoice      types.Object `tfsdk:"source_choice"`
 }
 
 type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDestinationChoice struct {
-	HttpList         types.Object `tfsdk:"http_list"`
-	DstPrefixList    types.Object `tfsdk:"dst_prefix_list"`
-	DstAsnSet        types.Object `tfsdk:"dst_asn_set"`
-	TlsList          types.Object `tfsdk:"tls_list"`
-	DstIpPrefixSet   types.Object `tfsdk:"dst_ip_prefix_set"`
-	UrlCategoryList  types.Object `tfsdk:"url_category_list"`
-	DstLabelSelector types.Object `tfsdk:"dst_label_selector"`
 	AllDestinations  types.Bool   `tfsdk:"all_destinations"`
 	DstAsnList       types.Object `tfsdk:"dst_asn_list"`
+	DstAsnSet        types.Object `tfsdk:"dst_asn_set"`
+	DstIpPrefixSet   types.Object `tfsdk:"dst_ip_prefix_set"`
+	DstLabelSelector types.Object `tfsdk:"dst_label_selector"`
+	DstPrefixList    types.Object `tfsdk:"dst_prefix_list"`
+	HttpList         types.Object `tfsdk:"http_list"`
+	TlsList          types.Object `tfsdk:"tls_list"`
+	UrlCategoryList  types.Object `tfsdk:"url_category_list"`
+}
+
+type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstAsnList struct {
+	AsNumbers types.List `tfsdk:"as_numbers"`
+}
+
+type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstLabelSelector struct {
+	Expressions types.List `tfsdk:"expressions"`
+}
+
+type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstPrefixList struct {
+	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
+	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
 type ForwardProxyPolicyForwardProxyAdvancedRuleTypeHttpList struct {
 	HttpList types.List `tfsdk:"http_list"`
-}
-
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstPrefixList struct {
-	Prefixes     types.List `tfsdk:"prefixes"`
-	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
 type ForwardProxyPolicyForwardProxyAdvancedRuleTypeTlsList struct {
@@ -159,32 +151,50 @@ type ForwardProxyPolicyForwardProxyAdvancedRuleTypeUrlCategoryList struct {
 	UrlCategories types.List `tfsdk:"url_categories"`
 }
 
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstLabelSelector struct {
-	Expressions types.List `tfsdk:"expressions"`
-}
-
-type ForwardProxyPolicyForwardProxyAdvancedRuleTypeDstAsnList struct {
-	AsNumbers types.List `tfsdk:"as_numbers"`
-}
-
 type ForwardProxyPolicyForwardProxyAdvancedRuleTypeHttpConnectChoice struct {
 	NoHttpConnectPort types.Bool   `tfsdk:"no_http_connect_port"`
 	PortMatcher       types.Object `tfsdk:"port_matcher"`
 }
 
 type ForwardProxyPolicyForwardProxyAdvancedRuleTypePortMatcher struct {
-	Ports         types.List `tfsdk:"ports"`
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
+	Ports         types.List `tfsdk:"ports"`
 }
 
 type ForwardProxyPolicyMessageMetaType struct {
-	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
+	Name        types.String `tfsdk:"name"`
+}
+
+type ForwardProxyPolicyForwardProxyAdvancedRuleTypeSourceChoice struct {
+	AllSources    types.Bool   `tfsdk:"all_sources"`
+	IpPrefixSet   types.Object `tfsdk:"ip_prefix_set"`
+	LabelSelector types.Object `tfsdk:"label_selector"`
+	PrefixList    types.Object `tfsdk:"prefix_list"`
+}
+
+type ForwardProxyPolicyForwardProxyAdvancedRuleTypeLabelSelector struct {
+	Expressions types.List `tfsdk:"expressions"`
+}
+
+type ForwardProxyPolicyForwardProxyAdvancedRuleTypePrefixList struct {
+	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
+	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
 type ForwardProxyPolicyPolicySegmentPolicyType struct {
-	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
 	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
+	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
+}
+
+type ForwardProxyPolicySegmentPolicyTypeDstSegmentChoice struct {
+	DstAny       types.Bool   `tfsdk:"dst_any"`
+	DstSegments  types.Object `tfsdk:"dst_segments"`
+	IntraSegment types.Bool   `tfsdk:"intra_segment"`
+}
+
+type ForwardProxyPolicySegmentPolicyTypeDstSegments struct {
+	Segments types.List `tfsdk:"segments"`
 }
 
 type ForwardProxyPolicySegmentPolicyTypeSrcSegmentChoice struct {
@@ -196,21 +206,11 @@ type ForwardProxyPolicySegmentPolicyTypeSrcSegments struct {
 	Segments types.List `tfsdk:"segments"`
 }
 
-type ForwardProxyPolicySegmentPolicyTypeDstSegmentChoice struct {
-	DstAny       types.Bool   `tfsdk:"dst_any"`
-	IntraSegment types.Bool   `tfsdk:"intra_segment"`
-	DstSegments  types.Object `tfsdk:"dst_segments"`
-}
-
-type ForwardProxyPolicySegmentPolicyTypeDstSegments struct {
-	Segments types.List `tfsdk:"segments"`
-}
-
 // DataSourceF5XCForwardProxyPolicyModel describes the resource data model.
 type DataSourceF5XCForwardProxyPolicyModel struct {
-	Labels        types.Map      `tfsdk:"labels"`
 	Annotations   types.Map      `tfsdk:"annotations"`
 	Description   types.String   `tfsdk:"description"`
+	Labels        types.Map      `tfsdk:"labels"`
 	Name          types.String   `tfsdk:"name"`
 	Namespace     types.String   `tfsdk:"namespace"`
 	Uid           types.String   `tfsdk:"uid"`
@@ -224,21 +224,21 @@ type DataSourceF5XCForwardProxyPolicyModel struct {
 // Attribute map for RequiredOneOfField --> ProxyChoice
 var ForwardProxyPolicyProxyChoiceModelAttributeMap = map[string]attr.Type{
 
+	"any_proxy":        types.BoolType,
+	"drp_http_connect": types.BoolType,
 	"network_connector": types.ObjectType{
 		AttrTypes: ForwardProxyPolicyProxyChoiceNetworkConnectorModelAttributeMap,
 	},
 	"proxy_label_selector": types.ObjectType{
 		AttrTypes: ForwardProxyPolicyProxyChoiceProxyLabelSelectorModelAttributeMap,
 	},
-	"drp_http_connect": types.BoolType,
-	"any_proxy":        types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> NetworkConnector
 var ForwardProxyPolicyProxyChoiceNetworkConnectorModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
 	"tenant":    types.StringType,
 }
 
@@ -268,12 +268,19 @@ var ForwardProxyPolicyRuleChoiceModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> AllowList
 var ForwardProxyPolicyRuleChoiceAllowListModelAttributeMap = map[string]attr.Type{
 
-	"tls_list": types.ListType{
+	"default_action_choice": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap,
+	},
+	"dest_list": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"domain_choice": types.ObjectType{
-					AttrTypes: ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap,
+				"ipv6_prefixes": types.ListType{
+					ElemType: types.StringType,
+				},
+				"port_ranges": types.StringType,
+				"prefixes": types.ListType{
+					ElemType: types.StringType,
 				},
 			},
 		},
@@ -291,39 +298,36 @@ var ForwardProxyPolicyRuleChoiceAllowListModelAttributeMap = map[string]attr.Typ
 			},
 		},
 	},
-	"dest_list": types.ListType{
+	"tls_list": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"prefixes": types.ListType{
-					ElemType: types.StringType,
+				"domain_choice": types.ObjectType{
+					AttrTypes: ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap,
 				},
-				"ipv6_prefixes": types.ListType{
-					ElemType: types.StringType,
-				},
-				"port_ranges": types.StringType,
 			},
 		},
 	},
-	"default_action_choice": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap,
-	},
 }
 
-// Attribute map for ArrayOfPointerField --> TlsList
-var ForwardProxyPolicyTlsListObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> DefaultActionChoice
+var ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"domain_choice": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap,
-	},
+	"default_action_allow":       types.BoolType,
+	"default_action_deny":        types.BoolType,
+	"default_action_next_policy": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
-var ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> DestList
+var ForwardProxyPolicyRuleChoiceAllowListDestListModelAttributeMap = map[string]attr.Type{
 
-	"suffix_value": types.StringType,
-	"regex_value":  types.StringType,
-	"exact_value":  types.StringType,
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"port_ranges": types.StringType,
+	"prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Attribute map for ArrayOfPointerField --> HttpList
@@ -341,37 +345,33 @@ var ForwardProxyPolicyRuleChoiceAllowListHttpListModelAttributeMap = map[string]
 var ForwardProxyPolicyRuleChoiceAllowListHttpListDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"exact_value":  types.StringType,
-	"suffix_value": types.StringType,
 	"regex_value":  types.StringType,
+	"suffix_value": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> PathChoice
 var ForwardProxyPolicyRuleChoiceAllowListHttpListPathChoiceModelAttributeMap = map[string]attr.Type{
 
-	"path_prefix_value": types.StringType,
-	"path_regex_value":  types.StringType,
 	"any_path":          types.BoolType,
 	"path_exact_value":  types.StringType,
+	"path_prefix_value": types.StringType,
+	"path_regex_value":  types.StringType,
 }
 
-// Attribute map for ArrayOfPointerField --> DestList
-var ForwardProxyPolicyDestListObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> TlsList
+var ForwardProxyPolicyRuleChoiceAllowListTlsListModelAttributeMap = map[string]attr.Type{
 
-	"prefixes": types.ListType{
-		ElemType: types.StringType,
+	"domain_choice": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap,
 	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"port_ranges": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> DefaultActionChoice
-var ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> DomainChoice
+var ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap = map[string]attr.Type{
 
-	"default_action_next_policy": types.BoolType,
-	"default_action_deny":        types.BoolType,
-	"default_action_allow":       types.BoolType,
+	"exact_value":  types.StringType,
+	"regex_value":  types.StringType,
+	"suffix_value": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> DenyList
@@ -380,12 +380,16 @@ var ForwardProxyPolicyRuleChoiceDenyListModelAttributeMap = map[string]attr.Type
 	"default_action_choice": types.ObjectType{
 		AttrTypes: ForwardProxyPolicyRuleChoiceDenyListDefaultActionChoiceModelAttributeMap,
 	},
-	"tls_list": types.ListType{
+	"dest_list": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"domain_choice": types.ObjectType{
-					AttrTypes: ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap,
+				"ipv6_prefixes": types.ListType{
+					ElemType: types.StringType,
+				},
+				"port_ranges": types.StringType,
+				"prefixes": types.ListType{
+					ElemType: types.StringType,
 				},
 			},
 		},
@@ -403,16 +407,12 @@ var ForwardProxyPolicyRuleChoiceDenyListModelAttributeMap = map[string]attr.Type
 			},
 		},
 	},
-	"dest_list": types.ListType{
+	"tls_list": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"ipv6_prefixes": types.ListType{
-					ElemType: types.StringType,
-				},
-				"port_ranges": types.StringType,
-				"prefixes": types.ListType{
-					ElemType: types.StringType,
+				"domain_choice": types.ObjectType{
+					AttrTypes: ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap,
 				},
 			},
 		},
@@ -422,17 +422,21 @@ var ForwardProxyPolicyRuleChoiceDenyListModelAttributeMap = map[string]attr.Type
 // Attribute map for RequiredOneOfField --> DefaultActionChoice
 var ForwardProxyPolicyRuleChoiceDenyListDefaultActionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"default_action_next_policy": types.BoolType,
-	"default_action_deny":        types.BoolType,
 	"default_action_allow":       types.BoolType,
+	"default_action_deny":        types.BoolType,
+	"default_action_next_policy": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
-var ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> DestList
+var ForwardProxyPolicyRuleChoiceDenyListDestListModelAttributeMap = map[string]attr.Type{
 
-	"suffix_value": types.StringType,
-	"regex_value":  types.StringType,
-	"exact_value":  types.StringType,
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"port_ranges": types.StringType,
+	"prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Attribute map for ArrayOfPointerField --> HttpList
@@ -449,8 +453,8 @@ var ForwardProxyPolicyRuleChoiceDenyListHttpListModelAttributeMap = map[string]a
 // Attribute map for RequiredOneOfField --> DomainChoice
 var ForwardProxyPolicyRuleChoiceDenyListHttpListDomainChoiceModelAttributeMap = map[string]attr.Type{
 
-	"regex_value":  types.StringType,
 	"exact_value":  types.StringType,
+	"regex_value":  types.StringType,
 	"suffix_value": types.StringType,
 }
 
@@ -463,6 +467,22 @@ var ForwardProxyPolicyRuleChoiceDenyListHttpListPathChoiceModelAttributeMap = ma
 	"path_regex_value":  types.StringType,
 }
 
+// Attribute map for ArrayOfPointerField --> TlsList
+var ForwardProxyPolicyRuleChoiceDenyListTlsListModelAttributeMap = map[string]attr.Type{
+
+	"domain_choice": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> DomainChoice
+var ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap = map[string]attr.Type{
+
+	"exact_value":  types.StringType,
+	"regex_value":  types.StringType,
+	"suffix_value": types.StringType,
+}
+
 // Attribute map for PointerOfOneOfField --> RuleList
 var ForwardProxyPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.Type{
 
@@ -470,8 +490,8 @@ var ForwardProxyPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.Type
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"source_choice": types.ObjectType{
-					AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
+				"action": types.ListType{
+					ElemType: types.StringType,
 				},
 				"destination_choice": types.ObjectType{
 					AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap,
@@ -480,11 +500,11 @@ var ForwardProxyPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.Type
 					AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoiceModelAttributeMap,
 				}, "metadata": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"name":        types.StringType,
-						"description": types.StringType},
+						"description": types.StringType,
+						"name":        types.StringType},
 				},
-				"action": types.ListType{
-					ElemType: types.StringType,
+				"source_choice": types.ObjectType{
+					AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
 				},
 			},
 		},
@@ -494,8 +514,8 @@ var ForwardProxyPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.Type
 // Attribute map for RequiredArrayOfPointerField --> Rules
 var ForwardProxyPolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]attr.Type{
 
-	"source_choice": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
+	"action": types.ListType{
+		ElemType: types.StringType,
 	},
 	"destination_choice": types.ObjectType{
 		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap,
@@ -504,83 +524,84 @@ var ForwardProxyPolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]attr
 		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoiceModelAttributeMap,
 	}, "metadata": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"name":        types.StringType,
-			"description": types.StringType},
+			"description": types.StringType,
+			"name":        types.StringType},
 	},
-	"action": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SourceChoice
-var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap = map[string]attr.Type{
-
-	"label_selector": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap,
-	},
-	"ip_prefix_set": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap,
-	},
-	"all_sources": types.BoolType,
-	"prefix_list": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> LabelSelector
-var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap = map[string]attr.Type{
-
-	"expressions": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> IpPrefixSet
-var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> PrefixList
-var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap = map[string]attr.Type{
-
-	"prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
+	"source_choice": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
 	},
 }
 
 // Attribute map for RequiredOneOfField --> DestinationChoice
 var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap = map[string]attr.Type{
 
-	"http_list": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListModelAttributeMap,
-	},
-	"dst_prefix_list": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap,
+	"all_destinations": types.BoolType,
+	"dst_asn_list": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap,
 	},
 	"dst_asn_set": types.ObjectType{
 		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap,
 	},
-	"tls_list": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListModelAttributeMap,
-	},
 	"dst_ip_prefix_set": types.ObjectType{
 		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap,
-	},
-	"url_category_list": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceUrlCategoryListModelAttributeMap,
 	},
 	"dst_label_selector": types.ObjectType{
 		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap,
 	},
-	"all_destinations": types.BoolType,
-	"dst_asn_list": types.ObjectType{
-		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap,
+	"dst_prefix_list": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap,
+	},
+	"http_list": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListModelAttributeMap,
+	},
+	"tls_list": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListModelAttributeMap,
+	},
+	"url_category_list": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceUrlCategoryListModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> DstAsnList
+var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap = map[string]attr.Type{
+
+	"as_numbers": types.ListType{
+		ElemType: types.Int64Type,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> DstAsnSet
+var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> DstIpPrefixSet
+var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> DstLabelSelector
+var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap = map[string]attr.Type{
+
+	"expressions": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> DstPrefixList
+var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap = map[string]attr.Type{
+
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"prefixes": types.ListType{
+		ElemType: types.StringType,
 	},
 }
 
@@ -617,8 +638,8 @@ var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListMo
 var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"exact_value":  types.StringType,
-	"suffix_value": types.StringType,
 	"regex_value":  types.StringType,
+	"suffix_value": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> PathChoice
@@ -628,25 +649,6 @@ var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListPa
 	"path_exact_value":  types.StringType,
 	"path_prefix_value": types.StringType,
 	"path_regex_value":  types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> DstPrefixList
-var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap = map[string]attr.Type{
-
-	"prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> DstAsnSet
-var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> TlsList
@@ -664,20 +666,20 @@ var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListModelAttrib
 	},
 }
 
+// Attribute map for ArrayOfPointerField --> TlsList
+var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListTlsListModelAttributeMap = map[string]attr.Type{
+
+	"domain_choice": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListTlsListDomainChoiceModelAttributeMap,
+	},
+}
+
 // Attribute map for RequiredOneOfField --> DomainChoice
 var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListTlsListDomainChoiceModelAttributeMap = map[string]attr.Type{
 
-	"regex_value":  types.StringType,
 	"exact_value":  types.StringType,
+	"regex_value":  types.StringType,
 	"suffix_value": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> DstIpPrefixSet
-var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> UrlCategoryList
@@ -685,22 +687,6 @@ var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceUrlCategoryListMod
 
 	"url_categories": types.ListType{
 		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> DstLabelSelector
-var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap = map[string]attr.Type{
-
-	"expressions": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> DstAsnList
-var ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap = map[string]attr.Type{
-
-	"as_numbers": types.ListType{
-		ElemType: types.Int64Type,
 	},
 }
 
@@ -716,28 +702,103 @@ var ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoiceModelAttributeMap 
 // Attribute map for PointerOfOneOfField --> PortMatcher
 var ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoicePortMatcherModelAttributeMap = map[string]attr.Type{
 
+	"invert_matcher": types.BoolType,
 	"ports": types.ListType{
 		ElemType: types.StringType,
 	},
-	"invert_matcher": types.BoolType,
 }
 
 // Attribute map for RequiredPointerField --> Metadata
 var ForwardProxyPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap = map[string]attr.Type{
 
-	"name":        types.StringType,
 	"description": types.StringType,
+	"name":        types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> SourceChoice
+var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap = map[string]attr.Type{
+
+	"all_sources": types.BoolType,
+	"ip_prefix_set": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap,
+	},
+	"label_selector": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap,
+	},
+	"prefix_list": types.ObjectType{
+		AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> IpPrefixSet
+var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> LabelSelector
+var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap = map[string]attr.Type{
+
+	"expressions": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> PrefixList
+var ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap = map[string]attr.Type{
+
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Attribute map for PointerField --> SegmentPolicy
 var ForwardProxyPolicySegmentPolicyModelAttributeMap = map[string]attr.Type{
 
-	"src_segment_choice": types.ObjectType{
-		AttrTypes: ForwardProxyPolicySegmentPolicySrcSegmentChoiceModelAttributeMap,
-	},
 	"dst_segment_choice": types.ObjectType{
 		AttrTypes: ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap,
 	},
+	"src_segment_choice": types.ObjectType{
+		AttrTypes: ForwardProxyPolicySegmentPolicySrcSegmentChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> DstSegmentChoice
+var ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
+
+	"dst_any": types.BoolType,
+	"dst_segments": types.ObjectType{
+		AttrTypes: ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
+	},
+	"intra_segment": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> DstSegments
+var ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
+
+	"segments": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Segments
+var ForwardProxyPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> SrcSegmentChoice
@@ -756,42 +817,9 @@ var ForwardProxyPolicySegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap 
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
 				"name":      types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Segments
-var ForwardProxyPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for OneOfField --> DstSegmentChoice
-var ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
-
-	"dst_any":       types.BoolType,
-	"intra_segment": types.BoolType,
-	"dst_segments": types.ObjectType{
-		AttrTypes: ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> DstSegments
-var ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
-
-	"segments": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
 				"namespace": types.StringType,
-				"name":      types.StringType,
+				"tenant":    types.StringType,
 			},
 		},
 	},
@@ -811,17 +839,10 @@ func (d *DataSourceF5XCForwardProxyPolicy) Metadata(ctx context.Context, request
 func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "ForwardProxyPolicy data source",
-		Description:         "ForwardProxyPolicy data source",
+		MarkdownDescription: "Forward Proxy Policy Hits ID ForwardProxyPolicyHitsId uniquely identifies an entry in the response to forward proxy policy hits request. Forward proxy policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		Description:         "Forward Proxy Policy Hits ID ForwardProxyPolicyHitsId uniquely identifies an entry in the response to forward proxy policy hits request. Forward proxy policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
 
 		Attributes: map[string]schema.Attribute{
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"annotations": schema.MapAttribute{
 				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				Required:    false,
@@ -834,6 +855,13 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -859,19 +887,31 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
+					"any_proxy": schema.BoolAttribute{
+						Description: "All Proxies on this site This policy is applied to all forward proxies on this site, and not drp/http-connect proxies",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"drp_http_connect": schema.BoolAttribute{
+						Description: "DRP or HTTP Connect Proxy This policy is applied to attached DRP/HTTP-Connect Proxy (applicable only in App namespace)",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 					"network_connector": schema.SingleNestedAttribute{
 						Description: "Specific Network Connector Proxy for given network connector",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"namespace": schema.StringAttribute{
+							"name": schema.StringAttribute{
 								Description: "",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 							},
-							"name": schema.StringAttribute{
+							"namespace": schema.StringAttribute{
 								Description: "",
 								Required:    false,
 								Optional:    false,
@@ -900,18 +940,6 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 							},
 						},
 					},
-					"drp_http_connect": schema.BoolAttribute{
-						Description: "DRP or HTTP Connect Proxy This policy is applied to attached DRP/HTTP-Connect Proxy (applicable only in App namespace)",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"any_proxy": schema.BoolAttribute{
-						Description: "All Proxies on this site This policy is applied to all forward proxies on this site, and not drp/http-connect proxies",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 				},
 			},
 			"rule_choice": schema.SingleNestedAttribute{
@@ -932,38 +960,58 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"tls_list": schema.ListNestedAttribute{
-								Description: "TLS Domains Domains in SNI for TLS connections",
+							"default_action_choice": schema.SingleNestedAttribute{
+								Description: "Default Action Default action for connections that do not match any items in the HTTP, TLS and L4 lists",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"default_action_allow": schema.BoolAttribute{
+										Description: "Allow Allow all connections",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"default_action_deny": schema.BoolAttribute{
+										Description: "Deny Deny all connections",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"default_action_next_policy": schema.BoolAttribute{
+										Description: "Next Policy Evaluate the next forward proxy policy in the active list",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+							"dest_list": schema.ListNestedAttribute{
+								Description: "L4 Destinations L4 destinations for non-HTTP and non-TLS connections and TLS connections without SNI",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"domain_choice": schema.SingleNestedAttribute{
-											Description: "Domain choice Method to specify domain part",
+										"ipv6_prefixes": schema.ListAttribute{
+											Description: "ipv6 prefixes Destination IPv6 prefixes.",
+											ElementType: types.StringType,
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"suffix_value": schema.StringAttribute{
-													Description: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"regex_value": schema.StringAttribute{
-													Description: "regex values of Domains Regular Expression value for the domain name",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"exact_value": schema.StringAttribute{
-													Description: "exact value Exact domain name.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
+										},
+										"port_ranges": schema.StringAttribute{
+											Description: "port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"prefixes": schema.ListAttribute{
+											Description: "prefixes Destination IPv4 prefixes.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
 										},
 									},
 								},
@@ -987,14 +1035,14 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 													Optional:    false,
 													Computed:    true,
 												},
-												"suffix_value": schema.StringAttribute{
-													Description: "suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'",
+												"regex_value": schema.StringAttribute{
+													Description: "regex value of Domains Regular Expression value for the domain name",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 												},
-												"regex_value": schema.StringAttribute{
-													Description: "regex value of Domains Regular Expression value for the domain name",
+												"suffix_value": schema.StringAttribute{
+													Description: "suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -1007,18 +1055,6 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"path_prefix_value": schema.StringAttribute{
-													Description: "Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"path_regex_value": schema.StringAttribute{
-													Description: "regex value of Paths Regular Expression value for the Path to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 												"any_path": schema.BoolAttribute{
 													Description: "Any Path All paths are considered match",
 													Required:    false,
@@ -1031,64 +1067,56 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 													Optional:    false,
 													Computed:    true,
 												},
+												"path_prefix_value": schema.StringAttribute{
+													Description: "Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"path_regex_value": schema.StringAttribute{
+													Description: "regex value of Paths Regular Expression value for the Path to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
 											},
 										},
 									},
 								},
 							},
-							"dest_list": schema.ListNestedAttribute{
-								Description: "L4 Destinations L4 destinations for non-HTTP and non-TLS connections and TLS connections without SNI",
+							"tls_list": schema.ListNestedAttribute{
+								Description: "TLS Domains Domains in SNI for TLS connections",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"prefixes": schema.ListAttribute{
-											Description: "prefixes Destination IPv4 prefixes.",
-											ElementType: types.StringType,
+										"domain_choice": schema.SingleNestedAttribute{
+											Description: "Domain choice Method to specify domain part",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"exact_value": schema.StringAttribute{
+													Description: "exact value Exact domain name.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"regex_value": schema.StringAttribute{
+													Description: "regex values of Domains Regular Expression value for the domain name",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"suffix_value": schema.StringAttribute{
+													Description: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
 										},
-										"ipv6_prefixes": schema.ListAttribute{
-											Description: "ipv6 prefixes Destination IPv6 prefixes.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"port_ranges": schema.StringAttribute{
-											Description: "port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-							},
-							"default_action_choice": schema.SingleNestedAttribute{
-								Description: "Default Action Default action for connections that do not match any items in the HTTP, TLS and L4 lists",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"default_action_next_policy": schema.BoolAttribute{
-										Description: "Next Policy Evaluate the next forward proxy policy in the active list",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"default_action_deny": schema.BoolAttribute{
-										Description: "Deny Deny all connections",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"default_action_allow": schema.BoolAttribute{
-										Description: "Allow Allow all connections",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
 									},
 								},
 							},
@@ -1106,8 +1134,8 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"default_action_next_policy": schema.BoolAttribute{
-										Description: "Next Policy Evaluate the next forward proxy policy in the active list",
+									"default_action_allow": schema.BoolAttribute{
+										Description: "Allow Allow all connections",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
@@ -1118,46 +1146,40 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 										Optional:    false,
 										Computed:    true,
 									},
-									"default_action_allow": schema.BoolAttribute{
-										Description: "Allow Allow all connections",
+									"default_action_next_policy": schema.BoolAttribute{
+										Description: "Next Policy Evaluate the next forward proxy policy in the active list",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
 								},
 							},
-							"tls_list": schema.ListNestedAttribute{
-								Description: "TLS Domains Domains in SNI for TLS connections",
+							"dest_list": schema.ListNestedAttribute{
+								Description: "L4 Destinations L4 destinations for non-HTTP and non-TLS connections and TLS connections without SNI",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"domain_choice": schema.SingleNestedAttribute{
-											Description: "Domain choice Method to specify domain part",
+										"ipv6_prefixes": schema.ListAttribute{
+											Description: "ipv6 prefixes Destination IPv6 prefixes.",
+											ElementType: types.StringType,
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"suffix_value": schema.StringAttribute{
-													Description: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"regex_value": schema.StringAttribute{
-													Description: "regex values of Domains Regular Expression value for the domain name",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"exact_value": schema.StringAttribute{
-													Description: "exact value Exact domain name.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
+										},
+										"port_ranges": schema.StringAttribute{
+											Description: "port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"prefixes": schema.ListAttribute{
+											Description: "prefixes Destination IPv4 prefixes.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
 										},
 									},
 								},
@@ -1175,14 +1197,14 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"regex_value": schema.StringAttribute{
-													Description: "regex value of Domains Regular Expression value for the domain name",
+												"exact_value": schema.StringAttribute{
+													Description: "exact value Exact domain name",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 												},
-												"exact_value": schema.StringAttribute{
-													Description: "exact value Exact domain name",
+												"regex_value": schema.StringAttribute{
+													Description: "regex value of Domains Regular Expression value for the domain name",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -1230,32 +1252,38 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 									},
 								},
 							},
-							"dest_list": schema.ListNestedAttribute{
-								Description: "L4 Destinations L4 destinations for non-HTTP and non-TLS connections and TLS connections without SNI",
+							"tls_list": schema.ListNestedAttribute{
+								Description: "TLS Domains Domains in SNI for TLS connections",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"ipv6_prefixes": schema.ListAttribute{
-											Description: "ipv6 prefixes Destination IPv6 prefixes.",
-											ElementType: types.StringType,
+										"domain_choice": schema.SingleNestedAttribute{
+											Description: "Domain choice Method to specify domain part",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
-										},
-										"port_ranges": schema.StringAttribute{
-											Description: "port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"prefixes": schema.ListAttribute{
-											Description: "prefixes Destination IPv4 prefixes.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"exact_value": schema.StringAttribute{
+													Description: "exact value Exact domain name.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"regex_value": schema.StringAttribute{
+													Description: "regex values of Domains Regular Expression value for the domain name",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"suffix_value": schema.StringAttribute{
+													Description: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
 										},
 									},
 								},
@@ -1275,14 +1303,94 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"source_choice": schema.SingleNestedAttribute{
-											Description: "Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints.",
+										"action": schema.ListAttribute{
+											Description: "action Action to be enforced if the input request matches the rule.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"destination_choice": schema.SingleNestedAttribute{
+											Description: "Destination Choice Destinations of the proxy connections",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"label_selector": schema.SingleNestedAttribute{
-													Description: "Source Label selector Sources is set of prefixes determined by label selector expression",
+												"all_destinations": schema.BoolAttribute{
+													Description: "All Destinations Match on all destinations",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"dst_asn_list": schema.SingleNestedAttribute{
+													Description: "Dst ASN List Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"as_numbers": schema.ListAttribute{
+															Description: "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.",
+															ElementType: types.Int64Type,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"dst_asn_set": schema.SingleNestedAttribute{
+													Description: "Dst ASN Set Addresses that belong to the ASNs in the given bgp_asn_set The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"namespace": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"tenant": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"dst_ip_prefix_set": schema.SingleNestedAttribute{
+													Description: "Dst IP Prefix Set Addresses that are covered by the prefixes in the given ip_prefix_set",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"namespace": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"tenant": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"dst_label_selector": schema.SingleNestedAttribute{
+													Description: "Dst Label Selector Destination is the set of prefixes determined by the label selector expression",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -1296,51 +1404,12 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 														},
 													},
 												},
-												"ip_prefix_set": schema.SingleNestedAttribute{
-													Description: "IP Prefix Set All ip prefixes that are in a given ip prefix set.",
+												"dst_prefix_list": schema.SingleNestedAttribute{
+													Description: "Dst IP Prefix List Addresses that are covered by the given list of IPv4 prefixes",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"name": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"tenant": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"namespace": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"all_sources": schema.BoolAttribute{
-													Description: "All Sources Any source that matches 0/0 ip prefix",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"prefix_list": schema.SingleNestedAttribute{
-													Description: "ip prefix list list of ip prefixes that are representing source of traffic seen by proxy list is a sublist of both V4 and V6 prefix list",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"prefixes": schema.ListAttribute{
-															Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
 														"ipv6_prefixes": schema.ListAttribute{
 															Description: "ipv6 prefixes List of IPv6 prefix strings.",
 															ElementType: types.StringType,
@@ -1348,16 +1417,15 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 															Optional:    false,
 															Computed:    true,
 														},
+														"prefixes": schema.ListAttribute{
+															Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
 													},
 												},
-											},
-										},
-										"destination_choice": schema.SingleNestedAttribute{
-											Description: "Destination Choice Destinations of the proxy connections",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
 												"http_list": schema.SingleNestedAttribute{
 													Description: "HTTP URLs URLs for HTTP connections",
 													Required:    false,
@@ -1383,14 +1451,14 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 																				Optional:    false,
 																				Computed:    true,
 																			},
-																			"suffix_value": schema.StringAttribute{
-																				Description: "suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'",
+																			"regex_value": schema.StringAttribute{
+																				Description: "regex value of Domains Regular Expression value for the domain name",
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
 																			},
-																			"regex_value": schema.StringAttribute{
-																				Description: "regex value of Domains Regular Expression value for the domain name",
+																			"suffix_value": schema.StringAttribute{
+																				Description: "suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'",
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
@@ -1434,54 +1502,6 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 														},
 													},
 												},
-												"dst_prefix_list": schema.SingleNestedAttribute{
-													Description: "Dst IP Prefix List Addresses that are covered by the given list of IPv4 prefixes",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"prefixes": schema.ListAttribute{
-															Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6_prefixes": schema.ListAttribute{
-															Description: "ipv6 prefixes List of IPv6 prefix strings.",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"dst_asn_set": schema.SingleNestedAttribute{
-													Description: "Dst ASN Set Addresses that belong to the ASNs in the given bgp_asn_set The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"name": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"tenant": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"namespace": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
 												"tls_list": schema.SingleNestedAttribute{
 													Description: "TLS Domains Domains in SNI for TLS connections",
 													Required:    false,
@@ -1501,14 +1521,14 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 																		Optional:    false,
 																		Computed:    true,
 																		Attributes: map[string]schema.Attribute{
-																			"regex_value": schema.StringAttribute{
-																				Description: "regex values of Domains Regular Expression value for the domain name",
+																			"exact_value": schema.StringAttribute{
+																				Description: "exact value Exact domain name.",
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
 																			},
-																			"exact_value": schema.StringAttribute{
-																				Description: "exact value Exact domain name.",
+																			"regex_value": schema.StringAttribute{
+																				Description: "regex values of Domains Regular Expression value for the domain name",
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
@@ -1526,32 +1546,6 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 														},
 													},
 												},
-												"dst_ip_prefix_set": schema.SingleNestedAttribute{
-													Description: "Dst IP Prefix Set Addresses that are covered by the prefixes in the given ip_prefix_set",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"tenant": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"namespace": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"name": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
 												"url_category_list": schema.SingleNestedAttribute{
 													Description: "URL Category List URL categories to choose, so that the corresponding label selector expressions can be derived from it",
 													Required:    false,
@@ -1561,42 +1555,6 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 														"url_categories": schema.ListAttribute{
 															Description: "URL Categories List of url categories to be selected",
 															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"dst_label_selector": schema.SingleNestedAttribute{
-													Description: "Dst Label Selector Destination is the set of prefixes determined by the label selector expression",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"expressions": schema.ListAttribute{
-															Description: "expressions expressions contains the kubernetes style label expression for selections.",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"all_destinations": schema.BoolAttribute{
-													Description: "All Destinations Match on all destinations",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"dst_asn_list": schema.SingleNestedAttribute{
-													Description: "Dst ASN List Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"as_numbers": schema.ListAttribute{
-															Description: "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.",
-															ElementType: types.Int64Type,
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
@@ -1623,15 +1581,15 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"ports": schema.ListAttribute{
-															Description: "port ranges A list of strings, each of which is a single port value or a tuple of start and end port values separated by '-'. The start and end values are considered to be part of the range.",
-															ElementType: types.StringType,
+														"invert_matcher": schema.BoolAttribute{
+															Description: "invert_matcher Invert the match result.",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 														},
-														"invert_matcher": schema.BoolAttribute{
-															Description: "invert_matcher Invert the match result.",
+														"ports": schema.ListAttribute{
+															Description: "port ranges A list of strings, each of which is a single port value or a tuple of start and end port values separated by '-'. The start and end values are considered to be part of the range.",
+															ElementType: types.StringType,
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
@@ -1646,26 +1604,96 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description: "name This is the name of the message. The value of name has to follow DNS-1035 format.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 												"description": schema.StringAttribute{
 													Description: "description Human readable description.",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 												},
+												"name": schema.StringAttribute{
+													Description: "name This is the name of the message. The value of name has to follow DNS-1035 format.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
 											},
 										},
-										"action": schema.ListAttribute{
-											Description: "action Action to be enforced if the input request matches the rule.",
-											ElementType: types.StringType,
+										"source_choice": schema.SingleNestedAttribute{
+											Description: "Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"all_sources": schema.BoolAttribute{
+													Description: "All Sources Any source that matches 0/0 ip prefix",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"ip_prefix_set": schema.SingleNestedAttribute{
+													Description: "IP Prefix Set All ip prefixes that are in a given ip prefix set.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"namespace": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"tenant": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"label_selector": schema.SingleNestedAttribute{
+													Description: "Source Label selector Sources is set of prefixes determined by label selector expression",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"expressions": schema.ListAttribute{
+															Description: "expressions expressions contains the kubernetes style label expression for selections.",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"prefix_list": schema.SingleNestedAttribute{
+													Description: "ip prefix list list of ip prefixes that are representing source of traffic seen by proxy list is a sublist of both V4 and V6 prefix list",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"ipv6_prefixes": schema.ListAttribute{
+															Description: "ipv6 prefixes List of IPv6 prefix strings.",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"prefixes": schema.ListAttribute{
+															Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
 										},
 									},
 								},
@@ -1680,6 +1708,62 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
+					"dst_segment_choice": schema.SingleNestedAttribute{
+						Description: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"dst_any": schema.BoolAttribute{
+								Description: "Any segment Traffic is not matched against any segment",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"dst_segments": schema.SingleNestedAttribute{
+								Description: "List of segments Traffic is matched against destination segment in selected segments",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"segments": schema.ListNestedAttribute{
+										Description: "Segments Select list of segments",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"namespace": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"tenant": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+							},
+							"intra_segment": schema.BoolAttribute{
+								Description: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
 					"src_segment_choice": schema.SingleNestedAttribute{
 						Description: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
 						Required:    false,
@@ -1705,7 +1789,7 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 										Computed:    true,
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
-												"tenant": schema.StringAttribute{
+												"name": schema.StringAttribute{
 													Description: "",
 													Required:    false,
 													Optional:    false,
@@ -1717,63 +1801,7 @@ func (r *DataSourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request d
 													Optional:    false,
 													Computed:    true,
 												},
-												"name": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					"dst_segment_choice": schema.SingleNestedAttribute{
-						Description: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"dst_any": schema.BoolAttribute{
-								Description: "Any segment Traffic is not matched against any segment",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"intra_segment": schema.BoolAttribute{
-								Description: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"dst_segments": schema.SingleNestedAttribute{
-								Description: "List of segments Traffic is matched against destination segment in selected segments",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"segments": schema.ListNestedAttribute{
-										Description: "Segments Select list of segments",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
 												"tenant": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"namespace": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"name": schema.StringAttribute{
 													Description: "",
 													Required:    false,
 													Optional:    false,
@@ -1835,15 +1863,14 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -1858,24 +1885,6 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -1897,6 +1906,24 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1921,41 +1948,60 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// data specToModelNested BoolOfOneOfPointerField --> AnyProxy
+		_, isAnyProxy := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_AnyProxy)
+
+		if isAnyProxy {
+			proxyChoiceChoicesModel.AnyProxy = types.BoolValue(true)
+		} else {
+			proxyChoiceChoicesModel.AnyProxy = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> DrpHttpConnect
+		_, isDrpHttpConnect := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_DrpHttpConnect)
+
+		if isDrpHttpConnect {
+			proxyChoiceChoicesModel.DrpHttpConnect = types.BoolValue(true)
+		} else {
+			proxyChoiceChoicesModel.DrpHttpConnect = types.BoolNull()
+		}
+
 		// data specToModelNested PointerOfOneOfField --> NetworkConnector
 		// <no value>
 		// false
 		{
-			networkConnectorOptions, isNetworkConnector := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_NetworkConnector)
+			networkConnectorOptionsWrapper, isNetworkConnector := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_NetworkConnector)
 			networkConnectorAttributeMap := make(map[string]attr.Value)
 
-			if isNetworkConnector && networkConnectorOptions != nil {
-
-				// data specToModelNested RequiredStringField --> Namespace
-				if networkConnectorOptions.NetworkConnector.GetNamespace() != "" {
-					networkConnectorAttributeMap["namespace"] = types.StringValue(networkConnectorOptions.NetworkConnector.GetNamespace())
-				} else {
-					// Empty string, set to null
-					networkConnectorAttributeMap["namespace"] = types.StringNull()
-				}
+			if isNetworkConnector && networkConnectorOptionsWrapper != nil && networkConnectorOptionsWrapper.NetworkConnector != nil {
+				networkConnectorElement := networkConnectorOptionsWrapper.NetworkConnector
 
 				// data specToModelNested RequiredStringField --> Name
-				if networkConnectorOptions.NetworkConnector.GetName() != "" {
-					networkConnectorAttributeMap["name"] = types.StringValue(networkConnectorOptions.NetworkConnector.GetName())
+				if networkConnectorElement.GetName() != "" {
+					networkConnectorAttributeMap["name"] = types.StringValue(networkConnectorElement.GetName())
 				} else {
 					// Empty string, set to null
 					networkConnectorAttributeMap["name"] = types.StringNull()
 				}
 
+				// data specToModelNested RequiredStringField --> Namespace
+				if networkConnectorElement.GetNamespace() != "" {
+					networkConnectorAttributeMap["namespace"] = types.StringValue(networkConnectorElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					networkConnectorAttributeMap["namespace"] = types.StringNull()
+				}
+
 				// data specToModelNested StringField --> Tenant
-				if networkConnectorOptions.NetworkConnector.GetTenant() != "" {
-					networkConnectorAttributeMap["tenant"] = types.StringValue(networkConnectorOptions.NetworkConnector.GetTenant())
+				if networkConnectorElement.GetTenant() != "" {
+					networkConnectorAttributeMap["tenant"] = types.StringValue(networkConnectorElement.GetTenant())
 				} else {
 					// Empty string, set to null
 					networkConnectorAttributeMap["tenant"] = types.StringNull()
 				}
 
-				networkConnectorObj, diags := types.ObjectValue(ForwardProxyPolicyProxyChoiceNetworkConnectorModelAttributeMap, networkConnectorAttributeMap)
-				response.Diagnostics.Append(diags...)
+				networkConnectorObj, networkConnectorObjDiags := types.ObjectValue(ForwardProxyPolicyProxyChoiceNetworkConnectorModelAttributeMap, networkConnectorAttributeMap)
+				response.Diagnostics.Append(networkConnectorObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1969,15 +2015,16 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		// <no value>
 		// false
 		{
-			proxyLabelSelectorOptions, isProxyLabelSelector := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_ProxyLabelSelector)
+			proxyLabelSelectorOptionsWrapper, isProxyLabelSelector := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_ProxyLabelSelector)
 			proxyLabelSelectorAttributeMap := make(map[string]attr.Value)
 
-			if isProxyLabelSelector && proxyLabelSelectorOptions != nil {
+			if isProxyLabelSelector && proxyLabelSelectorOptionsWrapper != nil && proxyLabelSelectorOptionsWrapper.ProxyLabelSelector != nil {
+				proxyLabelSelectorElement := proxyLabelSelectorOptionsWrapper.ProxyLabelSelector
 
 				// data specToModelNested RequiredArrayOfStringField --> Expressions
-				if len(proxyLabelSelectorOptions.ProxyLabelSelector.GetExpressions()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, proxyLabelSelectorOptions.ProxyLabelSelector.GetExpressions())
-					response.Diagnostics.Append(diags...)
+				if len(proxyLabelSelectorElement.GetExpressions()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, proxyLabelSelectorElement.GetExpressions())
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1986,8 +2033,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 					proxyLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
 				}
 
-				proxyLabelSelectorObj, diags := types.ObjectValue(ForwardProxyPolicyProxyChoiceProxyLabelSelectorModelAttributeMap, proxyLabelSelectorAttributeMap)
-				response.Diagnostics.Append(diags...)
+				proxyLabelSelectorObj, proxyLabelSelectorObjDiags := types.ObjectValue(ForwardProxyPolicyProxyChoiceProxyLabelSelectorModelAttributeMap, proxyLabelSelectorAttributeMap)
+				response.Diagnostics.Append(proxyLabelSelectorObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1997,37 +2044,21 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 			}
 		}
 
-		// data specToModelNested BoolOfOneOfPointerField --> DrpHttpConnect
-		_, isDrpHttpConnect := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_DrpHttpConnect)
-
-		if isDrpHttpConnect {
-			proxyChoiceChoicesModel.DrpHttpConnect = types.BoolValue(true)
-		} else {
-			proxyChoiceChoicesModel.DrpHttpConnect = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> AnyProxy
-		_, isAnyProxy := proxyChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_AnyProxy)
-
-		if isAnyProxy {
-			proxyChoiceChoicesModel.AnyProxy = types.BoolValue(true)
-		} else {
-			proxyChoiceChoicesModel.AnyProxy = types.BoolNull()
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		proxyChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			ForwardProxyPolicyProxyChoiceModelAttributeMap,
-			proxyChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			proxyChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				ForwardProxyPolicyProxyChoiceModelAttributeMap,
+				proxyChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.ProxyChoice = proxyChoiceObj
+			// Assign the final object to the root data model.
+			data.ProxyChoice = proxyChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.ProxyChoice = types.ObjectNull(ForwardProxyPolicyProxyChoiceModelAttributeMap)
@@ -2060,104 +2091,134 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		// <no value>
 		// false
 		{
-			allowListOptions, isAllowList := ruleChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_AllowList)
+			allowListOptionsWrapper, isAllowList := ruleChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_AllowList)
 			allowListAttributeMap := make(map[string]attr.Value)
 
-			if isAllowList && allowListOptions != nil {
+			if isAllowList && allowListOptionsWrapper != nil && allowListOptionsWrapper.AllowList != nil {
+				allowListElement := allowListOptionsWrapper.AllowList
 
-				// data specToModelNested ArrayOfPointerField --> TlsList
-				if len(allowListOptions.AllowList.GetTlsList()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					tlsListElements := make([]ForwardProxyPolicyDomainType, 0, len(allowListOptions.AllowList.GetTlsList()))
-					for _, tlsListElement := range allowListOptions.AllowList.GetTlsList() {
-						forwardProxyPolicyDomainTypeModel := ForwardProxyPolicyDomainType{}
+				// data specToModelNested RequiredOneOfField --> DefaultActionChoice
+				// <no value>
+				if allowListElement.GetDefaultActionChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					allowListdefaultActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-						// data specToModelNested RequiredOneOfField --> DomainChoice
-						// <no value>
-						if tlsListElement.GetDomainChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							tlsListdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					allowListdefaultActionChoiceChoices := allowListElement.GetDefaultActionChoice()
 
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							tlsListdomainChoiceChoices := tlsListElement.GetDomainChoice()
+					// Process nested choices, populating the temporary attribute map
 
-							// Process nested choices, populating the temporary attribute map
+					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionAllow
+					_, isDefaultActionAllow := allowListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionAllow)
 
-							// data specToModelNested StringOfOneOfField --> SuffixValue
-							suffixValueItem, isSuffixValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_SuffixValue)
-
-							if isSuffixValue {
-								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
-							} else {
-								// Empty string, set to null
-								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
-							}
-
-							// data specToModelNested StringOfOneOfField --> RegexValue
-							regexValueItem, isRegexValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_RegexValue)
-
-							if isRegexValue {
-								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
-							} else {
-								// Empty string, set to null
-								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
-							}
-
-							// data specToModelNested StringOfOneOfField --> ExactValue
-							exactValueItem, isExactValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_ExactValue)
-
-							if isExactValue {
-								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringValue(string(exactValueItem.ExactValue))
-							} else {
-								// Empty string, set to null
-								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, tlsListdomainChoiceChoicesObjDiags := types.ObjectValue(
-								ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								tlsListdomainChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(tlsListdomainChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyDomainTypeModel.DomainChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyDomainTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap)
-						}
-
-						tlsListElements = append(tlsListElements, forwardProxyPolicyDomainTypeModel)
+					if isDefaultActionAllow {
+						allowListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolValue(true)
+					} else {
+						allowListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolNull()
 					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					tlsListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyTlsListObjectRefModelAttributeMap}, tlsListElements)
-					response.Diagnostics.Append(diags...)
+
+					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionDeny
+					_, isDefaultActionDeny := allowListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionDeny)
+
+					if isDefaultActionDeny {
+						allowListdefaultActionChoiceChoicesAttributeMap["default_action_deny"] = types.BoolValue(true)
+					} else {
+						allowListdefaultActionChoiceChoicesAttributeMap["default_action_deny"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionNextPolicy
+					_, isDefaultActionNextPolicy := allowListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionNextPolicy)
+
+					if isDefaultActionNextPolicy {
+						allowListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolValue(true)
+					} else {
+						allowListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, allowListdefaultActionChoiceChoicesObjDiags := types.ObjectValue(
+						ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						allowListdefaultActionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(allowListdefaultActionChoiceChoicesObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					allowListAttributeMap["tls_list"] = tlsListListValue
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					allowListAttributeMap["default_action_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					allowListAttributeMap["default_action_choice"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested ArrayOfPointerField --> DestList
+				if len(allowListElement.GetDestList()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					destListElements := make([]ForwardProxyPolicyL4DestType, 0, len(allowListElement.GetDestList()))
+					for _, destListElement := range allowListElement.GetDestList() {
+						forwardProxyPolicyL4DestTypeModel := ForwardProxyPolicyL4DestType{}
+
+						// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+						if len(destListElement.GetIpv6Prefixes()) > 0 {
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, destListElement.GetIpv6Prefixes())
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = listValue
+						} else {
+							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
+						}
+
+						// data specToModelNested RequiredStringField --> PortRanges
+						if destListElement.GetPortRanges() != "" {
+							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringValue(destListElement.GetPortRanges())
+						} else {
+							// Empty string, set to null
+							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringNull()
+						}
+
+						// data specToModelNested ArrayOfStringField --> Prefixes
+						if len(destListElement.GetPrefixes()) > 0 {
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, destListElement.GetPrefixes())
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							forwardProxyPolicyL4DestTypeModel.Prefixes = listValue
+						} else {
+							forwardProxyPolicyL4DestTypeModel.Prefixes = types.ListNull(types.StringType)
+						}
+
+						destListElements = append(destListElements, forwardProxyPolicyL4DestTypeModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					destListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceAllowListDestListModelAttributeMap}, destListElements)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					allowListAttributeMap["dest_list"] = destListListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					allowListAttributeMap["tls_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyTlsListObjectRefModelAttributeMap})
+					allowListAttributeMap["dest_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceAllowListDestListModelAttributeMap})
 				}
 
 				// data specToModelNested ArrayOfPointerField --> HttpList
-				if len(allowListOptions.AllowList.GetHttpList()) > 0 {
+				if len(allowListElement.GetHttpList()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(allowListOptions.AllowList.GetHttpList()))
-					for _, httpListElement := range allowListOptions.AllowList.GetHttpList() {
+					httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(allowListElement.GetHttpList()))
+					for _, httpListElement := range allowListElement.GetHttpList() {
 						forwardProxyPolicyForwardProxyPolicyURLTypeModel := ForwardProxyPolicyForwardProxyPolicyURLType{}
 
 						// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -2182,16 +2243,6 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 								httpListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
 							}
 
-							// data specToModelNested StringOfOneOfField --> SuffixValue
-							suffixValueItem, isSuffixValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_SuffixValue)
-
-							if isSuffixValue {
-								httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
-							} else {
-								// Empty string, set to null
-								httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
-							}
-
 							// data specToModelNested StringOfOneOfField --> RegexValue
 							regexValueItem, isRegexValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_RegexValue)
 
@@ -2200,6 +2251,16 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							} else {
 								// Empty string, set to null
 								httpListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> SuffixValue
+							suffixValueItem, isSuffixValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_SuffixValue)
+
+							if isSuffixValue {
+								httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
+							} else {
+								// Empty string, set to null
+								httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
 							}
 
 							// --- End of Choices ---
@@ -2233,6 +2294,25 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 							// Process nested choices, populating the temporary attribute map
 
+							// data specToModelNested BoolOfOneOfPointerField --> AnyPath
+							_, isAnyPath := httpListpathChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_AnyPath)
+
+							if isAnyPath {
+								httpListpathChoiceChoicesAttributeMap["any_path"] = types.BoolValue(true)
+							} else {
+								httpListpathChoiceChoicesAttributeMap["any_path"] = types.BoolNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> PathExactValue
+							pathExactValueItem, isPathExactValue := httpListpathChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_PathExactValue)
+
+							if isPathExactValue {
+								httpListpathChoiceChoicesAttributeMap["path_exact_value"] = types.StringValue(string(pathExactValueItem.PathExactValue))
+							} else {
+								// Empty string, set to null
+								httpListpathChoiceChoicesAttributeMap["path_exact_value"] = types.StringNull()
+							}
+
 							// data specToModelNested StringOfOneOfField --> PathPrefixValue
 							pathPrefixValueItem, isPathPrefixValue := httpListpathChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_PathPrefixValue)
 
@@ -2251,25 +2331,6 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							} else {
 								// Empty string, set to null
 								httpListpathChoiceChoicesAttributeMap["path_regex_value"] = types.StringNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AnyPath
-							_, isAnyPath := httpListpathChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_AnyPath)
-
-							if isAnyPath {
-								httpListpathChoiceChoicesAttributeMap["any_path"] = types.BoolValue(true)
-							} else {
-								httpListpathChoiceChoicesAttributeMap["any_path"] = types.BoolNull()
-							}
-
-							// data specToModelNested StringOfOneOfField --> PathExactValue
-							pathExactValueItem, isPathExactValue := httpListpathChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_PathExactValue)
-
-							if isPathExactValue {
-								httpListpathChoiceChoicesAttributeMap["path_exact_value"] = types.StringValue(string(pathExactValueItem.PathExactValue))
-							} else {
-								// Empty string, set to null
-								httpListpathChoiceChoicesAttributeMap["path_exact_value"] = types.StringNull()
 							}
 
 							// --- End of Choices ---
@@ -2295,8 +2356,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					httpListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceAllowListHttpListModelAttributeMap}, httpListElements)
-					response.Diagnostics.Append(diags...)
+					httpListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceAllowListHttpListModelAttributeMap}, httpListElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2309,124 +2370,95 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 					allowListAttributeMap["http_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceAllowListHttpListModelAttributeMap})
 				}
 
-				// data specToModelNested ArrayOfPointerField --> DestList
-				if len(allowListOptions.AllowList.GetDestList()) > 0 {
+				// data specToModelNested ArrayOfPointerField --> TlsList
+				if len(allowListElement.GetTlsList()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					destListElements := make([]ForwardProxyPolicyL4DestType, 0, len(allowListOptions.AllowList.GetDestList()))
-					for _, destListElement := range allowListOptions.AllowList.GetDestList() {
-						forwardProxyPolicyL4DestTypeModel := ForwardProxyPolicyL4DestType{}
+					tlsListElements := make([]ForwardProxyPolicyDomainType, 0, len(allowListElement.GetTlsList()))
+					for _, tlsListElement := range allowListElement.GetTlsList() {
+						forwardProxyPolicyDomainTypeModel := ForwardProxyPolicyDomainType{}
 
-						// data specToModelNested ArrayOfStringField --> Prefixes
-						if len(destListElement.GetPrefixes()) > 0 {
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, destListElement.GetPrefixes())
-							response.Diagnostics.Append(diags...)
+						// data specToModelNested RequiredOneOfField --> DomainChoice
+						// <no value>
+						if tlsListElement.GetDomainChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							tlsListdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							tlsListdomainChoiceChoices := tlsListElement.GetDomainChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested StringOfOneOfField --> ExactValue
+							exactValueItem, isExactValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_ExactValue)
+
+							if isExactValue {
+								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringValue(string(exactValueItem.ExactValue))
+							} else {
+								// Empty string, set to null
+								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> RegexValue
+							regexValueItem, isRegexValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_RegexValue)
+
+							if isRegexValue {
+								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
+							} else {
+								// Empty string, set to null
+								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> SuffixValue
+							suffixValueItem, isSuffixValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_SuffixValue)
+
+							if isSuffixValue {
+								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
+							} else {
+								// Empty string, set to null
+								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, tlsListdomainChoiceChoicesObjDiags := types.ObjectValue(
+								ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								tlsListdomainChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(tlsListdomainChoiceChoicesObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							forwardProxyPolicyL4DestTypeModel.Prefixes = listValue
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							forwardProxyPolicyDomainTypeModel.DomainChoice = finalObj
 						} else {
-							forwardProxyPolicyL4DestTypeModel.Prefixes = types.ListNull(types.StringType)
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							forwardProxyPolicyDomainTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListTlsListDomainChoiceModelAttributeMap)
 						}
 
-						// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-						if len(destListElement.GetIpv6Prefixes()) > 0 {
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, destListElement.GetIpv6Prefixes())
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = listValue
-						} else {
-							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
-						}
-
-						// data specToModelNested RequiredStringField --> PortRanges
-						if destListElement.GetPortRanges() != "" {
-							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringValue(destListElement.GetPortRanges())
-						} else {
-							// Empty string, set to null
-							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringNull()
-						}
-
-						destListElements = append(destListElements, forwardProxyPolicyL4DestTypeModel)
+						tlsListElements = append(tlsListElements, forwardProxyPolicyDomainTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					destListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyDestListObjectRefModelAttributeMap}, destListElements)
-					response.Diagnostics.Append(diags...)
+					tlsListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceAllowListTlsListModelAttributeMap}, tlsListElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					allowListAttributeMap["dest_list"] = destListListValue
+					allowListAttributeMap["tls_list"] = tlsListListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					allowListAttributeMap["dest_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyDestListObjectRefModelAttributeMap})
+					allowListAttributeMap["tls_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceAllowListTlsListModelAttributeMap})
 				}
 
-				// data specToModelNested RequiredOneOfField --> DefaultActionChoice
-				// <no value>
-				if allowListOptions.AllowList.GetDefaultActionChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					allowListdefaultActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					allowListdefaultActionChoiceChoices := allowListOptions.AllowList.GetDefaultActionChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionNextPolicy
-					_, isDefaultActionNextPolicy := allowListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionNextPolicy)
-
-					if isDefaultActionNextPolicy {
-						allowListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolValue(true)
-					} else {
-						allowListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionDeny
-					_, isDefaultActionDeny := allowListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionDeny)
-
-					if isDefaultActionDeny {
-						allowListdefaultActionChoiceChoicesAttributeMap["default_action_deny"] = types.BoolValue(true)
-					} else {
-						allowListdefaultActionChoiceChoicesAttributeMap["default_action_deny"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionAllow
-					_, isDefaultActionAllow := allowListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionAllow)
-
-					if isDefaultActionAllow {
-						allowListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolValue(true)
-					} else {
-						allowListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, allowListdefaultActionChoiceChoicesObjDiags := types.ObjectValue(
-						ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						allowListdefaultActionChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(allowListdefaultActionChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					allowListAttributeMap["default_action_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					allowListAttributeMap["default_action_choice"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap)
-				}
-
-				allowListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceAllowListModelAttributeMap, allowListAttributeMap)
-				response.Diagnostics.Append(diags...)
+				allowListObj, allowListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceAllowListModelAttributeMap, allowListAttributeMap)
+				response.Diagnostics.Append(allowListObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2440,30 +2472,31 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		// <no value>
 		// false
 		{
-			denyListOptions, isDenyList := ruleChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_DenyList)
+			denyListOptionsWrapper, isDenyList := ruleChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_DenyList)
 			denyListAttributeMap := make(map[string]attr.Value)
 
-			if isDenyList && denyListOptions != nil {
+			if isDenyList && denyListOptionsWrapper != nil && denyListOptionsWrapper.DenyList != nil {
+				denyListElement := denyListOptionsWrapper.DenyList
 
 				// data specToModelNested RequiredOneOfField --> DefaultActionChoice
 				// <no value>
-				if denyListOptions.DenyList.GetDefaultActionChoice() != nil {
+				if denyListElement.GetDefaultActionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					denyListdefaultActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					denyListdefaultActionChoiceChoices := denyListOptions.DenyList.GetDefaultActionChoice()
+					denyListdefaultActionChoiceChoices := denyListElement.GetDefaultActionChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
-					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionNextPolicy
-					_, isDefaultActionNextPolicy := denyListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionNextPolicy)
+					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionAllow
+					_, isDefaultActionAllow := denyListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionAllow)
 
-					if isDefaultActionNextPolicy {
-						denyListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolValue(true)
+					if isDefaultActionAllow {
+						denyListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolValue(true)
 					} else {
-						denyListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolNull()
+						denyListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolNull()
 					}
 
 					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionDeny
@@ -2475,13 +2508,13 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 						denyListdefaultActionChoiceChoicesAttributeMap["default_action_deny"] = types.BoolNull()
 					}
 
-					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionAllow
-					_, isDefaultActionAllow := denyListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionAllow)
+					// data specToModelNested BoolOfOneOfPointerField --> DefaultActionNextPolicy
+					_, isDefaultActionNextPolicy := denyListdefaultActionChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxySimpleRuleType_DefaultActionNextPolicy)
 
-					if isDefaultActionAllow {
-						denyListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolValue(true)
+					if isDefaultActionNextPolicy {
+						denyListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolValue(true)
 					} else {
-						denyListdefaultActionChoiceChoicesAttributeMap["default_action_allow"] = types.BoolNull()
+						denyListdefaultActionChoiceChoicesAttributeMap["default_action_next_policy"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -2503,99 +2536,70 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 					denyListAttributeMap["default_action_choice"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListDefaultActionChoiceModelAttributeMap)
 				}
 
-				// data specToModelNested ArrayOfPointerField --> TlsList
-				if len(denyListOptions.DenyList.GetTlsList()) > 0 {
+				// data specToModelNested ArrayOfPointerField --> DestList
+				if len(denyListElement.GetDestList()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					tlsListElements := make([]ForwardProxyPolicyDomainType, 0, len(denyListOptions.DenyList.GetTlsList()))
-					for _, tlsListElement := range denyListOptions.DenyList.GetTlsList() {
-						forwardProxyPolicyDomainTypeModel := ForwardProxyPolicyDomainType{}
+					destListElements := make([]ForwardProxyPolicyL4DestType, 0, len(denyListElement.GetDestList()))
+					for _, destListElement := range denyListElement.GetDestList() {
+						forwardProxyPolicyL4DestTypeModel := ForwardProxyPolicyL4DestType{}
 
-						// data specToModelNested RequiredOneOfField --> DomainChoice
-						// <no value>
-						if tlsListElement.GetDomainChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							tlsListdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							tlsListdomainChoiceChoices := tlsListElement.GetDomainChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested StringOfOneOfField --> SuffixValue
-							suffixValueItem, isSuffixValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_SuffixValue)
-
-							if isSuffixValue {
-								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
-							} else {
-								// Empty string, set to null
-								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
-							}
-
-							// data specToModelNested StringOfOneOfField --> RegexValue
-							regexValueItem, isRegexValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_RegexValue)
-
-							if isRegexValue {
-								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
-							} else {
-								// Empty string, set to null
-								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
-							}
-
-							// data specToModelNested StringOfOneOfField --> ExactValue
-							exactValueItem, isExactValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_ExactValue)
-
-							if isExactValue {
-								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringValue(string(exactValueItem.ExactValue))
-							} else {
-								// Empty string, set to null
-								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, tlsListdomainChoiceChoicesObjDiags := types.ObjectValue(
-								ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								tlsListdomainChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(tlsListdomainChoiceChoicesObjDiags...)
+						// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+						if len(destListElement.GetIpv6Prefixes()) > 0 {
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, destListElement.GetIpv6Prefixes())
+							response.Diagnostics.Append(listDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyDomainTypeModel.DomainChoice = finalObj
+							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = listValue
 						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyDomainTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap)
+							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
 						}
 
-						tlsListElements = append(tlsListElements, forwardProxyPolicyDomainTypeModel)
+						// data specToModelNested RequiredStringField --> PortRanges
+						if destListElement.GetPortRanges() != "" {
+							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringValue(destListElement.GetPortRanges())
+						} else {
+							// Empty string, set to null
+							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringNull()
+						}
+
+						// data specToModelNested ArrayOfStringField --> Prefixes
+						if len(destListElement.GetPrefixes()) > 0 {
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, destListElement.GetPrefixes())
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							forwardProxyPolicyL4DestTypeModel.Prefixes = listValue
+						} else {
+							forwardProxyPolicyL4DestTypeModel.Prefixes = types.ListNull(types.StringType)
+						}
+
+						destListElements = append(destListElements, forwardProxyPolicyL4DestTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					tlsListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyTlsListObjectRefModelAttributeMap}, tlsListElements)
-					response.Diagnostics.Append(diags...)
+					destListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceDenyListDestListModelAttributeMap}, destListElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					denyListAttributeMap["tls_list"] = tlsListListValue
+					denyListAttributeMap["dest_list"] = destListListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					denyListAttributeMap["tls_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyTlsListObjectRefModelAttributeMap})
+					denyListAttributeMap["dest_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceDenyListDestListModelAttributeMap})
 				}
 
 				// data specToModelNested ArrayOfPointerField --> HttpList
-				if len(denyListOptions.DenyList.GetHttpList()) > 0 {
+				if len(denyListElement.GetHttpList()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(denyListOptions.DenyList.GetHttpList()))
-					for _, httpListElement := range denyListOptions.DenyList.GetHttpList() {
+					httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(denyListElement.GetHttpList()))
+					for _, httpListElement := range denyListElement.GetHttpList() {
 						forwardProxyPolicyForwardProxyPolicyURLTypeModel := ForwardProxyPolicyForwardProxyPolicyURLType{}
 
 						// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -2610,16 +2614,6 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 							// Process nested choices, populating the temporary attribute map
 
-							// data specToModelNested StringOfOneOfField --> RegexValue
-							regexValueItem, isRegexValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_RegexValue)
-
-							if isRegexValue {
-								httpListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
-							} else {
-								// Empty string, set to null
-								httpListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
-							}
-
 							// data specToModelNested StringOfOneOfField --> ExactValue
 							exactValueItem, isExactValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_ExactValue)
 
@@ -2628,6 +2622,16 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							} else {
 								// Empty string, set to null
 								httpListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> RegexValue
+							regexValueItem, isRegexValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_RegexValue)
+
+							if isRegexValue {
+								httpListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
+							} else {
+								// Empty string, set to null
+								httpListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
 							}
 
 							// data specToModelNested StringOfOneOfField --> SuffixValue
@@ -2733,8 +2737,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					httpListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceDenyListHttpListModelAttributeMap}, httpListElements)
-					response.Diagnostics.Append(diags...)
+					httpListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceDenyListHttpListModelAttributeMap}, httpListElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2747,66 +2751,95 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 					denyListAttributeMap["http_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceDenyListHttpListModelAttributeMap})
 				}
 
-				// data specToModelNested ArrayOfPointerField --> DestList
-				if len(denyListOptions.DenyList.GetDestList()) > 0 {
+				// data specToModelNested ArrayOfPointerField --> TlsList
+				if len(denyListElement.GetTlsList()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					destListElements := make([]ForwardProxyPolicyL4DestType, 0, len(denyListOptions.DenyList.GetDestList()))
-					for _, destListElement := range denyListOptions.DenyList.GetDestList() {
-						forwardProxyPolicyL4DestTypeModel := ForwardProxyPolicyL4DestType{}
+					tlsListElements := make([]ForwardProxyPolicyDomainType, 0, len(denyListElement.GetTlsList()))
+					for _, tlsListElement := range denyListElement.GetTlsList() {
+						forwardProxyPolicyDomainTypeModel := ForwardProxyPolicyDomainType{}
 
-						// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-						if len(destListElement.GetIpv6Prefixes()) > 0 {
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, destListElement.GetIpv6Prefixes())
-							response.Diagnostics.Append(diags...)
+						// data specToModelNested RequiredOneOfField --> DomainChoice
+						// <no value>
+						if tlsListElement.GetDomainChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							tlsListdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							tlsListdomainChoiceChoices := tlsListElement.GetDomainChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested StringOfOneOfField --> ExactValue
+							exactValueItem, isExactValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_ExactValue)
+
+							if isExactValue {
+								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringValue(string(exactValueItem.ExactValue))
+							} else {
+								// Empty string, set to null
+								tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> RegexValue
+							regexValueItem, isRegexValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_RegexValue)
+
+							if isRegexValue {
+								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
+							} else {
+								// Empty string, set to null
+								tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> SuffixValue
+							suffixValueItem, isSuffixValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_SuffixValue)
+
+							if isSuffixValue {
+								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
+							} else {
+								// Empty string, set to null
+								tlsListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, tlsListdomainChoiceChoicesObjDiags := types.ObjectValue(
+								ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								tlsListdomainChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(tlsListdomainChoiceChoicesObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = listValue
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							forwardProxyPolicyDomainTypeModel.DomainChoice = finalObj
 						} else {
-							forwardProxyPolicyL4DestTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							forwardProxyPolicyDomainTypeModel.DomainChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListTlsListDomainChoiceModelAttributeMap)
 						}
 
-						// data specToModelNested RequiredStringField --> PortRanges
-						if destListElement.GetPortRanges() != "" {
-							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringValue(destListElement.GetPortRanges())
-						} else {
-							// Empty string, set to null
-							forwardProxyPolicyL4DestTypeModel.PortRanges = types.StringNull()
-						}
-
-						// data specToModelNested ArrayOfStringField --> Prefixes
-						if len(destListElement.GetPrefixes()) > 0 {
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, destListElement.GetPrefixes())
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							forwardProxyPolicyL4DestTypeModel.Prefixes = listValue
-						} else {
-							forwardProxyPolicyL4DestTypeModel.Prefixes = types.ListNull(types.StringType)
-						}
-
-						destListElements = append(destListElements, forwardProxyPolicyL4DestTypeModel)
+						tlsListElements = append(tlsListElements, forwardProxyPolicyDomainTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					destListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyDestListObjectRefModelAttributeMap}, destListElements)
-					response.Diagnostics.Append(diags...)
+					tlsListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceDenyListTlsListModelAttributeMap}, tlsListElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					denyListAttributeMap["dest_list"] = destListListValue
+					denyListAttributeMap["tls_list"] = tlsListListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					denyListAttributeMap["dest_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyDestListObjectRefModelAttributeMap})
+					denyListAttributeMap["tls_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceDenyListTlsListModelAttributeMap})
 				}
 
-				denyListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceDenyListModelAttributeMap, denyListAttributeMap)
-				response.Diagnostics.Append(diags...)
+				denyListObj, denyListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceDenyListModelAttributeMap, denyListAttributeMap)
+				response.Diagnostics.Append(denyListObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2820,177 +2853,32 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		// <no value>
 		// false
 		{
-			ruleListOptions, isRuleList := ruleChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_RuleList)
+			ruleListOptionsWrapper, isRuleList := ruleChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.GlobalSpecType_RuleList)
 			ruleListAttributeMap := make(map[string]attr.Value)
 
-			if isRuleList && ruleListOptions != nil {
+			if isRuleList && ruleListOptionsWrapper != nil && ruleListOptionsWrapper.RuleList != nil {
+				ruleListElement := ruleListOptionsWrapper.RuleList
 
 				// data specToModelNested RequiredArrayOfPointerField --> Rules
-				if len(ruleListOptions.RuleList.GetRules()) > 0 {
+				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType, 0, len(ruleListOptions.RuleList.GetRules()))
-					for _, rulesElement := range ruleListOptions.RuleList.GetRules() {
+					rulesElements := make([]ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType, 0, len(ruleListElement.GetRules()))
+					for _, rulesElement := range ruleListElement.GetRules() {
 						forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel := ForwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleType{}
 
-						// data specToModelNested RequiredOneOfField --> SourceChoice
-						// <no value>
-						if rulesElement.GetSourceChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							rulessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							rulessourceChoiceChoices := rulesElement.GetSourceChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> LabelSelector
-							// <no value>
-							// false
-							{
-								labelSelectorOptions, isLabelSelector := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_LabelSelector)
-								labelSelectorAttributeMap := make(map[string]attr.Value)
-
-								if isLabelSelector && labelSelectorOptions != nil {
-
-									// data specToModelNested RequiredArrayOfStringField --> Expressions
-									if len(labelSelectorOptions.LabelSelector.GetExpressions()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, labelSelectorOptions.LabelSelector.GetExpressions())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										labelSelectorAttributeMap["expressions"] = listValue
-									} else {
-										labelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-									}
-
-									labelSelectorObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap, labelSelectorAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulessourceChoiceChoicesAttributeMap["label_selector"] = labelSelectorObj
-								} else {
-									rulessourceChoiceChoicesAttributeMap["label_selector"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> IpPrefixSet
-							// <no value>
-							// false
-							{
-								ipPrefixSetOptions, isIpPrefixSet := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_IpPrefixSet)
-								ipPrefixSetAttributeMap := make(map[string]attr.Value)
-
-								if isIpPrefixSet && ipPrefixSetOptions != nil {
-
-									// data specToModelNested RequiredStringField --> Name
-									if ipPrefixSetOptions.IpPrefixSet.GetName() != "" {
-										ipPrefixSetAttributeMap["name"] = types.StringValue(ipPrefixSetOptions.IpPrefixSet.GetName())
-									} else {
-										// Empty string, set to null
-										ipPrefixSetAttributeMap["name"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if ipPrefixSetOptions.IpPrefixSet.GetTenant() != "" {
-										ipPrefixSetAttributeMap["tenant"] = types.StringValue(ipPrefixSetOptions.IpPrefixSet.GetTenant())
-									} else {
-										// Empty string, set to null
-										ipPrefixSetAttributeMap["tenant"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if ipPrefixSetOptions.IpPrefixSet.GetNamespace() != "" {
-										ipPrefixSetAttributeMap["namespace"] = types.StringValue(ipPrefixSetOptions.IpPrefixSet.GetNamespace())
-									} else {
-										// Empty string, set to null
-										ipPrefixSetAttributeMap["namespace"] = types.StringNull()
-									}
-
-									ipPrefixSetObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulessourceChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
-								} else {
-									rulessourceChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllSources
-							_, isAllSources := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_AllSources)
-
-							if isAllSources {
-								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolValue(true)
-							} else {
-								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolNull()
-							}
-
-							// data specToModelNested PointerOfOneOfField --> PrefixList
-							// <no value>
-							// false
-							{
-								prefixListOptions, isPrefixList := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_PrefixList)
-								prefixListAttributeMap := make(map[string]attr.Value)
-
-								if isPrefixList && prefixListOptions != nil {
-
-									// data specToModelNested ArrayOfStringField --> Prefixes
-									if len(prefixListOptions.PrefixList.GetPrefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixListOptions.PrefixList.GetPrefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										prefixListAttributeMap["prefixes"] = listValue
-									} else {
-										prefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-									if len(prefixListOptions.PrefixList.GetIpv6Prefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixListOptions.PrefixList.GetIpv6Prefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										prefixListAttributeMap["ipv6_prefixes"] = listValue
-									} else {
-										prefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-									}
-
-									prefixListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap, prefixListAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulessourceChoiceChoicesAttributeMap["prefix_list"] = prefixListObj
-								} else {
-									rulessourceChoiceChoicesAttributeMap["prefix_list"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, rulessourceChoiceChoicesObjDiags := types.ObjectValue(
-								ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								rulessourceChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(rulessourceChoiceChoicesObjDiags...)
+						// data specToModelNested RequiredEnumField --> Action
+						if rulesElement.GetAction().String() != "" {
+							stringValue := types.StringValue(rulesElement.GetAction().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = finalObj
+							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = listValue
 						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
+							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> DestinationChoice
@@ -3005,21 +2893,233 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 							// Process nested choices, populating the temporary attribute map
 
+							// data specToModelNested BoolOfOneOfPointerField --> AllDestinations
+							_, isAllDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_AllDestinations)
+
+							if isAllDestinations {
+								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolValue(true)
+							} else {
+								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> DstAsnList
+							// <no value>
+							// false
+							{
+								dstAsnListOptionsWrapper, isDstAsnList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstAsnList)
+								dstAsnListAttributeMap := make(map[string]attr.Value)
+
+								if isDstAsnList && dstAsnListOptionsWrapper != nil && dstAsnListOptionsWrapper.DstAsnList != nil {
+									dstAsnListElement := dstAsnListOptionsWrapper.DstAsnList
+
+									// data specToModelNested RequiredArrayOfUintField --> AsNumbers
+									asNumbersValue := dstAsnListElement.GetAsNumbers()
+									if len(asNumbersValue) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, dstAsnListElement.GetAsNumbers())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										dstAsnListAttributeMap["as_numbers"] = listValue
+									} else {
+										dstAsnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
+									}
+
+									dstAsnListObj, dstAsnListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap, dstAsnListAttributeMap)
+									response.Diagnostics.Append(dstAsnListObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulesdestinationChoiceChoicesAttributeMap["dst_asn_list"] = dstAsnListObj
+								} else {
+									rulesdestinationChoiceChoicesAttributeMap["dst_asn_list"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> DstAsnSet
+							// <no value>
+							// false
+							{
+								dstAsnSetOptionsWrapper, isDstAsnSet := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstAsnSet)
+								dstAsnSetAttributeMap := make(map[string]attr.Value)
+
+								if isDstAsnSet && dstAsnSetOptionsWrapper != nil && dstAsnSetOptionsWrapper.DstAsnSet != nil {
+									dstAsnSetElement := dstAsnSetOptionsWrapper.DstAsnSet
+
+									// data specToModelNested RequiredStringField --> Name
+									if dstAsnSetElement.GetName() != "" {
+										dstAsnSetAttributeMap["name"] = types.StringValue(dstAsnSetElement.GetName())
+									} else {
+										// Empty string, set to null
+										dstAsnSetAttributeMap["name"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if dstAsnSetElement.GetNamespace() != "" {
+										dstAsnSetAttributeMap["namespace"] = types.StringValue(dstAsnSetElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										dstAsnSetAttributeMap["namespace"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if dstAsnSetElement.GetTenant() != "" {
+										dstAsnSetAttributeMap["tenant"] = types.StringValue(dstAsnSetElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										dstAsnSetAttributeMap["tenant"] = types.StringNull()
+									}
+
+									dstAsnSetObj, dstAsnSetObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap, dstAsnSetAttributeMap)
+									response.Diagnostics.Append(dstAsnSetObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulesdestinationChoiceChoicesAttributeMap["dst_asn_set"] = dstAsnSetObj
+								} else {
+									rulesdestinationChoiceChoicesAttributeMap["dst_asn_set"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> DstIpPrefixSet
+							// <no value>
+							// false
+							{
+								dstIpPrefixSetOptionsWrapper, isDstIpPrefixSet := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstIpPrefixSet)
+								dstIpPrefixSetAttributeMap := make(map[string]attr.Value)
+
+								if isDstIpPrefixSet && dstIpPrefixSetOptionsWrapper != nil && dstIpPrefixSetOptionsWrapper.DstIpPrefixSet != nil {
+									dstIpPrefixSetElement := dstIpPrefixSetOptionsWrapper.DstIpPrefixSet
+
+									// data specToModelNested RequiredStringField --> Name
+									if dstIpPrefixSetElement.GetName() != "" {
+										dstIpPrefixSetAttributeMap["name"] = types.StringValue(dstIpPrefixSetElement.GetName())
+									} else {
+										// Empty string, set to null
+										dstIpPrefixSetAttributeMap["name"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if dstIpPrefixSetElement.GetNamespace() != "" {
+										dstIpPrefixSetAttributeMap["namespace"] = types.StringValue(dstIpPrefixSetElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										dstIpPrefixSetAttributeMap["namespace"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if dstIpPrefixSetElement.GetTenant() != "" {
+										dstIpPrefixSetAttributeMap["tenant"] = types.StringValue(dstIpPrefixSetElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										dstIpPrefixSetAttributeMap["tenant"] = types.StringNull()
+									}
+
+									dstIpPrefixSetObj, dstIpPrefixSetObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap, dstIpPrefixSetAttributeMap)
+									response.Diagnostics.Append(dstIpPrefixSetObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulesdestinationChoiceChoicesAttributeMap["dst_ip_prefix_set"] = dstIpPrefixSetObj
+								} else {
+									rulesdestinationChoiceChoicesAttributeMap["dst_ip_prefix_set"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> DstLabelSelector
+							// <no value>
+							// false
+							{
+								dstLabelSelectorOptionsWrapper, isDstLabelSelector := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstLabelSelector)
+								dstLabelSelectorAttributeMap := make(map[string]attr.Value)
+
+								if isDstLabelSelector && dstLabelSelectorOptionsWrapper != nil && dstLabelSelectorOptionsWrapper.DstLabelSelector != nil {
+									dstLabelSelectorElement := dstLabelSelectorOptionsWrapper.DstLabelSelector
+
+									// data specToModelNested RequiredArrayOfStringField --> Expressions
+									if len(dstLabelSelectorElement.GetExpressions()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, dstLabelSelectorElement.GetExpressions())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										dstLabelSelectorAttributeMap["expressions"] = listValue
+									} else {
+										dstLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+									}
+
+									dstLabelSelectorObj, dstLabelSelectorObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap, dstLabelSelectorAttributeMap)
+									response.Diagnostics.Append(dstLabelSelectorObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulesdestinationChoiceChoicesAttributeMap["dst_label_selector"] = dstLabelSelectorObj
+								} else {
+									rulesdestinationChoiceChoicesAttributeMap["dst_label_selector"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> DstPrefixList
+							// <no value>
+							// false
+							{
+								dstPrefixListOptionsWrapper, isDstPrefixList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstPrefixList)
+								dstPrefixListAttributeMap := make(map[string]attr.Value)
+
+								if isDstPrefixList && dstPrefixListOptionsWrapper != nil && dstPrefixListOptionsWrapper.DstPrefixList != nil {
+									dstPrefixListElement := dstPrefixListOptionsWrapper.DstPrefixList
+
+									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+									if len(dstPrefixListElement.GetIpv6Prefixes()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, dstPrefixListElement.GetIpv6Prefixes())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										dstPrefixListAttributeMap["ipv6_prefixes"] = listValue
+									} else {
+										dstPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested ArrayOfStringField --> Prefixes
+									if len(dstPrefixListElement.GetPrefixes()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, dstPrefixListElement.GetPrefixes())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										dstPrefixListAttributeMap["prefixes"] = listValue
+									} else {
+										dstPrefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
+									}
+
+									dstPrefixListObj, dstPrefixListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap, dstPrefixListAttributeMap)
+									response.Diagnostics.Append(dstPrefixListObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulesdestinationChoiceChoicesAttributeMap["dst_prefix_list"] = dstPrefixListObj
+								} else {
+									rulesdestinationChoiceChoicesAttributeMap["dst_prefix_list"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap)
+								}
+							}
+
 							// data specToModelNested PointerOfOneOfField --> HttpList
 							// <no value>
 							// false
 							{
-								httpListOptions, isHttpList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_HttpList)
+								httpListOptionsWrapper, isHttpList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_HttpList)
 								httpListAttributeMap := make(map[string]attr.Value)
 
-								if isHttpList && httpListOptions != nil {
+								if isHttpList && httpListOptionsWrapper != nil && httpListOptionsWrapper.HttpList != nil {
+									httpListElement := httpListOptionsWrapper.HttpList
 
 									// data specToModelNested ArrayOfPointerField --> HttpList
-									if len(httpListOptions.HttpList.GetHttpList()) > 0 {
+									if len(httpListElement.GetHttpList()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(httpListOptions.HttpList.GetHttpList()))
-										for _, httpListElement := range httpListOptions.HttpList.GetHttpList() {
+										httpListElements := make([]ForwardProxyPolicyForwardProxyPolicyURLType, 0, len(httpListElement.GetHttpList()))
+										for _, httpListElement := range httpListElement.GetHttpList() {
 											forwardProxyPolicyForwardProxyPolicyURLTypeModel := ForwardProxyPolicyForwardProxyPolicyURLType{}
 
 											// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -3044,16 +3144,6 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 													httpListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
 												}
 
-												// data specToModelNested StringOfOneOfField --> SuffixValue
-												suffixValueItem, isSuffixValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_SuffixValue)
-
-												if isSuffixValue {
-													httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
-												} else {
-													// Empty string, set to null
-													httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
-												}
-
 												// data specToModelNested StringOfOneOfField --> RegexValue
 												regexValueItem, isRegexValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_RegexValue)
 
@@ -3062,6 +3152,16 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 												} else {
 													// Empty string, set to null
 													httpListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
+												}
+
+												// data specToModelNested StringOfOneOfField --> SuffixValue
+												suffixValueItem, isSuffixValue := httpListdomainChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.URLType_SuffixValue)
+
+												if isSuffixValue {
+													httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
+												} else {
+													// Empty string, set to null
+													httpListdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
 												}
 
 												// --- End of Choices ---
@@ -3157,8 +3257,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
-										httpListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListModelAttributeMap}, httpListElements)
-										response.Diagnostics.Append(diags...)
+										httpListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListModelAttributeMap}, httpListElements)
+										response.Diagnostics.Append(listDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -3171,8 +3271,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 										httpListAttributeMap["http_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListModelAttributeMap})
 									}
 
-									httpListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListModelAttributeMap, httpListAttributeMap)
-									response.Diagnostics.Append(diags...)
+									httpListObj, httpListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListModelAttributeMap, httpListAttributeMap)
+									response.Diagnostics.Append(httpListObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -3182,109 +3282,22 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> DstPrefixList
-							// <no value>
-							// false
-							{
-								dstPrefixListOptions, isDstPrefixList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstPrefixList)
-								dstPrefixListAttributeMap := make(map[string]attr.Value)
-
-								if isDstPrefixList && dstPrefixListOptions != nil {
-
-									// data specToModelNested ArrayOfStringField --> Prefixes
-									if len(dstPrefixListOptions.DstPrefixList.GetPrefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, dstPrefixListOptions.DstPrefixList.GetPrefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										dstPrefixListAttributeMap["prefixes"] = listValue
-									} else {
-										dstPrefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-									if len(dstPrefixListOptions.DstPrefixList.GetIpv6Prefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, dstPrefixListOptions.DstPrefixList.GetIpv6Prefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										dstPrefixListAttributeMap["ipv6_prefixes"] = listValue
-									} else {
-										dstPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-									}
-
-									dstPrefixListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap, dstPrefixListAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulesdestinationChoiceChoicesAttributeMap["dst_prefix_list"] = dstPrefixListObj
-								} else {
-									rulesdestinationChoiceChoicesAttributeMap["dst_prefix_list"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> DstAsnSet
-							// <no value>
-							// false
-							{
-								dstAsnSetOptions, isDstAsnSet := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstAsnSet)
-								dstAsnSetAttributeMap := make(map[string]attr.Value)
-
-								if isDstAsnSet && dstAsnSetOptions != nil {
-
-									// data specToModelNested RequiredStringField --> Name
-									if dstAsnSetOptions.DstAsnSet.GetName() != "" {
-										dstAsnSetAttributeMap["name"] = types.StringValue(dstAsnSetOptions.DstAsnSet.GetName())
-									} else {
-										// Empty string, set to null
-										dstAsnSetAttributeMap["name"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if dstAsnSetOptions.DstAsnSet.GetTenant() != "" {
-										dstAsnSetAttributeMap["tenant"] = types.StringValue(dstAsnSetOptions.DstAsnSet.GetTenant())
-									} else {
-										// Empty string, set to null
-										dstAsnSetAttributeMap["tenant"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if dstAsnSetOptions.DstAsnSet.GetNamespace() != "" {
-										dstAsnSetAttributeMap["namespace"] = types.StringValue(dstAsnSetOptions.DstAsnSet.GetNamespace())
-									} else {
-										// Empty string, set to null
-										dstAsnSetAttributeMap["namespace"] = types.StringNull()
-									}
-
-									dstAsnSetObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap, dstAsnSetAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulesdestinationChoiceChoicesAttributeMap["dst_asn_set"] = dstAsnSetObj
-								} else {
-									rulesdestinationChoiceChoicesAttributeMap["dst_asn_set"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap)
-								}
-							}
-
 							// data specToModelNested PointerOfOneOfField --> TlsList
 							// <no value>
 							// false
 							{
-								tlsListOptions, isTlsList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_TlsList)
+								tlsListOptionsWrapper, isTlsList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_TlsList)
 								tlsListAttributeMap := make(map[string]attr.Value)
 
-								if isTlsList && tlsListOptions != nil {
+								if isTlsList && tlsListOptionsWrapper != nil && tlsListOptionsWrapper.TlsList != nil {
+									tlsListElement := tlsListOptionsWrapper.TlsList
 
 									// data specToModelNested ArrayOfPointerField --> TlsList
-									if len(tlsListOptions.TlsList.GetTlsList()) > 0 {
+									if len(tlsListElement.GetTlsList()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										tlsListElements := make([]ForwardProxyPolicyDomainType, 0, len(tlsListOptions.TlsList.GetTlsList()))
-										for _, tlsListElement := range tlsListOptions.TlsList.GetTlsList() {
+										tlsListElements := make([]ForwardProxyPolicyDomainType, 0, len(tlsListElement.GetTlsList()))
+										for _, tlsListElement := range tlsListElement.GetTlsList() {
 											forwardProxyPolicyDomainTypeModel := ForwardProxyPolicyDomainType{}
 
 											// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -3299,16 +3312,6 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 												// Process nested choices, populating the temporary attribute map
 
-												// data specToModelNested StringOfOneOfField --> RegexValue
-												regexValueItem, isRegexValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_RegexValue)
-
-												if isRegexValue {
-													tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
-												} else {
-													// Empty string, set to null
-													tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
-												}
-
 												// data specToModelNested StringOfOneOfField --> ExactValue
 												exactValueItem, isExactValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_ExactValue)
 
@@ -3317,6 +3320,16 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 												} else {
 													// Empty string, set to null
 													tlsListdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
+												}
+
+												// data specToModelNested StringOfOneOfField --> RegexValue
+												regexValueItem, isRegexValue := tlsListdomainChoiceChoices.(*ves_io_schema.DomainType_RegexValue)
+
+												if isRegexValue {
+													tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringValue(string(regexValueItem.RegexValue))
+												} else {
+													// Empty string, set to null
+													tlsListdomainChoiceChoicesAttributeMap["regex_value"] = types.StringNull()
 												}
 
 												// data specToModelNested StringOfOneOfField --> SuffixValue
@@ -3352,8 +3365,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
-										tlsListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyTlsListObjectRefModelAttributeMap}, tlsListElements)
-										response.Diagnostics.Append(diags...)
+										tlsListListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListTlsListModelAttributeMap}, tlsListElements)
+										response.Diagnostics.Append(listDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -3363,11 +3376,11 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 										// The source list is empty or nil.
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// Assign a null `types.ListValue`.
-										tlsListAttributeMap["tls_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyTlsListObjectRefModelAttributeMap})
+										tlsListAttributeMap["tls_list"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListTlsListModelAttributeMap})
 									}
 
-									tlsListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListModelAttributeMap, tlsListAttributeMap)
-									response.Diagnostics.Append(diags...)
+									tlsListObj, tlsListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListModelAttributeMap, tlsListAttributeMap)
+									response.Diagnostics.Append(tlsListObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -3377,69 +3390,26 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> DstIpPrefixSet
-							// <no value>
-							// false
-							{
-								dstIpPrefixSetOptions, isDstIpPrefixSet := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstIpPrefixSet)
-								dstIpPrefixSetAttributeMap := make(map[string]attr.Value)
-
-								if isDstIpPrefixSet && dstIpPrefixSetOptions != nil {
-
-									// data specToModelNested StringField --> Tenant
-									if dstIpPrefixSetOptions.DstIpPrefixSet.GetTenant() != "" {
-										dstIpPrefixSetAttributeMap["tenant"] = types.StringValue(dstIpPrefixSetOptions.DstIpPrefixSet.GetTenant())
-									} else {
-										// Empty string, set to null
-										dstIpPrefixSetAttributeMap["tenant"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if dstIpPrefixSetOptions.DstIpPrefixSet.GetNamespace() != "" {
-										dstIpPrefixSetAttributeMap["namespace"] = types.StringValue(dstIpPrefixSetOptions.DstIpPrefixSet.GetNamespace())
-									} else {
-										// Empty string, set to null
-										dstIpPrefixSetAttributeMap["namespace"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Name
-									if dstIpPrefixSetOptions.DstIpPrefixSet.GetName() != "" {
-										dstIpPrefixSetAttributeMap["name"] = types.StringValue(dstIpPrefixSetOptions.DstIpPrefixSet.GetName())
-									} else {
-										// Empty string, set to null
-										dstIpPrefixSetAttributeMap["name"] = types.StringNull()
-									}
-
-									dstIpPrefixSetObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap, dstIpPrefixSetAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulesdestinationChoiceChoicesAttributeMap["dst_ip_prefix_set"] = dstIpPrefixSetObj
-								} else {
-									rulesdestinationChoiceChoicesAttributeMap["dst_ip_prefix_set"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap)
-								}
-							}
-
 							// data specToModelNested PointerOfOneOfField --> UrlCategoryList
 							// <no value>
 							// false
 							{
-								urlCategoryListOptions, isUrlCategoryList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_UrlCategoryList)
+								urlCategoryListOptionsWrapper, isUrlCategoryList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_UrlCategoryList)
 								urlCategoryListAttributeMap := make(map[string]attr.Value)
 
-								if isUrlCategoryList && urlCategoryListOptions != nil {
+								if isUrlCategoryList && urlCategoryListOptionsWrapper != nil && urlCategoryListOptionsWrapper.UrlCategoryList != nil {
+									urlCategoryListElement := urlCategoryListOptionsWrapper.UrlCategoryList
 
 									// data SpecToModelNested RequiredArrayOfEnumField --> UrlCategories
-									if len(urlCategoryListOptions.UrlCategoryList.GetUrlCategories()) > 0 {
-										urlCategoriesStrings := make([]string, 0, len(urlCategoryListOptions.UrlCategoryList.GetUrlCategories()))
-										for _, v := range urlCategoryListOptions.UrlCategoryList.GetUrlCategories() {
+									if len(urlCategoryListElement.GetUrlCategories()) > 0 {
+										urlCategoriesStrings := make([]string, 0, len(urlCategoryListElement.GetUrlCategories()))
+										for _, v := range urlCategoryListElement.GetUrlCategories() {
 											if strVal, exists := ves_io_schema_policy.URLCategory_name[int32(v)]; exists {
 												urlCategoriesStrings = append(urlCategoriesStrings, strVal)
 											}
 										}
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, urlCategoriesStrings)
-										response.Diagnostics.Append(diags...)
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, urlCategoriesStrings)
+										response.Diagnostics.Append(listDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -3448,88 +3418,14 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 										urlCategoryListAttributeMap["url_categories"] = types.ListNull(types.StringType)
 									}
 
-									urlCategoryListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceUrlCategoryListModelAttributeMap, urlCategoryListAttributeMap)
-									response.Diagnostics.Append(diags...)
+									urlCategoryListObj, urlCategoryListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceUrlCategoryListModelAttributeMap, urlCategoryListAttributeMap)
+									response.Diagnostics.Append(urlCategoryListObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
 									rulesdestinationChoiceChoicesAttributeMap["url_category_list"] = urlCategoryListObj
 								} else {
 									rulesdestinationChoiceChoicesAttributeMap["url_category_list"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceUrlCategoryListModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> DstLabelSelector
-							// <no value>
-							// false
-							{
-								dstLabelSelectorOptions, isDstLabelSelector := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstLabelSelector)
-								dstLabelSelectorAttributeMap := make(map[string]attr.Value)
-
-								if isDstLabelSelector && dstLabelSelectorOptions != nil {
-
-									// data specToModelNested RequiredArrayOfStringField --> Expressions
-									if len(dstLabelSelectorOptions.DstLabelSelector.GetExpressions()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, dstLabelSelectorOptions.DstLabelSelector.GetExpressions())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										dstLabelSelectorAttributeMap["expressions"] = listValue
-									} else {
-										dstLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-									}
-
-									dstLabelSelectorObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap, dstLabelSelectorAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulesdestinationChoiceChoicesAttributeMap["dst_label_selector"] = dstLabelSelectorObj
-								} else {
-									rulesdestinationChoiceChoicesAttributeMap["dst_label_selector"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllDestinations
-							_, isAllDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_AllDestinations)
-
-							if isAllDestinations {
-								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolValue(true)
-							} else {
-								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolNull()
-							}
-
-							// data specToModelNested PointerOfOneOfField --> DstAsnList
-							// <no value>
-							// false
-							{
-								dstAsnListOptions, isDstAsnList := rulesdestinationChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_DstAsnList)
-								dstAsnListAttributeMap := make(map[string]attr.Value)
-
-								if isDstAsnList && dstAsnListOptions != nil {
-
-									// data specToModelNested RequiredArrayOfUintField --> AsNumbers
-									asNumbersValue := dstAsnListOptions.DstAsnList.GetAsNumbers()
-									if len(asNumbersValue) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.Int64Type, dstAsnListOptions.DstAsnList.GetAsNumbers())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										dstAsnListAttributeMap["as_numbers"] = listValue
-									} else {
-										dstAsnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
-									}
-
-									dstAsnListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap, dstAsnListAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulesdestinationChoiceChoicesAttributeMap["dst_asn_list"] = dstAsnListObj
-								} else {
-									rulesdestinationChoiceChoicesAttributeMap["dst_asn_list"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap)
 								}
 							}
 
@@ -3576,15 +3472,19 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							// <no value>
 							// false
 							{
-								portMatcherOptions, isPortMatcher := ruleshttpConnectChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_PortMatcher)
+								portMatcherOptionsWrapper, isPortMatcher := ruleshttpConnectChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_PortMatcher)
 								portMatcherAttributeMap := make(map[string]attr.Value)
 
-								if isPortMatcher && portMatcherOptions != nil {
+								if isPortMatcher && portMatcherOptionsWrapper != nil && portMatcherOptionsWrapper.PortMatcher != nil {
+									portMatcherElement := portMatcherOptionsWrapper.PortMatcher
+
+									// data specToModelNested BoolField --> InvertMatcher
+									portMatcherAttributeMap["invert_matcher"] = types.BoolValue(bool(portMatcherElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredArrayOfStringField --> Ports
-									if len(portMatcherOptions.PortMatcher.GetPorts()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, portMatcherOptions.PortMatcher.GetPorts())
-										response.Diagnostics.Append(diags...)
+									if len(portMatcherElement.GetPorts()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, portMatcherElement.GetPorts())
+										response.Diagnostics.Append(listDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -3593,11 +3493,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 										portMatcherAttributeMap["ports"] = types.ListNull(types.StringType)
 									}
 
-									// data specToModelNested BoolField --> InvertMatcher
-									portMatcherAttributeMap["invert_matcher"] = types.BoolValue(bool(portMatcherOptions.PortMatcher.GetInvertMatcher()))
-
-									portMatcherObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoicePortMatcherModelAttributeMap, portMatcherAttributeMap)
-									response.Diagnostics.Append(diags...)
+									portMatcherObj, portMatcherObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesHttpConnectChoicePortMatcherModelAttributeMap, portMatcherAttributeMap)
+									response.Diagnostics.Append(portMatcherObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -3634,14 +3531,6 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 
 							// Recursively populate the nested struct
 
-							// data specToModelNested RequiredStringField --> Name
-							if metadataElement.GetName() != "" {
-								forwardProxyPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-							} else {
-								// Empty string, set to null
-								forwardProxyPolicyMessageMetaTypeModel.Name = types.StringNull()
-							}
-
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
 								forwardProxyPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -3650,9 +3539,17 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 								forwardProxyPolicyMessageMetaTypeModel.Description = types.StringNull()
 							}
 
+							// data specToModelNested RequiredStringField --> Name
+							if metadataElement.GetName() != "" {
+								forwardProxyPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+							} else {
+								// Empty string, set to null
+								forwardProxyPolicyMessageMetaTypeModel.Name = types.StringNull()
+							}
+
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							forwardProxyPolicyMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, ForwardProxyPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, forwardProxyPolicyMessageMetaTypeModel)
-							response.Diagnostics.Append(diags...)
+							forwardProxyPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ForwardProxyPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, forwardProxyPolicyMessageMetaTypeModel)
+							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -3668,26 +3565,175 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Metadata = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
-						// data specToModelNested RequiredEnumField --> Action
-						if rulesElement.GetAction().String() != "" {
-							stringValue := types.StringValue(rulesElement.GetAction().String())
-							stringSlice := []types.String{stringValue}
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(diags...)
+						// data specToModelNested RequiredOneOfField --> SourceChoice
+						// <no value>
+						if rulesElement.GetSourceChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							rulessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							rulessourceChoiceChoices := rulesElement.GetSourceChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllSources
+							_, isAllSources := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_AllSources)
+
+							if isAllSources {
+								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolValue(true)
+							} else {
+								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> IpPrefixSet
+							// <no value>
+							// false
+							{
+								ipPrefixSetOptionsWrapper, isIpPrefixSet := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_IpPrefixSet)
+								ipPrefixSetAttributeMap := make(map[string]attr.Value)
+
+								if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
+									ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
+
+									// data specToModelNested RequiredStringField --> Name
+									if ipPrefixSetElement.GetName() != "" {
+										ipPrefixSetAttributeMap["name"] = types.StringValue(ipPrefixSetElement.GetName())
+									} else {
+										// Empty string, set to null
+										ipPrefixSetAttributeMap["name"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if ipPrefixSetElement.GetNamespace() != "" {
+										ipPrefixSetAttributeMap["namespace"] = types.StringValue(ipPrefixSetElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										ipPrefixSetAttributeMap["namespace"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if ipPrefixSetElement.GetTenant() != "" {
+										ipPrefixSetAttributeMap["tenant"] = types.StringValue(ipPrefixSetElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										ipPrefixSetAttributeMap["tenant"] = types.StringNull()
+									}
+
+									ipPrefixSetObj, ipPrefixSetObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
+									response.Diagnostics.Append(ipPrefixSetObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulessourceChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
+								} else {
+									rulessourceChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> LabelSelector
+							// <no value>
+							// false
+							{
+								labelSelectorOptionsWrapper, isLabelSelector := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_LabelSelector)
+								labelSelectorAttributeMap := make(map[string]attr.Value)
+
+								if isLabelSelector && labelSelectorOptionsWrapper != nil && labelSelectorOptionsWrapper.LabelSelector != nil {
+									labelSelectorElement := labelSelectorOptionsWrapper.LabelSelector
+
+									// data specToModelNested RequiredArrayOfStringField --> Expressions
+									if len(labelSelectorElement.GetExpressions()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, labelSelectorElement.GetExpressions())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										labelSelectorAttributeMap["expressions"] = listValue
+									} else {
+										labelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+									}
+
+									labelSelectorObj, labelSelectorObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap, labelSelectorAttributeMap)
+									response.Diagnostics.Append(labelSelectorObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulessourceChoiceChoicesAttributeMap["label_selector"] = labelSelectorObj
+								} else {
+									rulessourceChoiceChoicesAttributeMap["label_selector"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> PrefixList
+							// <no value>
+							// false
+							{
+								prefixListOptionsWrapper, isPrefixList := rulessourceChoiceChoices.(*ves_io_schema_views_forward_proxy_policy.ForwardProxyAdvancedRuleType_PrefixList)
+								prefixListAttributeMap := make(map[string]attr.Value)
+
+								if isPrefixList && prefixListOptionsWrapper != nil && prefixListOptionsWrapper.PrefixList != nil {
+									prefixListElement := prefixListOptionsWrapper.PrefixList
+
+									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+									if len(prefixListElement.GetIpv6Prefixes()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, prefixListElement.GetIpv6Prefixes())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										prefixListAttributeMap["ipv6_prefixes"] = listValue
+									} else {
+										prefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested ArrayOfStringField --> Prefixes
+									if len(prefixListElement.GetPrefixes()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, prefixListElement.GetPrefixes())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										prefixListAttributeMap["prefixes"] = listValue
+									} else {
+										prefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
+									}
+
+									prefixListObj, prefixListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap, prefixListAttributeMap)
+									response.Diagnostics.Append(prefixListObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulessourceChoiceChoicesAttributeMap["prefix_list"] = prefixListObj
+								} else {
+									rulessourceChoiceChoicesAttributeMap["prefix_list"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, rulessourceChoiceChoicesObjDiags := types.ObjectValue(
+								ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								rulessourceChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(rulessourceChoiceChoicesObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = listValue
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = finalObj
 						} else {
-							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.Action = types.ListNull(types.StringType)
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
 						}
 
 						rulesElements = append(rulesElements, forwardProxyPolicyForwardProxyPolicyForwardProxyAdvancedRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
-					response.Diagnostics.Append(diags...)
+					rulesListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -3700,8 +3746,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 					ruleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicyRuleChoiceRuleListRulesModelAttributeMap})
 				}
 
-				ruleListObj, diags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ruleListObj, ruleListObjDiags := types.ObjectValue(ForwardProxyPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
+				response.Diagnostics.Append(ruleListObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3712,18 +3758,20 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ruleChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			ForwardProxyPolicyRuleChoiceModelAttributeMap,
-			ruleChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			ruleChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				ForwardProxyPolicyRuleChoiceModelAttributeMap,
+				ruleChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.RuleChoice = ruleChoiceObj
+			// Assign the final object to the root data model.
+			data.RuleChoice = ruleChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.RuleChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceModelAttributeMap)
@@ -3733,6 +3781,125 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 	if specData.GetSegmentPolicy() != nil {
 		var forwardProxyPolicyPolicySegmentPolicyTypeModel = &ForwardProxyPolicyPolicySegmentPolicyType{}
 		segmentPolicyElement := specData.GetSegmentPolicy()
+
+		// data specToModelNested OneOfField --> DstSegmentChoice
+		if segmentPolicyElement.GetDstSegmentChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> DstAny
+			_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
+
+			if isDstAny {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
+			} else {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
+			}
+
+			// data specToModelNested PointerOfOneOfField --> DstSegments
+			// <no value>
+			// false
+			{
+				dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
+				dstSegmentsAttributeMap := make(map[string]attr.Value)
+
+				if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
+					dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
+
+					// data specToModelNested RequiredArrayOfPointerField --> Segments
+					if len(dstSegmentsElement.GetSegments()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
+						for _, segmentsElement := range dstSegmentsElement.GetSegments() {
+							objectRefTypeModelModel := ObjectRefTypeModel{}
+
+							// data specToModelNested RequiredStringField --> Name
+							if segmentsElement.GetName() != "" {
+								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Name = types.StringNull()
+							}
+
+							// data specToModelNested RequiredStringField --> Namespace
+							if segmentsElement.GetNamespace() != "" {
+								objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Namespace = types.StringNull()
+							}
+
+							// data specToModelNested StringField --> Tenant
+							if segmentsElement.GetTenant() != "" {
+								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Tenant = types.StringNull()
+							}
+
+							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						segmentsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						dstSegmentsAttributeMap["segments"] = segmentsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicySegmentsObjectRefModelAttributeMap})
+					}
+
+					dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
+					response.Diagnostics.Append(dstSegmentsObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
+				} else {
+					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> IntraSegment
+			_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
+
+			if isIntraSegment {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
+			} else {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
+				ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				segmentPolicydstSegmentChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			forwardProxyPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			forwardProxyPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
+		}
 
 		// data specToModelNested OneOfField --> SrcSegmentChoice
 		if segmentPolicyElement.GetSrcSegmentChoice() != nil {
@@ -3758,25 +3925,26 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 			// <no value>
 			// false
 			{
-				srcSegmentsOptions, isSrcSegments := segmentPolicysrcSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_SrcSegments)
+				srcSegmentsOptionsWrapper, isSrcSegments := segmentPolicysrcSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_SrcSegments)
 				srcSegmentsAttributeMap := make(map[string]attr.Value)
 
-				if isSrcSegments && srcSegmentsOptions != nil {
+				if isSrcSegments && srcSegmentsOptionsWrapper != nil && srcSegmentsOptionsWrapper.SrcSegments != nil {
+					srcSegmentsElement := srcSegmentsOptionsWrapper.SrcSegments
 
 					// data specToModelNested RequiredArrayOfPointerField --> Segments
-					if len(srcSegmentsOptions.SrcSegments.GetSegments()) > 0 {
+					if len(srcSegmentsElement.GetSegments()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						segmentsElements := make([]ObjectRefTypeModel, 0, len(srcSegmentsOptions.SrcSegments.GetSegments()))
-						for _, segmentsElement := range srcSegmentsOptions.SrcSegments.GetSegments() {
+						segmentsElements := make([]ObjectRefTypeModel, 0, len(srcSegmentsElement.GetSegments()))
+						for _, segmentsElement := range srcSegmentsElement.GetSegments() {
 							objectRefTypeModelModel := ObjectRefTypeModel{}
 
-							// data specToModelNested StringField --> Tenant
-							if segmentsElement.GetTenant() != "" {
-								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
+							// data specToModelNested RequiredStringField --> Name
+							if segmentsElement.GetName() != "" {
+								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
 							} else {
 								// Empty string, set to null
-								objectRefTypeModelModel.Tenant = types.StringNull()
+								objectRefTypeModelModel.Name = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Namespace
@@ -3787,20 +3955,20 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 								objectRefTypeModelModel.Namespace = types.StringNull()
 							}
 
-							// data specToModelNested RequiredStringField --> Name
-							if segmentsElement.GetName() != "" {
-								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
+							// data specToModelNested StringField --> Tenant
+							if segmentsElement.GetTenant() != "" {
+								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
 							} else {
 								// Empty string, set to null
-								objectRefTypeModelModel.Name = types.StringNull()
+								objectRefTypeModelModel.Tenant = types.StringNull()
 							}
 
 							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						segmentsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-						response.Diagnostics.Append(diags...)
+						segmentsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
+						response.Diagnostics.Append(listDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
@@ -3813,8 +3981,8 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 						srcSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicySegmentsObjectRefModelAttributeMap})
 					}
 
-					srcSegmentsObj, diags := types.ObjectValue(ForwardProxyPolicySegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap, srcSegmentsAttributeMap)
-					response.Diagnostics.Append(diags...)
+					srcSegmentsObj, srcSegmentsObjDiags := types.ObjectValue(ForwardProxyPolicySegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap, srcSegmentsAttributeMap)
+					response.Diagnostics.Append(srcSegmentsObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -3843,140 +4011,19 @@ func (d *DataSourceF5XCForwardProxyPolicy) Read(ctx context.Context, request dat
 			forwardProxyPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ForwardProxyPolicySegmentPolicySrcSegmentChoiceModelAttributeMap)
 		}
 
-		// data specToModelNested OneOfField --> DstSegmentChoice
-		if segmentPolicyElement.GetDstSegmentChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> DstAny
-			_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-
-			if isDstAny {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> IntraSegment
-			_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-
-			if isIntraSegment {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-			}
-
-			// data specToModelNested PointerOfOneOfField --> DstSegments
-			// <no value>
-			// false
-			{
-				dstSegmentsOptions, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-				dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-				if isDstSegments && dstSegmentsOptions != nil {
-
-					// data specToModelNested RequiredArrayOfPointerField --> Segments
-					if len(dstSegmentsOptions.DstSegments.GetSegments()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsOptions.DstSegments.GetSegments()))
-						for _, segmentsElement := range dstSegmentsOptions.DstSegments.GetSegments() {
-							objectRefTypeModelModel := ObjectRefTypeModel{}
-
-							// data specToModelNested StringField --> Tenant
-							if segmentsElement.GetTenant() != "" {
-								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Tenant = types.StringNull()
-							}
-
-							// data specToModelNested RequiredStringField --> Namespace
-							if segmentsElement.GetNamespace() != "" {
-								objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Namespace = types.StringNull()
-							}
-
-							// data specToModelNested RequiredStringField --> Name
-							if segmentsElement.GetName() != "" {
-								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Name = types.StringNull()
-							}
-
-							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						segmentsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ForwardProxyPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: ForwardProxyPolicySegmentsObjectRefModelAttributeMap})
-					}
-
-					dstSegmentsObj, diags := types.ObjectValue(ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-				} else {
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(ForwardProxyPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-				ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				segmentPolicydstSegmentChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			forwardProxyPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			forwardProxyPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ForwardProxyPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
-		}
-
 		segmentPolicyObj, segmentPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			ForwardProxyPolicySegmentPolicyModelAttributeMap,
 			forwardProxyPolicyPolicySegmentPolicyTypeModel,
 		)
 		response.Diagnostics.Append(segmentPolicyDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
 		data.SegmentPolicy = segmentPolicyObj
 	} else {
 		data.SegmentPolicy = types.ObjectNull(ForwardProxyPolicySegmentPolicyModelAttributeMap)
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

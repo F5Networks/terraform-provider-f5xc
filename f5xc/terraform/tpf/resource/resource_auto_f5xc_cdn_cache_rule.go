@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,19 +22,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -43,7 +48,6 @@ import (
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_cdn_cache_rule "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/cdn_cache_rule"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCCdnCacheRule defines the resource implementation.
@@ -51,138 +55,138 @@ type ResourceF5XCCdnCacheRule struct {
 	client *client.APIClient
 }
 
-type CdnCacheRuleCdnCacheRuleCDNCacheRule struct {
-	RuleName           types.String `tfsdk:"rule_name"`
-	RuleExpressionList types.List   `tfsdk:"rule_expression_list"`
+type CdnCacheRuleCDNCacheRule struct {
 	CacheActionsChoice types.Object `tfsdk:"cache_actions_choice"`
+	RuleExpressionList types.List   `tfsdk:"rule_expression_list"`
+	RuleName           types.String `tfsdk:"rule_name"`
 }
 
-type CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList struct {
-	ExpressionName      types.String `tfsdk:"expression_name"`
+type CdnCacheRuleCacheActionsChoice struct {
+	CacheBypass      types.Bool   `tfsdk:"cache_bypass"`
+	EligibleForCache types.Object `tfsdk:"eligible_for_cache"`
+}
+
+type CdnCacheRuleEligibleForCache struct {
+	EligibleForCacheChoice types.Object `tfsdk:"eligible_for_cache_choice"`
+}
+
+type CdnCacheRuleEligibleForCacheChoice struct {
+	SchemeProxyHostRequestUri types.Object `tfsdk:"scheme_proxy_host_request_uri"`
+	SchemeProxyHostUri        types.Object `tfsdk:"scheme_proxy_host_uri"`
+}
+
+type CdnCacheRuleSchemeProxyHostReqUri struct {
+	CacheOverride        types.Bool   `tfsdk:"cache_override"`
+	CacheTtl             types.String `tfsdk:"cache_ttl"`
+	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
+}
+
+type CdnCacheRuleSchemeProxyHostUri struct {
+	CacheOverride        types.Bool   `tfsdk:"cache_override"`
+	CacheTtl             types.String `tfsdk:"cache_ttl"`
+	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
+}
+
+type CdnCacheRuleCDNCacheRuleExpressionList struct {
 	CacheRuleExpression types.List   `tfsdk:"cache_rule_expression"`
+	ExpressionName      types.String `tfsdk:"expression_name"`
 }
 
-type CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression struct {
-	PathMatch       types.Object `tfsdk:"path_match"`
-	QueryParameters types.List   `tfsdk:"query_parameters"`
+type CdnCacheRuleCDNCacheRuleExpression struct {
 	CacheHeaders    types.List   `tfsdk:"cache_headers"`
 	CookieMatcher   types.List   `tfsdk:"cookie_matcher"`
+	PathMatch       types.Object `tfsdk:"path_match"`
+	QueryParameters types.List   `tfsdk:"query_parameters"`
 }
 
-type CdnCacheRuleCdnCacheRuleCDNPathMatcherType struct {
-	Operator types.Object `tfsdk:"operator"`
-}
-
-type CdnCacheRuleCdnCacheRuleCacheOperator struct {
-	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
-}
-
-type CdnCacheRuleCacheOperatorCacheOperatorChoice struct {
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	Contains         types.String `tfsdk:"contains"`
-	Endswith         types.String `tfsdk:"endswith"`
-	MatchRegex       types.String `tfsdk:"match_regex"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
-	Startswith       types.String `tfsdk:"startswith"`
-	Equals           types.String `tfsdk:"equals"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-}
-
-type CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType struct {
-	Key      types.String `tfsdk:"key"`
-	Operator types.Object `tfsdk:"operator"`
-}
-
-type CdnCacheRuleCdnCacheRuleQueryParamCacheOperator struct {
-	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
-}
-
-type CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice struct {
-	Endswith         types.String `tfsdk:"endswith"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
-	Equals           types.String `tfsdk:"equals"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
-	Contains         types.String `tfsdk:"contains"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	MatchRegex       types.String `tfsdk:"match_regex"`
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	Startswith       types.String `tfsdk:"startswith"`
-}
-
-type CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType struct {
+type CdnCacheRuleCacheHeaderMatcherType struct {
 	Name     types.List   `tfsdk:"name"`
 	Operator types.Object `tfsdk:"operator"`
 }
 
-type CdnCacheRuleCdnCacheRuleHeaderCacheOperator struct {
+type CdnCacheRuleHeaderCacheOperator struct {
 	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
 }
 
-type CdnCacheRuleHeaderCacheOperatorCacheOperatorChoice struct {
+type CdnCacheRuleCacheOperatorChoice struct {
 	Contains         types.String `tfsdk:"contains"`
-	Startswith       types.String `tfsdk:"startswith"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
 	DoesNotContain   types.String `tfsdk:"does_not_contain"`
 	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
-	Endswith         types.String `tfsdk:"endswith"`
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
 	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	MatchRegex       types.String `tfsdk:"match_regex"`
+	Endswith         types.String `tfsdk:"endswith"`
 	Equals           types.String `tfsdk:"equals"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+	Startswith       types.String `tfsdk:"startswith"`
 }
 
-type CdnCacheRuleCdnCacheRuleCacheCookieMatcherType struct {
-	Operator types.Object `tfsdk:"operator"`
+type CdnCacheRuleCacheCookieMatcherType struct {
 	Name     types.String `tfsdk:"name"`
+	Operator types.Object `tfsdk:"operator"`
 }
 
-type CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator struct {
+type CdnCacheRuleCookieMatcherCacheOperator struct {
 	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
 }
 
 type CdnCacheRuleCookieMatcherCacheOperatorCacheOperatorChoice struct {
-	MatchRegex       types.String `tfsdk:"match_regex"`
+	Contains         types.String `tfsdk:"contains"`
 	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	Startswith       types.String `tfsdk:"startswith"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
 	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
 	Endswith         types.String `tfsdk:"endswith"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
 	Equals           types.String `tfsdk:"equals"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+	Startswith       types.String `tfsdk:"startswith"`
+}
+
+type CdnCacheRuleCDNPathMatcherType struct {
+	Operator types.Object `tfsdk:"operator"`
+}
+
+type CdnCacheRuleCacheOperator struct {
+	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
+}
+
+type CdnCacheRuleCacheOperatorCacheOperatorChoice struct {
 	Contains         types.String `tfsdk:"contains"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
+	Endswith         types.String `tfsdk:"endswith"`
+	Equals           types.String `tfsdk:"equals"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+	Startswith       types.String `tfsdk:"startswith"`
 }
 
-type CdnCacheRuleCDNCacheRuleCacheActionsChoice struct {
-	EligibleForCache types.Object `tfsdk:"eligible_for_cache"`
-	CacheBypass      types.Bool   `tfsdk:"cache_bypass"`
+type CdnCacheRuleCacheQueryParamMatcherType struct {
+	Key      types.String `tfsdk:"key"`
+	Operator types.Object `tfsdk:"operator"`
 }
 
-type CdnCacheRuleCDNCacheRuleEligibleForCache struct {
-	EligibleForCacheChoice types.Object `tfsdk:"eligible_for_cache_choice"`
+type CdnCacheRuleQueryParamCacheOperator struct {
+	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
 }
 
-type CdnCacheRuleCacheEligibleOptionsEligibleForCacheChoice struct {
-	SchemeProxyHostUri        types.Object `tfsdk:"scheme_proxy_host_uri"`
-	SchemeProxyHostRequestUri types.Object `tfsdk:"scheme_proxy_host_request_uri"`
-}
-
-type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostUri struct {
-	CacheTtl             types.String `tfsdk:"cache_ttl"`
-	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
-	CacheOverride        types.Bool   `tfsdk:"cache_override"`
-}
-
-type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUri struct {
-	CacheTtl             types.String `tfsdk:"cache_ttl"`
-	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
-	CacheOverride        types.Bool   `tfsdk:"cache_override"`
+type CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice struct {
+	Contains         types.String `tfsdk:"contains"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
+	Endswith         types.String `tfsdk:"endswith"`
+	Equals           types.String `tfsdk:"equals"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+	Startswith       types.String `tfsdk:"startswith"`
 }
 
 // ResourceF5XCCdnCacheRuleModel describes the resource data model.
 type ResourceF5XCCdnCacheRuleModel struct {
-	Labels      types.Map      `tfsdk:"labels"`
 	Annotations types.Map      `tfsdk:"annotations"`
 	Description types.String   `tfsdk:"description"`
+	Labels      types.Map      `tfsdk:"labels"`
 	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
@@ -203,16 +207,45 @@ var (
 // Attribute map for PointerField --> CacheRules
 var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 
-	"rule_name": types.StringType,
+	"cache_actions_choice": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesCacheActionsModelAttributeMap,
+	},
 	"rule_expression_list": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"expression_name": types.StringType,
 				"cache_rule_expression": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							"path_match": types.ObjectType{
+
+							"cache_headers": types.ListType{
+								ElemType: types.ObjectType{
+									AttrTypes: map[string]attr.Type{
+
+										"name": types.ListType{
+											ElemType: types.StringType,
+										}, "operator": types.ObjectType{
+											AttrTypes: map[string]attr.Type{
+												"cache_operator_choice": types.ObjectType{
+													AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap,
+												}},
+										},
+									},
+								},
+							},
+							"cookie_matcher": types.ListType{
+								ElemType: types.ObjectType{
+									AttrTypes: map[string]attr.Type{
+
+										"name": types.StringType, "operator": types.ObjectType{
+											AttrTypes: map[string]attr.Type{
+												"cache_operator_choice": types.ObjectType{
+													AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+												}},
+										},
+									},
+								},
+							}, "path_match": types.ObjectType{
 								AttrTypes: map[string]attr.Type{"operator": types.ObjectType{
 									AttrTypes: map[string]attr.Type{
 										"cache_operator_choice": types.ObjectType{
@@ -233,53 +266,95 @@ var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 									},
 								},
 							},
-							"cache_headers": types.ListType{
-								ElemType: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-
-										"name": types.ListType{
-											ElemType: types.StringType,
-										}, "operator": types.ObjectType{
-											AttrTypes: map[string]attr.Type{
-												"cache_operator_choice": types.ObjectType{
-													AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap,
-												}},
-										},
-									},
-								},
-							},
-							"cookie_matcher": types.ListType{
-								ElemType: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-										"operator": types.ObjectType{
-											AttrTypes: map[string]attr.Type{
-												"cache_operator_choice": types.ObjectType{
-													AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-												}},
-										},
-										"name": types.StringType,
-									},
-								},
-							},
 						},
 					},
 				},
+				"expression_name": types.StringType,
 			},
 		},
 	},
-	"cache_actions_choice": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesCacheActionsModelAttributeMap,
+	"rule_name": types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> CacheActions
+var CdnCacheRuleCacheRulesCacheActionsModelAttributeMap = map[string]attr.Type{
+
+	"cache_bypass": types.BoolType,
+	"eligible_for_cache": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap,
 	},
+}
+
+// Attribute map for PointerOfOneOfField --> EligibleForCache
+var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap = map[string]attr.Type{
+
+	"eligible_for_cache_choice": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> EligibleForCache
+var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap = map[string]attr.Type{
+
+	"scheme_proxy_host_request_uri": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap,
+	},
+	"scheme_proxy_host_uri": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SchemeProxyHostRequestUri
+var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap = map[string]attr.Type{
+
+	"cache_override":         types.BoolType,
+	"cache_ttl":              types.StringType,
+	"ignore_response_cookie": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> SchemeProxyHostUri
+var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap = map[string]attr.Type{
+
+	"cache_override":         types.BoolType,
+	"cache_ttl":              types.StringType,
+	"ignore_response_cookie": types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> RuleExpressionList
 var CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap = map[string]attr.Type{
 
-	"expression_name": types.StringType,
 	"cache_rule_expression": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				"path_match": types.ObjectType{
+
+				"cache_headers": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+
+							"name": types.ListType{
+								ElemType: types.StringType,
+							}, "operator": types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"cache_operator_choice": types.ObjectType{
+										AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap,
+									}},
+							},
+						},
+					},
+				},
+				"cookie_matcher": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+
+							"name": types.StringType, "operator": types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"cache_operator_choice": types.ObjectType{
+										AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+									}},
+							},
+						},
+					},
+				}, "path_match": types.ObjectType{
 					AttrTypes: map[string]attr.Type{"operator": types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 							"cache_operator_choice": types.ObjectType{
@@ -300,42 +375,43 @@ var CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap = map[string]attr.
 						},
 					},
 				},
-				"cache_headers": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-
-							"name": types.ListType{
-								ElemType: types.StringType,
-							}, "operator": types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"cache_operator_choice": types.ObjectType{
-										AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap,
-									}},
-							},
-						},
-					},
-				},
-				"cookie_matcher": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"operator": types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"cache_operator_choice": types.ObjectType{
-										AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-									}},
-							},
-							"name": types.StringType,
-						},
-					},
-				},
 			},
 		},
 	},
+	"expression_name": types.StringType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> CacheRuleExpression
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap = map[string]attr.Type{
-	"path_match": types.ObjectType{
+
+	"cache_headers": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name": types.ListType{
+					ElemType: types.StringType,
+				}, "operator": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"cache_operator_choice": types.ObjectType{
+							AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap,
+						}},
+				},
+			},
+		},
+	},
+	"cookie_matcher": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name": types.StringType, "operator": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"cache_operator_choice": types.ObjectType{
+							AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+						}},
+				},
+			},
+		},
+	}, "path_match": types.ObjectType{
 		AttrTypes: map[string]attr.Type{"operator": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"cache_operator_choice": types.ObjectType{
@@ -356,99 +432,6 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap
 			},
 		},
 	},
-	"cache_headers": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.ListType{
-					ElemType: types.StringType,
-				}, "operator": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"cache_operator_choice": types.ObjectType{
-							AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap,
-						}},
-				},
-			},
-		},
-	},
-	"cookie_matcher": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"operator": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"cache_operator_choice": types.ObjectType{
-							AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-						}},
-				},
-				"name": types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for PointerField --> PathMatch
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap = map[string]attr.Type{
-	"operator": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"cache_operator_choice": types.ObjectType{
-				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for PointerField --> Operator
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap = map[string]attr.Type{
-
-	"cache_operator_choice": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> CacheOperator
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
-
-	"does_not_end_with":   types.StringType,
-	"does_not_contain":    types.StringType,
-	"contains":            types.StringType,
-	"endswith":            types.StringType,
-	"match_regex":         types.StringType,
-	"does_not_equal":      types.StringType,
-	"startswith":          types.StringType,
-	"equals":              types.StringType,
-	"does_not_start_with": types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> QueryParameters
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap = map[string]attr.Type{
-
-	"key": types.StringType, "operator": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"cache_operator_choice": types.ObjectType{
-				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for PointerField --> Operator
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap = map[string]attr.Type{
-
-	"cache_operator_choice": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> CacheOperator
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
-
-	"endswith":            types.StringType,
-	"does_not_end_with":   types.StringType,
-	"equals":              types.StringType,
-	"does_not_equal":      types.StringType,
-	"contains":            types.StringType,
-	"does_not_start_with": types.StringType,
-	"match_regex":         types.StringType,
-	"does_not_contain":    types.StringType,
-	"startswith":          types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> CacheHeaders
@@ -476,25 +459,25 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOpera
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
 	"contains":            types.StringType,
-	"startswith":          types.StringType,
-	"does_not_equal":      types.StringType,
 	"does_not_contain":    types.StringType,
 	"does_not_end_with":   types.StringType,
-	"endswith":            types.StringType,
+	"does_not_equal":      types.StringType,
 	"does_not_start_with": types.StringType,
-	"match_regex":         types.StringType,
+	"endswith":            types.StringType,
 	"equals":              types.StringType,
+	"match_regex":         types.StringType,
+	"startswith":          types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> CookieMatcher
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap = map[string]attr.Type{
-	"operator": types.ObjectType{
+
+	"name": types.StringType, "operator": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"cache_operator_choice": types.ObjectType{
 				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
 			}},
 	},
-	"name": types.StringType,
 }
 
 // Attribute map for PointerField --> Operator
@@ -508,59 +491,80 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOper
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"match_regex":         types.StringType,
+	"contains":            types.StringType,
 	"does_not_contain":    types.StringType,
-	"startswith":          types.StringType,
+	"does_not_end_with":   types.StringType,
+	"does_not_equal":      types.StringType,
 	"does_not_start_with": types.StringType,
 	"endswith":            types.StringType,
-	"does_not_end_with":   types.StringType,
 	"equals":              types.StringType,
-	"does_not_equal":      types.StringType,
+	"match_regex":         types.StringType,
+	"startswith":          types.StringType,
+}
+
+// Attribute map for PointerField --> PathMatch
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap = map[string]attr.Type{
+	"operator": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"cache_operator_choice": types.ObjectType{
+				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for PointerField --> Operator
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap = map[string]attr.Type{
+
+	"cache_operator_choice": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> CacheOperator
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
+
 	"contains":            types.StringType,
+	"does_not_contain":    types.StringType,
+	"does_not_end_with":   types.StringType,
+	"does_not_equal":      types.StringType,
+	"does_not_start_with": types.StringType,
+	"endswith":            types.StringType,
+	"equals":              types.StringType,
+	"match_regex":         types.StringType,
+	"startswith":          types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> CacheActions
-var CdnCacheRuleCacheRulesCacheActionsModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> QueryParameters
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap = map[string]attr.Type{
 
-	"eligible_for_cache": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap,
-	},
-	"cache_bypass": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> EligibleForCache
-var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap = map[string]attr.Type{
-
-	"eligible_for_cache_choice": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> EligibleForCache
-var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap = map[string]attr.Type{
-
-	"scheme_proxy_host_uri": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap,
-	},
-	"scheme_proxy_host_request_uri": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap,
+	"key": types.StringType, "operator": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"cache_operator_choice": types.ObjectType{
+				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap,
+			}},
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> SchemeProxyHostUri
-var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> Operator
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap = map[string]attr.Type{
 
-	"cache_ttl":              types.StringType,
-	"ignore_response_cookie": types.BoolType,
-	"cache_override":         types.BoolType,
+	"cache_operator_choice": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap,
+	},
 }
 
-// Attribute map for PointerOfOneOfField --> SchemeProxyHostRequestUri
-var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> CacheOperator
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"cache_ttl":              types.StringType,
-	"ignore_response_cookie": types.BoolType,
-	"cache_override":         types.BoolType,
+	"contains":            types.StringType,
+	"does_not_contain":    types.StringType,
+	"does_not_end_with":   types.StringType,
+	"does_not_equal":      types.StringType,
+	"does_not_start_with": types.StringType,
+	"endswith":            types.StringType,
+	"equals":              types.StringType,
+	"match_regex":         types.StringType,
+	"startswith":          types.StringType,
 }
 
 func NewResourceF5XCCdnCacheRule() resource.Resource {
@@ -574,58 +578,66 @@ func (r *ResourceF5XCCdnCacheRule) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "CdnCacheRule resource",
-		Description:         "CdnCacheRule resource",
+		MarkdownDescription: "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
+		Description:         "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
 			"labels": schema.MapAttribute{
 				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				PlanModifiers: []planmodifier.Map{
 					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
 				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
 			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -635,279 +647,175 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 			},
 			"cache_rules": schema.SingleNestedAttribute{
 				Description:         "List of Cache rules(These rules are ORed) Rules are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs.",
-				MarkdownDescription: "",
+				MarkdownDescription: "List of Cache rules(These rules are ORed) Rules are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
-					"rule_name": schema.StringAttribute{
-						Description:         "Rule Name Name of the Cache Rule",
-						MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(128)`",
+					"cache_actions_choice": schema.SingleNestedAttribute{
+						Description:         "Cache Actions Configure the Cache Actions for a rule.",
+						MarkdownDescription: "Cache Actions Configure the Cache Actions for a rule.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
-						Validators: []validator.String{
-							stringvalidator.LengthAtMost(128),
+						Validators: []validator.Object{
+							exactlyoneofvalidator.RequiredExactlyOneOf(
+								"cache_bypass",
+								"eligible_for_cache",
+							),
 						},
-					},
-					"rule_expression_list": schema.ListNestedAttribute{
-						Description:         "Expression List Expressions are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs..",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"expression_name": schema.StringAttribute{
-									Description:         "Expression Name Name of the Expressions items that are ANDed",
-									MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(128)`",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
-									Validators: []validator.String{
-										stringvalidator.LengthAtMost(128),
-									},
+						Attributes: map[string]schema.Attribute{
+							"cache_bypass": schema.BoolAttribute{
+								Description:         "Bypass Cache Do not cache content if rule match occurs",
+								MarkdownDescription: "Bypass Cache Do not cache content if rule match occurs",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
 								},
-								"cache_rule_expression": schema.ListNestedAttribute{
-									Description:         "Terms The Cache Rule Expression Terms that are ANDed",
-									MarkdownDescription: "",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
-									NestedObject: schema.NestedAttributeObject{
+							},
+							"eligible_for_cache": schema.SingleNestedAttribute{
+								Description:         "Eligible For Cache Cache content if rule match occurs",
+								MarkdownDescription: "Eligible For Cache Cache content if rule match occurs",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"eligible_for_cache_choice": schema.SingleNestedAttribute{
+										Description:         "Eligible For Cache Compose Eligible For Cache",
+										MarkdownDescription: "Eligible For Cache Compose Eligible For Cache",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.Object{
+											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"scheme_proxy_host_request_uri",
+												"scheme_proxy_host_uri",
+											),
+										},
 										Attributes: map[string]schema.Attribute{
-											"path_match": schema.SingleNestedAttribute{
-												Description:         "path_match URI path of route",
-												MarkdownDescription: "",
+											"scheme_proxy_host_request_uri": schema.SingleNestedAttribute{
+												Description:         "Scheme + Proxy Host + Request URI",
+												MarkdownDescription: "Scheme + Proxy Host + Request URI",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
-													"operator": schema.SingleNestedAttribute{
-														Description:         "cache_operator A specification of path match",
-														MarkdownDescription: "",
+													"cache_override": schema.BoolAttribute{
+														Description:         "Cache Override Honour Cache Override",
+														MarkdownDescription: "Cache Override Honour Cache Override<br>**Default:** `false`",
 														Required:            false,
 														Optional:            true,
+														Computed:            true,
+														Default:             booldefault.StaticBool(false),
+													},
+													"cache_ttl": schema.StringAttribute{
+														Description:         "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
+														MarkdownDescription: "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
+														Required:            true,
+														Optional:            false,
 														Computed:            false,
-														Attributes: map[string]schema.Attribute{
-															"cache_operator_choice": schema.SingleNestedAttribute{
-																Description:         "Cache Operator Normalized URI path up to filename and extension but not including query parameters",
-																MarkdownDescription: "",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-																Validators: []validator.Object{
-																	atmostoneofvalidator.AtMostOneOf(
-																		"DoesNotEndWith",
-																		"MatchRegex",
-																		"DoesNotEqual",
-																		"DoesNotContain",
-																		"Startswith",
-																		"Equals",
-																		"Contains",
-																		"DoesNotStartWith",
-																		"Endswith",
-																	),
-																},
-																Attributes: map[string]schema.Attribute{
-																	"does_not_end_with": schema.StringAttribute{
-																		Description:         "Does Not End With The path must not end with the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"does_not_contain": schema.StringAttribute{
-																		Description:         "Does Not Contain The path must not include the specified value as a substring, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"contains": schema.StringAttribute{
-																		Description:         "Contains The path must include the specified value as a substring, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"endswith": schema.StringAttribute{
-																		Description:         "Ends With The path must end with the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"match_regex": schema.StringAttribute{
-																		Description:         "Matches Regex The path must match the specified regular expression pattern in PCRE format.",
-																		MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																		Validators: []validator.String{
-																			stringvalidator.LengthBetween(1, 256),
-																		},
-																	},
-																	"does_not_equal": schema.StringAttribute{
-																		Description:         "Does Not Equal The path must not match the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"startswith": schema.StringAttribute{
-																		Description:         "Starts With The path must begin with the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"equals": schema.StringAttribute{
-																		Description:         "Equals The path must exactly match the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"does_not_start_with": schema.StringAttribute{
-																		Description:         "Does Not Start With The path must not begin with the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																},
-															},
+														Validators: []validator.String{
+															stringvalidator.RegexMatches(
+																regexp.MustCompile(`^[1-9][0-9]*[smhd]$`),
+																"must be a valid time interval (e.g. 10s, 5m, 2h, 1d)",
+															),
 														},
+													},
+													"ignore_response_cookie": schema.BoolAttribute{
+														Description:         "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.",
+														MarkdownDescription: "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.<br>**Default:** `false`",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
+														Default:             booldefault.StaticBool(false),
 													},
 												},
 											},
-											"query_parameters": schema.ListNestedAttribute{
-												Description:         "query_params List of (key, value) query parameters",
-												MarkdownDescription: "",
+											"scheme_proxy_host_uri": schema.SingleNestedAttribute{
+												Description:         "Scheme + Proxy Host + URI",
+												MarkdownDescription: "Scheme + Proxy Host + URI",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
-												NestedObject: schema.NestedAttributeObject{
-													Attributes: map[string]schema.Attribute{
-														"key": schema.StringAttribute{
-															Description:         "key The name of the query parameter to match",
-															MarkdownDescription: "",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+												Attributes: map[string]schema.Attribute{
+													"cache_override": schema.BoolAttribute{
+														Description:         "Cache Override Honour Cache Override",
+														MarkdownDescription: "Cache Override Honour Cache Override<br>**Default:** `false`",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
+														Default:             booldefault.StaticBool(false),
+													},
+													"cache_ttl": schema.StringAttribute{
+														Description:         "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
+														MarkdownDescription: "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
+														Required:            true,
+														Optional:            false,
+														Computed:            false,
+														Validators: []validator.String{
+															stringvalidator.RegexMatches(
+																regexp.MustCompile(`^[1-9][0-9]*[smhd]$`),
+																"must be a valid time interval (e.g. 10s, 5m, 2h, 1d)",
+															),
 														},
-														"operator": schema.SingleNestedAttribute{
-															Description:         "cache_operator",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"cache_operator_choice": schema.SingleNestedAttribute{
-																	Description:         "Cache Operator Match Operator",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																	Validators: []validator.Object{
-																		atmostoneofvalidator.AtMostOneOf(
-																			"DoesNotContain",
-																			"Startswith",
-																			"DoesNotStartWith",
-																			"Endswith",
-																			"DoesNotEndWith",
-																			"Equals",
-																			"DoesNotEqual",
-																			"Contains",
-																			"MatchRegex",
-																		),
-																	},
-																	Attributes: map[string]schema.Attribute{
-																		"endswith": schema.StringAttribute{
-																			Description:         "Ends With The query parameter value must end with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_end_with": schema.StringAttribute{
-																			Description:         "Does Not End With The query parameter value must not end with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"equals": schema.StringAttribute{
-																			Description:         "Equals The query parameter value must exactly match the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_equal": schema.StringAttribute{
-																			Description:         "Does Not Equal The query parameter value must not match the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"contains": schema.StringAttribute{
-																			Description:         "Contains The query parameter value must include the specified value as a substring.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_start_with": schema.StringAttribute{
-																			Description:         "Does Not Start With The query parameter value must not begin with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"match_regex": schema.StringAttribute{
-																			Description:         "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.",
-																			MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																			Validators: []validator.String{
-																				stringvalidator.LengthBetween(1, 256),
-																			},
-																		},
-																		"does_not_contain": schema.StringAttribute{
-																			Description:         "Does Not Contain The query parameter value must not include the specified value as a substring.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"startswith": schema.StringAttribute{
-																			Description:         "Starts With The query parameter value must begin with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																	},
-																},
-															},
-														},
+													},
+													"ignore_response_cookie": schema.BoolAttribute{
+														Description:         "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.",
+														MarkdownDescription: "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.<br>**Default:** `false`",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
+														Default:             booldefault.StaticBool(false),
 													},
 												},
 											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"rule_expression_list": schema.ListNestedAttribute{
+						Description:         "Expression List Expressions are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs..",
+						MarkdownDescription: "Expression List Expressions are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs..",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.List{
+							listvalidator.SizeBetween(1, 8),
+							listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+						},
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"cache_rule_expression": schema.ListNestedAttribute{
+									Description:         "Terms The Cache Rule Expression Terms that are ANDed",
+									MarkdownDescription: "Terms The Cache Rule Expression Terms that are ANDed",
+									Required:            true,
+									Optional:            false,
+									Computed:            false,
+									Validators: []validator.List{
+										listvalidator.SizeBetween(1, 8),
+										listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+									},
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
 											"cache_headers": schema.ListNestedAttribute{
 												Description:         "Cache Headers Configure cache rule headers to match the criteria",
-												MarkdownDescription: "",
+												MarkdownDescription: "Cache Headers Configure cache rule headers to match the criteria",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
+												Validators: []validator.List{
+													listvalidator.SizeAtMost(8),
+													listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+												},
 												NestedObject: schema.NestedAttributeObject{
 													Attributes: map[string]schema.Attribute{
 														"name": schema.ListAttribute{
 															Description:         "Name Select the name of the header from the list",
-															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"PROXY_HOST\", \"REFERER\", \"SCHEME\", \"USER_AGENT\"]`",
+															MarkdownDescription: "Name Select the name of the header from the list<br>**Allowed Values (choose one):** `['PROXY_HOST', 'REFERER', 'SCHEME', 'USER_AGENT']`",
 															ElementType:         types.StringType,
 															Required:            true,
 															Optional:            false,
@@ -919,83 +827,83 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 														},
 														"operator": schema.SingleNestedAttribute{
 															Description:         "cache_operator Available operators",
-															MarkdownDescription: "",
+															MarkdownDescription: "cache_operator Available operators",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"cache_operator_choice": schema.SingleNestedAttribute{
 																	Description:         "Cache Operator Match Operator",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Cache Operator Match Operator",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
 																	Validators: []validator.Object{
-																		atmostoneofvalidator.AtMostOneOf(
-																			"DoesNotEqual",
-																			"DoesNotContain",
-																			"DoesNotStartWith",
-																			"DoesNotEndWith",
-																			"MatchRegex",
-																			"Equals",
-																			"Contains",
-																			"Startswith",
-																			"Endswith",
+																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																			"contains",
+																			"does_not_contain",
+																			"does_not_end_with",
+																			"does_not_equal",
+																			"does_not_start_with",
+																			"endswith",
+																			"equals",
+																			"match_regex",
+																			"startswith",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
 																		"contains": schema.StringAttribute{
 																			Description:         "Contains The header value must include the specified value as a substring.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"startswith": schema.StringAttribute{
-																			Description:         "Starts With The header value must begin with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_equal": schema.StringAttribute{
-																			Description:         "Does Not Equal The header value must not match the specified value.",
-																			MarkdownDescription: "",
+																			MarkdownDescription: "Contains The header value must include the specified value as a substring.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_contain": schema.StringAttribute{
 																			Description:         "Does Not Contain The header value must not include the specified value as a substring.",
-																			MarkdownDescription: "",
+																			MarkdownDescription: "Does Not Contain The header value must not include the specified value as a substring.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_end_with": schema.StringAttribute{
 																			Description:         "Does Not End With The header value must not end with the specified value.",
-																			MarkdownDescription: "",
+																			MarkdownDescription: "Does Not End With The header value must not end with the specified value.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"endswith": schema.StringAttribute{
-																			Description:         "Ends With The header value must end with the specified value.",
-																			MarkdownDescription: "",
+																		"does_not_equal": schema.StringAttribute{
+																			Description:         "Does Not Equal The header value must not match the specified value.",
+																			MarkdownDescription: "Does Not Equal The header value must not match the specified value.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_start_with": schema.StringAttribute{
 																			Description:         "Does Not Start With The header value must not begin with the specified value.",
-																			MarkdownDescription: "",
+																			MarkdownDescription: "Does Not Start With The header value must not begin with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"endswith": schema.StringAttribute{
+																			Description:         "Ends With The header value must end with the specified value.",
+																			MarkdownDescription: "Ends With The header value must end with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"equals": schema.StringAttribute{
+																			Description:         "Equals The header value must exactly match the specified value.",
+																			MarkdownDescription: "Equals The header value must exactly match the specified value.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"match_regex": schema.StringAttribute{
 																			Description:         "Matches Regex The header value must match the specified regular expression pattern.",
-																			MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "Matches Regex The header value must match the specified regular expression pattern.<br>**Validation:** `Length LengthBetween(1, 256)`",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1003,9 +911,9 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																				stringvalidator.LengthBetween(1, 256),
 																			},
 																		},
-																		"equals": schema.StringAttribute{
-																			Description:         "Equals The header value must exactly match the specified value.",
-																			MarkdownDescription: "",
+																		"startswith": schema.StringAttribute{
+																			Description:         "Starts With The header value must begin with the specified value.",
+																			MarkdownDescription: "Starts With The header value must begin with the specified value.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1019,42 +927,105 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 											},
 											"cookie_matcher": schema.ListNestedAttribute{
 												Description:         "cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true.",
-												MarkdownDescription: "",
+												MarkdownDescription: "cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
+												Validators: []validator.List{
+													listvalidator.SizeAtMost(8),
+													listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+												},
 												NestedObject: schema.NestedAttributeObject{
 													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description:         "name Enter the name of the cookie to match",
+															MarkdownDescription: "name Enter the name of the cookie to match",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
+															Validators: []validator.String{
+																bytesvalidator.BytesAtMost(256),
+															},
+														},
 														"operator": schema.SingleNestedAttribute{
 															Description:         "cache_operator",
-															MarkdownDescription: "",
+															MarkdownDescription: "cache_operator",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"cache_operator_choice": schema.SingleNestedAttribute{
 																	Description:         "Cache Operator Match Operator",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Cache Operator Match Operator",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
 																	Validators: []validator.Object{
-																		atmostoneofvalidator.AtMostOneOf(
-																			"Endswith",
-																			"DoesNotEndWith",
-																			"Equals",
-																			"MatchRegex",
-																			"DoesNotEqual",
-																			"Contains",
-																			"DoesNotContain",
-																			"Startswith",
-																			"DoesNotStartWith",
+																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																			"contains",
+																			"does_not_contain",
+																			"does_not_end_with",
+																			"does_not_equal",
+																			"does_not_start_with",
+																			"endswith",
+																			"equals",
+																			"match_regex",
+																			"startswith",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
+																		"contains": schema.StringAttribute{
+																			Description:         "Contains The cookie value must include the specified value as a substring.",
+																			MarkdownDescription: "Contains The cookie value must include the specified value as a substring.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_contain": schema.StringAttribute{
+																			Description:         "Does Not Contain The cookie value must not include the specified value as a substring.",
+																			MarkdownDescription: "Does Not Contain The cookie value must not include the specified value as a substring.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_end_with": schema.StringAttribute{
+																			Description:         "Does Not End With The cookie value must not end with the specified value.",
+																			MarkdownDescription: "Does Not End With The cookie value must not end with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_equal": schema.StringAttribute{
+																			Description:         "Does Not Equal The cookie value must not match the specified value.",
+																			MarkdownDescription: "Does Not Equal The cookie value must not match the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_start_with": schema.StringAttribute{
+																			Description:         "Does Not Start With The cookie value must not begin with the specified value.",
+																			MarkdownDescription: "Does Not Start With The cookie value must not begin with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"endswith": schema.StringAttribute{
+																			Description:         "Ends With The cookie value must end with the specified value.",
+																			MarkdownDescription: "Ends With The cookie value must end with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"equals": schema.StringAttribute{
+																			Description:         "Equals The cookie value must exactly match the specified value.",
+																			MarkdownDescription: "Equals The cookie value must exactly match the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
 																		"match_regex": schema.StringAttribute{
 																			Description:         "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.",
-																			MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1062,58 +1033,9 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																				stringvalidator.LengthBetween(1, 256),
 																			},
 																		},
-																		"does_not_contain": schema.StringAttribute{
-																			Description:         "Does Not Contain The cookie value must not include the specified value as a substring.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
 																		"startswith": schema.StringAttribute{
 																			Description:         "Starts With The cookie value must begin with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_start_with": schema.StringAttribute{
-																			Description:         "Does Not Start With The cookie value must not begin with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"endswith": schema.StringAttribute{
-																			Description:         "Ends With The cookie value must end with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_end_with": schema.StringAttribute{
-																			Description:         "Does Not End With The cookie value must not end with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"equals": schema.StringAttribute{
-																			Description:         "Equals The cookie value must exactly match the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_equal": schema.StringAttribute{
-																			Description:         "Does Not Equal The cookie value must not match the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"contains": schema.StringAttribute{
-																			Description:         "Contains The cookie value must include the specified value as a substring.",
-																			MarkdownDescription: "",
+																			MarkdownDescription: "Starts With The cookie value must begin with the specified value.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1122,12 +1044,233 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																},
 															},
 														},
-														"name": schema.StringAttribute{
-															Description:         "name Enter the name of the cookie to match",
-															MarkdownDescription: "",
+													},
+												},
+											},
+											"path_match": schema.SingleNestedAttribute{
+												Description:         "path_match URI path of route",
+												MarkdownDescription: "path_match URI path of route",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Attributes: map[string]schema.Attribute{
+													"operator": schema.SingleNestedAttribute{
+														Description:         "cache_operator A specification of path match",
+														MarkdownDescription: "cache_operator A specification of path match",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Attributes: map[string]schema.Attribute{
+															"cache_operator_choice": schema.SingleNestedAttribute{
+																Description:         "Cache Operator Normalized URI path up to filename and extension but not including query parameters",
+																MarkdownDescription: "Cache Operator Normalized URI path up to filename and extension but not including query parameters",
+																Required:            true,
+																Optional:            false,
+																Computed:            false,
+																Validators: []validator.Object{
+																	exactlyoneofvalidator.RequiredExactlyOneOf(
+																		"contains",
+																		"does_not_contain",
+																		"does_not_end_with",
+																		"does_not_equal",
+																		"does_not_start_with",
+																		"endswith",
+																		"equals",
+																		"match_regex",
+																		"startswith",
+																	),
+																},
+																Attributes: map[string]schema.Attribute{
+																	"contains": schema.StringAttribute{
+																		Description:         "Contains The path must include the specified value as a substring, up to the filename.",
+																		MarkdownDescription: "Contains The path must include the specified value as a substring, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"does_not_contain": schema.StringAttribute{
+																		Description:         "Does Not Contain The path must not include the specified value as a substring, up to the filename.",
+																		MarkdownDescription: "Does Not Contain The path must not include the specified value as a substring, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"does_not_end_with": schema.StringAttribute{
+																		Description:         "Does Not End With The path must not end with the specified value, up to the filename.",
+																		MarkdownDescription: "Does Not End With The path must not end with the specified value, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"does_not_equal": schema.StringAttribute{
+																		Description:         "Does Not Equal The path must not match the specified value, up to the filename.",
+																		MarkdownDescription: "Does Not Equal The path must not match the specified value, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"does_not_start_with": schema.StringAttribute{
+																		Description:         "Does Not Start With The path must not begin with the specified value, up to the filename.",
+																		MarkdownDescription: "Does Not Start With The path must not begin with the specified value, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"endswith": schema.StringAttribute{
+																		Description:         "Ends With The path must end with the specified value, up to the filename.",
+																		MarkdownDescription: "Ends With The path must end with the specified value, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"equals": schema.StringAttribute{
+																		Description:         "Equals The path must exactly match the specified value, up to the filename.",
+																		MarkdownDescription: "Equals The path must exactly match the specified value, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"match_regex": schema.StringAttribute{
+																		Description:         "Matches Regex The path must match the specified regular expression pattern in PCRE format.",
+																		MarkdownDescription: "Matches Regex The path must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.String{
+																			stringvalidator.LengthBetween(1, 256),
+																		},
+																	},
+																	"startswith": schema.StringAttribute{
+																		Description:         "Starts With The path must begin with the specified value, up to the filename.",
+																		MarkdownDescription: "Starts With The path must begin with the specified value, up to the filename.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											"query_parameters": schema.ListNestedAttribute{
+												Description:         "query_params List of (key, value) query parameters",
+												MarkdownDescription: "query_params List of (key, value) query parameters",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.List{
+													listvalidator.SizeAtMost(8),
+													listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+												},
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"key": schema.StringAttribute{
+															Description:         "key The name of the query parameter to match",
+															MarkdownDescription: "key The name of the query parameter to match",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
+															Validators: []validator.String{
+																bytesvalidator.BytesBetween(1, 256),
+															},
+														},
+														"operator": schema.SingleNestedAttribute{
+															Description:         "cache_operator",
+															MarkdownDescription: "cache_operator",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Attributes: map[string]schema.Attribute{
+																"cache_operator_choice": schema.SingleNestedAttribute{
+																	Description:         "Cache Operator Match Operator",
+																	MarkdownDescription: "Cache Operator Match Operator",
+																	Required:            true,
+																	Optional:            false,
+																	Computed:            false,
+																	Validators: []validator.Object{
+																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																			"contains",
+																			"does_not_contain",
+																			"does_not_end_with",
+																			"does_not_equal",
+																			"does_not_start_with",
+																			"endswith",
+																			"equals",
+																			"match_regex",
+																			"startswith",
+																		),
+																	},
+																	Attributes: map[string]schema.Attribute{
+																		"contains": schema.StringAttribute{
+																			Description:         "Contains The query parameter value must include the specified value as a substring.",
+																			MarkdownDescription: "Contains The query parameter value must include the specified value as a substring.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_contain": schema.StringAttribute{
+																			Description:         "Does Not Contain The query parameter value must not include the specified value as a substring.",
+																			MarkdownDescription: "Does Not Contain The query parameter value must not include the specified value as a substring.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_end_with": schema.StringAttribute{
+																			Description:         "Does Not End With The query parameter value must not end with the specified value.",
+																			MarkdownDescription: "Does Not End With The query parameter value must not end with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_equal": schema.StringAttribute{
+																			Description:         "Does Not Equal The query parameter value must not match the specified value.",
+																			MarkdownDescription: "Does Not Equal The query parameter value must not match the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_start_with": schema.StringAttribute{
+																			Description:         "Does Not Start With The query parameter value must not begin with the specified value.",
+																			MarkdownDescription: "Does Not Start With The query parameter value must not begin with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"endswith": schema.StringAttribute{
+																			Description:         "Ends With The query parameter value must end with the specified value.",
+																			MarkdownDescription: "Ends With The query parameter value must end with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"equals": schema.StringAttribute{
+																			Description:         "Equals The query parameter value must exactly match the specified value.",
+																			MarkdownDescription: "Equals The query parameter value must exactly match the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"match_regex": schema.StringAttribute{
+																			Description:         "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.",
+																			MarkdownDescription: "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																			Validators: []validator.String{
+																				stringvalidator.LengthBetween(1, 256),
+																			},
+																		},
+																		"startswith": schema.StringAttribute{
+																			Description:         "Starts With The query parameter value must begin with the specified value.",
+																			MarkdownDescription: "Starts With The query parameter value must begin with the specified value.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																	},
+																},
+															},
 														},
 													},
 												},
@@ -1135,127 +1278,34 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 										},
 									},
 								},
-							},
-						},
-					},
-					"cache_actions_choice": schema.SingleNestedAttribute{
-						Description:         "Cache Actions Configure the Cache Actions for a rule.",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
-								"eligible_for_cache",
-								"cache_bypass",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"eligible_for_cache": schema.SingleNestedAttribute{
-								Description:         "Eligible For Cache Cache content if rule match occurs",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"eligible_for_cache_choice": schema.SingleNestedAttribute{
-										Description:         "Eligible For Cache Compose Eligible For Cache",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											atmostoneofvalidator.AtMostOneOf(
-												"scheme_proxy_host_uri",
-												"scheme_proxy_host_request_uri",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"scheme_proxy_host_uri": schema.SingleNestedAttribute{
-												Description:         "Scheme + Proxy Host + URI",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"cache_ttl": schema.StringAttribute{
-														Description:         "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-													},
-													"ignore_response_cookie": schema.BoolAttribute{
-														Description:         "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.",
-														MarkdownDescription: "<br>**Default:** `false`",
-														Required:            false,
-														Optional:            true,
-														Computed:            true,
-														Default:             booldefault.StaticBool(false),
-													},
-													"cache_override": schema.BoolAttribute{
-														Description:         "Cache Override Honour Cache Override",
-														MarkdownDescription: "<br>**Default:** `false`",
-														Required:            false,
-														Optional:            true,
-														Computed:            true,
-														Default:             booldefault.StaticBool(false),
-													},
-												},
-											},
-											"scheme_proxy_host_request_uri": schema.SingleNestedAttribute{
-												Description:         "Scheme + Proxy Host + Request URI",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"cache_ttl": schema.StringAttribute{
-														Description:         "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-													},
-													"ignore_response_cookie": schema.BoolAttribute{
-														Description:         "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.",
-														MarkdownDescription: "<br>**Default:** `false`",
-														Required:            false,
-														Optional:            true,
-														Computed:            true,
-														Default:             booldefault.StaticBool(false),
-													},
-													"cache_override": schema.BoolAttribute{
-														Description:         "Cache Override Honour Cache Override",
-														MarkdownDescription: "<br>**Default:** `false`",
-														Required:            false,
-														Optional:            true,
-														Computed:            true,
-														Default:             booldefault.StaticBool(false),
-													},
-												},
-											},
-										},
+								"expression_name": schema.StringAttribute{
+									Description:         "Expression Name Name of the Expressions items that are ANDed",
+									MarkdownDescription: "Expression Name Name of the Expressions items that are ANDed<br>**Validation:** `Length LengthAtMost(128)`",
+									Required:            true,
+									Optional:            false,
+									Computed:            false,
+									Validators: []validator.String{
+										stringvalidator.LengthAtMost(128),
 									},
 								},
 							},
-							"cache_bypass": schema.BoolAttribute{
-								Description:         "Bypass Cache Do not cache content if rule match occurs",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
+						},
+					},
+					"rule_name": schema.StringAttribute{
+						Description:         "Rule Name Name of the Cache Rule",
+						MarkdownDescription: "Rule Name Name of the Cache Rule<br>**Validation:** `Length LengthAtMost(128)`",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.String{
+							stringvalidator.LengthAtMost(128),
 						},
 					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -1361,7 +1411,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1372,6 +1422,20 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -1389,7 +1453,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 		if !data.CacheRules.IsNull() && !data.CacheRules.IsUnknown() {
 			cacheRulesSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule{}
 			spec.CacheRules = cacheRulesSpec
-			var cacheRulesModel CdnCacheRuleCdnCacheRuleCDNCacheRule
+			var cacheRulesModel CdnCacheRuleCDNCacheRule
 
 			// Populate the nested model from the main data model
 			diags.Append(data.CacheRules.As(ctx, &cacheRulesModel, basetypes.ObjectAsOptions{})...)
@@ -1398,15 +1462,114 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredStringField --> RuleName
-			if !cacheRulesModel.RuleName.IsNull() && !cacheRulesModel.RuleName.IsUnknown() {
-				cacheRulesSpec.RuleName = string(cacheRulesModel.RuleName.ValueString())
+			// resource modelToSpecNested RequiredOneOfField --> CacheActions
+			if !cacheRulesModel.CacheActionsChoice.IsNull() && !cacheRulesModel.CacheActionsChoice.IsUnknown() {
+				cacheRulesCacheActionsChoiceModel := CdnCacheRuleCacheActionsChoice{}
+				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
+				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
+					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
+					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
+					cacheRulesSpec.CacheActions = cacheBypassSpecBool
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> EligibleForCache
+				if !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsNull() && !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsUnknown() {
+					var cdnCacheRuleEligibleForCacheModel CdnCacheRuleEligibleForCache
+					response.Diagnostics.Append(cacheRulesCacheActionsChoiceModel.EligibleForCache.As(ctx, &cdnCacheRuleEligibleForCacheModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					eligibleForCacheOneOfSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache{}
+					eligibleForCacheOneOfSpec.EligibleForCache = &ves_io_schema_cdn_cache_rule.CacheEligibleOptions{}
+					cacheRulesSpec.CacheActions = eligibleForCacheOneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> EligibleForCache
+					if !cdnCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsNull() && !cdnCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsUnknown() {
+						eligibleForCacheEligibleForCacheChoiceModel := CdnCacheRuleEligibleForCacheChoice{}
+						response.Diagnostics.Append(cdnCacheRuleEligibleForCacheModel.EligibleForCacheChoice.As(ctx, &eligibleForCacheEligibleForCacheChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostRequestUri
+						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsUnknown() {
+							var cdnCacheRuleSchemeProxyHostReqUriModel CdnCacheRuleSchemeProxyHostReqUri
+							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.As(ctx, &cdnCacheRuleSchemeProxyHostReqUriModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							schemeProxyHostRequestUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri{}
+							schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
+							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostRequestUriOneOfSpec
+
+							// resource modelToSpecNested BoolField --> CacheOverride
+							if !cdnCacheRuleSchemeProxyHostReqUriModel.CacheOverride.IsNull() && !cdnCacheRuleSchemeProxyHostReqUriModel.CacheOverride.IsUnknown() {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheOverride = bool(cdnCacheRuleSchemeProxyHostReqUriModel.CacheOverride.ValueBool())
+							} else {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheOverride = bool(false)
+							}
+
+							// resource modelToSpecNested RequiredStringField --> CacheTtl
+							if !cdnCacheRuleSchemeProxyHostReqUriModel.CacheTtl.IsNull() && !cdnCacheRuleSchemeProxyHostReqUriModel.CacheTtl.IsUnknown() {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheTtl = string(cdnCacheRuleSchemeProxyHostReqUriModel.CacheTtl.ValueString())
+							}
+
+							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
+							if !cdnCacheRuleSchemeProxyHostReqUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleSchemeProxyHostReqUriModel.IgnoreResponseCookie.IsUnknown() {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.IgnoreResponseCookie = bool(cdnCacheRuleSchemeProxyHostReqUriModel.IgnoreResponseCookie.ValueBool())
+							} else {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.IgnoreResponseCookie = bool(false)
+							}
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostUri
+						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsUnknown() {
+							var cdnCacheRuleSchemeProxyHostUriModel CdnCacheRuleSchemeProxyHostUri
+							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.As(ctx, &cdnCacheRuleSchemeProxyHostUriModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							schemeProxyHostUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri{}
+							schemeProxyHostUriOneOfSpec.SchemeProxyHostUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
+							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostUriOneOfSpec
+
+							// resource modelToSpecNested BoolField --> CacheOverride
+							if !cdnCacheRuleSchemeProxyHostUriModel.CacheOverride.IsNull() && !cdnCacheRuleSchemeProxyHostUriModel.CacheOverride.IsUnknown() {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheOverride = bool(cdnCacheRuleSchemeProxyHostUriModel.CacheOverride.ValueBool())
+							} else {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheOverride = bool(false)
+							}
+
+							// resource modelToSpecNested RequiredStringField --> CacheTtl
+							if !cdnCacheRuleSchemeProxyHostUriModel.CacheTtl.IsNull() && !cdnCacheRuleSchemeProxyHostUriModel.CacheTtl.IsUnknown() {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheTtl = string(cdnCacheRuleSchemeProxyHostUriModel.CacheTtl.ValueString())
+							}
+
+							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
+							if !cdnCacheRuleSchemeProxyHostUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleSchemeProxyHostUriModel.IgnoreResponseCookie.IsUnknown() {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.IgnoreResponseCookie = bool(cdnCacheRuleSchemeProxyHostUriModel.IgnoreResponseCookie.ValueBool())
+							} else {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.IgnoreResponseCookie = bool(false)
+							}
+
+						}
+
+					}
+
+				}
+
 			}
 
 			// resource modelToSpecNested RequiredArrayOfPointerField --> RuleExpressionList
 			if !cacheRulesModel.RuleExpressionList.IsNull() && !cacheRulesModel.RuleExpressionList.IsUnknown() && len(cacheRulesModel.RuleExpressionList.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var ruleExpressionListElements []CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList
+				var ruleExpressionListElements []CdnCacheRuleCDNCacheRuleExpressionList
 				response.Diagnostics.Append(cacheRulesModel.RuleExpressionList.ElementsAs(ctx, &ruleExpressionListElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
@@ -1423,15 +1586,10 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredStringField --> ExpressionName
-					if !ruleExpressionListElement.ExpressionName.IsNull() && !ruleExpressionListElement.ExpressionName.IsUnknown() {
-						ruleExpressionListSpec[i].ExpressionName = string(ruleExpressionListElement.ExpressionName.ValueString())
-					}
-
 					// resource modelToSpecNested RequiredArrayOfPointerField --> CacheRuleExpression
 					if !ruleExpressionListElement.CacheRuleExpression.IsNull() && !ruleExpressionListElement.CacheRuleExpression.IsUnknown() && len(ruleExpressionListElement.CacheRuleExpression.Elements()) > 0 {
 						// 1. Convert the types.List into a slice of the model's Go struct
-						var cacheRuleExpressionElements []CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression
+						var cacheRuleExpressionElements []CdnCacheRuleCDNCacheRuleExpression
 						response.Diagnostics.Append(ruleExpressionListElement.CacheRuleExpression.ElementsAs(ctx, &cacheRuleExpressionElements, false)...)
 						if response.Diagnostics.HasError() {
 							return
@@ -1439,232 +1597,19 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 						// 2. Initialize the spec slice
 						cacheRuleExpressionSpec := make([]*ves_io_schema_cdn_cache_rule.CDNCacheRuleExpression, len(cacheRuleExpressionElements))
-						ruleExpressionListSpec[i].CacheRuleExpression = cacheRuleExpressionSpec
+						cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression = cacheRuleExpressionSpec
 
 						// 3. Iterate over the converted Go slice
 						for ii, cacheRuleExpressionElement := range cacheRuleExpressionElements {
 							// Initialize the spec struct for the current element
-							ruleExpressionListSpec[i].CacheRuleExpression[ii] = &ves_io_schema_cdn_cache_rule.CDNCacheRuleExpression{}
+							cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii] = &ves_io_schema_cdn_cache_rule.CDNCacheRuleExpression{}
 
 							// Recursively process nested elements
-
-							// resource modelToSpecNested PointerField --> PathMatch
-							if !cacheRuleExpressionElement.PathMatch.IsNull() && !cacheRuleExpressionElement.PathMatch.IsUnknown() {
-								var pathMatchModel CdnCacheRuleCdnCacheRuleCDNPathMatcherType
-								response.Diagnostics.Append(cacheRuleExpressionElement.PathMatch.As(ctx, &pathMatchModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								pathMatchSpec := &ves_io_schema_cdn_cache_rule.CDNPathMatcherType{}
-								cacheRuleExpressionSpec[i].PathMatch = pathMatchSpec
-
-								// resource modelToSpecNested PointerField --> Operator
-								if !pathMatchModel.Operator.IsNull() && !pathMatchModel.Operator.IsUnknown() {
-									var operatorModel CdnCacheRuleCdnCacheRuleCacheOperator
-									response.Diagnostics.Append(pathMatchModel.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									operatorSpec := &ves_io_schema_cdn_cache_rule.CacheOperator{}
-									pathMatchSpec.Operator = operatorSpec
-
-									// resource modelToSpecNested RequiredOneOfField --> CacheOperator
-									if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
-										operatorCacheOperatorChoiceModel := CdnCacheRuleCacheOperatorCacheOperatorChoice{}
-										response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
-											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-											operatorSpec.CacheOperator = doesNotEndWithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-										if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-											doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain{}
-											doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-											operatorSpec.CacheOperator = doesNotContainSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Contains
-										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
-											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-											operatorSpec.CacheOperator = containsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Endswith
-										if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-											endswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Endswith{}
-											endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-											operatorSpec.CacheOperator = endswithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
-											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-											operatorSpec.CacheOperator = matchRegexSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
-											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-											operatorSpec.CacheOperator = doesNotEqualSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Startswith
-										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
-											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-											operatorSpec.CacheOperator = startswithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Equals
-										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
-											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-											operatorSpec.CacheOperator = equalsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
-											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-											operatorSpec.CacheOperator = doesNotStartWithSpecStr
-										}
-
-									}
-
-								}
-
-							}
-
-							// resource modelToSpecNested ArrayOfPointerField --> QueryParameters
-							if !cacheRuleExpressionElement.QueryParameters.IsNull() && !cacheRuleExpressionElement.QueryParameters.IsUnknown() && len(cacheRuleExpressionElement.QueryParameters.Elements()) > 0 {
-								// 1. Convert the types.List into a slice of the model's Go struct
-								var queryParametersElements []CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType
-								response.Diagnostics.Append(cacheRuleExpressionElement.QueryParameters.ElementsAs(ctx, &queryParametersElements, false)...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// 2. Initialize the spec slice
-								queryParametersSpec := make([]*ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType, len(queryParametersElements))
-								cacheRuleExpressionSpec[ii].QueryParameters = queryParametersSpec
-
-								// 3. Iterate over the converted Go slice
-								for iii, queryParametersElement := range queryParametersElements {
-									// Initialize the spec struct for the current element
-									cacheRuleExpressionSpec[ii].QueryParameters[iii] = &ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType{}
-
-									// Recursively process nested elements
-
-									// resource modelToSpecNested RequiredStringField --> Key
-									if !queryParametersElement.Key.IsNull() && !queryParametersElement.Key.IsUnknown() {
-										queryParametersSpec[i].Key = string(queryParametersElement.Key.ValueString())
-									}
-
-									// resource modelToSpecNested PointerField --> Operator
-									if !queryParametersElement.Operator.IsNull() && !queryParametersElement.Operator.IsUnknown() {
-										var operatorModel CdnCacheRuleCdnCacheRuleQueryParamCacheOperator
-										response.Diagnostics.Append(queryParametersElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										operatorSpec := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator{}
-										queryParametersSpec[i].Operator = operatorSpec
-
-										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
-										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
-											operatorCacheOperatorChoiceModel := CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice{}
-											response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Endswith
-											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
-												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-												operatorSpec.CacheOperator = endswithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual{}
-												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-												operatorSpec.CacheOperator = doesNotEqualSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
-												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-												operatorSpec.CacheOperator = doesNotStartWithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
-												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-												operatorSpec.CacheOperator = doesNotContainSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
-											}
-
-										}
-
-									}
-
-								}
-							}
 
 							// resource modelToSpecNested ArrayOfPointerField --> CacheHeaders
 							if !cacheRuleExpressionElement.CacheHeaders.IsNull() && !cacheRuleExpressionElement.CacheHeaders.IsUnknown() && len(cacheRuleExpressionElement.CacheHeaders.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
-								var cacheHeadersElements []CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType
+								var cacheHeadersElements []CdnCacheRuleCacheHeaderMatcherType
 								response.Diagnostics.Append(cacheRuleExpressionElement.CacheHeaders.ElementsAs(ctx, &cacheHeadersElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
@@ -1672,12 +1617,12 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 								// 2. Initialize the spec slice
 								cacheHeadersSpec := make([]*ves_io_schema_cdn_cache_rule.CacheHeaderMatcherType, len(cacheHeadersElements))
-								cacheRuleExpressionSpec[ii].CacheHeaders = cacheHeadersSpec
+								cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CacheHeaders = cacheHeadersSpec
 
 								// 3. Iterate over the converted Go slice
 								for iii, cacheHeadersElement := range cacheHeadersElements {
 									// Initialize the spec struct for the current element
-									cacheRuleExpressionSpec[ii].CacheHeaders[iii] = &ves_io_schema_cdn_cache_rule.CacheHeaderMatcherType{}
+									cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CacheHeaders[iii] = &ves_io_schema_cdn_cache_rule.CacheHeaderMatcherType{}
 
 									// Recursively process nested elements
 
@@ -1694,7 +1639,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											valStr := nameTfStrings[0].ValueString()
 
 											if v, ok := ves_io_schema_cdn_cache_rule.HeaderOptions_value[valStr]; ok {
-												cacheHeadersSpec[i].Name = ves_io_schema_cdn_cache_rule.HeaderOptions(v)
+												cacheHeadersSpec[iii].Name = ves_io_schema_cdn_cache_rule.HeaderOptions(v)
 											} else {
 												response.Diagnostics.AddError(
 													"Invalid Enum Value",
@@ -1707,18 +1652,18 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 									// resource modelToSpecNested PointerField --> Operator
 									if !cacheHeadersElement.Operator.IsNull() && !cacheHeadersElement.Operator.IsUnknown() {
-										var operatorModel CdnCacheRuleCdnCacheRuleHeaderCacheOperator
+										var operatorModel CdnCacheRuleHeaderCacheOperator
 										response.Diagnostics.Append(cacheHeadersElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
 										if response.Diagnostics.HasError() {
 											return
 										}
 
 										operatorSpec := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator{}
-										cacheHeadersSpec[i].Operator = operatorSpec
+										cacheHeadersSpec[iii].Operator = operatorSpec
 
 										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
 										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
-											operatorCacheOperatorChoiceModel := CdnCacheRuleHeaderCacheOperatorCacheOperatorChoice{}
+											operatorCacheOperatorChoiceModel := CdnCacheRuleCacheOperatorChoice{}
 											response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
 											if response.Diagnostics.HasError() {
 												return
@@ -1729,20 +1674,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												containsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains{}
 												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
 												operatorSpec.CacheOperator = containsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual{}
-												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -1759,11 +1690,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEndWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Endswith
-											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-												endswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith{}
-												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-												operatorSpec.CacheOperator = endswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual{}
+												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
@@ -1773,11 +1704,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotStartWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Endswith
+											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+												endswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith{}
+												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> Equals
@@ -1785,6 +1716,20 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												equalsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals{}
 												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
 												operatorSpec.CacheOperator = equalsSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 										}
@@ -1797,7 +1742,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 							// resource modelToSpecNested ArrayOfPointerField --> CookieMatcher
 							if !cacheRuleExpressionElement.CookieMatcher.IsNull() && !cacheRuleExpressionElement.CookieMatcher.IsUnknown() && len(cacheRuleExpressionElement.CookieMatcher.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
-								var cookieMatcherElements []CdnCacheRuleCdnCacheRuleCacheCookieMatcherType
+								var cookieMatcherElements []CdnCacheRuleCacheCookieMatcherType
 								response.Diagnostics.Append(cacheRuleExpressionElement.CookieMatcher.ElementsAs(ctx, &cookieMatcherElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
@@ -1805,25 +1750,30 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 								// 2. Initialize the spec slice
 								cookieMatcherSpec := make([]*ves_io_schema_cdn_cache_rule.CacheCookieMatcherType, len(cookieMatcherElements))
-								cacheRuleExpressionSpec[ii].CookieMatcher = cookieMatcherSpec
+								cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CookieMatcher = cookieMatcherSpec
 
 								// 3. Iterate over the converted Go slice
 								for iii, cookieMatcherElement := range cookieMatcherElements {
 									// Initialize the spec struct for the current element
-									cacheRuleExpressionSpec[ii].CookieMatcher[iii] = &ves_io_schema_cdn_cache_rule.CacheCookieMatcherType{}
+									cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CookieMatcher[iii] = &ves_io_schema_cdn_cache_rule.CacheCookieMatcherType{}
 
 									// Recursively process nested elements
 
+									// resource modelToSpecNested RequiredStringField --> Name
+									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
+										cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CookieMatcher[iii].Name = string(cookieMatcherElement.Name.ValueString())
+									}
+
 									// resource modelToSpecNested PointerField --> Operator
 									if !cookieMatcherElement.Operator.IsNull() && !cookieMatcherElement.Operator.IsUnknown() {
-										var operatorModel CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator
+										var operatorModel CdnCacheRuleCookieMatcherCacheOperator
 										response.Diagnostics.Append(cookieMatcherElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
 										if response.Diagnostics.HasError() {
 											return
 										}
 
 										operatorSpec := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator{}
-										cookieMatcherSpec[i].Operator = operatorSpec
+										cookieMatcherSpec[iii].Operator = operatorSpec
 
 										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
 										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
@@ -1833,11 +1783,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -1847,11 +1797,18 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotContainSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual{}
+												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
@@ -1868,13 +1825,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
-											}
-
 											// resource modelToSpecNested StringOfOneOfField --> Equals
 											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
 												equalsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals{}
@@ -1882,27 +1832,235 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual{}
-												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-												operatorSpec.CacheOperator = doesNotEqualSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 										}
 
 									}
 
-									// resource modelToSpecNested RequiredStringField --> Name
-									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
-										cookieMatcherSpec[i].Name = string(cookieMatcherElement.Name.ValueString())
+								}
+							}
+
+							// resource modelToSpecNested PointerField --> PathMatch
+							if !cacheRuleExpressionElement.PathMatch.IsNull() && !cacheRuleExpressionElement.PathMatch.IsUnknown() {
+								var pathMatchModel CdnCacheRuleCDNPathMatcherType
+								response.Diagnostics.Append(cacheRuleExpressionElement.PathMatch.As(ctx, &pathMatchModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								pathMatchSpec := &ves_io_schema_cdn_cache_rule.CDNPathMatcherType{}
+								cacheRuleExpressionSpec[ii].PathMatch = pathMatchSpec
+
+								// resource modelToSpecNested PointerField --> Operator
+								if !pathMatchModel.Operator.IsNull() && !pathMatchModel.Operator.IsUnknown() {
+									var operatorModel CdnCacheRuleCacheOperator
+									response.Diagnostics.Append(pathMatchModel.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									operatorSpec := &ves_io_schema_cdn_cache_rule.CacheOperator{}
+									pathMatchSpec.Operator = operatorSpec
+
+									// resource modelToSpecNested RequiredOneOfField --> CacheOperator
+									if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
+										operatorCacheOperatorChoiceModel := CdnCacheRuleCacheOperatorCacheOperatorChoice{}
+										response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Contains
+										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
+											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+											operatorSpec.CacheOperator = containsSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+										if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+											doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain{}
+											doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+											operatorSpec.CacheOperator = doesNotContainSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
+											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+											operatorSpec.CacheOperator = doesNotEndWithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
+											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+											operatorSpec.CacheOperator = doesNotEqualSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
+											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+											operatorSpec.CacheOperator = doesNotStartWithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Endswith
+										if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+											endswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Endswith{}
+											endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+											operatorSpec.CacheOperator = endswithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Equals
+										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
+											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+											operatorSpec.CacheOperator = equalsSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
+											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+											operatorSpec.CacheOperator = matchRegexSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Startswith
+										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
+											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+											operatorSpec.CacheOperator = startswithSpecStr
+										}
+
+									}
+
+								}
+
+							}
+
+							// resource modelToSpecNested ArrayOfPointerField --> QueryParameters
+							if !cacheRuleExpressionElement.QueryParameters.IsNull() && !cacheRuleExpressionElement.QueryParameters.IsUnknown() && len(cacheRuleExpressionElement.QueryParameters.Elements()) > 0 {
+								// 1. Convert the types.List into a slice of the model's Go struct
+								var queryParametersElements []CdnCacheRuleCacheQueryParamMatcherType
+								response.Diagnostics.Append(cacheRuleExpressionElement.QueryParameters.ElementsAs(ctx, &queryParametersElements, false)...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// 2. Initialize the spec slice
+								queryParametersSpec := make([]*ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType, len(queryParametersElements))
+								cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].QueryParameters = queryParametersSpec
+
+								// 3. Iterate over the converted Go slice
+								for iii, queryParametersElement := range queryParametersElements {
+									// Initialize the spec struct for the current element
+									cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].QueryParameters[iii] = &ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType{}
+
+									// Recursively process nested elements
+
+									// resource modelToSpecNested RequiredStringField --> Key
+									if !queryParametersElement.Key.IsNull() && !queryParametersElement.Key.IsUnknown() {
+										cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].QueryParameters[iii].Key = string(queryParametersElement.Key.ValueString())
+									}
+
+									// resource modelToSpecNested PointerField --> Operator
+									if !queryParametersElement.Operator.IsNull() && !queryParametersElement.Operator.IsUnknown() {
+										var operatorModel CdnCacheRuleQueryParamCacheOperator
+										response.Diagnostics.Append(queryParametersElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										operatorSpec := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator{}
+										queryParametersSpec[iii].Operator = operatorSpec
+
+										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
+										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
+											operatorCacheOperatorChoiceModel := CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice{}
+											response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
+												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+												operatorSpec.CacheOperator = doesNotContainSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual{}
+												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+												operatorSpec.CacheOperator = doesNotEqualSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
+												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+												operatorSpec.CacheOperator = doesNotStartWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Endswith
+											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
+												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+												operatorSpec.CacheOperator = endswithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
+											}
+
+										}
+
 									}
 
 								}
@@ -1911,113 +2069,34 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 						}
 					}
 
+					// resource modelToSpecNested RequiredStringField --> ExpressionName
+					if !ruleExpressionListElement.ExpressionName.IsNull() && !ruleExpressionListElement.ExpressionName.IsUnknown() {
+						cacheRulesSpec.RuleExpressionList[i].ExpressionName = string(ruleExpressionListElement.ExpressionName.ValueString())
+					}
+
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CacheActions
-			if !cacheRulesModel.CacheActionsChoice.IsNull() && !cacheRulesModel.CacheActionsChoice.IsUnknown() {
-				cacheRulesCacheActionsChoiceModel := CdnCacheRuleCDNCacheRuleCacheActionsChoice{}
-				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> EligibleForCache
-				if !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsNull() && !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsUnknown() {
-					var cdnCacheRuleCDNCacheRuleEligibleForCacheModel CdnCacheRuleCDNCacheRuleEligibleForCache
-					response.Diagnostics.Append(cacheRulesCacheActionsChoiceModel.EligibleForCache.As(ctx, &cdnCacheRuleCDNCacheRuleEligibleForCacheModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					eligibleForCacheOneOfSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache{}
-					eligibleForCacheOneOfSpec.EligibleForCache = &ves_io_schema_cdn_cache_rule.CacheEligibleOptions{}
-					cacheRulesSpec.CacheActions = eligibleForCacheOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> EligibleForCache
-					if !cdnCacheRuleCDNCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsNull() && !cdnCacheRuleCDNCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsUnknown() {
-						eligibleForCacheEligibleForCacheChoiceModel := CdnCacheRuleCacheEligibleOptionsEligibleForCacheChoice{}
-						response.Diagnostics.Append(cdnCacheRuleCDNCacheRuleEligibleForCacheModel.EligibleForCacheChoice.As(ctx, &eligibleForCacheEligibleForCacheChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostUri
-						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsUnknown() {
-							var cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel CdnCacheRuleCacheEligibleOptionsSchemeProxyHostUri
-							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.As(ctx, &cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							schemeProxyHostUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri{}
-							schemeProxyHostUriOneOfSpec.SchemeProxyHostUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
-							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostUriOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> CacheTtl
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheTtl.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheTtl.IsUnknown() {
-								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheTtl = string(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheTtl.ValueString())
-							}
-
-							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.IgnoreResponseCookie.IsUnknown() {
-								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.IgnoreResponseCookie = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.IgnoreResponseCookie.ValueBool())
-							}
-
-							// resource modelToSpecNested BoolField --> CacheOverride
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheOverride.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheOverride.IsUnknown() {
-								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheOverride = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheOverride.ValueBool())
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostRequestUri
-						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsUnknown() {
-							var cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel CdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUri
-							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.As(ctx, &cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							schemeProxyHostRequestUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri{}
-							schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
-							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostRequestUriOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> CacheTtl
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheTtl.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheTtl.IsUnknown() {
-								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheTtl = string(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheTtl.ValueString())
-							}
-
-							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.IgnoreResponseCookie.IsUnknown() {
-								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.IgnoreResponseCookie = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.IgnoreResponseCookie.ValueBool())
-							}
-
-							// resource modelToSpecNested BoolField --> CacheOverride
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheOverride.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheOverride.IsUnknown() {
-								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheOverride = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheOverride.ValueBool())
-							}
-
-						}
-
-					}
-
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
-				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
-					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
-					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
-					cacheRulesSpec.CacheActions = cacheBypassSpecBool
-				}
-
+			// resource modelToSpecNested RequiredStringField --> RuleName
+			if !cacheRulesModel.RuleName.IsNull() && !cacheRulesModel.RuleName.IsUnknown() {
+				cacheRulesSpec.RuleName = string(cacheRulesModel.RuleName.ValueString())
 			}
 
 		}
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_cdn_cache_rule.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -2046,86 +2125,100 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
 		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
 		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -2138,419 +2231,213 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 	// resource SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
-		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
+		var cdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
 
-		// resource specToModelNested RequiredStringField --> RuleName
-		if cacheRulesElement.GetRuleName() != "" {
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
+		// resource specToModelNested RequiredOneOfField --> CacheActions
+		// GlobalSpecType
+		if cacheRulesElement.GetCacheActions() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
+			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
+
+			if isCacheBypass {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
+			} else {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
+			// GlobalSpecType
+			// false
+			{
+				eligibleForCacheOptionsWrapper, isEligibleForCache := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache)
+				eligibleForCacheAttributeMap := make(map[string]attr.Value)
+
+				if isEligibleForCache && eligibleForCacheOptionsWrapper != nil && eligibleForCacheOptionsWrapper.EligibleForCache != nil {
+					eligibleForCacheElement := eligibleForCacheOptionsWrapper.EligibleForCache
+
+					// resource specToModelNested RequiredOneOfField --> EligibleForCache
+					// GlobalSpecType
+					if eligibleForCacheElement.GetEligibleForCache() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						eligibleForCacheeligibleForCacheChoiceChoices := eligibleForCacheElement.GetEligibleForCache()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
+						// GlobalSpecType
+						// false
+						{
+							schemeProxyHostRequestUriOptionsWrapper, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
+							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
+
+							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptionsWrapper != nil && schemeProxyHostRequestUriOptionsWrapper.SchemeProxyHostRequestUri != nil {
+								schemeProxyHostRequestUriElement := schemeProxyHostRequestUriOptionsWrapper.SchemeProxyHostRequestUri
+
+								// resource specToModelNested BoolField --> CacheOverride
+								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriElement.GetCacheOverride()))
+
+								// resource specToModelNested RequiredStringField --> CacheTtl
+								if schemeProxyHostRequestUriElement.GetCacheTtl() != "" {
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriElement.GetCacheTtl())
+								} else {
+									// Empty string, set to null
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolField --> IgnoreResponseCookie
+								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriElement.GetIgnoreResponseCookie()))
+
+								schemeProxyHostRequestUriObj, schemeProxyHostRequestUriObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
+								response.Diagnostics.Append(schemeProxyHostRequestUriObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
+							} else {
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostUri
+						// GlobalSpecType
+						// false
+						{
+							schemeProxyHostUriOptionsWrapper, isSchemeProxyHostUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri)
+							schemeProxyHostUriAttributeMap := make(map[string]attr.Value)
+
+							if isSchemeProxyHostUri && schemeProxyHostUriOptionsWrapper != nil && schemeProxyHostUriOptionsWrapper.SchemeProxyHostUri != nil {
+								schemeProxyHostUriElement := schemeProxyHostUriOptionsWrapper.SchemeProxyHostUri
+
+								// resource specToModelNested BoolField --> CacheOverride
+								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriElement.GetCacheOverride()))
+
+								// resource specToModelNested RequiredStringField --> CacheTtl
+								if schemeProxyHostUriElement.GetCacheTtl() != "" {
+									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostUriElement.GetCacheTtl())
+								} else {
+									// Empty string, set to null
+									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolField --> IgnoreResponseCookie
+								schemeProxyHostUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostUriElement.GetIgnoreResponseCookie()))
+
+								schemeProxyHostUriObj, schemeProxyHostUriObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap, schemeProxyHostUriAttributeMap)
+								response.Diagnostics.Append(schemeProxyHostUriObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = schemeProxyHostUriObj
+							} else {
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, eligibleForCacheeligibleForCacheChoiceChoicesObjDiags := types.ObjectValue(
+							CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap, // The attribute schema for the OneOf choices
+							eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(eligibleForCacheeligibleForCacheChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap)
+					}
+
+					eligibleForCacheObj, eligibleForCacheObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap, eligibleForCacheAttributeMap)
+					response.Diagnostics.Append(eligibleForCacheObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = eligibleForCacheObj
+				} else {
+					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, cacheRulescacheActionsChoiceChoicesObjDiags := types.ObjectValue(
+				CdnCacheRuleCacheRulesCacheActionsModelAttributeMap, // The attribute schema for the OneOf choices
+				cacheRulescacheActionsChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(cacheRulescacheActionsChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
 		} else {
-			// Empty string, set to null
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
 		}
 
 		// resource specToModelNested RequiredArrayOfPointerField --> RuleExpressionList
 		if len(cacheRulesElement.GetRuleExpressionList()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			ruleExpressionListElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
+			ruleExpressionListElements := make([]CdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
 			for _, ruleExpressionListElement := range cacheRulesElement.GetRuleExpressionList() {
-				cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList{}
-
-				// resource specToModelNested RequiredStringField --> ExpressionName
-				if ruleExpressionListElement.GetExpressionName() != "" {
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
-				} else {
-					// Empty string, set to null
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
-				}
+				cdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCDNCacheRuleExpressionList{}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> CacheRuleExpression
 				if len(ruleExpressionListElement.GetCacheRuleExpression()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					cacheRuleExpressionElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
+					cacheRuleExpressionElements := make([]CdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
 					for _, cacheRuleExpressionElement := range ruleExpressionListElement.GetCacheRuleExpression() {
-						cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression{}
-
-						// resource specToModelNested PointerField --> PathMatch
-						if cacheRuleExpressionElement.GetPathMatch() != nil {
-							// Create the nested Go struct
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCdnCacheRuleCDNPathMatcherType{}
-							pathMatchElement := cacheRuleExpressionElement.GetPathMatch()
-
-							// Recursively populate the nested struct
-
-							// resource specToModelNested PointerField --> Operator
-							if pathMatchElement.GetOperator() != nil {
-								// Create the nested Go struct
-								cdnCacheRuleCdnCacheRuleCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCacheOperator{}
-								operatorElement := pathMatchElement.GetOperator()
-
-								// Recursively populate the nested struct
-
-								// resource specToModelNested RequiredOneOfField --> CacheOperator
-								// GlobalSpecType
-								if operatorElement.GetCacheOperator() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
-
-									if isDoesNotEndWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotContain
-									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
-
-									if isDoesNotContain {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Contains
-									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
-
-									if isContains {
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Endswith
-									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
-
-									if isEndswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> MatchRegex
-									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
-
-									if isMatchRegex {
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
-
-									if isDoesNotEqual {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Startswith
-									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
-
-									if isStartswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Equals
-									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
-
-									if isEquals {
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
-
-									if isDoesNotStartWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
-										CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
-										operatorcacheOperatorChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
-								}
-
-								// This field needs to be converted to a types.ObjectValue before assignment.
-								cdnCacheRuleCdnCacheRuleCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCacheOperatorModel)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCacheOperatorModelObj
-
-							} else {
-								// The source field is nil (e.g. redacted by the API).
-								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-								// because the API may always return a non-nil struct (with REDACTED values) for this field,
-								// making this else-branch unreachable. The child OneOf handles the actual healing.
-								// The target is a types.Object, so we use types.ObjectNull.
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
-						}
-
-						// resource specToModelNested ArrayOfPointerField --> QueryParameters
-						if len(cacheRuleExpressionElement.GetQueryParameters()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							queryParametersElements := make([]CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
-							for _, queryParametersElement := range cacheRuleExpressionElement.GetQueryParameters() {
-								cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType{}
-
-								// resource specToModelNested RequiredStringField --> Key
-								if queryParametersElement.GetKey() != "" {
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringNull()
-								}
-
-								// resource specToModelNested PointerField --> Operator
-								if queryParametersElement.GetOperator() != nil {
-									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleCdnCacheRuleQueryParamCacheOperator{}
-									operatorElement := queryParametersElement.GetOperator()
-
-									// Recursively populate the nested struct
-
-									// resource specToModelNested RequiredOneOfField --> CacheOperator
-									// GlobalSpecType
-									if operatorElement.GetCacheOperator() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates
-										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
-
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
-
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual)
-
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
-
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
-
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
-
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
-											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
-											operatorcacheOperatorChoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
-									}
-
-									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj
-
-								} else {
-									// The source field is nil (e.g. redacted by the API).
-									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-									// because the API may always return a non-nil struct (with REDACTED values) for this field,
-									// making this else-branch unreachable. The child OneOf handles the actual healing.
-									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
-								}
-
-								queryParametersElements = append(queryParametersElements, cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							queryParametersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap}, queryParametersElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
-						}
+						cdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCDNCacheRuleExpression{}
 
 						// resource specToModelNested ArrayOfPointerField --> CacheHeaders
 						if len(cacheRuleExpressionElement.GetCacheHeaders()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cacheHeadersElements := make([]CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
+							cacheHeadersElements := make([]CdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
 							for _, cacheHeadersElement := range cacheRuleExpressionElement.GetCacheHeaders() {
-								cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType{}
+								cdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCacheHeaderMatcherType{}
 
 								// resource specToModelNested RequiredEnumField --> Name
-								if cacheHeadersElement.GetName().String() != "" {
-									stringValue := types.StringValue(cacheHeadersElement.GetName().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								{
+									if cacheHeadersElement.GetName().String() != "" {
+										stringValue := types.StringValue(cacheHeadersElement.GetName().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										cdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
+									} else {
+										cdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
-								} else {
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
 								}
 
 								// resource specToModelNested PointerField --> Operator
 								if cacheHeadersElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleCdnCacheRuleHeaderCacheOperator{}
+									cdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleHeaderCacheOperator{}
 									operatorElement := cacheHeadersElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -2576,26 +2463,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual)
-
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
 										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
 
@@ -2616,14 +2483,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual)
 
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
@@ -2636,14 +2503,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> Equals
@@ -2654,6 +2521,26 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -2669,19 +2556,19 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
+									cdnCacheRuleHeaderCacheOperatorModelObj, cdnCacheRuleHeaderCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleHeaderCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleHeaderCacheOperatorModelObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleHeaderCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -2690,39 +2577,47 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
 								}
 
-								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel)
+								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCacheHeaderMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							cacheHeadersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap}, cacheHeadersElements)
-							response.Diagnostics.Append(diags...)
+							cacheHeadersListValue, cacheHeadersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap}, cacheHeadersElements)
+							response.Diagnostics.Append(cacheHeadersListDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
 						}
 
 						// resource specToModelNested ArrayOfPointerField --> CookieMatcher
 						if len(cacheRuleExpressionElement.GetCookieMatcher()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cookieMatcherElements := make([]CdnCacheRuleCdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
+							cookieMatcherElements := make([]CdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
 							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
-								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
+								cdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCacheCookieMatcherType{}
+
+								// resource specToModelNested RequiredStringField --> Name
+								if cookieMatcherElement.GetName() != "" {
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
+								}
 
 								// resource specToModelNested PointerField --> Operator
 								if cookieMatcherElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator{}
+									cdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCookieMatcherCacheOperator{}
 									operatorElement := cookieMatcherElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -2738,14 +2633,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -2758,14 +2653,24 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
 
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
+
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
@@ -2788,16 +2693,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
 										// resource specToModelNested StringOfOneOfField --> Equals
 										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
 
@@ -2808,24 +2703,24 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
 
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -2841,19 +2736,19 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
+									cdnCacheRuleCookieMatcherCacheOperatorModelObj, cdnCacheRuleCookieMatcherCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCookieMatcherCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleCookieMatcherCacheOperatorModelObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCookieMatcherCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -2862,232 +2757,435 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
 								}
 
-								// resource specToModelNested RequiredStringField --> Name
-								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
-								}
-
-								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
+								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCacheCookieMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							cookieMatcherListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
-							response.Diagnostics.Append(diags...)
+							cookieMatcherListValue, cookieMatcherListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
+							response.Diagnostics.Append(cookieMatcherListDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
 						}
 
-						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel)
+						// resource specToModelNested PointerField --> PathMatch
+						if cacheRuleExpressionElement.GetPathMatch() != nil {
+							// Create the nested Go struct
+							cdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCDNPathMatcherType{}
+							pathMatchElement := cacheRuleExpressionElement.GetPathMatch()
+
+							// Recursively populate the nested struct
+
+							// resource specToModelNested PointerField --> Operator
+							if pathMatchElement.GetOperator() != nil {
+								// Create the nested Go struct
+								cdnCacheRuleCacheOperatorModel := &CdnCacheRuleCacheOperator{}
+								operatorElement := pathMatchElement.GetOperator()
+
+								// Recursively populate the nested struct
+
+								// resource specToModelNested RequiredOneOfField --> CacheOperator
+								// GlobalSpecType
+								if operatorElement.GetCacheOperator() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+									// Define a variable for the spec choices to be passed down to nested templates
+									operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
+
+									// Process nested choices, populating the temporary attribute map
+
+									// resource specToModelNested StringOfOneOfField --> Contains
+									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
+
+									if isContains {
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotContain
+									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
+
+									if isDoesNotContain {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
+
+									if isDoesNotEndWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
+
+									if isDoesNotEqual {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
+
+									if isDoesNotStartWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Endswith
+									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
+
+									if isEndswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Equals
+									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+
+									if isEquals {
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> MatchRegex
+									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
+
+									if isMatchRegex {
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Startswith
+									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
+
+									if isStartswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
+										CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
+										operatorcacheOperatorChoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
+								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
+								}
+
+								// This field needs to be converted to a types.ObjectValue before assignment.
+								cdnCacheRuleCacheOperatorModelObj, cdnCacheRuleCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCacheOperatorModel)
+								response.Diagnostics.Append(cdnCacheRuleCacheOperatorModelObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCacheOperatorModelObj
+
+							} else {
+								// The source field is nil (e.g. redacted by the API).
+								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+								// because the API may always return a non-nil struct (with REDACTED values) for this field,
+								// making this else-branch unreachable. The child OneOf handles the actual healing.
+								// The target is a types.Object, so we use types.ObjectNull.
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							cdnCacheRuleCDNPathMatcherTypeModelObj, cdnCacheRuleCDNPathMatcherTypeModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCDNPathMatcherTypeModel)
+							response.Diagnostics.Append(cdnCacheRuleCDNPathMatcherTypeModelObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCDNPathMatcherTypeModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
+						}
+
+						// resource specToModelNested ArrayOfPointerField --> QueryParameters
+						if len(cacheRuleExpressionElement.GetQueryParameters()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							queryParametersElements := make([]CdnCacheRuleCacheQueryParamMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
+							for _, queryParametersElement := range cacheRuleExpressionElement.GetQueryParameters() {
+								cdnCacheRuleCacheQueryParamMatcherTypeModel := CdnCacheRuleCacheQueryParamMatcherType{}
+
+								// resource specToModelNested RequiredStringField --> Key
+								if queryParametersElement.GetKey() != "" {
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringNull()
+								}
+
+								// resource specToModelNested PointerField --> Operator
+								if queryParametersElement.GetOperator() != nil {
+									// Create the nested Go struct
+									cdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleQueryParamCacheOperator{}
+									operatorElement := queryParametersElement.GetOperator()
+
+									// Recursively populate the nested struct
+
+									// resource specToModelNested RequiredOneOfField --> CacheOperator
+									// GlobalSpecType
+									if operatorElement.GetCacheOperator() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates
+										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
+
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual)
+
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
+
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
+											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
+											operatorcacheOperatorChoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
+									}
+
+									// This field needs to be converted to a types.ObjectValue before assignment.
+									cdnCacheRuleQueryParamCacheOperatorModelObj, cdnCacheRuleQueryParamCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleQueryParamCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleQueryParamCacheOperatorModelObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = cdnCacheRuleQueryParamCacheOperatorModelObj
+
+								} else {
+									// The source field is nil (e.g. redacted by the API).
+									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+									// because the API may always return a non-nil struct (with REDACTED values) for this field,
+									// making this else-branch unreachable. The child OneOf handles the actual healing.
+									// The target is a types.Object, so we use types.ObjectNull.
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
+								}
+
+								queryParametersElements = append(queryParametersElements, cdnCacheRuleCacheQueryParamMatcherTypeModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							queryParametersListValue, queryParametersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap}, queryParametersElements)
+							response.Diagnostics.Append(queryParametersListDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
+						}
+
+						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCDNCacheRuleExpressionModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					cacheRuleExpressionListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap}, cacheRuleExpressionElements)
-					response.Diagnostics.Append(diags...)
+					cacheRuleExpressionListValue, cacheRuleExpressionListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap}, cacheRuleExpressionElements)
+					response.Diagnostics.Append(cacheRuleExpressionListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
 				}
 
-				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel)
+				// resource specToModelNested RequiredStringField --> ExpressionName
+				if ruleExpressionListElement.GetExpressionName() != "" {
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
+				} else {
+					// Empty string, set to null
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
+				}
+
+				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCDNCacheRuleExpressionListModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			ruleExpressionListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap}, ruleExpressionListElements)
-			response.Diagnostics.Append(diags...)
+			ruleExpressionListListValue, ruleExpressionListListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap}, ruleExpressionListElements)
+			response.Diagnostics.Append(ruleExpressionListListDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> CacheActions
-		// GlobalSpecType
-		if cacheRulesElement.GetCacheActions() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
-			// GlobalSpecType
-			// false
-			{
-				eligibleForCacheOptions, isEligibleForCache := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache)
-				eligibleForCacheAttributeMap := make(map[string]attr.Value)
-
-				if isEligibleForCache && eligibleForCacheOptions != nil {
-
-					// resource specToModelNested RequiredOneOfField --> EligibleForCache
-					// GlobalSpecType
-					if eligibleForCacheOptions.EligibleForCache.GetEligibleForCache() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						eligibleForCacheeligibleForCacheChoiceChoices := eligibleForCacheOptions.EligibleForCache.GetEligibleForCache()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostUri
-						// GlobalSpecType
-						// false
-						{
-							schemeProxyHostUriOptions, isSchemeProxyHostUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri)
-							schemeProxyHostUriAttributeMap := make(map[string]attr.Value)
-
-							if isSchemeProxyHostUri && schemeProxyHostUriOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> CacheTtl
-								if schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheTtl() != "" {
-									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheTtl())
-								} else {
-									// Empty string, set to null
-									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringNull()
-								}
-
-								// resource specToModelNested BoolField --> IgnoreResponseCookie
-								schemeProxyHostUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetIgnoreResponseCookie()))
-
-								// resource specToModelNested BoolField --> CacheOverride
-								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheOverride()))
-
-								schemeProxyHostUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap, schemeProxyHostUriAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = schemeProxyHostUriObj
-							} else {
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
-						// GlobalSpecType
-						// false
-						{
-							schemeProxyHostRequestUriOptions, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
-							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
-
-							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> CacheTtl
-								if schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl() != "" {
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl())
-								} else {
-									// Empty string, set to null
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
-								}
-
-								// resource specToModelNested BoolField --> IgnoreResponseCookie
-								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetIgnoreResponseCookie()))
-
-								// resource specToModelNested BoolField --> CacheOverride
-								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheOverride()))
-
-								schemeProxyHostRequestUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
-							} else {
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, eligibleForCacheeligibleForCacheChoiceChoicesObjDiags := types.ObjectValue(
-							CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap, // The attribute schema for the OneOf choices
-							eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(eligibleForCacheeligibleForCacheChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap)
-					}
-
-					eligibleForCacheObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap, eligibleForCacheAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = eligibleForCacheObj
-				} else {
-					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
-			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
-
-			if isCacheBypass {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
-			} else {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, cacheRulescacheActionsChoiceChoicesObjDiags := types.ObjectValue(
-				CdnCacheRuleCacheRulesCacheActionsModelAttributeMap, // The attribute schema for the OneOf choices
-				cacheRulescacheActionsChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(cacheRulescacheActionsChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
+		// resource specToModelNested RequiredStringField --> RuleName
+		if cacheRulesElement.GetRuleName() != "" {
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
 		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
+			// Empty string, set to null
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
 		}
 
 		cacheRulesObj, cacheRulesDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnCacheRuleCacheRulesModelAttributeMap,
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel,
+			cdnCacheRuleCDNCacheRuleModel,
 		)
 		response.Diagnostics.Append(cacheRulesDiags...)
 		if response.Diagnostics.HasError() {
@@ -3161,102 +3259,101 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -3269,419 +3366,213 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 
 	// resource SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
-		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
+		var cdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
 
-		// resource specToModelNested RequiredStringField --> RuleName
-		if cacheRulesElement.GetRuleName() != "" {
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
+		// resource specToModelNested RequiredOneOfField --> CacheActions
+		// <no value>
+		if cacheRulesElement.GetCacheActions() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
+			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
+
+			if isCacheBypass {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
+			} else {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
+			// <no value>
+			// false
+			{
+				eligibleForCacheOptionsWrapper, isEligibleForCache := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache)
+				eligibleForCacheAttributeMap := make(map[string]attr.Value)
+
+				if isEligibleForCache && eligibleForCacheOptionsWrapper != nil && eligibleForCacheOptionsWrapper.EligibleForCache != nil {
+					eligibleForCacheElement := eligibleForCacheOptionsWrapper.EligibleForCache
+
+					// resource specToModelNested RequiredOneOfField --> EligibleForCache
+					// <no value>
+					if eligibleForCacheElement.GetEligibleForCache() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						eligibleForCacheeligibleForCacheChoiceChoices := eligibleForCacheElement.GetEligibleForCache()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
+						// <no value>
+						// false
+						{
+							schemeProxyHostRequestUriOptionsWrapper, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
+							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
+
+							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptionsWrapper != nil && schemeProxyHostRequestUriOptionsWrapper.SchemeProxyHostRequestUri != nil {
+								schemeProxyHostRequestUriElement := schemeProxyHostRequestUriOptionsWrapper.SchemeProxyHostRequestUri
+
+								// resource specToModelNested BoolField --> CacheOverride
+								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriElement.GetCacheOverride()))
+
+								// resource specToModelNested RequiredStringField --> CacheTtl
+								if schemeProxyHostRequestUriElement.GetCacheTtl() != "" {
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriElement.GetCacheTtl())
+								} else {
+									// Empty string, set to null
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolField --> IgnoreResponseCookie
+								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriElement.GetIgnoreResponseCookie()))
+
+								schemeProxyHostRequestUriObj, schemeProxyHostRequestUriObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
+								response.Diagnostics.Append(schemeProxyHostRequestUriObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
+							} else {
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostUri
+						// <no value>
+						// false
+						{
+							schemeProxyHostUriOptionsWrapper, isSchemeProxyHostUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri)
+							schemeProxyHostUriAttributeMap := make(map[string]attr.Value)
+
+							if isSchemeProxyHostUri && schemeProxyHostUriOptionsWrapper != nil && schemeProxyHostUriOptionsWrapper.SchemeProxyHostUri != nil {
+								schemeProxyHostUriElement := schemeProxyHostUriOptionsWrapper.SchemeProxyHostUri
+
+								// resource specToModelNested BoolField --> CacheOverride
+								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriElement.GetCacheOverride()))
+
+								// resource specToModelNested RequiredStringField --> CacheTtl
+								if schemeProxyHostUriElement.GetCacheTtl() != "" {
+									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostUriElement.GetCacheTtl())
+								} else {
+									// Empty string, set to null
+									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolField --> IgnoreResponseCookie
+								schemeProxyHostUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostUriElement.GetIgnoreResponseCookie()))
+
+								schemeProxyHostUriObj, schemeProxyHostUriObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap, schemeProxyHostUriAttributeMap)
+								response.Diagnostics.Append(schemeProxyHostUriObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = schemeProxyHostUriObj
+							} else {
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, eligibleForCacheeligibleForCacheChoiceChoicesObjDiags := types.ObjectValue(
+							CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap, // The attribute schema for the OneOf choices
+							eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(eligibleForCacheeligibleForCacheChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap)
+					}
+
+					eligibleForCacheObj, eligibleForCacheObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap, eligibleForCacheAttributeMap)
+					response.Diagnostics.Append(eligibleForCacheObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = eligibleForCacheObj
+				} else {
+					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, cacheRulescacheActionsChoiceChoicesObjDiags := types.ObjectValue(
+				CdnCacheRuleCacheRulesCacheActionsModelAttributeMap, // The attribute schema for the OneOf choices
+				cacheRulescacheActionsChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(cacheRulescacheActionsChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
 		} else {
-			// Empty string, set to null
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
 		}
 
 		// resource specToModelNested RequiredArrayOfPointerField --> RuleExpressionList
 		if len(cacheRulesElement.GetRuleExpressionList()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			ruleExpressionListElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
+			ruleExpressionListElements := make([]CdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
 			for _, ruleExpressionListElement := range cacheRulesElement.GetRuleExpressionList() {
-				cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList{}
-
-				// resource specToModelNested RequiredStringField --> ExpressionName
-				if ruleExpressionListElement.GetExpressionName() != "" {
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
-				} else {
-					// Empty string, set to null
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
-				}
+				cdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCDNCacheRuleExpressionList{}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> CacheRuleExpression
 				if len(ruleExpressionListElement.GetCacheRuleExpression()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					cacheRuleExpressionElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
+					cacheRuleExpressionElements := make([]CdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
 					for _, cacheRuleExpressionElement := range ruleExpressionListElement.GetCacheRuleExpression() {
-						cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression{}
-
-						// resource specToModelNested PointerField --> PathMatch
-						if cacheRuleExpressionElement.GetPathMatch() != nil {
-							// Create the nested Go struct
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCdnCacheRuleCDNPathMatcherType{}
-							pathMatchElement := cacheRuleExpressionElement.GetPathMatch()
-
-							// Recursively populate the nested struct
-
-							// resource specToModelNested PointerField --> Operator
-							if pathMatchElement.GetOperator() != nil {
-								// Create the nested Go struct
-								cdnCacheRuleCdnCacheRuleCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCacheOperator{}
-								operatorElement := pathMatchElement.GetOperator()
-
-								// Recursively populate the nested struct
-
-								// resource specToModelNested RequiredOneOfField --> CacheOperator
-								// <no value>
-								if operatorElement.GetCacheOperator() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
-
-									if isDoesNotEndWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotContain
-									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
-
-									if isDoesNotContain {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Contains
-									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
-
-									if isContains {
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Endswith
-									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
-
-									if isEndswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> MatchRegex
-									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
-
-									if isMatchRegex {
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
-
-									if isDoesNotEqual {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Startswith
-									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
-
-									if isStartswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Equals
-									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
-
-									if isEquals {
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
-
-									if isDoesNotStartWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
-										CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
-										operatorcacheOperatorChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
-								}
-
-								// This field needs to be converted to a types.ObjectValue before assignment.
-								cdnCacheRuleCdnCacheRuleCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCacheOperatorModel)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCacheOperatorModelObj
-
-							} else {
-								// The source field is nil (e.g. redacted by the API).
-								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-								// because the API may always return a non-nil struct (with REDACTED values) for this field,
-								// making this else-branch unreachable. The child OneOf handles the actual healing.
-								// The target is a types.Object, so we use types.ObjectNull.
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
-						}
-
-						// resource specToModelNested ArrayOfPointerField --> QueryParameters
-						if len(cacheRuleExpressionElement.GetQueryParameters()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							queryParametersElements := make([]CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
-							for _, queryParametersElement := range cacheRuleExpressionElement.GetQueryParameters() {
-								cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType{}
-
-								// resource specToModelNested RequiredStringField --> Key
-								if queryParametersElement.GetKey() != "" {
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringNull()
-								}
-
-								// resource specToModelNested PointerField --> Operator
-								if queryParametersElement.GetOperator() != nil {
-									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleCdnCacheRuleQueryParamCacheOperator{}
-									operatorElement := queryParametersElement.GetOperator()
-
-									// Recursively populate the nested struct
-
-									// resource specToModelNested RequiredOneOfField --> CacheOperator
-									// <no value>
-									if operatorElement.GetCacheOperator() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates
-										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
-
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
-
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual)
-
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
-
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
-
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
-
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
-											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
-											operatorcacheOperatorChoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
-									}
-
-									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj
-
-								} else {
-									// The source field is nil (e.g. redacted by the API).
-									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-									// because the API may always return a non-nil struct (with REDACTED values) for this field,
-									// making this else-branch unreachable. The child OneOf handles the actual healing.
-									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
-								}
-
-								queryParametersElements = append(queryParametersElements, cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							queryParametersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap}, queryParametersElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
-						}
+						cdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCDNCacheRuleExpression{}
 
 						// resource specToModelNested ArrayOfPointerField --> CacheHeaders
 						if len(cacheRuleExpressionElement.GetCacheHeaders()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cacheHeadersElements := make([]CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
+							cacheHeadersElements := make([]CdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
 							for _, cacheHeadersElement := range cacheRuleExpressionElement.GetCacheHeaders() {
-								cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType{}
+								cdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCacheHeaderMatcherType{}
 
 								// resource specToModelNested RequiredEnumField --> Name
-								if cacheHeadersElement.GetName().String() != "" {
-									stringValue := types.StringValue(cacheHeadersElement.GetName().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								{
+									if cacheHeadersElement.GetName().String() != "" {
+										stringValue := types.StringValue(cacheHeadersElement.GetName().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										cdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
+									} else {
+										cdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
-								} else {
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
 								}
 
 								// resource specToModelNested PointerField --> Operator
 								if cacheHeadersElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleCdnCacheRuleHeaderCacheOperator{}
+									cdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleHeaderCacheOperator{}
 									operatorElement := cacheHeadersElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -3707,26 +3598,6 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual)
-
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
 										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
 
@@ -3747,14 +3618,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual)
 
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
@@ -3767,14 +3638,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> Equals
@@ -3785,6 +3656,26 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -3800,19 +3691,19 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
+									cdnCacheRuleHeaderCacheOperatorModelObj, cdnCacheRuleHeaderCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleHeaderCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleHeaderCacheOperatorModelObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleHeaderCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -3821,39 +3712,47 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
 								}
 
-								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel)
+								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCacheHeaderMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							cacheHeadersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap}, cacheHeadersElements)
-							response.Diagnostics.Append(diags...)
+							cacheHeadersListValue, cacheHeadersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap}, cacheHeadersElements)
+							response.Diagnostics.Append(cacheHeadersListDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
 						}
 
 						// resource specToModelNested ArrayOfPointerField --> CookieMatcher
 						if len(cacheRuleExpressionElement.GetCookieMatcher()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cookieMatcherElements := make([]CdnCacheRuleCdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
+							cookieMatcherElements := make([]CdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
 							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
-								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
+								cdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCacheCookieMatcherType{}
+
+								// resource specToModelNested RequiredStringField --> Name
+								if cookieMatcherElement.GetName() != "" {
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
+								}
 
 								// resource specToModelNested PointerField --> Operator
 								if cookieMatcherElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator{}
+									cdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCookieMatcherCacheOperator{}
 									operatorElement := cookieMatcherElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -3869,14 +3768,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -3889,14 +3788,24 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
 
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
+
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
@@ -3919,16 +3828,6 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
 										// resource specToModelNested StringOfOneOfField --> Equals
 										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
 
@@ -3939,24 +3838,24 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
 
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -3972,19 +3871,19 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
+									cdnCacheRuleCookieMatcherCacheOperatorModelObj, cdnCacheRuleCookieMatcherCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCookieMatcherCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleCookieMatcherCacheOperatorModelObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCookieMatcherCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -3993,232 +3892,435 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
 								}
 
-								// resource specToModelNested RequiredStringField --> Name
-								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
-								}
-
-								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
+								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCacheCookieMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							cookieMatcherListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
-							response.Diagnostics.Append(diags...)
+							cookieMatcherListValue, cookieMatcherListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
+							response.Diagnostics.Append(cookieMatcherListDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
 						}
 
-						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel)
+						// resource specToModelNested PointerField --> PathMatch
+						if cacheRuleExpressionElement.GetPathMatch() != nil {
+							// Create the nested Go struct
+							cdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCDNPathMatcherType{}
+							pathMatchElement := cacheRuleExpressionElement.GetPathMatch()
+
+							// Recursively populate the nested struct
+
+							// resource specToModelNested PointerField --> Operator
+							if pathMatchElement.GetOperator() != nil {
+								// Create the nested Go struct
+								cdnCacheRuleCacheOperatorModel := &CdnCacheRuleCacheOperator{}
+								operatorElement := pathMatchElement.GetOperator()
+
+								// Recursively populate the nested struct
+
+								// resource specToModelNested RequiredOneOfField --> CacheOperator
+								// <no value>
+								if operatorElement.GetCacheOperator() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+									// Define a variable for the spec choices to be passed down to nested templates
+									operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
+
+									// Process nested choices, populating the temporary attribute map
+
+									// resource specToModelNested StringOfOneOfField --> Contains
+									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
+
+									if isContains {
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotContain
+									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
+
+									if isDoesNotContain {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
+
+									if isDoesNotEndWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
+
+									if isDoesNotEqual {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
+
+									if isDoesNotStartWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Endswith
+									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
+
+									if isEndswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Equals
+									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+
+									if isEquals {
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> MatchRegex
+									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
+
+									if isMatchRegex {
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Startswith
+									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
+
+									if isStartswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
+										CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
+										operatorcacheOperatorChoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
+								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
+								}
+
+								// This field needs to be converted to a types.ObjectValue before assignment.
+								cdnCacheRuleCacheOperatorModelObj, cdnCacheRuleCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCacheOperatorModel)
+								response.Diagnostics.Append(cdnCacheRuleCacheOperatorModelObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCacheOperatorModelObj
+
+							} else {
+								// The source field is nil (e.g. redacted by the API).
+								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+								// because the API may always return a non-nil struct (with REDACTED values) for this field,
+								// making this else-branch unreachable. The child OneOf handles the actual healing.
+								// The target is a types.Object, so we use types.ObjectNull.
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							cdnCacheRuleCDNPathMatcherTypeModelObj, cdnCacheRuleCDNPathMatcherTypeModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCDNPathMatcherTypeModel)
+							response.Diagnostics.Append(cdnCacheRuleCDNPathMatcherTypeModelObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCDNPathMatcherTypeModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
+						}
+
+						// resource specToModelNested ArrayOfPointerField --> QueryParameters
+						if len(cacheRuleExpressionElement.GetQueryParameters()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							queryParametersElements := make([]CdnCacheRuleCacheQueryParamMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
+							for _, queryParametersElement := range cacheRuleExpressionElement.GetQueryParameters() {
+								cdnCacheRuleCacheQueryParamMatcherTypeModel := CdnCacheRuleCacheQueryParamMatcherType{}
+
+								// resource specToModelNested RequiredStringField --> Key
+								if queryParametersElement.GetKey() != "" {
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringNull()
+								}
+
+								// resource specToModelNested PointerField --> Operator
+								if queryParametersElement.GetOperator() != nil {
+									// Create the nested Go struct
+									cdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleQueryParamCacheOperator{}
+									operatorElement := queryParametersElement.GetOperator()
+
+									// Recursively populate the nested struct
+
+									// resource specToModelNested RequiredOneOfField --> CacheOperator
+									// <no value>
+									if operatorElement.GetCacheOperator() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates
+										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
+
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual)
+
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
+
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
+											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
+											operatorcacheOperatorChoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
+									}
+
+									// This field needs to be converted to a types.ObjectValue before assignment.
+									cdnCacheRuleQueryParamCacheOperatorModelObj, cdnCacheRuleQueryParamCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleQueryParamCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleQueryParamCacheOperatorModelObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = cdnCacheRuleQueryParamCacheOperatorModelObj
+
+								} else {
+									// The source field is nil (e.g. redacted by the API).
+									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+									// because the API may always return a non-nil struct (with REDACTED values) for this field,
+									// making this else-branch unreachable. The child OneOf handles the actual healing.
+									// The target is a types.Object, so we use types.ObjectNull.
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
+								}
+
+								queryParametersElements = append(queryParametersElements, cdnCacheRuleCacheQueryParamMatcherTypeModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							queryParametersListValue, queryParametersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap}, queryParametersElements)
+							response.Diagnostics.Append(queryParametersListDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
+						}
+
+						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCDNCacheRuleExpressionModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					cacheRuleExpressionListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap}, cacheRuleExpressionElements)
-					response.Diagnostics.Append(diags...)
+					cacheRuleExpressionListValue, cacheRuleExpressionListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap}, cacheRuleExpressionElements)
+					response.Diagnostics.Append(cacheRuleExpressionListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
 				}
 
-				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel)
+				// resource specToModelNested RequiredStringField --> ExpressionName
+				if ruleExpressionListElement.GetExpressionName() != "" {
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
+				} else {
+					// Empty string, set to null
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
+				}
+
+				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCDNCacheRuleExpressionListModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			ruleExpressionListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap}, ruleExpressionListElements)
-			response.Diagnostics.Append(diags...)
+			ruleExpressionListListValue, ruleExpressionListListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap}, ruleExpressionListElements)
+			response.Diagnostics.Append(ruleExpressionListListDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> CacheActions
-		// <no value>
-		if cacheRulesElement.GetCacheActions() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
-			// <no value>
-			// false
-			{
-				eligibleForCacheOptions, isEligibleForCache := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache)
-				eligibleForCacheAttributeMap := make(map[string]attr.Value)
-
-				if isEligibleForCache && eligibleForCacheOptions != nil {
-
-					// resource specToModelNested RequiredOneOfField --> EligibleForCache
-					// <no value>
-					if eligibleForCacheOptions.EligibleForCache.GetEligibleForCache() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						eligibleForCacheeligibleForCacheChoiceChoices := eligibleForCacheOptions.EligibleForCache.GetEligibleForCache()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostUri
-						// <no value>
-						// false
-						{
-							schemeProxyHostUriOptions, isSchemeProxyHostUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri)
-							schemeProxyHostUriAttributeMap := make(map[string]attr.Value)
-
-							if isSchemeProxyHostUri && schemeProxyHostUriOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> CacheTtl
-								if schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheTtl() != "" {
-									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheTtl())
-								} else {
-									// Empty string, set to null
-									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringNull()
-								}
-
-								// resource specToModelNested BoolField --> IgnoreResponseCookie
-								schemeProxyHostUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetIgnoreResponseCookie()))
-
-								// resource specToModelNested BoolField --> CacheOverride
-								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheOverride()))
-
-								schemeProxyHostUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap, schemeProxyHostUriAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = schemeProxyHostUriObj
-							} else {
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
-						// <no value>
-						// false
-						{
-							schemeProxyHostRequestUriOptions, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
-							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
-
-							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> CacheTtl
-								if schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl() != "" {
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl())
-								} else {
-									// Empty string, set to null
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
-								}
-
-								// resource specToModelNested BoolField --> IgnoreResponseCookie
-								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetIgnoreResponseCookie()))
-
-								// resource specToModelNested BoolField --> CacheOverride
-								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheOverride()))
-
-								schemeProxyHostRequestUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
-							} else {
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, eligibleForCacheeligibleForCacheChoiceChoicesObjDiags := types.ObjectValue(
-							CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap, // The attribute schema for the OneOf choices
-							eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(eligibleForCacheeligibleForCacheChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap)
-					}
-
-					eligibleForCacheObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap, eligibleForCacheAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = eligibleForCacheObj
-				} else {
-					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
-			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
-
-			if isCacheBypass {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
-			} else {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, cacheRulescacheActionsChoiceChoicesObjDiags := types.ObjectValue(
-				CdnCacheRuleCacheRulesCacheActionsModelAttributeMap, // The attribute schema for the OneOf choices
-				cacheRulescacheActionsChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(cacheRulescacheActionsChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
+		// resource specToModelNested RequiredStringField --> RuleName
+		if cacheRulesElement.GetRuleName() != "" {
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
 		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
+			// Empty string, set to null
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
 		}
 
 		cacheRulesObj, cacheRulesDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnCacheRuleCacheRulesModelAttributeMap,
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel,
+			cdnCacheRuleCDNCacheRuleModel,
 		)
 		response.Diagnostics.Append(cacheRulesDiags...)
 		if response.Diagnostics.HasError() {
@@ -4246,6 +4348,25 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCCdnCacheRuleModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -4282,7 +4403,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -4293,6 +4414,20 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -4310,7 +4445,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 		if !data.CacheRules.IsNull() && !data.CacheRules.IsUnknown() {
 			cacheRulesSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule{}
 			spec.CacheRules = cacheRulesSpec
-			var cacheRulesModel CdnCacheRuleCdnCacheRuleCDNCacheRule
+			var cacheRulesModel CdnCacheRuleCDNCacheRule
 
 			// Populate the nested model from the main data model
 			diags.Append(data.CacheRules.As(ctx, &cacheRulesModel, basetypes.ObjectAsOptions{})...)
@@ -4319,15 +4454,114 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredStringField --> RuleName
-			if !cacheRulesModel.RuleName.IsNull() && !cacheRulesModel.RuleName.IsUnknown() {
-				cacheRulesSpec.RuleName = string(cacheRulesModel.RuleName.ValueString())
+			// resource modelToSpecNested RequiredOneOfField --> CacheActions
+			if !cacheRulesModel.CacheActionsChoice.IsNull() && !cacheRulesModel.CacheActionsChoice.IsUnknown() {
+				cacheRulesCacheActionsChoiceModel := CdnCacheRuleCacheActionsChoice{}
+				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
+				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
+					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
+					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
+					cacheRulesSpec.CacheActions = cacheBypassSpecBool
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> EligibleForCache
+				if !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsNull() && !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsUnknown() {
+					var cdnCacheRuleEligibleForCacheModel CdnCacheRuleEligibleForCache
+					response.Diagnostics.Append(cacheRulesCacheActionsChoiceModel.EligibleForCache.As(ctx, &cdnCacheRuleEligibleForCacheModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					eligibleForCacheOneOfSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache{}
+					eligibleForCacheOneOfSpec.EligibleForCache = &ves_io_schema_cdn_cache_rule.CacheEligibleOptions{}
+					cacheRulesSpec.CacheActions = eligibleForCacheOneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> EligibleForCache
+					if !cdnCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsNull() && !cdnCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsUnknown() {
+						eligibleForCacheEligibleForCacheChoiceModel := CdnCacheRuleEligibleForCacheChoice{}
+						response.Diagnostics.Append(cdnCacheRuleEligibleForCacheModel.EligibleForCacheChoice.As(ctx, &eligibleForCacheEligibleForCacheChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostRequestUri
+						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsUnknown() {
+							var cdnCacheRuleSchemeProxyHostReqUriModel CdnCacheRuleSchemeProxyHostReqUri
+							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.As(ctx, &cdnCacheRuleSchemeProxyHostReqUriModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							schemeProxyHostRequestUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri{}
+							schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
+							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostRequestUriOneOfSpec
+
+							// resource modelToSpecNested BoolField --> CacheOverride
+							if !cdnCacheRuleSchemeProxyHostReqUriModel.CacheOverride.IsNull() && !cdnCacheRuleSchemeProxyHostReqUriModel.CacheOverride.IsUnknown() {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheOverride = bool(cdnCacheRuleSchemeProxyHostReqUriModel.CacheOverride.ValueBool())
+							} else {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheOverride = bool(false)
+							}
+
+							// resource modelToSpecNested RequiredStringField --> CacheTtl
+							if !cdnCacheRuleSchemeProxyHostReqUriModel.CacheTtl.IsNull() && !cdnCacheRuleSchemeProxyHostReqUriModel.CacheTtl.IsUnknown() {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheTtl = string(cdnCacheRuleSchemeProxyHostReqUriModel.CacheTtl.ValueString())
+							}
+
+							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
+							if !cdnCacheRuleSchemeProxyHostReqUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleSchemeProxyHostReqUriModel.IgnoreResponseCookie.IsUnknown() {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.IgnoreResponseCookie = bool(cdnCacheRuleSchemeProxyHostReqUriModel.IgnoreResponseCookie.ValueBool())
+							} else {
+								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.IgnoreResponseCookie = bool(false)
+							}
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostUri
+						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsUnknown() {
+							var cdnCacheRuleSchemeProxyHostUriModel CdnCacheRuleSchemeProxyHostUri
+							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.As(ctx, &cdnCacheRuleSchemeProxyHostUriModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							schemeProxyHostUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri{}
+							schemeProxyHostUriOneOfSpec.SchemeProxyHostUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
+							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostUriOneOfSpec
+
+							// resource modelToSpecNested BoolField --> CacheOverride
+							if !cdnCacheRuleSchemeProxyHostUriModel.CacheOverride.IsNull() && !cdnCacheRuleSchemeProxyHostUriModel.CacheOverride.IsUnknown() {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheOverride = bool(cdnCacheRuleSchemeProxyHostUriModel.CacheOverride.ValueBool())
+							} else {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheOverride = bool(false)
+							}
+
+							// resource modelToSpecNested RequiredStringField --> CacheTtl
+							if !cdnCacheRuleSchemeProxyHostUriModel.CacheTtl.IsNull() && !cdnCacheRuleSchemeProxyHostUriModel.CacheTtl.IsUnknown() {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheTtl = string(cdnCacheRuleSchemeProxyHostUriModel.CacheTtl.ValueString())
+							}
+
+							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
+							if !cdnCacheRuleSchemeProxyHostUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleSchemeProxyHostUriModel.IgnoreResponseCookie.IsUnknown() {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.IgnoreResponseCookie = bool(cdnCacheRuleSchemeProxyHostUriModel.IgnoreResponseCookie.ValueBool())
+							} else {
+								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.IgnoreResponseCookie = bool(false)
+							}
+
+						}
+
+					}
+
+				}
+
 			}
 
 			// resource modelToSpecNested RequiredArrayOfPointerField --> RuleExpressionList
 			if !cacheRulesModel.RuleExpressionList.IsNull() && !cacheRulesModel.RuleExpressionList.IsUnknown() && len(cacheRulesModel.RuleExpressionList.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var ruleExpressionListElements []CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList
+				var ruleExpressionListElements []CdnCacheRuleCDNCacheRuleExpressionList
 				response.Diagnostics.Append(cacheRulesModel.RuleExpressionList.ElementsAs(ctx, &ruleExpressionListElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
@@ -4344,15 +4578,10 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredStringField --> ExpressionName
-					if !ruleExpressionListElement.ExpressionName.IsNull() && !ruleExpressionListElement.ExpressionName.IsUnknown() {
-						ruleExpressionListSpec[i].ExpressionName = string(ruleExpressionListElement.ExpressionName.ValueString())
-					}
-
 					// resource modelToSpecNested RequiredArrayOfPointerField --> CacheRuleExpression
 					if !ruleExpressionListElement.CacheRuleExpression.IsNull() && !ruleExpressionListElement.CacheRuleExpression.IsUnknown() && len(ruleExpressionListElement.CacheRuleExpression.Elements()) > 0 {
 						// 1. Convert the types.List into a slice of the model's Go struct
-						var cacheRuleExpressionElements []CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression
+						var cacheRuleExpressionElements []CdnCacheRuleCDNCacheRuleExpression
 						response.Diagnostics.Append(ruleExpressionListElement.CacheRuleExpression.ElementsAs(ctx, &cacheRuleExpressionElements, false)...)
 						if response.Diagnostics.HasError() {
 							return
@@ -4360,232 +4589,19 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 						// 2. Initialize the spec slice
 						cacheRuleExpressionSpec := make([]*ves_io_schema_cdn_cache_rule.CDNCacheRuleExpression, len(cacheRuleExpressionElements))
-						ruleExpressionListSpec[i].CacheRuleExpression = cacheRuleExpressionSpec
+						cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression = cacheRuleExpressionSpec
 
 						// 3. Iterate over the converted Go slice
 						for ii, cacheRuleExpressionElement := range cacheRuleExpressionElements {
 							// Initialize the spec struct for the current element
-							ruleExpressionListSpec[i].CacheRuleExpression[ii] = &ves_io_schema_cdn_cache_rule.CDNCacheRuleExpression{}
+							cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii] = &ves_io_schema_cdn_cache_rule.CDNCacheRuleExpression{}
 
 							// Recursively process nested elements
-
-							// resource modelToSpecNested PointerField --> PathMatch
-							if !cacheRuleExpressionElement.PathMatch.IsNull() && !cacheRuleExpressionElement.PathMatch.IsUnknown() {
-								var pathMatchModel CdnCacheRuleCdnCacheRuleCDNPathMatcherType
-								response.Diagnostics.Append(cacheRuleExpressionElement.PathMatch.As(ctx, &pathMatchModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								pathMatchSpec := &ves_io_schema_cdn_cache_rule.CDNPathMatcherType{}
-								cacheRuleExpressionSpec[i].PathMatch = pathMatchSpec
-
-								// resource modelToSpecNested PointerField --> Operator
-								if !pathMatchModel.Operator.IsNull() && !pathMatchModel.Operator.IsUnknown() {
-									var operatorModel CdnCacheRuleCdnCacheRuleCacheOperator
-									response.Diagnostics.Append(pathMatchModel.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									operatorSpec := &ves_io_schema_cdn_cache_rule.CacheOperator{}
-									pathMatchSpec.Operator = operatorSpec
-
-									// resource modelToSpecNested RequiredOneOfField --> CacheOperator
-									if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
-										operatorCacheOperatorChoiceModel := CdnCacheRuleCacheOperatorCacheOperatorChoice{}
-										response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
-											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-											operatorSpec.CacheOperator = doesNotEndWithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-										if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-											doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain{}
-											doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-											operatorSpec.CacheOperator = doesNotContainSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Contains
-										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
-											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-											operatorSpec.CacheOperator = containsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Endswith
-										if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-											endswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Endswith{}
-											endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-											operatorSpec.CacheOperator = endswithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
-											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-											operatorSpec.CacheOperator = matchRegexSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
-											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-											operatorSpec.CacheOperator = doesNotEqualSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Startswith
-										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
-											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-											operatorSpec.CacheOperator = startswithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Equals
-										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
-											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-											operatorSpec.CacheOperator = equalsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
-											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-											operatorSpec.CacheOperator = doesNotStartWithSpecStr
-										}
-
-									}
-
-								}
-
-							}
-
-							// resource modelToSpecNested ArrayOfPointerField --> QueryParameters
-							if !cacheRuleExpressionElement.QueryParameters.IsNull() && !cacheRuleExpressionElement.QueryParameters.IsUnknown() && len(cacheRuleExpressionElement.QueryParameters.Elements()) > 0 {
-								// 1. Convert the types.List into a slice of the model's Go struct
-								var queryParametersElements []CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType
-								response.Diagnostics.Append(cacheRuleExpressionElement.QueryParameters.ElementsAs(ctx, &queryParametersElements, false)...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// 2. Initialize the spec slice
-								queryParametersSpec := make([]*ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType, len(queryParametersElements))
-								cacheRuleExpressionSpec[ii].QueryParameters = queryParametersSpec
-
-								// 3. Iterate over the converted Go slice
-								for iii, queryParametersElement := range queryParametersElements {
-									// Initialize the spec struct for the current element
-									cacheRuleExpressionSpec[ii].QueryParameters[iii] = &ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType{}
-
-									// Recursively process nested elements
-
-									// resource modelToSpecNested RequiredStringField --> Key
-									if !queryParametersElement.Key.IsNull() && !queryParametersElement.Key.IsUnknown() {
-										queryParametersSpec[i].Key = string(queryParametersElement.Key.ValueString())
-									}
-
-									// resource modelToSpecNested PointerField --> Operator
-									if !queryParametersElement.Operator.IsNull() && !queryParametersElement.Operator.IsUnknown() {
-										var operatorModel CdnCacheRuleCdnCacheRuleQueryParamCacheOperator
-										response.Diagnostics.Append(queryParametersElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										operatorSpec := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator{}
-										queryParametersSpec[i].Operator = operatorSpec
-
-										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
-										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
-											operatorCacheOperatorChoiceModel := CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice{}
-											response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Endswith
-											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
-												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-												operatorSpec.CacheOperator = endswithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual{}
-												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-												operatorSpec.CacheOperator = doesNotEqualSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
-												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-												operatorSpec.CacheOperator = doesNotStartWithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
-												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-												operatorSpec.CacheOperator = doesNotContainSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
-											}
-
-										}
-
-									}
-
-								}
-							}
 
 							// resource modelToSpecNested ArrayOfPointerField --> CacheHeaders
 							if !cacheRuleExpressionElement.CacheHeaders.IsNull() && !cacheRuleExpressionElement.CacheHeaders.IsUnknown() && len(cacheRuleExpressionElement.CacheHeaders.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
-								var cacheHeadersElements []CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType
+								var cacheHeadersElements []CdnCacheRuleCacheHeaderMatcherType
 								response.Diagnostics.Append(cacheRuleExpressionElement.CacheHeaders.ElementsAs(ctx, &cacheHeadersElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
@@ -4593,12 +4609,12 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 								// 2. Initialize the spec slice
 								cacheHeadersSpec := make([]*ves_io_schema_cdn_cache_rule.CacheHeaderMatcherType, len(cacheHeadersElements))
-								cacheRuleExpressionSpec[ii].CacheHeaders = cacheHeadersSpec
+								cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CacheHeaders = cacheHeadersSpec
 
 								// 3. Iterate over the converted Go slice
 								for iii, cacheHeadersElement := range cacheHeadersElements {
 									// Initialize the spec struct for the current element
-									cacheRuleExpressionSpec[ii].CacheHeaders[iii] = &ves_io_schema_cdn_cache_rule.CacheHeaderMatcherType{}
+									cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CacheHeaders[iii] = &ves_io_schema_cdn_cache_rule.CacheHeaderMatcherType{}
 
 									// Recursively process nested elements
 
@@ -4615,7 +4631,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											valStr := nameTfStrings[0].ValueString()
 
 											if v, ok := ves_io_schema_cdn_cache_rule.HeaderOptions_value[valStr]; ok {
-												cacheHeadersSpec[i].Name = ves_io_schema_cdn_cache_rule.HeaderOptions(v)
+												cacheHeadersSpec[iii].Name = ves_io_schema_cdn_cache_rule.HeaderOptions(v)
 											} else {
 												response.Diagnostics.AddError(
 													"Invalid Enum Value",
@@ -4628,18 +4644,18 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 									// resource modelToSpecNested PointerField --> Operator
 									if !cacheHeadersElement.Operator.IsNull() && !cacheHeadersElement.Operator.IsUnknown() {
-										var operatorModel CdnCacheRuleCdnCacheRuleHeaderCacheOperator
+										var operatorModel CdnCacheRuleHeaderCacheOperator
 										response.Diagnostics.Append(cacheHeadersElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
 										if response.Diagnostics.HasError() {
 											return
 										}
 
 										operatorSpec := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator{}
-										cacheHeadersSpec[i].Operator = operatorSpec
+										cacheHeadersSpec[iii].Operator = operatorSpec
 
 										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
 										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
-											operatorCacheOperatorChoiceModel := CdnCacheRuleHeaderCacheOperatorCacheOperatorChoice{}
+											operatorCacheOperatorChoiceModel := CdnCacheRuleCacheOperatorChoice{}
 											response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
 											if response.Diagnostics.HasError() {
 												return
@@ -4650,20 +4666,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												containsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains{}
 												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
 												operatorSpec.CacheOperator = containsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual{}
-												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -4680,11 +4682,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEndWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Endswith
-											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-												endswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith{}
-												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-												operatorSpec.CacheOperator = endswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual{}
+												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
@@ -4694,11 +4696,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotStartWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Endswith
+											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+												endswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith{}
+												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> Equals
@@ -4706,6 +4708,20 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												equalsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals{}
 												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
 												operatorSpec.CacheOperator = equalsSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 										}
@@ -4718,7 +4734,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 							// resource modelToSpecNested ArrayOfPointerField --> CookieMatcher
 							if !cacheRuleExpressionElement.CookieMatcher.IsNull() && !cacheRuleExpressionElement.CookieMatcher.IsUnknown() && len(cacheRuleExpressionElement.CookieMatcher.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
-								var cookieMatcherElements []CdnCacheRuleCdnCacheRuleCacheCookieMatcherType
+								var cookieMatcherElements []CdnCacheRuleCacheCookieMatcherType
 								response.Diagnostics.Append(cacheRuleExpressionElement.CookieMatcher.ElementsAs(ctx, &cookieMatcherElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
@@ -4726,25 +4742,30 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 								// 2. Initialize the spec slice
 								cookieMatcherSpec := make([]*ves_io_schema_cdn_cache_rule.CacheCookieMatcherType, len(cookieMatcherElements))
-								cacheRuleExpressionSpec[ii].CookieMatcher = cookieMatcherSpec
+								cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CookieMatcher = cookieMatcherSpec
 
 								// 3. Iterate over the converted Go slice
 								for iii, cookieMatcherElement := range cookieMatcherElements {
 									// Initialize the spec struct for the current element
-									cacheRuleExpressionSpec[ii].CookieMatcher[iii] = &ves_io_schema_cdn_cache_rule.CacheCookieMatcherType{}
+									cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CookieMatcher[iii] = &ves_io_schema_cdn_cache_rule.CacheCookieMatcherType{}
 
 									// Recursively process nested elements
 
+									// resource modelToSpecNested RequiredStringField --> Name
+									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
+										cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].CookieMatcher[iii].Name = string(cookieMatcherElement.Name.ValueString())
+									}
+
 									// resource modelToSpecNested PointerField --> Operator
 									if !cookieMatcherElement.Operator.IsNull() && !cookieMatcherElement.Operator.IsUnknown() {
-										var operatorModel CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator
+										var operatorModel CdnCacheRuleCookieMatcherCacheOperator
 										response.Diagnostics.Append(cookieMatcherElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
 										if response.Diagnostics.HasError() {
 											return
 										}
 
 										operatorSpec := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator{}
-										cookieMatcherSpec[i].Operator = operatorSpec
+										cookieMatcherSpec[iii].Operator = operatorSpec
 
 										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
 										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
@@ -4754,11 +4775,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -4768,11 +4789,18 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotContainSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual{}
+												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
@@ -4789,13 +4817,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
-											}
-
 											// resource modelToSpecNested StringOfOneOfField --> Equals
 											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
 												equalsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals{}
@@ -4803,27 +4824,235 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual{}
-												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-												operatorSpec.CacheOperator = doesNotEqualSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 										}
 
 									}
 
-									// resource modelToSpecNested RequiredStringField --> Name
-									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
-										cookieMatcherSpec[i].Name = string(cookieMatcherElement.Name.ValueString())
+								}
+							}
+
+							// resource modelToSpecNested PointerField --> PathMatch
+							if !cacheRuleExpressionElement.PathMatch.IsNull() && !cacheRuleExpressionElement.PathMatch.IsUnknown() {
+								var pathMatchModel CdnCacheRuleCDNPathMatcherType
+								response.Diagnostics.Append(cacheRuleExpressionElement.PathMatch.As(ctx, &pathMatchModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								pathMatchSpec := &ves_io_schema_cdn_cache_rule.CDNPathMatcherType{}
+								cacheRuleExpressionSpec[ii].PathMatch = pathMatchSpec
+
+								// resource modelToSpecNested PointerField --> Operator
+								if !pathMatchModel.Operator.IsNull() && !pathMatchModel.Operator.IsUnknown() {
+									var operatorModel CdnCacheRuleCacheOperator
+									response.Diagnostics.Append(pathMatchModel.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									operatorSpec := &ves_io_schema_cdn_cache_rule.CacheOperator{}
+									pathMatchSpec.Operator = operatorSpec
+
+									// resource modelToSpecNested RequiredOneOfField --> CacheOperator
+									if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
+										operatorCacheOperatorChoiceModel := CdnCacheRuleCacheOperatorCacheOperatorChoice{}
+										response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Contains
+										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
+											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+											operatorSpec.CacheOperator = containsSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+										if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+											doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain{}
+											doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+											operatorSpec.CacheOperator = doesNotContainSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
+											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+											operatorSpec.CacheOperator = doesNotEndWithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
+											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+											operatorSpec.CacheOperator = doesNotEqualSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
+											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+											operatorSpec.CacheOperator = doesNotStartWithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Endswith
+										if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+											endswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Endswith{}
+											endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+											operatorSpec.CacheOperator = endswithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Equals
+										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
+											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+											operatorSpec.CacheOperator = equalsSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
+											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+											operatorSpec.CacheOperator = matchRegexSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Startswith
+										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
+											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+											operatorSpec.CacheOperator = startswithSpecStr
+										}
+
+									}
+
+								}
+
+							}
+
+							// resource modelToSpecNested ArrayOfPointerField --> QueryParameters
+							if !cacheRuleExpressionElement.QueryParameters.IsNull() && !cacheRuleExpressionElement.QueryParameters.IsUnknown() && len(cacheRuleExpressionElement.QueryParameters.Elements()) > 0 {
+								// 1. Convert the types.List into a slice of the model's Go struct
+								var queryParametersElements []CdnCacheRuleCacheQueryParamMatcherType
+								response.Diagnostics.Append(cacheRuleExpressionElement.QueryParameters.ElementsAs(ctx, &queryParametersElements, false)...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// 2. Initialize the spec slice
+								queryParametersSpec := make([]*ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType, len(queryParametersElements))
+								cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].QueryParameters = queryParametersSpec
+
+								// 3. Iterate over the converted Go slice
+								for iii, queryParametersElement := range queryParametersElements {
+									// Initialize the spec struct for the current element
+									cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].QueryParameters[iii] = &ves_io_schema_cdn_cache_rule.CacheQueryParameterMatcherType{}
+
+									// Recursively process nested elements
+
+									// resource modelToSpecNested RequiredStringField --> Key
+									if !queryParametersElement.Key.IsNull() && !queryParametersElement.Key.IsUnknown() {
+										cacheRulesSpec.RuleExpressionList[i].CacheRuleExpression[ii].QueryParameters[iii].Key = string(queryParametersElement.Key.ValueString())
+									}
+
+									// resource modelToSpecNested PointerField --> Operator
+									if !queryParametersElement.Operator.IsNull() && !queryParametersElement.Operator.IsUnknown() {
+										var operatorModel CdnCacheRuleQueryParamCacheOperator
+										response.Diagnostics.Append(queryParametersElement.Operator.As(ctx, &operatorModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										operatorSpec := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator{}
+										queryParametersSpec[iii].Operator = operatorSpec
+
+										// resource modelToSpecNested RequiredOneOfField --> CacheOperator
+										if !operatorModel.CacheOperatorChoice.IsNull() && !operatorModel.CacheOperatorChoice.IsUnknown() {
+											operatorCacheOperatorChoiceModel := CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice{}
+											response.Diagnostics.Append(operatorModel.CacheOperatorChoice.As(ctx, &operatorCacheOperatorChoiceModel, basetypes.ObjectAsOptions{})...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
+												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+												operatorSpec.CacheOperator = doesNotContainSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+											if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+												doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual{}
+												doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+												operatorSpec.CacheOperator = doesNotEqualSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
+												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+												operatorSpec.CacheOperator = doesNotStartWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Endswith
+											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
+												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+												operatorSpec.CacheOperator = endswithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
+											}
+
+										}
+
 									}
 
 								}
@@ -4832,106 +5061,27 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 						}
 					}
 
+					// resource modelToSpecNested RequiredStringField --> ExpressionName
+					if !ruleExpressionListElement.ExpressionName.IsNull() && !ruleExpressionListElement.ExpressionName.IsUnknown() {
+						cacheRulesSpec.RuleExpressionList[i].ExpressionName = string(ruleExpressionListElement.ExpressionName.ValueString())
+					}
+
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CacheActions
-			if !cacheRulesModel.CacheActionsChoice.IsNull() && !cacheRulesModel.CacheActionsChoice.IsUnknown() {
-				cacheRulesCacheActionsChoiceModel := CdnCacheRuleCDNCacheRuleCacheActionsChoice{}
-				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> EligibleForCache
-				if !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsNull() && !cacheRulesCacheActionsChoiceModel.EligibleForCache.IsUnknown() {
-					var cdnCacheRuleCDNCacheRuleEligibleForCacheModel CdnCacheRuleCDNCacheRuleEligibleForCache
-					response.Diagnostics.Append(cacheRulesCacheActionsChoiceModel.EligibleForCache.As(ctx, &cdnCacheRuleCDNCacheRuleEligibleForCacheModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					eligibleForCacheOneOfSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache{}
-					eligibleForCacheOneOfSpec.EligibleForCache = &ves_io_schema_cdn_cache_rule.CacheEligibleOptions{}
-					cacheRulesSpec.CacheActions = eligibleForCacheOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> EligibleForCache
-					if !cdnCacheRuleCDNCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsNull() && !cdnCacheRuleCDNCacheRuleEligibleForCacheModel.EligibleForCacheChoice.IsUnknown() {
-						eligibleForCacheEligibleForCacheChoiceModel := CdnCacheRuleCacheEligibleOptionsEligibleForCacheChoice{}
-						response.Diagnostics.Append(cdnCacheRuleCDNCacheRuleEligibleForCacheModel.EligibleForCacheChoice.As(ctx, &eligibleForCacheEligibleForCacheChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostUri
-						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.IsUnknown() {
-							var cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel CdnCacheRuleCacheEligibleOptionsSchemeProxyHostUri
-							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostUri.As(ctx, &cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							schemeProxyHostUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri{}
-							schemeProxyHostUriOneOfSpec.SchemeProxyHostUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
-							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostUriOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> CacheTtl
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheTtl.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheTtl.IsUnknown() {
-								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheTtl = string(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheTtl.ValueString())
-							}
-
-							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.IgnoreResponseCookie.IsUnknown() {
-								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.IgnoreResponseCookie = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.IgnoreResponseCookie.ValueBool())
-							}
-
-							// resource modelToSpecNested BoolField --> CacheOverride
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheOverride.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheOverride.IsUnknown() {
-								schemeProxyHostUriOneOfSpec.SchemeProxyHostUri.CacheOverride = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostUriModel.CacheOverride.ValueBool())
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> SchemeProxyHostRequestUri
-						if !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsNull() && !eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.IsUnknown() {
-							var cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel CdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUri
-							response.Diagnostics.Append(eligibleForCacheEligibleForCacheChoiceModel.SchemeProxyHostRequestUri.As(ctx, &cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							schemeProxyHostRequestUriOneOfSpec := &ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri{}
-							schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri = &ves_io_schema_cdn_cache_rule.CacheTTLEnableProps{}
-							eligibleForCacheOneOfSpec.EligibleForCache.EligibleForCache = schemeProxyHostRequestUriOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> CacheTtl
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheTtl.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheTtl.IsUnknown() {
-								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheTtl = string(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheTtl.ValueString())
-							}
-
-							// resource modelToSpecNested BoolField --> IgnoreResponseCookie
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.IgnoreResponseCookie.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.IgnoreResponseCookie.IsUnknown() {
-								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.IgnoreResponseCookie = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.IgnoreResponseCookie.ValueBool())
-							}
-
-							// resource modelToSpecNested BoolField --> CacheOverride
-							if !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheOverride.IsNull() && !cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheOverride.IsUnknown() {
-								schemeProxyHostRequestUriOneOfSpec.SchemeProxyHostRequestUri.CacheOverride = bool(cdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUriModel.CacheOverride.ValueBool())
-							}
-
-						}
-
-					}
-
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
-				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
-					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
-					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
-					cacheRulesSpec.CacheActions = cacheBypassSpecBool
-				}
-
+			// resource modelToSpecNested RequiredStringField --> RuleName
+			if !cacheRulesModel.RuleName.IsNull() && !cacheRulesModel.RuleName.IsUnknown() {
+				cacheRulesSpec.RuleName = string(cacheRulesModel.RuleName.ValueString())
 			}
 
 		}
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -4968,102 +5118,100 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -5076,419 +5224,213 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 	// resource SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
-		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
+		var cdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
 
-		// resource specToModelNested RequiredStringField --> RuleName
-		if cacheRulesElement.GetRuleName() != "" {
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
+		// resource specToModelNested RequiredOneOfField --> CacheActions
+		// GlobalSpecType
+		if cacheRulesElement.GetCacheActions() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
+			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
+
+			if isCacheBypass {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
+			} else {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
+			// GlobalSpecType
+			// false
+			{
+				eligibleForCacheOptionsWrapper, isEligibleForCache := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache)
+				eligibleForCacheAttributeMap := make(map[string]attr.Value)
+
+				if isEligibleForCache && eligibleForCacheOptionsWrapper != nil && eligibleForCacheOptionsWrapper.EligibleForCache != nil {
+					eligibleForCacheElement := eligibleForCacheOptionsWrapper.EligibleForCache
+
+					// resource specToModelNested RequiredOneOfField --> EligibleForCache
+					// GlobalSpecType
+					if eligibleForCacheElement.GetEligibleForCache() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						eligibleForCacheeligibleForCacheChoiceChoices := eligibleForCacheElement.GetEligibleForCache()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
+						// GlobalSpecType
+						// false
+						{
+							schemeProxyHostRequestUriOptionsWrapper, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
+							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
+
+							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptionsWrapper != nil && schemeProxyHostRequestUriOptionsWrapper.SchemeProxyHostRequestUri != nil {
+								schemeProxyHostRequestUriElement := schemeProxyHostRequestUriOptionsWrapper.SchemeProxyHostRequestUri
+
+								// resource specToModelNested BoolField --> CacheOverride
+								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriElement.GetCacheOverride()))
+
+								// resource specToModelNested RequiredStringField --> CacheTtl
+								if schemeProxyHostRequestUriElement.GetCacheTtl() != "" {
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriElement.GetCacheTtl())
+								} else {
+									// Empty string, set to null
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolField --> IgnoreResponseCookie
+								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriElement.GetIgnoreResponseCookie()))
+
+								schemeProxyHostRequestUriObj, schemeProxyHostRequestUriObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
+								response.Diagnostics.Append(schemeProxyHostRequestUriObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
+							} else {
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostUri
+						// GlobalSpecType
+						// false
+						{
+							schemeProxyHostUriOptionsWrapper, isSchemeProxyHostUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri)
+							schemeProxyHostUriAttributeMap := make(map[string]attr.Value)
+
+							if isSchemeProxyHostUri && schemeProxyHostUriOptionsWrapper != nil && schemeProxyHostUriOptionsWrapper.SchemeProxyHostUri != nil {
+								schemeProxyHostUriElement := schemeProxyHostUriOptionsWrapper.SchemeProxyHostUri
+
+								// resource specToModelNested BoolField --> CacheOverride
+								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriElement.GetCacheOverride()))
+
+								// resource specToModelNested RequiredStringField --> CacheTtl
+								if schemeProxyHostUriElement.GetCacheTtl() != "" {
+									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostUriElement.GetCacheTtl())
+								} else {
+									// Empty string, set to null
+									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolField --> IgnoreResponseCookie
+								schemeProxyHostUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostUriElement.GetIgnoreResponseCookie()))
+
+								schemeProxyHostUriObj, schemeProxyHostUriObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap, schemeProxyHostUriAttributeMap)
+								response.Diagnostics.Append(schemeProxyHostUriObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = schemeProxyHostUriObj
+							} else {
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, eligibleForCacheeligibleForCacheChoiceChoicesObjDiags := types.ObjectValue(
+							CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap, // The attribute schema for the OneOf choices
+							eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(eligibleForCacheeligibleForCacheChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap)
+					}
+
+					eligibleForCacheObj, eligibleForCacheObjDiags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap, eligibleForCacheAttributeMap)
+					response.Diagnostics.Append(eligibleForCacheObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = eligibleForCacheObj
+				} else {
+					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, cacheRulescacheActionsChoiceChoicesObjDiags := types.ObjectValue(
+				CdnCacheRuleCacheRulesCacheActionsModelAttributeMap, // The attribute schema for the OneOf choices
+				cacheRulescacheActionsChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(cacheRulescacheActionsChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
 		} else {
-			// Empty string, set to null
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
 		}
 
 		// resource specToModelNested RequiredArrayOfPointerField --> RuleExpressionList
 		if len(cacheRulesElement.GetRuleExpressionList()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			ruleExpressionListElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
+			ruleExpressionListElements := make([]CdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
 			for _, ruleExpressionListElement := range cacheRulesElement.GetRuleExpressionList() {
-				cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList{}
-
-				// resource specToModelNested RequiredStringField --> ExpressionName
-				if ruleExpressionListElement.GetExpressionName() != "" {
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
-				} else {
-					// Empty string, set to null
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
-				}
+				cdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCDNCacheRuleExpressionList{}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> CacheRuleExpression
 				if len(ruleExpressionListElement.GetCacheRuleExpression()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					cacheRuleExpressionElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
+					cacheRuleExpressionElements := make([]CdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
 					for _, cacheRuleExpressionElement := range ruleExpressionListElement.GetCacheRuleExpression() {
-						cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression{}
-
-						// resource specToModelNested PointerField --> PathMatch
-						if cacheRuleExpressionElement.GetPathMatch() != nil {
-							// Create the nested Go struct
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCdnCacheRuleCDNPathMatcherType{}
-							pathMatchElement := cacheRuleExpressionElement.GetPathMatch()
-
-							// Recursively populate the nested struct
-
-							// resource specToModelNested PointerField --> Operator
-							if pathMatchElement.GetOperator() != nil {
-								// Create the nested Go struct
-								cdnCacheRuleCdnCacheRuleCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCacheOperator{}
-								operatorElement := pathMatchElement.GetOperator()
-
-								// Recursively populate the nested struct
-
-								// resource specToModelNested RequiredOneOfField --> CacheOperator
-								// GlobalSpecType
-								if operatorElement.GetCacheOperator() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
-
-									if isDoesNotEndWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotContain
-									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
-
-									if isDoesNotContain {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Contains
-									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
-
-									if isContains {
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Endswith
-									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
-
-									if isEndswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> MatchRegex
-									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
-
-									if isMatchRegex {
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
-
-									if isDoesNotEqual {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Startswith
-									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
-
-									if isStartswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Equals
-									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
-
-									if isEquals {
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
-
-									if isDoesNotStartWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
-										CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
-										operatorcacheOperatorChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
-								}
-
-								// This field needs to be converted to a types.ObjectValue before assignment.
-								cdnCacheRuleCdnCacheRuleCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCacheOperatorModel)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCacheOperatorModelObj
-
-							} else {
-								// The source field is nil (e.g. redacted by the API).
-								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-								// because the API may always return a non-nil struct (with REDACTED values) for this field,
-								// making this else-branch unreachable. The child OneOf handles the actual healing.
-								// The target is a types.Object, so we use types.ObjectNull.
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
-						}
-
-						// resource specToModelNested ArrayOfPointerField --> QueryParameters
-						if len(cacheRuleExpressionElement.GetQueryParameters()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							queryParametersElements := make([]CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
-							for _, queryParametersElement := range cacheRuleExpressionElement.GetQueryParameters() {
-								cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType{}
-
-								// resource specToModelNested RequiredStringField --> Key
-								if queryParametersElement.GetKey() != "" {
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringNull()
-								}
-
-								// resource specToModelNested PointerField --> Operator
-								if queryParametersElement.GetOperator() != nil {
-									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleCdnCacheRuleQueryParamCacheOperator{}
-									operatorElement := queryParametersElement.GetOperator()
-
-									// Recursively populate the nested struct
-
-									// resource specToModelNested RequiredOneOfField --> CacheOperator
-									// GlobalSpecType
-									if operatorElement.GetCacheOperator() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates
-										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
-
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
-
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual)
-
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
-
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
-
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
-
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
-											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
-											operatorcacheOperatorChoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
-									}
-
-									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj
-
-								} else {
-									// The source field is nil (e.g. redacted by the API).
-									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-									// because the API may always return a non-nil struct (with REDACTED values) for this field,
-									// making this else-branch unreachable. The child OneOf handles the actual healing.
-									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
-								}
-
-								queryParametersElements = append(queryParametersElements, cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							queryParametersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap}, queryParametersElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
-						}
+						cdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCDNCacheRuleExpression{}
 
 						// resource specToModelNested ArrayOfPointerField --> CacheHeaders
 						if len(cacheRuleExpressionElement.GetCacheHeaders()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cacheHeadersElements := make([]CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
+							cacheHeadersElements := make([]CdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
 							for _, cacheHeadersElement := range cacheRuleExpressionElement.GetCacheHeaders() {
-								cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType{}
+								cdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCacheHeaderMatcherType{}
 
 								// resource specToModelNested RequiredEnumField --> Name
-								if cacheHeadersElement.GetName().String() != "" {
-									stringValue := types.StringValue(cacheHeadersElement.GetName().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								{
+									if cacheHeadersElement.GetName().String() != "" {
+										stringValue := types.StringValue(cacheHeadersElement.GetName().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										cdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
+									} else {
+										cdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
-								} else {
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
 								}
 
 								// resource specToModelNested PointerField --> Operator
 								if cacheHeadersElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleCdnCacheRuleHeaderCacheOperator{}
+									cdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleHeaderCacheOperator{}
 									operatorElement := cacheHeadersElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -5514,26 +5456,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual)
-
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
 										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
 
@@ -5554,14 +5476,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual)
 
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
@@ -5574,14 +5496,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Endswith)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> Equals
@@ -5592,6 +5514,26 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -5607,19 +5549,19 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
+									cdnCacheRuleHeaderCacheOperatorModelObj, cdnCacheRuleHeaderCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleHeaderCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleHeaderCacheOperatorModelObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleHeaderCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -5628,39 +5570,47 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
 								}
 
-								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel)
+								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCacheHeaderMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							cacheHeadersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap}, cacheHeadersElements)
-							response.Diagnostics.Append(diags...)
+							cacheHeadersListValue, cacheHeadersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap}, cacheHeadersElements)
+							response.Diagnostics.Append(cacheHeadersListDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
 						}
 
 						// resource specToModelNested ArrayOfPointerField --> CookieMatcher
 						if len(cacheRuleExpressionElement.GetCookieMatcher()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cookieMatcherElements := make([]CdnCacheRuleCdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
+							cookieMatcherElements := make([]CdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
 							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
-								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
+								cdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCacheCookieMatcherType{}
+
+								// resource specToModelNested RequiredStringField --> Name
+								if cookieMatcherElement.GetName() != "" {
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
+								}
 
 								// resource specToModelNested PointerField --> Operator
 								if cookieMatcherElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator{}
+									cdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCookieMatcherCacheOperator{}
 									operatorElement := cookieMatcherElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -5676,14 +5626,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -5696,14 +5646,24 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
 
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
+
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
@@ -5726,16 +5686,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
 										// resource specToModelNested StringOfOneOfField --> Equals
 										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
 
@@ -5746,24 +5696,24 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
 
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -5779,19 +5729,19 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
+									cdnCacheRuleCookieMatcherCacheOperatorModelObj, cdnCacheRuleCookieMatcherCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCookieMatcherCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleCookieMatcherCacheOperatorModelObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCookieMatcherCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -5800,232 +5750,435 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
 								}
 
-								// resource specToModelNested RequiredStringField --> Name
-								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
-								}
-
-								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
+								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCacheCookieMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							cookieMatcherListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
-							response.Diagnostics.Append(diags...)
+							cookieMatcherListValue, cookieMatcherListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
+							response.Diagnostics.Append(cookieMatcherListDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
 						}
 
-						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel)
+						// resource specToModelNested PointerField --> PathMatch
+						if cacheRuleExpressionElement.GetPathMatch() != nil {
+							// Create the nested Go struct
+							cdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCDNPathMatcherType{}
+							pathMatchElement := cacheRuleExpressionElement.GetPathMatch()
+
+							// Recursively populate the nested struct
+
+							// resource specToModelNested PointerField --> Operator
+							if pathMatchElement.GetOperator() != nil {
+								// Create the nested Go struct
+								cdnCacheRuleCacheOperatorModel := &CdnCacheRuleCacheOperator{}
+								operatorElement := pathMatchElement.GetOperator()
+
+								// Recursively populate the nested struct
+
+								// resource specToModelNested RequiredOneOfField --> CacheOperator
+								// GlobalSpecType
+								if operatorElement.GetCacheOperator() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+									// Define a variable for the spec choices to be passed down to nested templates
+									operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
+
+									// Process nested choices, populating the temporary attribute map
+
+									// resource specToModelNested StringOfOneOfField --> Contains
+									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
+
+									if isContains {
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotContain
+									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
+
+									if isDoesNotContain {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
+
+									if isDoesNotEndWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
+
+									if isDoesNotEqual {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
+
+									if isDoesNotStartWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Endswith
+									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
+
+									if isEndswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Equals
+									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+
+									if isEquals {
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> MatchRegex
+									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
+
+									if isMatchRegex {
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Startswith
+									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
+
+									if isStartswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
+										CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
+										operatorcacheOperatorChoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
+								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
+								}
+
+								// This field needs to be converted to a types.ObjectValue before assignment.
+								cdnCacheRuleCacheOperatorModelObj, cdnCacheRuleCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCacheOperatorModel)
+								response.Diagnostics.Append(cdnCacheRuleCacheOperatorModelObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCacheOperatorModelObj
+
+							} else {
+								// The source field is nil (e.g. redacted by the API).
+								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+								// because the API may always return a non-nil struct (with REDACTED values) for this field,
+								// making this else-branch unreachable. The child OneOf handles the actual healing.
+								// The target is a types.Object, so we use types.ObjectNull.
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							cdnCacheRuleCDNPathMatcherTypeModelObj, cdnCacheRuleCDNPathMatcherTypeModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCDNPathMatcherTypeModel)
+							response.Diagnostics.Append(cdnCacheRuleCDNPathMatcherTypeModelObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCDNPathMatcherTypeModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
+						}
+
+						// resource specToModelNested ArrayOfPointerField --> QueryParameters
+						if len(cacheRuleExpressionElement.GetQueryParameters()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							queryParametersElements := make([]CdnCacheRuleCacheQueryParamMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
+							for _, queryParametersElement := range cacheRuleExpressionElement.GetQueryParameters() {
+								cdnCacheRuleCacheQueryParamMatcherTypeModel := CdnCacheRuleCacheQueryParamMatcherType{}
+
+								// resource specToModelNested RequiredStringField --> Key
+								if queryParametersElement.GetKey() != "" {
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringNull()
+								}
+
+								// resource specToModelNested PointerField --> Operator
+								if queryParametersElement.GetOperator() != nil {
+									// Create the nested Go struct
+									cdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleQueryParamCacheOperator{}
+									operatorElement := queryParametersElement.GetOperator()
+
+									// Recursively populate the nested struct
+
+									// resource specToModelNested RequiredOneOfField --> CacheOperator
+									// GlobalSpecType
+									if operatorElement.GetCacheOperator() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates
+										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
+
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual)
+
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
+
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
+											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
+											operatorcacheOperatorChoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
+									}
+
+									// This field needs to be converted to a types.ObjectValue before assignment.
+									cdnCacheRuleQueryParamCacheOperatorModelObj, cdnCacheRuleQueryParamCacheOperatorModelObjDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleQueryParamCacheOperatorModel)
+									response.Diagnostics.Append(cdnCacheRuleQueryParamCacheOperatorModelObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = cdnCacheRuleQueryParamCacheOperatorModelObj
+
+								} else {
+									// The source field is nil (e.g. redacted by the API).
+									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+									// because the API may always return a non-nil struct (with REDACTED values) for this field,
+									// making this else-branch unreachable. The child OneOf handles the actual healing.
+									// The target is a types.Object, so we use types.ObjectNull.
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
+								}
+
+								queryParametersElements = append(queryParametersElements, cdnCacheRuleCacheQueryParamMatcherTypeModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							queryParametersListValue, queryParametersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap}, queryParametersElements)
+							response.Diagnostics.Append(queryParametersListDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
+						}
+
+						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCDNCacheRuleExpressionModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					cacheRuleExpressionListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap}, cacheRuleExpressionElements)
-					response.Diagnostics.Append(diags...)
+					cacheRuleExpressionListValue, cacheRuleExpressionListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap}, cacheRuleExpressionElements)
+					response.Diagnostics.Append(cacheRuleExpressionListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
 				}
 
-				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel)
+				// resource specToModelNested RequiredStringField --> ExpressionName
+				if ruleExpressionListElement.GetExpressionName() != "" {
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
+				} else {
+					// Empty string, set to null
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
+				}
+
+				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCDNCacheRuleExpressionListModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			ruleExpressionListListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap}, ruleExpressionListElements)
-			response.Diagnostics.Append(diags...)
+			ruleExpressionListListValue, ruleExpressionListListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap}, ruleExpressionListElements)
+			response.Diagnostics.Append(ruleExpressionListListDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> CacheActions
-		// GlobalSpecType
-		if cacheRulesElement.GetCacheActions() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
-			// GlobalSpecType
-			// false
-			{
-				eligibleForCacheOptions, isEligibleForCache := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_EligibleForCache)
-				eligibleForCacheAttributeMap := make(map[string]attr.Value)
-
-				if isEligibleForCache && eligibleForCacheOptions != nil {
-
-					// resource specToModelNested RequiredOneOfField --> EligibleForCache
-					// GlobalSpecType
-					if eligibleForCacheOptions.EligibleForCache.GetEligibleForCache() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						eligibleForCacheeligibleForCacheChoiceChoices := eligibleForCacheOptions.EligibleForCache.GetEligibleForCache()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostUri
-						// GlobalSpecType
-						// false
-						{
-							schemeProxyHostUriOptions, isSchemeProxyHostUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostUri)
-							schemeProxyHostUriAttributeMap := make(map[string]attr.Value)
-
-							if isSchemeProxyHostUri && schemeProxyHostUriOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> CacheTtl
-								if schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheTtl() != "" {
-									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheTtl())
-								} else {
-									// Empty string, set to null
-									schemeProxyHostUriAttributeMap["cache_ttl"] = types.StringNull()
-								}
-
-								// resource specToModelNested BoolField --> IgnoreResponseCookie
-								schemeProxyHostUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetIgnoreResponseCookie()))
-
-								// resource specToModelNested BoolField --> CacheOverride
-								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheOverride()))
-
-								schemeProxyHostUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap, schemeProxyHostUriAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = schemeProxyHostUriObj
-							} else {
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
-						// GlobalSpecType
-						// false
-						{
-							schemeProxyHostRequestUriOptions, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
-							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
-
-							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> CacheTtl
-								if schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl() != "" {
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl())
-								} else {
-									// Empty string, set to null
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
-								}
-
-								// resource specToModelNested BoolField --> IgnoreResponseCookie
-								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetIgnoreResponseCookie()))
-
-								// resource specToModelNested BoolField --> CacheOverride
-								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheOverride()))
-
-								schemeProxyHostRequestUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
-							} else {
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, eligibleForCacheeligibleForCacheChoiceChoicesObjDiags := types.ObjectValue(
-							CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap, // The attribute schema for the OneOf choices
-							eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(eligibleForCacheeligibleForCacheChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						eligibleForCacheAttributeMap["eligible_for_cache_choice"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap)
-					}
-
-					eligibleForCacheObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap, eligibleForCacheAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = eligibleForCacheObj
-				} else {
-					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
-			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
-
-			if isCacheBypass {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
-			} else {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, cacheRulescacheActionsChoiceChoicesObjDiags := types.ObjectValue(
-				CdnCacheRuleCacheRulesCacheActionsModelAttributeMap, // The attribute schema for the OneOf choices
-				cacheRulescacheActionsChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(cacheRulescacheActionsChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
+		// resource specToModelNested RequiredStringField --> RuleName
+		if cacheRulesElement.GetRuleName() != "" {
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
 		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
+			// Empty string, set to null
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
 		}
 
 		cacheRulesObj, cacheRulesDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnCacheRuleCacheRulesModelAttributeMap,
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel,
+			cdnCacheRuleCDNCacheRuleModel,
 		)
 		response.Diagnostics.Append(cacheRulesDiags...)
 		if response.Diagnostics.HasError() {
@@ -6034,6 +6187,32 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 		data.CacheRules = cacheRulesObj
 	} else {
 		data.CacheRules = types.ObjectNull(CdnCacheRuleCacheRulesModelAttributeMap)
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -6070,9 +6249,8 @@ func (r *ResourceF5XCCdnCacheRule) Delete(ctx context.Context, request resource.
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -6087,19 +6265,32 @@ func (r *ResourceF5XCCdnCacheRule) Delete(ctx context.Context, request resource.
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCCdnCacheRule) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

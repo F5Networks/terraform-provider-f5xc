@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "A service_policy object consists of an unordered list of predicates and a list of service policy rules. The predicates are evaluated against a set of input\nfields that are extracted from or derived from an L7 request API. Any predicates that are not specified in a policy are implicitly considered to be true. The\nrules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining\nalgorithm. A request API is considered to match a policy if all predicates in the policy evaluate to true and the request API matches one of the rules in the\npolicy.\n\nIf the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule\ncombining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with\na DENY action are evaluated prior to rules with a ALLOW action.\n\nA service policy is part of an ordered list of policies in one or more service policy sets. If a request API matches a policy, the resulting action for the\npolicy is the action configured in the matching rule. If a request API does not match a given policy, the next policy in the service policy set is evaluated.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2578,7 +2605,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert Match of the expression defined",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Matcher"
                 },
                 "item": {
@@ -2679,8 +2705,7 @@ var APISwaggerJSON string = `{
                 "negation": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"\nnot checker",
-                    "title": "Check not",
-                    "format": "boolean"
+                    "title": "Check not"
                 },
                 "operator": {
                     "description": "x-displayName: \"Comparison Operator\"\nChoose the Comparison Operator",
@@ -2731,6 +2756,14 @@ var APISwaggerJSON string = `{
                     "title": "Domain",
                     "$ref": "#/definitions/policyBotAdvancedDomainOperator"
                 },
+                "headers": {
+                    "type": "array",
+                    "description": "x-displayName: \"Header\"\nHeader matcher",
+                    "title": "Header",
+                    "items": {
+                        "$ref": "#/definitions/policyBotAdvancedHeaderOperator"
+                    }
+                },
                 "http_methods": {
                     "type": "array",
                     "description": "x-displayName: \"HTTP Methods\"\nList of HTTP methods",
@@ -2743,6 +2776,90 @@ var APISwaggerJSON string = `{
                     "description": "x-displayName: \"Path\"\nURI path matcher",
                     "title": "Path",
                     "$ref": "#/definitions/policyBotAdvancedPathOperator"
+                },
+                "query": {
+                    "description": "x-displayName: \"Query\"\nQuery matcher",
+                    "title": "Query",
+                    "$ref": "#/definitions/policyBotAdvancedQueryOperator"
+                }
+            }
+        },
+        "policyBotAdvancedHeaderOperator": {
+            "type": "object",
+            "description": "x-displayName: \"Bot Advanced Header Operator\"\nBot Advanced Header Operator",
+            "title": "Bot Advanced Header Operator",
+            "properties": {
+                "all_header": {
+                    "description": "x-displayName: \"ANYTHING\"\nMatch if header is present. No request matcher is needed.",
+                    "title": "Header Present",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                },
+                "header_and": {
+                    "description": "x-displayName: \"ALL\"\nMatch requests when all conditions are met ('And').",
+                    "title": "Header and",
+                    "$ref": "#/definitions/policyBotAdvancedMatcher"
+                },
+                "header_none": {
+                    "description": "x-displayName: \"NONE\"\nMatch requests when none of the conditions are met.",
+                    "title": "Header none",
+                    "$ref": "#/definitions/policyBotAdvancedMatcher"
+                },
+                "header_or": {
+                    "description": "x-displayName: \"ANY\"\nMatch requests when at least one condition is met ('Or').",
+                    "title": "Header or",
+                    "$ref": "#/definitions/policyBotAdvancedMatcher"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "x-displayName: \"Header Name\"\nx-required\nHeader Name",
+                    "title": "Header Name"
+                },
+                "not_present_header": {
+                    "description": "x-displayName: \"NOT PRESENT\"\nMatch requires header to not exist.",
+                    "title": "Header not present",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                }
+            }
+        },
+        "policyBotAdvancedMatcher": {
+            "type": "object",
+            "description": "x-displayName: \"Bot Advanced Matcher\"\nThis is a generic matcher which can be used for matching with different operators such as query, header, body, etc.",
+            "title": "Bot Advanced Matcher",
+            "properties": {
+                "matchers": {
+                    "type": "array",
+                    "description": "x-displayName: \"Matcher(s)\"\nMatchers",
+                    "title": "Matchers",
+                    "items": {
+                        "$ref": "#/definitions/policyBotAdvancedMatcherType"
+                    }
+                }
+            }
+        },
+        "policyBotAdvancedMatcherType": {
+            "type": "object",
+            "description": "x-displayName: \"Bot Advanced Matcher Type\"\nBot Advanced Matcher Type",
+            "title": "Bot Advanced Matcher Type",
+            "properties": {
+                "case_insensitive": {
+                    "type": "boolean",
+                    "description": "x-displayName: \"Case-Insensitive\"\nIs Case insensitive ?",
+                    "title": "Case Insensitive"
+                },
+                "negation": {
+                    "type": "boolean",
+                    "description": "x-displayName: \"Not(!)\"\nIs Negation ?",
+                    "title": "Negation"
+                },
+                "operator": {
+                    "description": "x-displayName: \"Comparison Operator\"\nChoose the Comparison Operator",
+                    "title": "Comparison Operator",
+                    "$ref": "#/definitions/policyComparisonOperator"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "x-displayName: \"Value\"\nValue",
+                    "title": "Value"
                 }
             }
         },
@@ -2769,14 +2886,12 @@ var APISwaggerJSON string = `{
                 "case_insensitive": {
                     "type": "boolean",
                     "description": "x-displayName: \"Case-Insensitive\"\ncase insensitive checker",
-                    "title": "Check case insensitive",
-                    "format": "boolean"
+                    "title": "Check case insensitive"
                 },
                 "negation": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"\nnot checker",
-                    "title": "Check not",
-                    "format": "boolean"
+                    "title": "Check not"
                 },
                 "operator": {
                     "description": "x-displayName: \"Comparison Operator\"\nChoose the Comparison Operator",
@@ -2814,6 +2929,65 @@ var APISwaggerJSON string = `{
                     "description": "x-displayName: \"ANY\"\nMatch requests when at least one condition is met ('Or').",
                     "title": "use ANY operator for defined path",
                     "$ref": "#/definitions/policyBotAdvancedPathMatcher"
+                }
+            }
+        },
+        "policyBotAdvancedQueryOperator": {
+            "type": "object",
+            "description": "x-displayName: \"Bot Advanced Query Operator\"\nBot Advanced Query Operators",
+            "title": "Bot Advanced Query Operators",
+            "properties": {
+                "all_query": {
+                    "description": "x-displayName: \"ANYTHING\"\nMatch Anything. No query request matcher is needed.",
+                    "title": "Query all",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                },
+                "query_and": {
+                    "description": "x-displayName: \"ALL\"\nMatch requests when all of the query conditions are met ('And').",
+                    "title": "Query and",
+                    "$ref": "#/definitions/policyBotAdvancedMatcher"
+                },
+                "query_none": {
+                    "description": "x-displayName: \"NONE\"\nMatch all requests except for these specified query conditions.",
+                    "title": "Query none",
+                    "$ref": "#/definitions/policyBotAdvancedMatcher"
+                },
+                "query_or": {
+                    "description": "x-displayName: \"ANY\"\nMatch requests when at least one of the query condition is met ('Or').",
+                    "title": "Query or",
+                    "$ref": "#/definitions/policyBotAdvancedMatcher"
+                }
+            }
+        },
+        "policyBotDefenseRequestLegIdentifier": {
+            "type": "object",
+            "description": "x-displayName: \"Bot Defense Request Leg Identifier\"\nIdentifies the request leg for bot inline routing",
+            "title": "Bot Defense Request Leg Identifier",
+            "properties": {
+                "first_leg": {
+                    "description": "x-displayName: \"First Leg\"\nSpecifies that this is a first request leg request",
+                    "title": "First Leg",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                },
+                "second_leg": {
+                    "description": "x-displayName: \"Second Leg\"\nSpecifies that this is a second leg request coming from bot engine",
+                    "title": "Second Leg",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                }
+            }
+        },
+        "policyBotFullSiteAction": {
+            "type": "object",
+            "description": "x-displayName: \"Bot Full Site Action\"\nAction to be taken for full site bot protection based on risk score assessment.",
+            "title": "BotFullSiteAction",
+            "properties": {
+                "risk_score_action": {
+                    "type": "array",
+                    "description": "x-displayName: \"Risk Score Actions\"\nList of risk score actions for bot protection.",
+                    "title": "Risk Score Actions",
+                    "items": {
+                        "$ref": "#/definitions/policyRiskScoreAction"
+                    }
                 }
             }
         },
@@ -2914,7 +3088,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert Match of the expression defined",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Matcher"
                 },
                 "item": {
@@ -3302,7 +3475,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Method Matcher"
                 },
                 "methods": {
@@ -3356,7 +3528,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert IP Matcher"
                 },
                 "prefix_sets": {
@@ -3425,7 +3596,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Matcher"
                 },
                 "item": {
@@ -3616,6 +3786,33 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "policyMitigationAction": {
+            "type": "object",
+            "description": "x-displayName: \"Mitigation Action\"\nMitigation action to be taken for the risk assessment.",
+            "title": "MitigationAction",
+            "properties": {
+                "block": {
+                    "description": "x-displayName: \"Block\"\nBlock the requests matching the risk assessment.",
+                    "title": "Block",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                },
+                "challenge": {
+                    "description": "x-displayName: \"Challenge\"\nChallenge the requests matching the risk assessment.",
+                    "title": "Challenge",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                },
+                "monitor": {
+                    "description": "x-displayName: \"Monitor\"\nMonitor the requests matching the risk assessment.",
+                    "title": "Monitor",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                },
+                "none": {
+                    "description": "x-displayName: \"No Action\"\nNo mitigation actions.",
+                    "title": "None",
+                    "$ref": "#/definitions/ioschemaEmpty"
+                }
+            }
+        },
         "policyMobileIdentifierMatcherAction": {
             "type": "object",
             "description": "x-displayName: \"Mobile Identifier Matcher Action\"\nMobile Identifier Matcher Action",
@@ -3624,20 +3821,17 @@ var APISwaggerJSON string = `{
                 "mobile_identifier": {
                     "type": "boolean",
                     "description": "x-displayName: \"Mobile Identifier\"\nIf request matches mobile identifier service policy, mobile identifier is true",
-                    "title": "Mobile Identifier",
-                    "format": "boolean"
+                    "title": "Mobile Identifier"
                 },
                 "mobile_traffic": {
                     "type": "boolean",
                     "description": "x-displayName: \"Mobile Traffic\"\nIf request matches mobile endpoint service policy, mobile traffic is true",
-                    "title": "Mobile Traffic",
-                    "format": "boolean"
+                    "title": "Mobile Traffic"
                 },
                 "web_traffic": {
                     "type": "boolean",
                     "description": "x-displayName: \"Web Traffic\"\nIf request matches web endpoint service policy, web traffic is true",
-                    "title": "Web Traffic",
-                    "format": "boolean"
+                    "title": "Web Traffic"
                 }
             }
         },
@@ -3720,7 +3914,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Match Result"
                 },
                 "ip_prefixes": {
@@ -4014,6 +4207,35 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "policyRiskAssessment": {
+            "type": "string",
+            "description": "x-displayName: \"Risk Assessment\"\nRisk assessment level.\n\n - UNSPECIFIED: UNSPECIFIED\n\nx-displayName: \"UNSPECIFIED\"\n - LOW: Low risk\n\nx-displayName: \"Low\"\n - MEDIUM: Medium risk\n\nx-displayName: \"Medium\"\n - HIGH: High risk\n\nx-displayName: \"High\"",
+            "title": "RiskAssessment",
+            "enum": [
+                "UNSPECIFIED",
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+            ],
+            "default": "UNSPECIFIED"
+        },
+        "policyRiskScoreAction": {
+            "type": "object",
+            "description": "x-displayName: \"Risk Score Action\"\nAction to be taken for a specific risk assessment.",
+            "title": "RiskScoreAction",
+            "properties": {
+                "mitigation_action": {
+                    "description": "x-displayName: \"Mitigation Action\"\nx-required\nMitigation action to be taken for the risk assessment.",
+                    "title": "Mitigation Action",
+                    "$ref": "#/definitions/policyMitigationAction"
+                },
+                "risk_assessment": {
+                    "description": "x-displayName: \"Risk Assessment\"\nx-required\nRisk assessment level.",
+                    "title": "Risk Assessment",
+                    "$ref": "#/definitions/policyRiskAssessment"
+                }
+            }
+        },
         "policyRoleMatcherType": {
             "type": "object",
             "description": "x-displayName: \"Role Matcher\"\nA role matcher specifies a single value for matching an input list of roles. The match is considered successful if the specified value is present in the input\nlist.",
@@ -4194,8 +4416,7 @@ var APISwaggerJSON string = `{
                 "allow_goodbot": {
                     "type": "boolean",
                     "description": "x-displayName: \"Good bot\"\nx-required\nGood bot",
-                    "title": "GoodBot",
-                    "format": "boolean"
+                    "title": "GoodBot"
                 },
                 "app_traffic_type": {
                     "description": "x-displayName: \"Traffic type\"\nx-required\nTraffic type",
@@ -4220,8 +4441,7 @@ var APISwaggerJSON string = `{
                 "web_scraping": {
                     "type": "boolean",
                     "description": "x-displayName: \"Web scraping\"\nx-required\nWeb scraping protection enabled for protected endpoint",
-                    "title": "Web scraping",
-                    "format": "boolean"
+                    "title": "Web scraping"
                 }
             }
         },
@@ -4236,7 +4456,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert String Matcher"
                 },
                 "match": {
@@ -4374,8 +4593,7 @@ var APISwaggerJSON string = `{
                 "invert_matcher": {
                     "type": "boolean",
                     "description": "x-displayName: \"Invert URL Matcher\"\nInvert the match result.",
-                    "title": "invert_matcher",
-                    "format": "boolean"
+                    "title": "invert_matcher"
                 },
                 "url_items": {
                     "type": "array",
@@ -4575,6 +4793,27 @@ var APISwaggerJSON string = `{
             "type": "object",
             "description": "x-displayName: \"Token Bucket Rate Limiter\"\nToken-Bucket is a rate limiter algorithm that is stricter with enforcing limits",
             "title": "TokenBucketRateLimiter"
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "schemaAction": {
             "type": "object",
@@ -4994,7 +5233,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -5058,7 +5296,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -5124,7 +5361,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -5226,7 +5462,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -5453,7 +5688,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Header Matcher"
                 },
                 "item": {
@@ -5489,7 +5723,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Match against the encoded, escaped path\n\nExample: - \"match \\\"/path/%20another%20path\\\" instead of default \\\"/path/ another path\\\"\"-",
                     "title": "Encoded_Path",
-                    "format": "boolean",
                     "x-displayname": "Match Encoded Path",
                     "x-ves-example": "match \\\"/path/%20another%20path\\\" instead of default \\\"/path/ another path\\\""
                 },
@@ -5516,7 +5749,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Path Matcher"
                 },
                 "prefix_values": {
@@ -5602,7 +5834,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Port Matcher"
                 },
                 "ports": {
@@ -5650,7 +5881,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Query Parameter Matcher"
                 },
                 "item": {
@@ -5944,7 +6174,7 @@ var APISwaggerJSON string = `{
                 },
                 "arg_matchers": {
                     "type": "array",
-                    "description": " A list of predicates for all POST args that need to be matched. The criteria for matching each arg are described in individual instances\n of ArgMatcherType. The actual arg values are extracted from the request API as a list of strings for each arg selector name.\n Note that all specified arg matcher predicates must evaluate to true.\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 16\n",
+                    "description": " A list of predicates for all POST args that need to be matched. The criteria for matching each arg are described in individual instances\n of ArgMatcherType. The actual arg values are extracted from the request API as a list of strings for each arg selector name.\n Note that all specified arg matcher predicates must evaluate to true. A request body greater than 64KB will not be evaluated.\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 16\n",
                     "title": "arg matchers",
                     "maxItems": 16,
                     "items": {
@@ -5968,7 +6198,7 @@ var APISwaggerJSON string = `{
                     "x-displayname": "BGP ASN Sets"
                 },
                 "body_matcher": {
-                    "description": " Predicate for matching the request body string. The criteria for matching the request body is described in MatcherType.\n The actual request body value is extracted from the request API as a string.",
+                    "description": " Predicate for matching the request body string. The criteria for matching the request body is described in MatcherType.\n The actual request body value is extracted from the request API as a string. A request body greater than 64KB will not be evaluated.",
                     "title": "request body matcher",
                     "$ref": "#/definitions/policyMatcherType",
                     "x-displayname": "Request Body Matcher"
@@ -6096,7 +6326,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Log the rule match details along with the request and continue to evaluate rules in the sequence.",
                     "title": "Log Rule Evaluation",
-                    "format": "boolean",
                     "x-displayname": "Log Rule Evaluation"
                 },
                 "mum_action": {
@@ -6294,7 +6523,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -6475,7 +6703,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates service_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -6680,6 +6907,16 @@ var APISwaggerJSON string = `{
                     "title": "Bot Advanced Endpoints",
                     "$ref": "#/definitions/policyBotAdvancedEndpointMatcherType"
                 },
+                "bot_defense_request_leg_identifier": {
+                    "description": "x-displayName: \"Bot Defense Request Leg Identifier\"\nIdentifies the request leg for bot inline routing",
+                    "title": "Bot Defense Request Leg Identifier",
+                    "$ref": "#/definitions/policyBotDefenseRequestLegIdentifier"
+                },
+                "bot_full_site_action": {
+                    "description": "x-displayName: \"Bot Full Site Action\"\nAction to be taken for full site bot protection based on risk score assessment.",
+                    "title": "Bot Full Site Action",
+                    "$ref": "#/definitions/policyBotFullSiteAction"
+                },
                 "challenge_action": {
                     "description": "x-displayName: \"Select Challenge Action Type\"\nx-required\nSelect challenge action, enable javascript/captcha challenge or disable challenge",
                     "title": "challenge action",
@@ -6816,8 +7053,7 @@ var APISwaggerJSON string = `{
                 "log_rule_evaluation": {
                     "type": "boolean",
                     "description": "x-displayName: \"Log Rule Evaluation\"\nLog the rule match details along with the request and continue to evaluate rules in the sequence.",
-                    "title": "Log Rule Evaluation",
-                    "format": "boolean"
+                    "title": "Log Rule Evaluation"
                 },
                 "malware_protection_action": {
                     "description": "x-displayName: \"Malware Protection Action\"\nSpecifies how Malware Protection is handled",
@@ -7031,10 +7267,10 @@ var APISwaggerJSON string = `{
                     }
                 },
                 "prefix_list": {
-                    "description": " Addresses that are covered by the given list of IPv4 prefixes",
+                    "description": " Addresses that are covered by the given list of IPv4 or IPv6 prefixes",
                     "title": "prefix_list",
                     "$ref": "#/definitions/viewsPrefixStringListType",
-                    "x-displayname": "IPv4 Prefix List"
+                    "x-displayname": "IP Prefix List"
                 },
                 "tls_fingerprint_classes": {
                     "type": "array",

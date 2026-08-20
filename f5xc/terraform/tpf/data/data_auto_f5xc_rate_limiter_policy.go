@@ -38,114 +38,25 @@ type RateLimiterPolicyRateLimiterPolicyRateLimiterRule struct {
 }
 
 type RateLimiterPolicyMessageMetaType struct {
-	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
+	Name        types.String `tfsdk:"name"`
 }
 
 type RateLimiterPolicyServicePolicyRuleRateLimiterRuleSpec struct {
-	Path          types.Object `tfsdk:"path"`
-	IpChoice      types.Object `tfsdk:"ip_choice"`
-	CountryChoice types.Object `tfsdk:"country_choice"`
-	HttpMethod    types.Object `tfsdk:"http_method"`
-	DomainMatcher types.Object `tfsdk:"domain_matcher"`
-	Headers       types.List   `tfsdk:"headers"`
-	SegmentPolicy types.Object `tfsdk:"segment_policy"`
 	ActionChoice  types.Object `tfsdk:"action_choice"`
 	AsnChoice     types.Object `tfsdk:"asn_choice"`
-}
-
-type RateLimiterPolicyPolicyPathMatcherType struct {
-	ExactValues        types.List `tfsdk:"exact_values"`
-	RegexValues        types.List `tfsdk:"regex_values"`
-	SuffixValues       types.List `tfsdk:"suffix_values"`
-	Transformers       types.List `tfsdk:"transformers"`
-	InvertMatcher      types.Bool `tfsdk:"invert_matcher"`
-	EncodedPathMatcher types.Bool `tfsdk:"encoded_path_matcher"`
-	PrefixValues       types.List `tfsdk:"prefix_values"`
-}
-
-type RateLimiterPolicyRateLimiterRuleSpecIpChoice struct {
-	AnyIp        types.Bool   `tfsdk:"any_ip"`
-	IpPrefixList types.Object `tfsdk:"ip_prefix_list"`
-	IpMatcher    types.Object `tfsdk:"ip_matcher"`
-}
-
-type RateLimiterPolicyRateLimiterRuleSpecIpPrefixList struct {
-	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
-	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
-	InvertMatch  types.Bool `tfsdk:"invert_match"`
-}
-
-type RateLimiterPolicyRateLimiterRuleSpecIpMatcher struct {
-	PrefixSets    types.List `tfsdk:"prefix_sets"`
-	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
-}
-
-type RateLimiterPolicyRateLimiterRuleSpecCountryChoice struct {
-	AnyCountry  types.Bool   `tfsdk:"any_country"`
-	CountryList types.Object `tfsdk:"country_list"`
-}
-
-type RateLimiterPolicyRateLimiterRuleSpecCountryList struct {
-	CountryCodes types.List `tfsdk:"country_codes"`
-	InvertMatch  types.Bool `tfsdk:"invert_match"`
-}
-
-type RateLimiterPolicyPolicyHttpMethodMatcherType struct {
-	Methods       types.List `tfsdk:"methods"`
-	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
-}
-
-type RateLimiterPolicyPolicyMatcherTypeBasic struct {
-	ExactValues types.List `tfsdk:"exact_values"`
-	RegexValues types.List `tfsdk:"regex_values"`
-}
-
-type RateLimiterPolicyPolicyHeaderMatcherType struct {
-	Name          types.String `tfsdk:"name"`
-	MatchChoice   types.Object `tfsdk:"match_choice"`
-	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
-}
-
-type RateLimiterPolicyHeaderMatcherTypeMatchChoice struct {
-	Item            types.Object `tfsdk:"item"`
-	CheckPresent    types.Bool   `tfsdk:"check_present"`
-	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
-}
-
-type RateLimiterPolicyHeaderMatcherTypeItem struct {
-	RegexValues  types.List `tfsdk:"regex_values"`
-	Transformers types.List `tfsdk:"transformers"`
-	ExactValues  types.List `tfsdk:"exact_values"`
-}
-
-type RateLimiterPolicyPolicySegmentPolicyType struct {
-	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
-	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
-}
-
-type RateLimiterPolicySegmentPolicyTypeSrcSegmentChoice struct {
-	SrcAny      types.Bool   `tfsdk:"src_any"`
-	SrcSegments types.Object `tfsdk:"src_segments"`
-}
-
-type RateLimiterPolicySegmentPolicyTypeSrcSegments struct {
-	Segments types.List `tfsdk:"segments"`
-}
-
-type RateLimiterPolicySegmentPolicyTypeDstSegmentChoice struct {
-	DstAny       types.Bool   `tfsdk:"dst_any"`
-	IntraSegment types.Bool   `tfsdk:"intra_segment"`
-	DstSegments  types.Object `tfsdk:"dst_segments"`
-}
-
-type RateLimiterPolicySegmentPolicyTypeDstSegments struct {
-	Segments types.List `tfsdk:"segments"`
+	CountryChoice types.Object `tfsdk:"country_choice"`
+	DomainMatcher types.Object `tfsdk:"domain_matcher"`
+	Headers       types.List   `tfsdk:"headers"`
+	HttpMethod    types.Object `tfsdk:"http_method"`
+	IpChoice      types.Object `tfsdk:"ip_choice"`
+	Path          types.Object `tfsdk:"path"`
+	SegmentPolicy types.Object `tfsdk:"segment_policy"`
 }
 
 type RateLimiterPolicyRateLimiterRuleSpecActionChoice struct {
-	BypassRateLimiter types.Bool   `tfsdk:"bypass_rate_limiter"`
 	ApplyRateLimiter  types.Bool   `tfsdk:"apply_rate_limiter"`
+	BypassRateLimiter types.Bool   `tfsdk:"bypass_rate_limiter"`
 	CustomRateLimiter types.Object `tfsdk:"custom_rate_limiter"`
 }
 
@@ -163,14 +74,103 @@ type RateLimiterPolicyRateLimiterRuleSpecAsnMatcher struct {
 	AsnSets types.List `tfsdk:"asn_sets"`
 }
 
+type RateLimiterPolicyRateLimiterRuleSpecCountryChoice struct {
+	AnyCountry  types.Bool   `tfsdk:"any_country"`
+	CountryList types.Object `tfsdk:"country_list"`
+}
+
+type RateLimiterPolicyRateLimiterRuleSpecCountryList struct {
+	CountryCodes types.List `tfsdk:"country_codes"`
+	InvertMatch  types.Bool `tfsdk:"invert_match"`
+}
+
+type RateLimiterPolicyPolicyMatcherTypeBasic struct {
+	ExactValues types.List `tfsdk:"exact_values"`
+	RegexValues types.List `tfsdk:"regex_values"`
+}
+
+type RateLimiterPolicyPolicyHeaderMatcherType struct {
+	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
+	MatchChoice   types.Object `tfsdk:"match_choice"`
+	Name          types.String `tfsdk:"name"`
+}
+
+type RateLimiterPolicyHeaderMatcherTypeMatchChoice struct {
+	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
+	CheckPresent    types.Bool   `tfsdk:"check_present"`
+	Item            types.Object `tfsdk:"item"`
+}
+
+type RateLimiterPolicyHeaderMatcherTypeItem struct {
+	ExactValues  types.List `tfsdk:"exact_values"`
+	RegexValues  types.List `tfsdk:"regex_values"`
+	Transformers types.List `tfsdk:"transformers"`
+}
+
+type RateLimiterPolicyPolicyHttpMethodMatcherType struct {
+	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
+	Methods       types.List `tfsdk:"methods"`
+}
+
+type RateLimiterPolicyRateLimiterRuleSpecIpChoice struct {
+	AnyIp        types.Bool   `tfsdk:"any_ip"`
+	IpMatcher    types.Object `tfsdk:"ip_matcher"`
+	IpPrefixList types.Object `tfsdk:"ip_prefix_list"`
+}
+
+type RateLimiterPolicyRateLimiterRuleSpecIpMatcher struct {
+	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
+	PrefixSets    types.List `tfsdk:"prefix_sets"`
+}
+
+type RateLimiterPolicyRateLimiterRuleSpecIpPrefixList struct {
+	InvertMatch  types.Bool `tfsdk:"invert_match"`
+	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
+	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
+}
+
+type RateLimiterPolicyPolicyPathMatcherType struct {
+	EncodedPathMatcher types.Bool `tfsdk:"encoded_path_matcher"`
+	ExactValues        types.List `tfsdk:"exact_values"`
+	InvertMatcher      types.Bool `tfsdk:"invert_matcher"`
+	PrefixValues       types.List `tfsdk:"prefix_values"`
+	RegexValues        types.List `tfsdk:"regex_values"`
+	SuffixValues       types.List `tfsdk:"suffix_values"`
+	Transformers       types.List `tfsdk:"transformers"`
+}
+
+type RateLimiterPolicyPolicySegmentPolicyType struct {
+	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
+	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
+}
+
+type RateLimiterPolicySegmentPolicyTypeDstSegmentChoice struct {
+	DstAny       types.Bool   `tfsdk:"dst_any"`
+	DstSegments  types.Object `tfsdk:"dst_segments"`
+	IntraSegment types.Bool   `tfsdk:"intra_segment"`
+}
+
+type RateLimiterPolicySegmentPolicyTypeDstSegments struct {
+	Segments types.List `tfsdk:"segments"`
+}
+
+type RateLimiterPolicySegmentPolicyTypeSrcSegmentChoice struct {
+	SrcAny      types.Bool   `tfsdk:"src_any"`
+	SrcSegments types.Object `tfsdk:"src_segments"`
+}
+
+type RateLimiterPolicySegmentPolicyTypeSrcSegments struct {
+	Segments types.List `tfsdk:"segments"`
+}
+
 // DataSourceF5XCRateLimiterPolicyModel describes the resource data model.
 type DataSourceF5XCRateLimiterPolicyModel struct {
+	Annotations types.Map      `tfsdk:"annotations"`
+	Description types.String   `tfsdk:"description"`
+	Labels      types.Map      `tfsdk:"labels"`
 	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
-	Labels      types.Map      `tfsdk:"labels"`
-	Annotations types.Map      `tfsdk:"annotations"`
-	Description types.String   `tfsdk:"description"`
 	Rules       types.List     `tfsdk:"rules"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
@@ -180,40 +180,18 @@ type DataSourceF5XCRateLimiterPolicyModel struct {
 var RateLimiterPolicyRulesModelAttributeMap = map[string]attr.Type{
 	"metadata": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"name":        types.StringType,
-			"description": types.StringType},
+			"description": types.StringType,
+			"name":        types.StringType},
 	}, "spec": types.ObjectType{
-		AttrTypes: map[string]attr.Type{"path": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"exact_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"regex_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"suffix_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"transformers": types.ListType{
-					ElemType: types.StringType,
-				},
-				"invert_matcher":       types.BoolType,
-				"encoded_path_matcher": types.BoolType,
-				"prefix_values": types.ListType{
-					ElemType: types.StringType,
-				}},
-		},
-			"ip_choice": types.ObjectType{
-				AttrTypes: RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap,
+		AttrTypes: map[string]attr.Type{
+			"action_choice": types.ObjectType{
+				AttrTypes: RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap,
+			},
+			"asn_choice": types.ObjectType{
+				AttrTypes: RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap,
 			},
 			"country_choice": types.ObjectType{
 				AttrTypes: RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap,
-			}, "http_method": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"methods": types.ListType{
-						ElemType: types.StringType,
-					},
-					"invert_matcher": types.BoolType},
 			}, "domain_matcher": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"exact_values": types.ListType{
@@ -227,27 +205,49 @@ var RateLimiterPolicyRulesModelAttributeMap = map[string]attr.Type{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
-						"name": types.StringType,
+						"invert_matcher": types.BoolType,
 						"match_choice": types.ObjectType{
 							AttrTypes: RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap,
 						},
-						"invert_matcher": types.BoolType,
+						"name": types.StringType,
 					},
 				},
-			}, "segment_policy": types.ObjectType{
+			}, "http_method": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					"src_segment_choice": types.ObjectType{
-						AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
-					},
-					"dst_segment_choice": types.ObjectType{
-						AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
+					"invert_matcher": types.BoolType,
+					"methods": types.ListType{
+						ElemType: types.StringType,
 					}},
 			},
-			"action_choice": types.ObjectType{
-				AttrTypes: RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap,
-			},
-			"asn_choice": types.ObjectType{
-				AttrTypes: RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap,
+			"ip_choice": types.ObjectType{
+				AttrTypes: RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap,
+			}, "path": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"encoded_path_matcher": types.BoolType,
+					"exact_values": types.ListType{
+						ElemType: types.StringType,
+					},
+					"invert_matcher": types.BoolType,
+					"prefix_values": types.ListType{
+						ElemType: types.StringType,
+					},
+					"regex_values": types.ListType{
+						ElemType: types.StringType,
+					},
+					"suffix_values": types.ListType{
+						ElemType: types.StringType,
+					},
+					"transformers": types.ListType{
+						ElemType: types.StringType,
+					}},
+			}, "segment_policy": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"dst_segment_choice": types.ObjectType{
+						AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
+					},
+					"src_segment_choice": types.ObjectType{
+						AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
+					}},
 			}},
 	},
 }
@@ -255,43 +255,21 @@ var RateLimiterPolicyRulesModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredPointerField --> Metadata
 var RateLimiterPolicyRulesMetadataModelAttributeMap = map[string]attr.Type{
 
-	"name":        types.StringType,
 	"description": types.StringType,
+	"name":        types.StringType,
 }
 
 // Attribute map for RequiredPointerField --> Spec
 var RateLimiterPolicyRulesSpecModelAttributeMap = map[string]attr.Type{
-	"path": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"exact_values": types.ListType{
-				ElemType: types.StringType,
-			},
-			"regex_values": types.ListType{
-				ElemType: types.StringType,
-			},
-			"suffix_values": types.ListType{
-				ElemType: types.StringType,
-			},
-			"transformers": types.ListType{
-				ElemType: types.StringType,
-			},
-			"invert_matcher":       types.BoolType,
-			"encoded_path_matcher": types.BoolType,
-			"prefix_values": types.ListType{
-				ElemType: types.StringType,
-			}},
+
+	"action_choice": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap,
 	},
-	"ip_choice": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap,
+	"asn_choice": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap,
 	},
 	"country_choice": types.ObjectType{
 		AttrTypes: RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap,
-	}, "http_method": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"methods": types.ListType{
-				ElemType: types.StringType,
-			},
-			"invert_matcher": types.BoolType},
 	}, "domain_matcher": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"exact_values": types.ListType{
@@ -305,245 +283,57 @@ var RateLimiterPolicyRulesSpecModelAttributeMap = map[string]attr.Type{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"name": types.StringType,
+				"invert_matcher": types.BoolType,
 				"match_choice": types.ObjectType{
 					AttrTypes: RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap,
 				},
-				"invert_matcher": types.BoolType,
+				"name": types.StringType,
 			},
 		},
-	}, "segment_policy": types.ObjectType{
+	}, "http_method": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"src_segment_choice": types.ObjectType{
-				AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
-			},
-			"dst_segment_choice": types.ObjectType{
-				AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
+			"invert_matcher": types.BoolType,
+			"methods": types.ListType{
+				ElemType: types.StringType,
 			}},
 	},
-	"action_choice": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap,
-	},
-	"asn_choice": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerField --> Path
-var RateLimiterPolicyRulesSpecPathModelAttributeMap = map[string]attr.Type{
-
-	"exact_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"suffix_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
-	"invert_matcher":       types.BoolType,
-	"encoded_path_matcher": types.BoolType,
-	"prefix_values": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for OneOfField --> IpChoice
-var RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap = map[string]attr.Type{
-
-	"any_ip": types.BoolType,
-	"ip_prefix_list": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap,
-	},
-	"ip_matcher": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> IpPrefixList
-var RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap = map[string]attr.Type{
-
-	"ip_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"invert_match": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> IpMatcher
-var RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap = map[string]attr.Type{
-
-	"prefix_sets": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
+	"ip_choice": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap,
+	}, "path": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"encoded_path_matcher": types.BoolType,
+			"exact_values": types.ListType{
+				ElemType: types.StringType,
 			},
-		},
-	},
-	"invert_matcher": types.BoolType,
-}
-
-// Attribute map for RequiredArrayOfPointerField --> PrefixSets
-var RateLimiterPolicyPrefixSetsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> CountryChoice
-var RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap = map[string]attr.Type{
-
-	"any_country": types.BoolType,
-	"country_list": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> CountryList
-var RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap = map[string]attr.Type{
-
-	"country_codes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"invert_match": types.BoolType,
-}
-
-// Attribute map for PointerField --> HttpMethod
-var RateLimiterPolicyRulesSpecHttpMethodModelAttributeMap = map[string]attr.Type{
-
-	"methods": types.ListType{
-		ElemType: types.StringType,
-	},
-	"invert_matcher": types.BoolType,
-}
-
-// Attribute map for PointerField --> DomainMatcher
-var RateLimiterPolicyRulesSpecDomainMatcherModelAttributeMap = map[string]attr.Type{
-
-	"exact_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> Headers
-var RateLimiterPolicyRulesSpecHeadersModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"match_choice": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap,
-	},
-	"invert_matcher": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> Match
-var RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap = map[string]attr.Type{
-
-	"item": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap,
-	},
-	"check_present":     types.BoolType,
-	"check_not_present": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Item
-var RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap = map[string]attr.Type{
-
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
-	"exact_values": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> SegmentPolicy
-var RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap = map[string]attr.Type{
-
-	"src_segment_choice": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
-	},
-	"dst_segment_choice": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> SrcSegmentChoice
-var RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap = map[string]attr.Type{
-
-	"src_any": types.BoolType,
-	"src_segments": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> SrcSegments
-var RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap = map[string]attr.Type{
-
-	"segments": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
+			"invert_matcher": types.BoolType,
+			"prefix_values": types.ListType{
+				ElemType: types.StringType,
 			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Segments
-var RateLimiterPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for OneOfField --> DstSegmentChoice
-var RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
-
-	"dst_any":       types.BoolType,
-	"intra_segment": types.BoolType,
-	"dst_segments": types.ObjectType{
-		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> DstSegments
-var RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
-
-	"segments": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
+			"regex_values": types.ListType{
+				ElemType: types.StringType,
 			},
-		},
+			"suffix_values": types.ListType{
+				ElemType: types.StringType,
+			},
+			"transformers": types.ListType{
+				ElemType: types.StringType,
+			}},
+	}, "segment_policy": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"dst_segment_choice": types.ObjectType{
+				AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
+			},
+			"src_segment_choice": types.ObjectType{
+				AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
+			}},
 	},
 }
 
 // Attribute map for RequiredOneOfField --> ActionChoice
 var RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"bypass_rate_limiter": types.BoolType,
 	"apply_rate_limiter":  types.BoolType,
+	"bypass_rate_limiter": types.BoolType,
 	"custom_rate_limiter": types.ObjectType{
 		AttrTypes: RateLimiterPolicyRulesSpecActionChoiceCustomRateLimiterModelAttributeMap,
 	},
@@ -553,8 +343,8 @@ var RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap = map[string]attr.Ty
 var RateLimiterPolicyRulesSpecActionChoiceCustomRateLimiterModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> AsnChoice
@@ -584,8 +374,8 @@ var RateLimiterPolicyRulesSpecAsnChoiceAsnMatcherModelAttributeMap = map[string]
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"namespace": types.StringType,
 				"name":      types.StringType,
+				"namespace": types.StringType,
 				"tenant":    types.StringType,
 			},
 		},
@@ -595,9 +385,219 @@ var RateLimiterPolicyRulesSpecAsnChoiceAsnMatcherModelAttributeMap = map[string]
 // Attribute map for RequiredArrayOfPointerField --> AsnSets
 var RateLimiterPolicyAsnSetsObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
 	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> CountryChoice
+var RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap = map[string]attr.Type{
+
+	"any_country": types.BoolType,
+	"country_list": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> CountryList
+var RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap = map[string]attr.Type{
+
+	"country_codes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"invert_match": types.BoolType,
+}
+
+// Attribute map for PointerField --> DomainMatcher
+var RateLimiterPolicyRulesSpecDomainMatcherModelAttributeMap = map[string]attr.Type{
+
+	"exact_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"regex_values": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> Headers
+var RateLimiterPolicyRulesSpecHeadersModelAttributeMap = map[string]attr.Type{
+
+	"invert_matcher": types.BoolType,
+	"match_choice": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap,
+	},
+	"name": types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> Match
+var RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap = map[string]attr.Type{
+
+	"check_not_present": types.BoolType,
+	"check_present":     types.BoolType,
+	"item": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Item
+var RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap = map[string]attr.Type{
+
+	"exact_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"regex_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"transformers": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerField --> HttpMethod
+var RateLimiterPolicyRulesSpecHttpMethodModelAttributeMap = map[string]attr.Type{
+
+	"invert_matcher": types.BoolType,
+	"methods": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for OneOfField --> IpChoice
+var RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap = map[string]attr.Type{
+
+	"any_ip": types.BoolType,
+	"ip_matcher": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap,
+	},
+	"ip_prefix_list": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> IpMatcher
+var RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap = map[string]attr.Type{
+
+	"invert_matcher": types.BoolType,
+	"prefix_sets": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> PrefixSets
+var RateLimiterPolicyPrefixSetsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> IpPrefixList
+var RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap = map[string]attr.Type{
+
+	"invert_match": types.BoolType,
+	"ip_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerField --> Path
+var RateLimiterPolicyRulesSpecPathModelAttributeMap = map[string]attr.Type{
+
+	"encoded_path_matcher": types.BoolType,
+	"exact_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"invert_matcher": types.BoolType,
+	"prefix_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"regex_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"suffix_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"transformers": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerField --> SegmentPolicy
+var RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap = map[string]attr.Type{
+
+	"dst_segment_choice": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
+	},
+	"src_segment_choice": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> DstSegmentChoice
+var RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
+
+	"dst_any": types.BoolType,
+	"dst_segments": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
+	},
+	"intra_segment": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> DstSegments
+var RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
+
+	"segments": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Segments
+var RateLimiterPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for OneOfField --> SrcSegmentChoice
+var RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap = map[string]attr.Type{
+
+	"src_any": types.BoolType,
+	"src_segments": types.ObjectType{
+		AttrTypes: RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SrcSegments
+var RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap = map[string]attr.Type{
+
+	"segments": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -614,10 +614,30 @@ func (d *DataSourceF5XCRateLimiterPolicy) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "RateLimiterPolicy data source",
-		Description:         "RateLimiterPolicy data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a rate_limiter_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter_policy) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a rate_limiter_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter_policy) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -636,26 +656,6 @@ func (r *DataSourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request da
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"rules": schema.ListNestedAttribute{
 				Description: "rules A list of RateLimiterRules that are evaluated sequentially till a matching rule is identified.",
 				Required:    false,
@@ -669,14 +669,14 @@ func (r *DataSourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request da
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"name": schema.StringAttribute{
-									Description: "name This is the name of the message. The value of name has to follow DNS-1035 format.",
+								"description": schema.StringAttribute{
+									Description: "description Human readable description.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
 								},
-								"description": schema.StringAttribute{
-									Description: "description Human readable description.",
+								"name": schema.StringAttribute{
+									Description: "name This is the name of the message. The value of name has to follow DNS-1035 format.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
@@ -689,422 +689,20 @@ func (r *DataSourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request da
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"path": schema.SingleNestedAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"exact_values": schema.ListAttribute{
-											Description: "exact values A list of exact path values to match the input HTTP path against.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"regex_values": schema.ListAttribute{
-											Description: "regex values A list of regular expressions to match the input HTTP path against.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"suffix_values": schema.ListAttribute{
-											Description: "Suffix values A list of path suffix values to match the input HTTP path against.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"transformers": schema.ListAttribute{
-											Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"invert_matcher": schema.BoolAttribute{
-											Description: "invert_matcher Invert the match result.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"encoded_path_matcher": schema.BoolAttribute{
-											Description: "Encoded_Path Match against the encoded, escaped path",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"prefix_values": schema.ListAttribute{
-											Description: "prefix values A list of path prefix values to match the input HTTP path against.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"ip_choice": schema.SingleNestedAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"any_ip": schema.BoolAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"ip_prefix_list": schema.SingleNestedAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"ip_prefixes": schema.ListAttribute{
-													Description: "ip prefixes List of IPv4 prefix strings.",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"ipv6_prefixes": schema.ListAttribute{
-													Description: "ipv6 prefixes List of IPv6 prefix strings.",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"invert_match": schema.BoolAttribute{
-													Description: "invert_matcher Invert the match result.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"ip_matcher": schema.SingleNestedAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"prefix_sets": schema.ListNestedAttribute{
-													Description: "prefix_sets A list of references to ip_prefix_set objects.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													NestedObject: schema.NestedAttributeObject{
-														Attributes: map[string]schema.Attribute{
-															"name": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"tenant": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"namespace": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
-												"invert_matcher": schema.BoolAttribute{
-													Description: "invert_matcher Invert the match result.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
-								"country_choice": schema.SingleNestedAttribute{
-									Description: "country choice Match the country of origin. The country is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"any_country": schema.BoolAttribute{
-											Description: "any country",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"country_list": schema.SingleNestedAttribute{
-											Description: "country_list",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"country_codes": schema.ListAttribute{
-													Description: "country codes List of Country Codes",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"invert_match": schema.BoolAttribute{
-													Description: "invert_matcher Invert the match result.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
-								"http_method": schema.SingleNestedAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"methods": schema.ListAttribute{
-											Description: "methods List of methods values to match against.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"invert_matcher": schema.BoolAttribute{
-											Description: "invert_matcher Invert the match result.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"domain_matcher": schema.SingleNestedAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"exact_values": schema.ListAttribute{
-											Description: "exact values A list of exact values to match the input against.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"regex_values": schema.ListAttribute{
-											Description: "regex values A list of regular expressions to match the input against.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"headers": schema.ListNestedAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											"name": schema.StringAttribute{
-												Description: "name A case-insensitive HTTP header name.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"match_choice": schema.SingleNestedAttribute{
-												Description: "match Select Match Options.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"item": schema.SingleNestedAttribute{
-														Description: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"regex_values": schema.ListAttribute{
-																Description: "regex values A list of regular expressions to match the input against.",
-																ElementType: types.StringType,
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"transformers": schema.ListAttribute{
-																Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																ElementType: types.StringType,
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"exact_values": schema.ListAttribute{
-																Description: "exact values A list of exact values to match the input against.",
-																ElementType: types.StringType,
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-													"check_present": schema.BoolAttribute{
-														Description: "check_present Check that the header is present.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"check_not_present": schema.BoolAttribute{
-														Description: "check_not_present Check that the header is not present.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-											"invert_matcher": schema.BoolAttribute{
-												Description: "invert_matcher Invert the match result.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-								},
-								"segment_policy": schema.SingleNestedAttribute{
-									Description: "Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"src_segment_choice": schema.SingleNestedAttribute{
-											Description: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"src_any": schema.BoolAttribute{
-													Description: "Any segment Traffic is not matched against any segment",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"src_segments": schema.SingleNestedAttribute{
-													Description: "List of segments Source traffic is matched against selected segments",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"segments": schema.ListNestedAttribute{
-															Description: "Segments Select list of segments",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															NestedObject: schema.NestedAttributeObject{
-																Attributes: map[string]schema.Attribute{
-																	"name": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"tenant": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"namespace": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-										"dst_segment_choice": schema.SingleNestedAttribute{
-											Description: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"dst_any": schema.BoolAttribute{
-													Description: "Any segment Traffic is not matched against any segment",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"intra_segment": schema.BoolAttribute{
-													Description: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"dst_segments": schema.SingleNestedAttribute{
-													Description: "List of segments Traffic is matched against destination segment in selected segments",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"segments": schema.ListNestedAttribute{
-															Description: "Segments Select list of segments",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															NestedObject: schema.NestedAttributeObject{
-																Attributes: map[string]schema.Attribute{
-																	"name": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"tenant": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"namespace": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
 								"action_choice": schema.SingleNestedAttribute{
 									Description: "action choice Specify action for the rule.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
-										"bypass_rate_limiter": schema.BoolAttribute{
-											Description: "bypass_rate_limiter Bypass the rate limiter configured on the HTTP loadbalancer.",
+										"apply_rate_limiter": schema.BoolAttribute{
+											Description: "apply_rate_limiter Apply the rate limiter configured on the HTTP loadbalancer.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
-										"apply_rate_limiter": schema.BoolAttribute{
-											Description: "apply_rate_limiter Apply the rate limiter configured on the HTTP loadbalancer.",
+										"bypass_rate_limiter": schema.BoolAttribute{
+											Description: "bypass_rate_limiter Bypass the rate limiter configured on the HTTP loadbalancer.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
@@ -1121,13 +719,13 @@ func (r *DataSourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request da
 													Optional:    false,
 													Computed:    true,
 												},
-												"tenant": schema.StringAttribute{
+												"namespace": schema.StringAttribute{
 													Description: "",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 												},
-												"namespace": schema.StringAttribute{
+												"tenant": schema.StringAttribute{
 													Description: "",
 													Required:    false,
 													Optional:    false,
@@ -1177,13 +775,13 @@ func (r *DataSourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request da
 													Computed:    true,
 													NestedObject: schema.NestedAttributeObject{
 														Attributes: map[string]schema.Attribute{
-															"namespace": schema.StringAttribute{
+															"name": schema.StringAttribute{
 																Description: "",
 																Required:    false,
 																Optional:    false,
 																Computed:    true,
 															},
-															"name": schema.StringAttribute{
+															"namespace": schema.StringAttribute{
 																Description: "",
 																Required:    false,
 																Optional:    false,
@@ -1194,6 +792,408 @@ func (r *DataSourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request da
 																Required:    false,
 																Optional:    false,
 																Computed:    true,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+								"country_choice": schema.SingleNestedAttribute{
+									Description: "country choice Match the country of origin. The country is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"any_country": schema.BoolAttribute{
+											Description: "any country",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"country_list": schema.SingleNestedAttribute{
+											Description: "country_list",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"country_codes": schema.ListAttribute{
+													Description: "country codes List of Country Codes",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"invert_match": schema.BoolAttribute{
+													Description: "invert_matcher Invert the match result.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+								"domain_matcher": schema.SingleNestedAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"exact_values": schema.ListAttribute{
+											Description: "exact values A list of exact values to match the input against.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"regex_values": schema.ListAttribute{
+											Description: "regex values A list of regular expressions to match the input against.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+								"headers": schema.ListNestedAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"invert_matcher": schema.BoolAttribute{
+												Description: "invert_matcher Invert the match result.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"match_choice": schema.SingleNestedAttribute{
+												Description: "match Select Match Options.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"check_not_present": schema.BoolAttribute{
+														Description: "check_not_present Check that the header is not present.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"check_present": schema.BoolAttribute{
+														Description: "check_present Check that the header is present.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"item": schema.SingleNestedAttribute{
+														Description: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"exact_values": schema.ListAttribute{
+																Description: "exact values A list of exact values to match the input against.",
+																ElementType: types.StringType,
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"regex_values": schema.ListAttribute{
+																Description: "regex values A list of regular expressions to match the input against.",
+																ElementType: types.StringType,
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"transformers": schema.ListAttribute{
+																Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
+																ElementType: types.StringType,
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+												},
+											},
+											"name": schema.StringAttribute{
+												Description: "name A case-insensitive HTTP header name.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+								},
+								"http_method": schema.SingleNestedAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"invert_matcher": schema.BoolAttribute{
+											Description: "invert_matcher Invert the match result.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"methods": schema.ListAttribute{
+											Description: "methods List of methods values to match against.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+								"ip_choice": schema.SingleNestedAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"any_ip": schema.BoolAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"ip_matcher": schema.SingleNestedAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"invert_matcher": schema.BoolAttribute{
+													Description: "invert_matcher Invert the match result.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"prefix_sets": schema.ListNestedAttribute{
+													Description: "prefix_sets A list of references to ip_prefix_set objects.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"name": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"namespace": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"tenant": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+												},
+											},
+										},
+										"ip_prefix_list": schema.SingleNestedAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"invert_match": schema.BoolAttribute{
+													Description: "invert_matcher Invert the match result.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"ip_prefixes": schema.ListAttribute{
+													Description: "ip prefixes List of IPv4 prefix strings.",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"ipv6_prefixes": schema.ListAttribute{
+													Description: "ipv6 prefixes List of IPv6 prefix strings.",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+								"path": schema.SingleNestedAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"encoded_path_matcher": schema.BoolAttribute{
+											Description: "Encoded_Path Match against the encoded, escaped path",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"exact_values": schema.ListAttribute{
+											Description: "exact values A list of exact path values to match the input HTTP path against.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"invert_matcher": schema.BoolAttribute{
+											Description: "invert_matcher Invert the match result.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"prefix_values": schema.ListAttribute{
+											Description: "prefix values A list of path prefix values to match the input HTTP path against.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"regex_values": schema.ListAttribute{
+											Description: "regex values A list of regular expressions to match the input HTTP path against.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"suffix_values": schema.ListAttribute{
+											Description: "Suffix values A list of path suffix values to match the input HTTP path against.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"transformers": schema.ListAttribute{
+											Description: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+								"segment_policy": schema.SingleNestedAttribute{
+									Description: "Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"dst_segment_choice": schema.SingleNestedAttribute{
+											Description: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"dst_any": schema.BoolAttribute{
+													Description: "Any segment Traffic is not matched against any segment",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"dst_segments": schema.SingleNestedAttribute{
+													Description: "List of segments Traffic is matched against destination segment in selected segments",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"segments": schema.ListNestedAttribute{
+															Description: "Segments Select list of segments",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															NestedObject: schema.NestedAttributeObject{
+																Attributes: map[string]schema.Attribute{
+																	"name": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"namespace": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"tenant": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+														},
+													},
+												},
+												"intra_segment": schema.BoolAttribute{
+													Description: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"src_segment_choice": schema.SingleNestedAttribute{
+											Description: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"src_any": schema.BoolAttribute{
+													Description: "Any segment Traffic is not matched against any segment",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"src_segments": schema.SingleNestedAttribute{
+													Description: "List of segments Source traffic is matched against selected segments",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"segments": schema.ListNestedAttribute{
+															Description: "Segments Select list of segments",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															NestedObject: schema.NestedAttributeObject{
+																Attributes: map[string]schema.Attribute{
+																	"name": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"namespace": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"tenant": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
 															},
 														},
 													},
@@ -1254,15 +1254,14 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -1277,33 +1276,6 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -1326,11 +1298,38 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot ArrayOfPointerField --> Rules
-	if len(specData.Rules) > 0 {
-		rulesElements := make([]RateLimiterPolicyRateLimiterPolicyRateLimiterRule, 0, len(specData.Rules))
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
-		for _, rulesElement := range specData.Rules {
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot ArrayOfPointerField --> Rules
+	if len(specData.GetRules()) > 0 {
+		rulesElements := make([]RateLimiterPolicyRateLimiterPolicyRateLimiterRule, 0, len(specData.GetRules()))
+
+		for _, rulesElement := range specData.GetRules() {
 			rateLimiterPolicyRateLimiterPolicyRateLimiterRuleModel := RateLimiterPolicyRateLimiterPolicyRateLimiterRule{}
 
 			// data specToModelNested RequiredPointerField --> Metadata
@@ -1341,14 +1340,6 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 
 				// Recursively populate the nested struct
 
-				// data specToModelNested RequiredStringField --> Name
-				if metadataElement.GetName() != "" {
-					rateLimiterPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-				} else {
-					// Empty string, set to null
-					rateLimiterPolicyMessageMetaTypeModel.Name = types.StringNull()
-				}
-
 				// data specToModelNested StringField --> Description
 				if metadataElement.GetDescription() != "" {
 					rateLimiterPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -1357,9 +1348,17 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 					rateLimiterPolicyMessageMetaTypeModel.Description = types.StringNull()
 				}
 
+				// data specToModelNested RequiredStringField --> Name
+				if metadataElement.GetName() != "" {
+					rateLimiterPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+				} else {
+					// Empty string, set to null
+					rateLimiterPolicyMessageMetaTypeModel.Name = types.StringNull()
+				}
+
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				rateLimiterPolicyMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesMetadataModelAttributeMap, rateLimiterPolicyMessageMetaTypeModel)
-				response.Diagnostics.Append(diags...)
+				rateLimiterPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesMetadataModelAttributeMap, rateLimiterPolicyMessageMetaTypeModel)
+				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1383,842 +1382,6 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 
 				// Recursively populate the nested struct
 
-				// data specToModelNested PointerField --> Path
-				if specElement.GetPath() != nil {
-					// Create the nested Go struct
-					rateLimiterPolicyPolicyPathMatcherTypeModel := &RateLimiterPolicyPolicyPathMatcherType{}
-					pathElement := specElement.GetPath()
-
-					// Recursively populate the nested struct
-
-					// data specToModelNested ArrayOfStringField --> ExactValues
-					if len(pathElement.GetExactValues()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, pathElement.GetExactValues())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyPathMatcherTypeModel.ExactValues = listValue
-					} else {
-						rateLimiterPolicyPolicyPathMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested ArrayOfStringField --> RegexValues
-					if len(pathElement.GetRegexValues()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, pathElement.GetRegexValues())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyPathMatcherTypeModel.RegexValues = listValue
-					} else {
-						rateLimiterPolicyPolicyPathMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested ArrayOfStringField --> SuffixValues
-					if len(pathElement.GetSuffixValues()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, pathElement.GetSuffixValues())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyPathMatcherTypeModel.SuffixValues = listValue
-					} else {
-						rateLimiterPolicyPolicyPathMatcherTypeModel.SuffixValues = types.ListNull(types.StringType)
-					}
-
-					// data SpecToModelNested ArrayOfEnumField --> Transformers
-					if len(pathElement.GetTransformers()) > 0 {
-						transformersStrings := make([]string, 0, len(pathElement.GetTransformers()))
-						for _, v := range pathElement.GetTransformers() {
-							if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-								transformersStrings = append(transformersStrings, strVal)
-							}
-						}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyPathMatcherTypeModel.Transformers = listValue
-					} else {
-						rateLimiterPolicyPolicyPathMatcherTypeModel.Transformers = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested BoolField --> InvertMatcher
-					rateLimiterPolicyPolicyPathMatcherTypeModel.InvertMatcher = types.BoolValue(bool(pathElement.GetInvertMatcher()))
-
-					// data specToModelNested BoolField --> EncodedPathMatcher
-					rateLimiterPolicyPolicyPathMatcherTypeModel.EncodedPathMatcher = types.BoolValue(bool(pathElement.GetEncodedPathMatcher()))
-
-					// data specToModelNested ArrayOfStringField --> PrefixValues
-					if len(pathElement.GetPrefixValues()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, pathElement.GetPrefixValues())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyPathMatcherTypeModel.PrefixValues = listValue
-					} else {
-						rateLimiterPolicyPolicyPathMatcherTypeModel.PrefixValues = types.ListNull(types.StringType)
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					rateLimiterPolicyPolicyPathMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecPathModelAttributeMap, rateLimiterPolicyPolicyPathMatcherTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Path = rateLimiterPolicyPolicyPathMatcherTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-					// because the API may always return a non-nil struct (with REDACTED values) for this field,
-					// making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Path = types.ObjectNull(RateLimiterPolicyRulesSpecPathModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> IpChoice
-				if specElement.GetIpChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					specipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					specipChoiceChoices := specElement.GetIpChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> AnyIp
-					_, isAnyIp := specipChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AnyIp)
-
-					if isAnyIp {
-						specipChoiceChoicesAttributeMap["any_ip"] = types.BoolValue(true)
-					} else {
-						specipChoiceChoicesAttributeMap["any_ip"] = types.BoolNull()
-					}
-
-					// data specToModelNested PointerOfOneOfField --> IpPrefixList
-					// <no value>
-					// false
-					{
-						ipPrefixListOptions, isIpPrefixList := specipChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_IpPrefixList)
-						ipPrefixListAttributeMap := make(map[string]attr.Value)
-
-						if isIpPrefixList && ipPrefixListOptions != nil {
-
-							// data specToModelNested ArrayOfStringField --> IpPrefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpPrefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpPrefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ip_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// data specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListOptions.IpPrefixList.GetInvertMatch()))
-
-							ipPrefixListObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							specipChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
-						} else {
-							specipChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap)
-						}
-					}
-
-					// data specToModelNested PointerOfOneOfField --> IpMatcher
-					// <no value>
-					// false
-					{
-						ipMatcherOptions, isIpMatcher := specipChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_IpMatcher)
-						ipMatcherAttributeMap := make(map[string]attr.Value)
-
-						if isIpMatcher && ipMatcherOptions != nil {
-
-							// data specToModelNested RequiredArrayOfPointerField --> PrefixSets
-							if len(ipMatcherOptions.IpMatcher.GetPrefixSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipMatcherOptions.IpMatcher.GetPrefixSets()))
-								for _, prefixSetsElement := range ipMatcherOptions.IpMatcher.GetPrefixSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// data specToModelNested RequiredStringField --> Name
-									if prefixSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if prefixSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if prefixSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								prefixSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicyPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipMatcherAttributeMap["prefix_sets"] = prefixSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								ipMatcherAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicyPrefixSetsObjectRefModelAttributeMap})
-							}
-
-							// data specToModelNested BoolField --> InvertMatcher
-							ipMatcherAttributeMap["invert_matcher"] = types.BoolValue(bool(ipMatcherOptions.IpMatcher.GetInvertMatcher()))
-
-							ipMatcherObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap, ipMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							specipChoiceChoicesAttributeMap["ip_matcher"] = ipMatcherObj
-						} else {
-							specipChoiceChoicesAttributeMap["ip_matcher"] = types.ObjectNull(RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, specipChoiceChoicesObjDiags := types.ObjectValue(
-						RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						specipChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(specipChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.IpChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.IpChoice = types.ObjectNull(RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested RequiredOneOfField --> CountryChoice
-				// <no value>
-				if specElement.GetCountryChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					speccountryChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					speccountryChoiceChoices := specElement.GetCountryChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> AnyCountry
-					_, isAnyCountry := speccountryChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AnyCountry)
-
-					if isAnyCountry {
-						speccountryChoiceChoicesAttributeMap["any_country"] = types.BoolValue(true)
-					} else {
-						speccountryChoiceChoicesAttributeMap["any_country"] = types.BoolNull()
-					}
-
-					// data specToModelNested PointerOfOneOfField --> CountryList
-					// <no value>
-					// false
-					{
-						countryListOptions, isCountryList := speccountryChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_CountryList)
-						countryListAttributeMap := make(map[string]attr.Value)
-
-						if isCountryList && countryListOptions != nil {
-
-							// data SpecToModelNested RequiredArrayOfEnumField --> CountryCodes
-							if len(countryListOptions.CountryList.GetCountryCodes()) > 0 {
-								countryCodesStrings := make([]string, 0, len(countryListOptions.CountryList.GetCountryCodes()))
-								for _, v := range countryListOptions.CountryList.GetCountryCodes() {
-									if strVal, exists := ves_io_schema_policy.CountryCode_name[int32(v)]; exists {
-										countryCodesStrings = append(countryCodesStrings, strVal)
-									}
-								}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, countryCodesStrings)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								countryListAttributeMap["country_codes"] = listValue
-							} else {
-								countryListAttributeMap["country_codes"] = types.ListNull(types.StringType)
-							}
-
-							// data specToModelNested BoolField --> InvertMatch
-							countryListAttributeMap["invert_match"] = types.BoolValue(bool(countryListOptions.CountryList.GetInvertMatch()))
-
-							countryListObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap, countryListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							speccountryChoiceChoicesAttributeMap["country_list"] = countryListObj
-						} else {
-							speccountryChoiceChoicesAttributeMap["country_list"] = types.ObjectNull(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, speccountryChoiceChoicesObjDiags := types.ObjectValue(
-						RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						speccountryChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(speccountryChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.CountryChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.CountryChoice = types.ObjectNull(RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested PointerField --> HttpMethod
-				if specElement.GetHttpMethod() != nil {
-					// Create the nested Go struct
-					rateLimiterPolicyPolicyHttpMethodMatcherTypeModel := &RateLimiterPolicyPolicyHttpMethodMatcherType{}
-					httpMethodElement := specElement.GetHttpMethod()
-
-					// Recursively populate the nested struct
-
-					// data SpecToModelNested ArrayOfEnumField --> Methods
-					if len(httpMethodElement.GetMethods()) > 0 {
-						methodsStrings := make([]string, 0, len(httpMethodElement.GetMethods()))
-						for _, v := range httpMethodElement.GetMethods() {
-							if strVal, exists := ves_io_schema.HttpMethod_name[int32(v)]; exists {
-								methodsStrings = append(methodsStrings, strVal)
-							}
-						}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, methodsStrings)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyHttpMethodMatcherTypeModel.Methods = listValue
-					} else {
-						rateLimiterPolicyPolicyHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested BoolField --> InvertMatcher
-					rateLimiterPolicyPolicyHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(httpMethodElement.GetInvertMatcher()))
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					rateLimiterPolicyPolicyHttpMethodMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecHttpMethodModelAttributeMap, rateLimiterPolicyPolicyHttpMethodMatcherTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.HttpMethod = rateLimiterPolicyPolicyHttpMethodMatcherTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-					// because the API may always return a non-nil struct (with REDACTED values) for this field,
-					// making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.HttpMethod = types.ObjectNull(RateLimiterPolicyRulesSpecHttpMethodModelAttributeMap)
-				}
-
-				// data specToModelNested PointerField --> DomainMatcher
-				if specElement.GetDomainMatcher() != nil {
-					// Create the nested Go struct
-					rateLimiterPolicyPolicyMatcherTypeBasicModel := &RateLimiterPolicyPolicyMatcherTypeBasic{}
-					domainMatcherElement := specElement.GetDomainMatcher()
-
-					// Recursively populate the nested struct
-
-					// data specToModelNested ArrayOfStringField --> ExactValues
-					if len(domainMatcherElement.GetExactValues()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, domainMatcherElement.GetExactValues())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyMatcherTypeBasicModel.ExactValues = listValue
-					} else {
-						rateLimiterPolicyPolicyMatcherTypeBasicModel.ExactValues = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested ArrayOfStringField --> RegexValues
-					if len(domainMatcherElement.GetRegexValues()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, domainMatcherElement.GetRegexValues())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						rateLimiterPolicyPolicyMatcherTypeBasicModel.RegexValues = listValue
-					} else {
-						rateLimiterPolicyPolicyMatcherTypeBasicModel.RegexValues = types.ListNull(types.StringType)
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					rateLimiterPolicyPolicyMatcherTypeBasicModelObj, diags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecDomainMatcherModelAttributeMap, rateLimiterPolicyPolicyMatcherTypeBasicModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.DomainMatcher = rateLimiterPolicyPolicyMatcherTypeBasicModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-					// because the API may always return a non-nil struct (with REDACTED values) for this field,
-					// making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.DomainMatcher = types.ObjectNull(RateLimiterPolicyRulesSpecDomainMatcherModelAttributeMap)
-				}
-
-				// data specToModelNested ArrayOfPointerField --> Headers
-				if len(specElement.GetHeaders()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					headersElements := make([]RateLimiterPolicyPolicyHeaderMatcherType, 0, len(specElement.GetHeaders()))
-					for _, headersElement := range specElement.GetHeaders() {
-						rateLimiterPolicyPolicyHeaderMatcherTypeModel := RateLimiterPolicyPolicyHeaderMatcherType{}
-
-						// data specToModelNested RequiredStringField --> Name
-						if headersElement.GetName() != "" {
-							rateLimiterPolicyPolicyHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
-						} else {
-							// Empty string, set to null
-							rateLimiterPolicyPolicyHeaderMatcherTypeModel.Name = types.StringNull()
-						}
-
-						// data specToModelNested RequiredOneOfField --> Match
-						// <no value>
-						if headersElement.GetMatch() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							headersmatchChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							headersmatchChoiceChoices := headersElement.GetMatch()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> Item
-							// <no value>
-							// false
-							{
-								itemOptions, isItem := headersmatchChoiceChoices.(*ves_io_schema_policy.HeaderMatcherType_Item)
-								itemAttributeMap := make(map[string]attr.Value)
-
-								if isItem && itemOptions != nil {
-
-									// data specToModelNested ArrayOfStringField --> RegexValues
-									if len(itemOptions.Item.GetRegexValues()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, itemOptions.Item.GetRegexValues())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										itemAttributeMap["regex_values"] = listValue
-									} else {
-										itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
-									}
-
-									// data SpecToModelNested ArrayOfEnumField --> Transformers
-									if len(itemOptions.Item.GetTransformers()) > 0 {
-										transformersStrings := make([]string, 0, len(itemOptions.Item.GetTransformers()))
-										for _, v := range itemOptions.Item.GetTransformers() {
-											if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-												transformersStrings = append(transformersStrings, strVal)
-											}
-										}
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										itemAttributeMap["transformers"] = listValue
-									} else {
-										itemAttributeMap["transformers"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested ArrayOfStringField --> ExactValues
-									if len(itemOptions.Item.GetExactValues()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, itemOptions.Item.GetExactValues())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										itemAttributeMap["exact_values"] = listValue
-									} else {
-										itemAttributeMap["exact_values"] = types.ListNull(types.StringType)
-									}
-
-									itemObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap, itemAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									headersmatchChoiceChoicesAttributeMap["item"] = itemObj
-								} else {
-									headersmatchChoiceChoicesAttributeMap["item"] = types.ObjectNull(RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> CheckPresent
-							_, isCheckPresent := headersmatchChoiceChoices.(*ves_io_schema_policy.HeaderMatcherType_CheckPresent)
-
-							if isCheckPresent {
-								headersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolValue(true)
-							} else {
-								headersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> CheckNotPresent
-							_, isCheckNotPresent := headersmatchChoiceChoices.(*ves_io_schema_policy.HeaderMatcherType_CheckNotPresent)
-
-							if isCheckNotPresent {
-								headersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolValue(true)
-							} else {
-								headersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, headersmatchChoiceChoicesObjDiags := types.ObjectValue(
-								RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap, // The attribute schema for the OneOf choices
-								headersmatchChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(headersmatchChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							rateLimiterPolicyPolicyHeaderMatcherTypeModel.MatchChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							rateLimiterPolicyPolicyHeaderMatcherTypeModel.MatchChoice = types.ObjectNull(RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap)
-						}
-
-						// data specToModelNested BoolField --> InvertMatcher
-						rateLimiterPolicyPolicyHeaderMatcherTypeModel.InvertMatcher = types.BoolValue(bool(headersElement.GetInvertMatcher()))
-
-						headersElements = append(headersElements, rateLimiterPolicyPolicyHeaderMatcherTypeModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					headersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicyRulesSpecHeadersModelAttributeMap}, headersElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Headers = headersListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Headers = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicyRulesSpecHeadersModelAttributeMap})
-				}
-
-				// data specToModelNested PointerField --> SegmentPolicy
-				if specElement.GetSegmentPolicy() != nil {
-					// Create the nested Go struct
-					rateLimiterPolicyPolicySegmentPolicyTypeModel := &RateLimiterPolicyPolicySegmentPolicyType{}
-					segmentPolicyElement := specElement.GetSegmentPolicy()
-
-					// Recursively populate the nested struct
-
-					// data specToModelNested OneOfField --> SrcSegmentChoice
-					if segmentPolicyElement.GetSrcSegmentChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						segmentPolicysrcSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						segmentPolicysrcSegmentChoiceChoices := segmentPolicyElement.GetSrcSegmentChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> SrcAny
-						_, isSrcAny := segmentPolicysrcSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_SrcAny)
-
-						if isSrcAny {
-							segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_any"] = types.BoolValue(true)
-						} else {
-							segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_any"] = types.BoolNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> SrcSegments
-						// <no value>
-						// false
-						{
-							srcSegmentsOptions, isSrcSegments := segmentPolicysrcSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_SrcSegments)
-							srcSegmentsAttributeMap := make(map[string]attr.Value)
-
-							if isSrcSegments && srcSegmentsOptions != nil {
-
-								// data specToModelNested RequiredArrayOfPointerField --> Segments
-								if len(srcSegmentsOptions.SrcSegments.GetSegments()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									segmentsElements := make([]ObjectRefTypeModel, 0, len(srcSegmentsOptions.SrcSegments.GetSegments()))
-									for _, segmentsElement := range srcSegmentsOptions.SrcSegments.GetSegments() {
-										objectRefTypeModelModel := ObjectRefTypeModel{}
-
-										// data specToModelNested RequiredStringField --> Name
-										if segmentsElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if segmentsElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if segmentsElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									segmentsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									srcSegmentsAttributeMap["segments"] = segmentsListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									srcSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap})
-								}
-
-								srcSegmentsObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap, srcSegmentsAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_segments"] = srcSegmentsObj
-							} else {
-								segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_segments"] = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, segmentPolicysrcSegmentChoiceChoicesObjDiags := types.ObjectValue(
-							RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							segmentPolicysrcSegmentChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(segmentPolicysrcSegmentChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						rateLimiterPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						rateLimiterPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested OneOfField --> DstSegmentChoice
-					if segmentPolicyElement.GetDstSegmentChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DstAny
-						_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-
-						if isDstAny {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> IntraSegment
-						_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-
-						if isIntraSegment {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-						} else {
-							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> DstSegments
-						// <no value>
-						// false
-						{
-							dstSegmentsOptions, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-							dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-							if isDstSegments && dstSegmentsOptions != nil {
-
-								// data specToModelNested RequiredArrayOfPointerField --> Segments
-								if len(dstSegmentsOptions.DstSegments.GetSegments()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsOptions.DstSegments.GetSegments()))
-									for _, segmentsElement := range dstSegmentsOptions.DstSegments.GetSegments() {
-										objectRefTypeModelModel := ObjectRefTypeModel{}
-
-										// data specToModelNested RequiredStringField --> Name
-										if segmentsElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if segmentsElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if segmentsElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									segmentsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap})
-								}
-
-								dstSegmentsObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-							} else {
-								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-							RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							segmentPolicydstSegmentChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						rateLimiterPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						rateLimiterPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap)
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					rateLimiterPolicyPolicySegmentPolicyTypeModelObj, diags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap, rateLimiterPolicyPolicySegmentPolicyTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.SegmentPolicy = rateLimiterPolicyPolicySegmentPolicyTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-					// because the API may always return a non-nil struct (with REDACTED values) for this field,
-					// making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.SegmentPolicy = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap)
-				}
-
 				// data specToModelNested RequiredOneOfField --> ActionChoice
 				// <no value>
 				if specElement.GetActionChoice() != nil {
@@ -2231,15 +1394,6 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 
 					// Process nested choices, populating the temporary attribute map
 
-					// data specToModelNested BoolOfOneOfPointerField --> BypassRateLimiter
-					_, isBypassRateLimiter := specactionChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_BypassRateLimiter)
-
-					if isBypassRateLimiter {
-						specactionChoiceChoicesAttributeMap["bypass_rate_limiter"] = types.BoolValue(true)
-					} else {
-						specactionChoiceChoicesAttributeMap["bypass_rate_limiter"] = types.BoolNull()
-					}
-
 					// data specToModelNested BoolOfOneOfPointerField --> ApplyRateLimiter
 					_, isApplyRateLimiter := specactionChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_ApplyRateLimiter)
 
@@ -2249,41 +1403,51 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 						specactionChoiceChoicesAttributeMap["apply_rate_limiter"] = types.BoolNull()
 					}
 
+					// data specToModelNested BoolOfOneOfPointerField --> BypassRateLimiter
+					_, isBypassRateLimiter := specactionChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_BypassRateLimiter)
+
+					if isBypassRateLimiter {
+						specactionChoiceChoicesAttributeMap["bypass_rate_limiter"] = types.BoolValue(true)
+					} else {
+						specactionChoiceChoicesAttributeMap["bypass_rate_limiter"] = types.BoolNull()
+					}
+
 					// data specToModelNested PointerOfOneOfField --> CustomRateLimiter
 					// <no value>
 					// false
 					{
-						customRateLimiterOptions, isCustomRateLimiter := specactionChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_CustomRateLimiter)
+						customRateLimiterOptionsWrapper, isCustomRateLimiter := specactionChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_CustomRateLimiter)
 						customRateLimiterAttributeMap := make(map[string]attr.Value)
 
-						if isCustomRateLimiter && customRateLimiterOptions != nil {
+						if isCustomRateLimiter && customRateLimiterOptionsWrapper != nil && customRateLimiterOptionsWrapper.CustomRateLimiter != nil {
+							customRateLimiterElement := customRateLimiterOptionsWrapper.CustomRateLimiter
 
 							// data specToModelNested RequiredStringField --> Name
-							if customRateLimiterOptions.CustomRateLimiter.GetName() != "" {
-								customRateLimiterAttributeMap["name"] = types.StringValue(customRateLimiterOptions.CustomRateLimiter.GetName())
+							if customRateLimiterElement.GetName() != "" {
+								customRateLimiterAttributeMap["name"] = types.StringValue(customRateLimiterElement.GetName())
 							} else {
 								// Empty string, set to null
 								customRateLimiterAttributeMap["name"] = types.StringNull()
 							}
 
-							// data specToModelNested StringField --> Tenant
-							if customRateLimiterOptions.CustomRateLimiter.GetTenant() != "" {
-								customRateLimiterAttributeMap["tenant"] = types.StringValue(customRateLimiterOptions.CustomRateLimiter.GetTenant())
-							} else {
-								// Empty string, set to null
-								customRateLimiterAttributeMap["tenant"] = types.StringNull()
-							}
-
 							// data specToModelNested RequiredStringField --> Namespace
-							if customRateLimiterOptions.CustomRateLimiter.GetNamespace() != "" {
-								customRateLimiterAttributeMap["namespace"] = types.StringValue(customRateLimiterOptions.CustomRateLimiter.GetNamespace())
+							if customRateLimiterElement.GetNamespace() != "" {
+								customRateLimiterAttributeMap["namespace"] = types.StringValue(customRateLimiterElement.GetNamespace())
 							} else {
 								// Empty string, set to null
 								customRateLimiterAttributeMap["namespace"] = types.StringNull()
 							}
 
-							customRateLimiterObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecActionChoiceCustomRateLimiterModelAttributeMap, customRateLimiterAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// data specToModelNested StringField --> Tenant
+							if customRateLimiterElement.GetTenant() != "" {
+								customRateLimiterAttributeMap["tenant"] = types.StringValue(customRateLimiterElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								customRateLimiterAttributeMap["tenant"] = types.StringNull()
+							}
+
+							customRateLimiterObj, customRateLimiterObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecActionChoiceCustomRateLimiterModelAttributeMap, customRateLimiterAttributeMap)
+							response.Diagnostics.Append(customRateLimiterObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -2336,16 +1500,17 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 					// <no value>
 					// false
 					{
-						asnListOptions, isAsnList := specasnChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AsnList)
+						asnListOptionsWrapper, isAsnList := specasnChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AsnList)
 						asnListAttributeMap := make(map[string]attr.Value)
 
-						if isAsnList && asnListOptions != nil {
+						if isAsnList && asnListOptionsWrapper != nil && asnListOptionsWrapper.AsnList != nil {
+							asnListElement := asnListOptionsWrapper.AsnList
 
 							// data specToModelNested RequiredArrayOfUintField --> AsNumbers
-							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
+							asNumbersValue := asnListElement.GetAsNumbers()
 							if len(asNumbersValue) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
-								response.Diagnostics.Append(diags...)
+								listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asnListElement.GetAsNumbers())
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2354,8 +1519,8 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
 							}
 
-							asnListObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecAsnChoiceAsnListModelAttributeMap, asnListAttributeMap)
-							response.Diagnostics.Append(diags...)
+							asnListObj, asnListObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecAsnChoiceAsnListModelAttributeMap, asnListAttributeMap)
+							response.Diagnostics.Append(asnListObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -2369,26 +1534,19 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 					// <no value>
 					// false
 					{
-						asnMatcherOptions, isAsnMatcher := specasnChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AsnMatcher)
+						asnMatcherOptionsWrapper, isAsnMatcher := specasnChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AsnMatcher)
 						asnMatcherAttributeMap := make(map[string]attr.Value)
 
-						if isAsnMatcher && asnMatcherOptions != nil {
+						if isAsnMatcher && asnMatcherOptionsWrapper != nil && asnMatcherOptionsWrapper.AsnMatcher != nil {
+							asnMatcherElement := asnMatcherOptionsWrapper.AsnMatcher
 
 							// data specToModelNested RequiredArrayOfPointerField --> AsnSets
-							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
+							if len(asnMatcherElement.GetAsnSets()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
-								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
+								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherElement.GetAsnSets()))
+								for _, asnSetsElement := range asnMatcherElement.GetAsnSets() {
 									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if asnSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if asnSetsElement.GetName() != "" {
@@ -2396,6 +1554,14 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 									} else {
 										// Empty string, set to null
 										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if asnSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
 									}
 
 									// data specToModelNested StringField --> Tenant
@@ -2410,8 +1576,8 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicyAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
-								response.Diagnostics.Append(diags...)
+								asnSetsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicyAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2424,8 +1590,8 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicyAsnSetsObjectRefModelAttributeMap})
 							}
 
-							asnMatcherObj, diags := types.ObjectValue(RateLimiterPolicyRulesSpecAsnChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
+							asnMatcherObj, asnMatcherObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecAsnChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
+							response.Diagnostics.Append(asnMatcherObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -2454,9 +1620,851 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.AsnChoice = types.ObjectNull(RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap)
 				}
 
+				// data specToModelNested RequiredOneOfField --> CountryChoice
+				// <no value>
+				if specElement.GetCountryChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					speccountryChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					speccountryChoiceChoices := specElement.GetCountryChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> AnyCountry
+					_, isAnyCountry := speccountryChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AnyCountry)
+
+					if isAnyCountry {
+						speccountryChoiceChoicesAttributeMap["any_country"] = types.BoolValue(true)
+					} else {
+						speccountryChoiceChoicesAttributeMap["any_country"] = types.BoolNull()
+					}
+
+					// data specToModelNested PointerOfOneOfField --> CountryList
+					// <no value>
+					// false
+					{
+						countryListOptionsWrapper, isCountryList := speccountryChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_CountryList)
+						countryListAttributeMap := make(map[string]attr.Value)
+
+						if isCountryList && countryListOptionsWrapper != nil && countryListOptionsWrapper.CountryList != nil {
+							countryListElement := countryListOptionsWrapper.CountryList
+
+							// data SpecToModelNested RequiredArrayOfEnumField --> CountryCodes
+							if len(countryListElement.GetCountryCodes()) > 0 {
+								countryCodesStrings := make([]string, 0, len(countryListElement.GetCountryCodes()))
+								for _, v := range countryListElement.GetCountryCodes() {
+									if strVal, exists := ves_io_schema_policy.CountryCode_name[int32(v)]; exists {
+										countryCodesStrings = append(countryCodesStrings, strVal)
+									}
+								}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, countryCodesStrings)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								countryListAttributeMap["country_codes"] = listValue
+							} else {
+								countryListAttributeMap["country_codes"] = types.ListNull(types.StringType)
+							}
+
+							// data specToModelNested BoolField --> InvertMatch
+							countryListAttributeMap["invert_match"] = types.BoolValue(bool(countryListElement.GetInvertMatch()))
+
+							countryListObj, countryListObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap, countryListAttributeMap)
+							response.Diagnostics.Append(countryListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							speccountryChoiceChoicesAttributeMap["country_list"] = countryListObj
+						} else {
+							speccountryChoiceChoicesAttributeMap["country_list"] = types.ObjectNull(RateLimiterPolicyRulesSpecCountryChoiceCountryListModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, speccountryChoiceChoicesObjDiags := types.ObjectValue(
+						RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						speccountryChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(speccountryChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.CountryChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.CountryChoice = types.ObjectNull(RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested PointerField --> DomainMatcher
+				if specElement.GetDomainMatcher() != nil {
+					// Create the nested Go struct
+					rateLimiterPolicyPolicyMatcherTypeBasicModel := &RateLimiterPolicyPolicyMatcherTypeBasic{}
+					domainMatcherElement := specElement.GetDomainMatcher()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested ArrayOfStringField --> ExactValues
+					if len(domainMatcherElement.GetExactValues()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, domainMatcherElement.GetExactValues())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyMatcherTypeBasicModel.ExactValues = listValue
+					} else {
+						rateLimiterPolicyPolicyMatcherTypeBasicModel.ExactValues = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested ArrayOfStringField --> RegexValues
+					if len(domainMatcherElement.GetRegexValues()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, domainMatcherElement.GetRegexValues())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyMatcherTypeBasicModel.RegexValues = listValue
+					} else {
+						rateLimiterPolicyPolicyMatcherTypeBasicModel.RegexValues = types.ListNull(types.StringType)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					rateLimiterPolicyPolicyMatcherTypeBasicModelObj, objDiags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecDomainMatcherModelAttributeMap, rateLimiterPolicyPolicyMatcherTypeBasicModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.DomainMatcher = rateLimiterPolicyPolicyMatcherTypeBasicModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+					// because the API may always return a non-nil struct (with REDACTED values) for this field,
+					// making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.DomainMatcher = types.ObjectNull(RateLimiterPolicyRulesSpecDomainMatcherModelAttributeMap)
+				}
+
+				// data specToModelNested ArrayOfPointerField --> Headers
+				if len(specElement.GetHeaders()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					headersElements := make([]RateLimiterPolicyPolicyHeaderMatcherType, 0, len(specElement.GetHeaders()))
+					for _, headersElement := range specElement.GetHeaders() {
+						rateLimiterPolicyPolicyHeaderMatcherTypeModel := RateLimiterPolicyPolicyHeaderMatcherType{}
+
+						// data specToModelNested BoolField --> InvertMatcher
+						rateLimiterPolicyPolicyHeaderMatcherTypeModel.InvertMatcher = types.BoolValue(bool(headersElement.GetInvertMatcher()))
+
+						// data specToModelNested RequiredOneOfField --> Match
+						// <no value>
+						if headersElement.GetMatch() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							headersmatchChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							headersmatchChoiceChoices := headersElement.GetMatch()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> CheckNotPresent
+							_, isCheckNotPresent := headersmatchChoiceChoices.(*ves_io_schema_policy.HeaderMatcherType_CheckNotPresent)
+
+							if isCheckNotPresent {
+								headersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolValue(true)
+							} else {
+								headersmatchChoiceChoicesAttributeMap["check_not_present"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> CheckPresent
+							_, isCheckPresent := headersmatchChoiceChoices.(*ves_io_schema_policy.HeaderMatcherType_CheckPresent)
+
+							if isCheckPresent {
+								headersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolValue(true)
+							} else {
+								headersmatchChoiceChoicesAttributeMap["check_present"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> Item
+							// <no value>
+							// false
+							{
+								itemOptionsWrapper, isItem := headersmatchChoiceChoices.(*ves_io_schema_policy.HeaderMatcherType_Item)
+								itemAttributeMap := make(map[string]attr.Value)
+
+								if isItem && itemOptionsWrapper != nil && itemOptionsWrapper.Item != nil {
+									itemElement := itemOptionsWrapper.Item
+
+									// data specToModelNested ArrayOfStringField --> ExactValues
+									if len(itemElement.GetExactValues()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, itemElement.GetExactValues())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										itemAttributeMap["exact_values"] = listValue
+									} else {
+										itemAttributeMap["exact_values"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested ArrayOfStringField --> RegexValues
+									if len(itemElement.GetRegexValues()) > 0 {
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, itemElement.GetRegexValues())
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										itemAttributeMap["regex_values"] = listValue
+									} else {
+										itemAttributeMap["regex_values"] = types.ListNull(types.StringType)
+									}
+
+									// data SpecToModelNested ArrayOfEnumField --> Transformers
+									if len(itemElement.GetTransformers()) > 0 {
+										transformersStrings := make([]string, 0, len(itemElement.GetTransformers()))
+										for _, v := range itemElement.GetTransformers() {
+											if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
+												transformersStrings = append(transformersStrings, strVal)
+											}
+										}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										itemAttributeMap["transformers"] = listValue
+									} else {
+										itemAttributeMap["transformers"] = types.ListNull(types.StringType)
+									}
+
+									itemObj, itemObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap, itemAttributeMap)
+									response.Diagnostics.Append(itemObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									headersmatchChoiceChoicesAttributeMap["item"] = itemObj
+								} else {
+									headersmatchChoiceChoicesAttributeMap["item"] = types.ObjectNull(RateLimiterPolicyRulesSpecHeadersMatchItemModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, headersmatchChoiceChoicesObjDiags := types.ObjectValue(
+								RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap, // The attribute schema for the OneOf choices
+								headersmatchChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(headersmatchChoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							rateLimiterPolicyPolicyHeaderMatcherTypeModel.MatchChoice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							rateLimiterPolicyPolicyHeaderMatcherTypeModel.MatchChoice = types.ObjectNull(RateLimiterPolicyRulesSpecHeadersMatchModelAttributeMap)
+						}
+
+						// data specToModelNested RequiredStringField --> Name
+						if headersElement.GetName() != "" {
+							rateLimiterPolicyPolicyHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
+						} else {
+							// Empty string, set to null
+							rateLimiterPolicyPolicyHeaderMatcherTypeModel.Name = types.StringNull()
+						}
+
+						headersElements = append(headersElements, rateLimiterPolicyPolicyHeaderMatcherTypeModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					headersListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicyRulesSpecHeadersModelAttributeMap}, headersElements)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Headers = headersListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Headers = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicyRulesSpecHeadersModelAttributeMap})
+				}
+
+				// data specToModelNested PointerField --> HttpMethod
+				if specElement.GetHttpMethod() != nil {
+					// Create the nested Go struct
+					rateLimiterPolicyPolicyHttpMethodMatcherTypeModel := &RateLimiterPolicyPolicyHttpMethodMatcherType{}
+					httpMethodElement := specElement.GetHttpMethod()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested BoolField --> InvertMatcher
+					rateLimiterPolicyPolicyHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(httpMethodElement.GetInvertMatcher()))
+
+					// data SpecToModelNested ArrayOfEnumField --> Methods
+					if len(httpMethodElement.GetMethods()) > 0 {
+						methodsStrings := make([]string, 0, len(httpMethodElement.GetMethods()))
+						for _, v := range httpMethodElement.GetMethods() {
+							if strVal, exists := ves_io_schema.HttpMethod_name[int32(v)]; exists {
+								methodsStrings = append(methodsStrings, strVal)
+							}
+						}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, methodsStrings)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyHttpMethodMatcherTypeModel.Methods = listValue
+					} else {
+						rateLimiterPolicyPolicyHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					rateLimiterPolicyPolicyHttpMethodMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecHttpMethodModelAttributeMap, rateLimiterPolicyPolicyHttpMethodMatcherTypeModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.HttpMethod = rateLimiterPolicyPolicyHttpMethodMatcherTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+					// because the API may always return a non-nil struct (with REDACTED values) for this field,
+					// making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.HttpMethod = types.ObjectNull(RateLimiterPolicyRulesSpecHttpMethodModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> IpChoice
+				if specElement.GetIpChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					specipChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					specipChoiceChoices := specElement.GetIpChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> AnyIp
+					_, isAnyIp := specipChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AnyIp)
+
+					if isAnyIp {
+						specipChoiceChoicesAttributeMap["any_ip"] = types.BoolValue(true)
+					} else {
+						specipChoiceChoicesAttributeMap["any_ip"] = types.BoolNull()
+					}
+
+					// data specToModelNested PointerOfOneOfField --> IpMatcher
+					// <no value>
+					// false
+					{
+						ipMatcherOptionsWrapper, isIpMatcher := specipChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_IpMatcher)
+						ipMatcherAttributeMap := make(map[string]attr.Value)
+
+						if isIpMatcher && ipMatcherOptionsWrapper != nil && ipMatcherOptionsWrapper.IpMatcher != nil {
+							ipMatcherElement := ipMatcherOptionsWrapper.IpMatcher
+
+							// data specToModelNested BoolField --> InvertMatcher
+							ipMatcherAttributeMap["invert_matcher"] = types.BoolValue(bool(ipMatcherElement.GetInvertMatcher()))
+
+							// data specToModelNested RequiredArrayOfPointerField --> PrefixSets
+							if len(ipMatcherElement.GetPrefixSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipMatcherElement.GetPrefixSets()))
+								for _, prefixSetsElement := range ipMatcherElement.GetPrefixSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// data specToModelNested RequiredStringField --> Name
+									if prefixSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if prefixSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if prefixSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								prefixSetsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicyPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								ipMatcherAttributeMap["prefix_sets"] = prefixSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								ipMatcherAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicyPrefixSetsObjectRefModelAttributeMap})
+							}
+
+							ipMatcherObj, ipMatcherObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap, ipMatcherAttributeMap)
+							response.Diagnostics.Append(ipMatcherObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							specipChoiceChoicesAttributeMap["ip_matcher"] = ipMatcherObj
+						} else {
+							specipChoiceChoicesAttributeMap["ip_matcher"] = types.ObjectNull(RateLimiterPolicyRulesSpecIpChoiceIpMatcherModelAttributeMap)
+						}
+					}
+
+					// data specToModelNested PointerOfOneOfField --> IpPrefixList
+					// <no value>
+					// false
+					{
+						ipPrefixListOptionsWrapper, isIpPrefixList := specipChoiceChoices.(*ves_io_schema_service_policy_rule.RateLimiterRuleSpec_IpPrefixList)
+						ipPrefixListAttributeMap := make(map[string]attr.Value)
+
+						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
+							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
+
+							// data specToModelNested BoolField --> InvertMatch
+							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
+
+							// data specToModelNested ArrayOfStringField --> IpPrefixes
+							if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpPrefixes())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								ipPrefixListAttributeMap["ip_prefixes"] = listValue
+							} else {
+								ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+							}
+
+							// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+							if len(ipPrefixListElement.GetIpv6Prefixes()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpv6Prefixes())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+							} else {
+								ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+							}
+
+							ipPrefixListObj, ipPrefixListObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
+							response.Diagnostics.Append(ipPrefixListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							specipChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
+						} else {
+							specipChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(RateLimiterPolicyRulesSpecIpChoiceIpPrefixListModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, specipChoiceChoicesObjDiags := types.ObjectValue(
+						RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						specipChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(specipChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.IpChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.IpChoice = types.ObjectNull(RateLimiterPolicyRulesSpecIpChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested PointerField --> Path
+				if specElement.GetPath() != nil {
+					// Create the nested Go struct
+					rateLimiterPolicyPolicyPathMatcherTypeModel := &RateLimiterPolicyPolicyPathMatcherType{}
+					pathElement := specElement.GetPath()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested BoolField --> EncodedPathMatcher
+					rateLimiterPolicyPolicyPathMatcherTypeModel.EncodedPathMatcher = types.BoolValue(bool(pathElement.GetEncodedPathMatcher()))
+
+					// data specToModelNested ArrayOfStringField --> ExactValues
+					if len(pathElement.GetExactValues()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, pathElement.GetExactValues())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyPathMatcherTypeModel.ExactValues = listValue
+					} else {
+						rateLimiterPolicyPolicyPathMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested BoolField --> InvertMatcher
+					rateLimiterPolicyPolicyPathMatcherTypeModel.InvertMatcher = types.BoolValue(bool(pathElement.GetInvertMatcher()))
+
+					// data specToModelNested ArrayOfStringField --> PrefixValues
+					if len(pathElement.GetPrefixValues()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, pathElement.GetPrefixValues())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyPathMatcherTypeModel.PrefixValues = listValue
+					} else {
+						rateLimiterPolicyPolicyPathMatcherTypeModel.PrefixValues = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested ArrayOfStringField --> RegexValues
+					if len(pathElement.GetRegexValues()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, pathElement.GetRegexValues())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyPathMatcherTypeModel.RegexValues = listValue
+					} else {
+						rateLimiterPolicyPolicyPathMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested ArrayOfStringField --> SuffixValues
+					if len(pathElement.GetSuffixValues()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, pathElement.GetSuffixValues())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyPathMatcherTypeModel.SuffixValues = listValue
+					} else {
+						rateLimiterPolicyPolicyPathMatcherTypeModel.SuffixValues = types.ListNull(types.StringType)
+					}
+
+					// data SpecToModelNested ArrayOfEnumField --> Transformers
+					if len(pathElement.GetTransformers()) > 0 {
+						transformersStrings := make([]string, 0, len(pathElement.GetTransformers()))
+						for _, v := range pathElement.GetTransformers() {
+							if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
+								transformersStrings = append(transformersStrings, strVal)
+							}
+						}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						rateLimiterPolicyPolicyPathMatcherTypeModel.Transformers = listValue
+					} else {
+						rateLimiterPolicyPolicyPathMatcherTypeModel.Transformers = types.ListNull(types.StringType)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					rateLimiterPolicyPolicyPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecPathModelAttributeMap, rateLimiterPolicyPolicyPathMatcherTypeModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Path = rateLimiterPolicyPolicyPathMatcherTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+					// because the API may always return a non-nil struct (with REDACTED values) for this field,
+					// making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.Path = types.ObjectNull(RateLimiterPolicyRulesSpecPathModelAttributeMap)
+				}
+
+				// data specToModelNested PointerField --> SegmentPolicy
+				if specElement.GetSegmentPolicy() != nil {
+					// Create the nested Go struct
+					rateLimiterPolicyPolicySegmentPolicyTypeModel := &RateLimiterPolicyPolicySegmentPolicyType{}
+					segmentPolicyElement := specElement.GetSegmentPolicy()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested OneOfField --> DstSegmentChoice
+					if segmentPolicyElement.GetDstSegmentChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> DstAny
+						_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
+
+						if isDstAny {
+							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
+						} else {
+							segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
+						}
+
+						// data specToModelNested PointerOfOneOfField --> DstSegments
+						// <no value>
+						// false
+						{
+							dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
+							dstSegmentsAttributeMap := make(map[string]attr.Value)
+
+							if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
+								dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
+
+								// data specToModelNested RequiredArrayOfPointerField --> Segments
+								if len(dstSegmentsElement.GetSegments()) > 0 {
+									// Step 1: Always create a slice of model structs from the spec data.
+									// This slice serves as an intermediate representation.
+									segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
+									for _, segmentsElement := range dstSegmentsElement.GetSegments() {
+										objectRefTypeModelModel := ObjectRefTypeModel{}
+
+										// data specToModelNested RequiredStringField --> Name
+										if segmentsElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if segmentsElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if segmentsElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										segmentsElements = append(segmentsElements, objectRefTypeModelModel)
+									}
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// The intermediate slice of structs must be converted to a `types.ListValue`.
+									segmentsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									dstSegmentsAttributeMap["segments"] = segmentsListValue
+
+								} else {
+									// The source list is empty or nil.
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// Assign a null `types.ListValue`.
+									dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap})
+								}
+
+								dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
+								response.Diagnostics.Append(dstSegmentsObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
+							} else {
+								segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
+							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> IntraSegment
+						_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
+
+						if isIntraSegment {
+							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
+						} else {
+							segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
+							RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							segmentPolicydstSegmentChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						rateLimiterPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						rateLimiterPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap)
+					}
+
+					// data specToModelNested OneOfField --> SrcSegmentChoice
+					if segmentPolicyElement.GetSrcSegmentChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						segmentPolicysrcSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						segmentPolicysrcSegmentChoiceChoices := segmentPolicyElement.GetSrcSegmentChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> SrcAny
+						_, isSrcAny := segmentPolicysrcSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_SrcAny)
+
+						if isSrcAny {
+							segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_any"] = types.BoolValue(true)
+						} else {
+							segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_any"] = types.BoolNull()
+						}
+
+						// data specToModelNested PointerOfOneOfField --> SrcSegments
+						// <no value>
+						// false
+						{
+							srcSegmentsOptionsWrapper, isSrcSegments := segmentPolicysrcSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_SrcSegments)
+							srcSegmentsAttributeMap := make(map[string]attr.Value)
+
+							if isSrcSegments && srcSegmentsOptionsWrapper != nil && srcSegmentsOptionsWrapper.SrcSegments != nil {
+								srcSegmentsElement := srcSegmentsOptionsWrapper.SrcSegments
+
+								// data specToModelNested RequiredArrayOfPointerField --> Segments
+								if len(srcSegmentsElement.GetSegments()) > 0 {
+									// Step 1: Always create a slice of model structs from the spec data.
+									// This slice serves as an intermediate representation.
+									segmentsElements := make([]ObjectRefTypeModel, 0, len(srcSegmentsElement.GetSegments()))
+									for _, segmentsElement := range srcSegmentsElement.GetSegments() {
+										objectRefTypeModelModel := ObjectRefTypeModel{}
+
+										// data specToModelNested RequiredStringField --> Name
+										if segmentsElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if segmentsElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if segmentsElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										segmentsElements = append(segmentsElements, objectRefTypeModelModel)
+									}
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// The intermediate slice of structs must be converted to a `types.ListValue`.
+									segmentsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									srcSegmentsAttributeMap["segments"] = segmentsListValue
+
+								} else {
+									// The source list is empty or nil.
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// Assign a null `types.ListValue`.
+									srcSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: RateLimiterPolicySegmentsObjectRefModelAttributeMap})
+								}
+
+								srcSegmentsObj, srcSegmentsObjDiags := types.ObjectValue(RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap, srcSegmentsAttributeMap)
+								response.Diagnostics.Append(srcSegmentsObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_segments"] = srcSegmentsObj
+							} else {
+								segmentPolicysrcSegmentChoiceChoicesAttributeMap["src_segments"] = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceSrcSegmentsModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, segmentPolicysrcSegmentChoiceChoicesObjDiags := types.ObjectValue(
+							RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							segmentPolicysrcSegmentChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(segmentPolicysrcSegmentChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						rateLimiterPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						rateLimiterPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					rateLimiterPolicyPolicySegmentPolicyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap, rateLimiterPolicyPolicySegmentPolicyTypeModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.SegmentPolicy = rateLimiterPolicyPolicySegmentPolicyTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+					// because the API may always return a non-nil struct (with REDACTED values) for this field,
+					// making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel.SegmentPolicy = types.ObjectNull(RateLimiterPolicyRulesSpecSegmentPolicyModelAttributeMap)
+				}
+
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModelObj, diags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecModelAttributeMap, rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel)
-				response.Diagnostics.Append(diags...)
+				rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModelObj, objDiags := types.ObjectValueFrom(ctx, RateLimiterPolicyRulesSpecModelAttributeMap, rateLimiterPolicyServicePolicyRuleRateLimiterRuleSpecModel)
+				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2475,18 +2483,20 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 			rulesElements = append(rulesElements, rateLimiterPolicyRateLimiterPolicyRateLimiterRuleModel)
 		}
 
-		rulesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			RateLimiterPolicyRulesModelAttributeMap,
-			rulesElements,
-		)
+		{
+			rulesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				RateLimiterPolicyRulesModelAttributeMap,
+				rulesElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Rules = rulesList
 		}
-
-		data.Rules = rulesList
 	} else {
 		var rulesObjectType = basetypes.ObjectType{
 			AttrTypes: RateLimiterPolicyRulesModelAttributeMap,
@@ -2496,7 +2506,7 @@ func (d *DataSourceF5XCRateLimiterPolicy) Read(ctx context.Context, request data
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

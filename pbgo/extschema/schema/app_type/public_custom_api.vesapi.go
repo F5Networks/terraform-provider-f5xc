@@ -1461,13 +1461,10 @@ var CustomAPISwaggerJSON string = `{
     "swagger": "2.0",
     "info": {
         "title": "app type object",
-        "description": "App Type object defines a application profile type from an advanced monitoring/security point of view.\nAn App type is a set of (micro) services that interact with one another and function as an application.\nServices can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.\nApp type object is the profile for one such application label. One can define various AI/ML features that can\nbe enabled for a given application in this object. All services in a given namespace that are labeled with\nsame ves.io/app_type label are assumed to be a single application. In a different namespace as two different\ninstances of same application.\napp_type object is recommended per tenant and present only in shared namespace.\nThis way AI/ML modelled developed for a given application can be shared across namespaces or deployments.\napp_setting object can be used to enable a app_type monitoring profile in a given namespace.",
+        "description": "App Type object defines a application profile type from an advanced monitoring/security point of view.\nAn App type is a set of (micro) services that interact with one another and function as an application.\nServices can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.\nApp type object is the profile for one such application label. One can define various advanced security\nfeatures that can\nbe enabled for a given application in this object. All services in a given namespace that are labeled with\nsame ves.io/app_type label are assumed to be a single application. In a different namespace as two different\ninstances of same application.\napp_type object is recommended per tenant and present only in shared namespace.\nThis way some advanced security features developed for a given application can be shared across namespaces or deployments.\napp_setting object can be used to enable a app_type monitoring profile in a given namespace.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1534,6 +1531,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1634,6 +1637,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1743,6 +1752,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1847,6 +1862,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1938,6 +1959,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2039,6 +2066,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2139,6 +2172,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2230,6 +2269,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2338,6 +2383,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2587,7 +2638,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Has Learnt Schema flag for request API endpoint.\n\nExample: - true-",
                     "title": "Has Learnt Schema",
-                    "format": "boolean",
                     "x-displayname": "Has Learnt Schema"
                 },
                 "last_tested": {
@@ -3135,7 +3185,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable or Disable component to be considered as dynamic to collapse or expand API URL\n\nExample: - \"False\"-",
                     "title": "Override Value",
-                    "format": "boolean",
                     "x-displayname": "Enable/Disable",
                     "x-ves-example": "False"
                 }
@@ -3175,7 +3224,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Status of the add operation (sucess or fail)\n\nExample: - \"true\"-",
                     "title": "Status",
-                    "format": "boolean",
                     "x-displayname": "Status",
                     "x-ves-example": "true"
                 },
@@ -3228,7 +3276,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Status of the add operation (sucess or fail)\n\nExample: - \"true\"-",
                     "title": "Status",
-                    "format": "boolean",
                     "x-displayname": "Status",
                     "x-ves-example": "true"
                 },
@@ -3590,6 +3637,27 @@ var CustomAPISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },

@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -22,20 +23,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -47,7 +52,6 @@ import (
 	ves_io_schema_dns_load_balancer "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dns_load_balancer"
 	ves_io_schema_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCDnsLoadBalancer defines the resource implementation.
@@ -55,80 +59,80 @@ type ResourceF5XCDnsLoadBalancer struct {
 	client *client.APIClient
 }
 
-type DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList struct {
-	Rules types.List `tfsdk:"rules"`
-}
-
-type DnsLoadBalancerDnsLoadBalancerLoadBalancingRule struct {
-	ClientChoice types.Object `tfsdk:"client_choice"`
-	ActionChoice types.Object `tfsdk:"action_choice"`
-	Score        types.Int64  `tfsdk:"score"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleClientChoice struct {
-	AsnList                  types.Object `tfsdk:"asn_list"`
-	AsnMatcher               types.Object `tfsdk:"asn_matcher"`
-	IpPrefixList             types.Object `tfsdk:"ip_prefix_list"`
-	IpPrefixSet              types.Object `tfsdk:"ip_prefix_set"`
-	GeoLocationLabelSelector types.Object `tfsdk:"geo_location_label_selector"`
-	GeoLocationSet           types.Object `tfsdk:"geo_location_set"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleAsnList struct {
-	AsNumbers types.List `tfsdk:"as_numbers"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleAsnMatcher struct {
-	AsnSets types.List `tfsdk:"asn_sets"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleIpPrefixList struct {
-	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
-	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
-	InvertMatch  types.Bool `tfsdk:"invert_match"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleIpPrefixSet struct {
-	PrefixSets    types.List `tfsdk:"prefix_sets"`
-	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelector struct {
-	Expressions types.List `tfsdk:"expressions"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleActionChoice struct {
-	Pool types.Object `tfsdk:"pool"`
-}
-
-type DnsLoadBalancerDnsLoadBalancerResponseCache struct {
+type DnsLoadBalancerRespCache struct {
 	ResponseCacheParametersChoice types.Object `tfsdk:"response_cache_parameters_choice"`
 }
 
-type DnsLoadBalancerResponseCacheResponseCacheParametersChoice struct {
+type DnsLoadBalancerRespCacheParametersChoice struct {
 	DefaultResponseCacheParameters types.Bool   `tfsdk:"default_response_cache_parameters"`
 	ResponseCacheParameters        types.Object `tfsdk:"response_cache_parameters"`
 }
 
-type DnsLoadBalancerResponseCacheResponseCacheParameters struct {
+type DnsLoadBalancerRespCacheParameters struct {
 	CacheCidrIpv4 types.Int64 `tfsdk:"cache_cidr_ipv4"`
 	CacheCidrIpv6 types.Int64 `tfsdk:"cache_cidr_ipv6"`
 	CacheTtl      types.Int64 `tfsdk:"cache_ttl"`
 }
 
+type DnsLoadBalancerLoadBalancingRuleList struct {
+	Rules types.List `tfsdk:"rules"`
+}
+
+type DnsLoadBalancerLoadBalancingRule struct {
+	ActionChoice types.Object `tfsdk:"action_choice"`
+	ClientChoice types.Object `tfsdk:"client_choice"`
+	Score        types.Int64  `tfsdk:"score"`
+}
+
+type DnsLoadBalancerActionChoice struct {
+	Pool types.Object `tfsdk:"pool"`
+}
+
+type DnsLoadBalancerClientChoice struct {
+	AsnList                  types.Object `tfsdk:"asn_list"`
+	AsnMatcher               types.Object `tfsdk:"asn_matcher"`
+	GeoLocationLabelSelector types.Object `tfsdk:"geo_location_label_selector"`
+	GeoLocationSet           types.Object `tfsdk:"geo_location_set"`
+	IpPrefixList             types.Object `tfsdk:"ip_prefix_list"`
+	IpPrefixSet              types.Object `tfsdk:"ip_prefix_set"`
+}
+
+type DnsLoadBalancerAsnList struct {
+	AsNumbers types.List `tfsdk:"as_numbers"`
+}
+
+type DnsLoadBalancerAsnMatcher struct {
+	AsnSets types.List `tfsdk:"asn_sets"`
+}
+
+type DnsLoadBalancerGeoLocationLabelSelector struct {
+	Expressions types.List `tfsdk:"expressions"`
+}
+
+type DnsLoadBalancerIpPrefixList struct {
+	InvertMatch  types.Bool `tfsdk:"invert_match"`
+	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
+	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
+}
+
+type DnsLoadBalancerIpPrefixSet struct {
+	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
+	PrefixSets    types.List `tfsdk:"prefix_sets"`
+}
+
 // ResourceF5XCDnsLoadBalancerModel describes the resource data model.
 type ResourceF5XCDnsLoadBalancerModel struct {
+	Annotations   types.Map      `tfsdk:"annotations"`
+	Description   types.String   `tfsdk:"description"`
+	Labels        types.Map      `tfsdk:"labels"`
 	Name          types.String   `tfsdk:"name"`
 	Namespace     types.String   `tfsdk:"namespace"`
 	Uid           types.String   `tfsdk:"uid"`
-	Labels        types.Map      `tfsdk:"labels"`
-	Annotations   types.Map      `tfsdk:"annotations"`
-	Description   types.String   `tfsdk:"description"`
+	DnsZones      types.List     `tfsdk:"dns_zones"`
 	FallbackPool  types.Object   `tfsdk:"fallback_pool"`
 	RecordType    types.List     `tfsdk:"record_type"`
-	RuleList      types.Object   `tfsdk:"rule_list"`
 	ResponseCache types.Object   `tfsdk:"response_cache"`
-	DnsZones      types.List     `tfsdk:"dns_zones"`
+	RuleList      types.Object   `tfsdk:"rule_list"`
 	Timeouts      timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -142,165 +146,20 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for ArrayOfPointerField --> DnsZones
+var DnsLoadBalancerDnsZonesObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
 // Attribute map for PointerField --> FallbackPool
 var DnsLoadBalancerFallbackPoolModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> RuleList
-var DnsLoadBalancerRuleListModelAttributeMap = map[string]attr.Type{
-
-	"rules": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"client_choice": types.ObjectType{
-					AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap,
-				},
-				"action_choice": types.ObjectType{
-					AttrTypes: DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap,
-				},
-				"score": types.Int64Type,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Rules
-var DnsLoadBalancerRuleListRulesModelAttributeMap = map[string]attr.Type{
-
-	"client_choice": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap,
-	},
-	"action_choice": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap,
-	},
-	"score": types.Int64Type,
-}
-
-// Attribute map for RequiredOneOfField --> ClientChoice
-var DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap = map[string]attr.Type{
-
-	"asn_list": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap,
-	},
-	"asn_matcher": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap,
-	},
-	"ip_prefix_list": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap,
-	},
-	"ip_prefix_set": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap,
-	},
-	"geo_location_label_selector": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap,
-	},
-	"geo_location_set": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> AsnList
-var DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap = map[string]attr.Type{
-
-	"as_numbers": types.ListType{
-		ElemType: types.Int64Type,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> AsnMatcher
-var DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap = map[string]attr.Type{
-
-	"asn_sets": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"namespace": types.StringType,
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> AsnSets
-var DnsLoadBalancerAsnSetsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"namespace": types.StringType,
-	"name":      types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> IpPrefixList
-var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap = map[string]attr.Type{
-
-	"ip_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"invert_match": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> IpPrefixSet
-var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap = map[string]attr.Type{
-
-	"prefix_sets": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-			},
-		},
-	},
-	"invert_matcher": types.BoolType,
-}
-
-// Attribute map for RequiredArrayOfPointerField --> PrefixSets
-var DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> GeoLocationLabelSelector
-var DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap = map[string]attr.Type{
-
-	"expressions": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> GeoLocationSet
-var DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> ActionChoice
-var DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap = map[string]attr.Type{
-
-	"pool": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Pool
-var DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
 }
 
 // Attribute map for PointerField --> ResponseCache
@@ -328,12 +187,157 @@ var DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParame
 	"cache_ttl":       types.Int64Type,
 }
 
-// Attribute map for ArrayOfPointerField --> DnsZones
-var DnsLoadBalancerDnsZonesObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredPointerField --> RuleList
+var DnsLoadBalancerRuleListModelAttributeMap = map[string]attr.Type{
+
+	"rules": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"action_choice": types.ObjectType{
+					AttrTypes: DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap,
+				},
+				"client_choice": types.ObjectType{
+					AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap,
+				},
+				"score": types.Int64Type,
+			},
+		},
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Rules
+var DnsLoadBalancerRuleListRulesModelAttributeMap = map[string]attr.Type{
+
+	"action_choice": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap,
+	},
+	"client_choice": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap,
+	},
+	"score": types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> ActionChoice
+var DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap = map[string]attr.Type{
+
+	"pool": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Pool
+var DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> ClientChoice
+var DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap = map[string]attr.Type{
+
+	"asn_list": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap,
+	},
+	"asn_matcher": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap,
+	},
+	"geo_location_label_selector": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap,
+	},
+	"geo_location_set": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap,
+	},
+	"ip_prefix_list": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap,
+	},
+	"ip_prefix_set": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> AsnList
+var DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap = map[string]attr.Type{
+
+	"as_numbers": types.ListType{
+		ElemType: types.Int64Type,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> AsnMatcher
+var DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap = map[string]attr.Type{
+
+	"asn_sets": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> AsnSets
+var DnsLoadBalancerAsnSetsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> GeoLocationLabelSelector
+var DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap = map[string]attr.Type{
+
+	"expressions": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> GeoLocationSet
+var DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> IpPrefixList
+var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap = map[string]attr.Type{
+
+	"invert_match": types.BoolType,
+	"ip_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> IpPrefixSet
+var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap = map[string]attr.Type{
+
+	"invert_matcher": types.BoolType,
+	"prefix_sets": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> PrefixSets
+var DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 func NewResourceF5XCDnsLoadBalancer() resource.Resource {
@@ -347,27 +351,69 @@ func (r *ResourceF5XCDnsLoadBalancer) Metadata(ctx context.Context, request reso
 func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "DnsLoadBalancer resource",
-		Description:         "DnsLoadBalancer resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a dns_load_balancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_load_balancer) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a dns_load_balancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_load_balancer) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"system"}...),
+				},
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -375,40 +421,44 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
+			"dns_zones": schema.ListNestedAttribute{
+				Description:         "backref_objs a list of DNS Zones associated with this load balancer",
+				MarkdownDescription: "backref_objs a list of DNS Zones associated with this load balancer",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+						},
+						"namespace": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.OneOf([]string{"system"}...),
+							},
+						},
+						"tenant": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+						},
+					},
 				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
 			},
 			"fallback_pool": schema.SingleNestedAttribute{
 				Description:         "fallback pool Fallback Pool to be used for load balancing if none of the Load Balancing rules match",
-				MarkdownDescription: "",
+				MarkdownDescription: "fallback pool Fallback Pool to be used for load balancing if none of the Load Balancing rules match",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -420,17 +470,17 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 						Optional:            false,
 						Computed:            false,
 					},
-					"tenant": schema.StringAttribute{
+					"namespace": schema.StringAttribute{
 						Description:         "",
 						MarkdownDescription: "",
-						Required:            false,
+						Required:            true,
 						Optional:            false,
-						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+						Computed:            false,
+						Validators: []validator.String{
+							stringvalidator.OneOf([]string{"system"}...),
 						},
 					},
-					"namespace": schema.StringAttribute{
+					"tenant": schema.StringAttribute{
 						Description:         "",
 						MarkdownDescription: "",
 						Required:            true,
@@ -441,330 +491,31 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 			},
 			"record_type": schema.ListAttribute{
 				Description:         "Resource Record Type",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"MX\", \"CNAME\", \"SRV\", \"A\", \"AAAA\"]`",
+				MarkdownDescription: "Resource Record Type<br>**Allowed Values (choose one):** `['A', 'AAAA', 'CNAME', 'MX', 'SRV']`",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"MX", "CNAME", "SRV", "A", "AAAA"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"A", "AAAA", "CNAME", "MX", "SRV"}...)),
 					listvalidator.SizeAtMost(1),
-				},
-			},
-			"rule_list": schema.SingleNestedAttribute{
-				Description:         "Rule List Load Balancing Rules",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Attributes: map[string]schema.Attribute{
-					"rules": schema.ListNestedAttribute{
-						Description:         "Load Balancing Rules Rules to perform load balancing",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"client_choice": schema.SingleNestedAttribute{
-									Description:         "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.",
-									MarkdownDescription: "",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
-									Validators: []validator.Object{
-										atmostoneofvalidator.AtMostOneOf(
-											"asn_list",
-											"asn_matcher",
-											"ip_prefix_list",
-											"ip_prefix_set",
-											"geo_location_label_selector",
-											"geo_location_set",
-										),
-									},
-									Attributes: map[string]schema.Attribute{
-										"asn_list": schema.SingleNestedAttribute{
-											Description:         "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"as_numbers": schema.ListAttribute{
-													Description:         "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.",
-													MarkdownDescription: "",
-													ElementType:         types.Int64Type,
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-											},
-										},
-										"asn_matcher": schema.SingleNestedAttribute{
-											Description:         "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"asn_sets": schema.ListNestedAttribute{
-													Description:         "asn_sets A list of references to bgp_asn_set objects.",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													NestedObject: schema.NestedAttributeObject{
-														Attributes: map[string]schema.Attribute{
-															"namespace": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-															},
-															"name": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-															},
-															"tenant": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            false,
-																Optional:            false,
-																Computed:            true,
-																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-										"ip_prefix_list": schema.SingleNestedAttribute{
-											Description:         "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"ip_prefixes": schema.ListAttribute{
-													Description:         "ip prefixes List of IPv4 prefix strings.",
-													MarkdownDescription: "",
-													ElementType:         types.StringType,
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.List{
-														listvalidator.SizeAtMost(128),
-													},
-												},
-												"ipv6_prefixes": schema.ListAttribute{
-													Description:         "ipv6 prefixes List of IPv6 prefix strings.",
-													MarkdownDescription: "",
-													ElementType:         types.StringType,
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.List{
-														listvalidator.SizeAtMost(128),
-													},
-												},
-												"invert_match": schema.BoolAttribute{
-													Description:         "invert_matcher Invert the match result.",
-													MarkdownDescription: "<br>**Default:** `false`",
-													Required:            false,
-													Optional:            true,
-													Computed:            true,
-													Default:             booldefault.StaticBool(false),
-												},
-											},
-										},
-										"ip_prefix_set": schema.SingleNestedAttribute{
-											Description:         "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"prefix_sets": schema.ListNestedAttribute{
-													Description:         "prefix_sets A list of references to ip_prefix_set objects.",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													NestedObject: schema.NestedAttributeObject{
-														Attributes: map[string]schema.Attribute{
-															"name": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-															},
-															"tenant": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            false,
-																Optional:            false,
-																Computed:            true,
-																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
-																},
-															},
-															"namespace": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-															},
-														},
-													},
-												},
-												"invert_matcher": schema.BoolAttribute{
-													Description:         "invert_matcher Invert the match result.",
-													MarkdownDescription: "<br>**Default:** `false`",
-													Required:            false,
-													Optional:            true,
-													Computed:            true,
-													Default:             booldefault.StaticBool(false),
-												},
-											},
-										},
-										"geo_location_label_selector": schema.SingleNestedAttribute{
-											Description:         "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"expressions": schema.ListAttribute{
-													Description:         "expressions expressions contains the kubernetes style label expression for selections.",
-													MarkdownDescription: "",
-													ElementType:         types.StringType,
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-											},
-										},
-										"geo_location_set": schema.SingleNestedAttribute{
-											Description:         "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-												"tenant": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            false,
-													Optional:            false,
-													Computed:            true,
-													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
-													},
-												},
-												"namespace": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-											},
-										},
-									},
-								},
-								"action_choice": schema.SingleNestedAttribute{
-									Description:         "action choice Action for the DNS Load Balancing Rule",
-									MarkdownDescription: "",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
-									Validators: []validator.Object{
-										atmostoneofvalidator.AtMostOneOf(
-											"pool",
-										),
-									},
-									Attributes: map[string]schema.Attribute{
-										"pool": schema.SingleNestedAttribute{
-											Description:         "use pool Use this pool for the Load Balancing.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"tenant": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            false,
-													Optional:            false,
-													Computed:            true,
-													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
-													},
-												},
-												"namespace": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-												"name": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-											},
-										},
-									},
-								},
-								"score": schema.Int64Attribute{
-									Description:         "Score When multiple load balancing rules match a query, the one with the highest score is chosen",
-									MarkdownDescription: "<br>**Default:** `100`",
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Default:             int64default.StaticInt64(100),
-									Validators: []validator.Int64{
-										int64validator.Between(1, 32767),
-									},
-								},
-							},
-						},
-					},
 				},
 			},
 			"response_cache": schema.SingleNestedAttribute{
 				Description:         "Response Cache Parameters Response Cache Parameters",
-				MarkdownDescription: "",
+				MarkdownDescription: "Response Cache Parameters Response Cache Parameters",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
 					"response_cache_parameters_choice": schema.SingleNestedAttribute{
 						Description:         "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers",
-						MarkdownDescription: "",
+						MarkdownDescription: "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
+							exactlyoneofvalidator.RequiredExactlyOneOf(
 								"default_response_cache_parameters",
 								"response_cache_parameters",
 							),
@@ -772,7 +523,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 						Attributes: map[string]schema.Attribute{
 							"default_response_cache_parameters": schema.BoolAttribute{
 								Description:         "Default Response Cache Parameters Default Parameters for caching the DNS responses",
-								MarkdownDescription: "",
+								MarkdownDescription: "Default Response Cache Parameters Default Parameters for caching the DNS responses",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -782,14 +533,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 							},
 							"response_cache_parameters": schema.SingleNestedAttribute{
 								Description:         "Response Cache Parameters Customize the parameters for Response cache",
-								MarkdownDescription: "",
+								MarkdownDescription: "Response Cache Parameters Customize the parameters for Response cache",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"cache_cidr_ipv4": schema.Int64Attribute{
 										Description:         "Length of IPv4 CIDR masks Length of CIDR masks used to group IPv4 clients",
-										MarkdownDescription: "<br>**Default:** `24`",
+										MarkdownDescription: "Length of IPv4 CIDR masks Length of CIDR masks used to group IPv4 clients<br>**Default:** `24`",
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -800,7 +551,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 									},
 									"cache_cidr_ipv6": schema.Int64Attribute{
 										Description:         "Length of IPv6 CIDR masks Length of CIDR masks used to group IPv6 clients",
-										MarkdownDescription: "<br>**Default:** `56`",
+										MarkdownDescription: "Length of IPv6 CIDR masks Length of CIDR masks used to group IPv6 clients<br>**Default:** `56`",
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -811,7 +562,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 									},
 									"cache_ttl": schema.Int64Attribute{
 										Description:         "TTL TTL for response cache",
-										MarkdownDescription: "<br>**Default:** `3600`",
+										MarkdownDescription: "TTL TTL for response cache<br>**Default:** `3600`",
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -826,44 +577,338 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 					},
 				},
 			},
-			"dns_zones": schema.ListNestedAttribute{
-				Description:         "backref_objs a list of DNS Zones associated with this load balancer",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
+			"rule_list": schema.SingleNestedAttribute{
+				Description:         "Rule List Load Balancing Rules",
+				MarkdownDescription: "Rule List Load Balancing Rules",
+				Required:            true,
+				Optional:            false,
 				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+				Attributes: map[string]schema.Attribute{
+					"rules": schema.ListNestedAttribute{
+						Description:         "Load Balancing Rules Rules to perform load balancing",
+						MarkdownDescription: "Load Balancing Rules Rules to perform load balancing",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.List{
+							listvalidator.SizeBetween(1, 64),
+							listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
 						},
-						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            false,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"action_choice": schema.SingleNestedAttribute{
+									Description:         "action choice Action for the DNS Load Balancing Rule",
+									MarkdownDescription: "action choice Action for the DNS Load Balancing Rule",
+									Required:            true,
+									Optional:            false,
+									Computed:            false,
+									Validators: []validator.Object{
+										exactlyoneofvalidator.RequiredExactlyOneOf(
+											"pool",
+										),
+									},
+									Attributes: map[string]schema.Attribute{
+										"pool": schema.SingleNestedAttribute{
+											Description:         "use pool Use this pool for the Load Balancing.",
+											MarkdownDescription: "use pool Use this pool for the Load Balancing.",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													Description:         "",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+												},
+												"namespace": schema.StringAttribute{
+													Description:         "",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.OneOf([]string{"system"}...),
+													},
+												},
+												"tenant": schema.StringAttribute{
+													Description:         "",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+												},
+											},
+										},
+									},
+								},
+								"client_choice": schema.SingleNestedAttribute{
+									Description:         "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.",
+									MarkdownDescription: "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.",
+									Required:            true,
+									Optional:            false,
+									Computed:            false,
+									Validators: []validator.Object{
+										exactlyoneofvalidator.RequiredExactlyOneOf(
+											"asn_list",
+											"asn_matcher",
+											"geo_location_label_selector",
+											"geo_location_set",
+											"ip_prefix_list",
+											"ip_prefix_set",
+										),
+									},
+									Attributes: map[string]schema.Attribute{
+										"asn_list": schema.SingleNestedAttribute{
+											Description:         "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
+											MarkdownDescription: "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"as_numbers": schema.ListAttribute{
+													Description:         "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.",
+													MarkdownDescription: "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.",
+													ElementType:         types.Int64Type,
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.SizeBetween(1, 16),
+														listvalidator.UniqueValues(),
+													},
+												},
+											},
+										},
+										"asn_matcher": schema.SingleNestedAttribute{
+											Description:         "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+											MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"asn_sets": schema.ListNestedAttribute{
+													Description:         "asn_sets A list of references to bgp_asn_set objects.",
+													MarkdownDescription: "asn_sets A list of references to bgp_asn_set objects.",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.SizeAtMost(4),
+													},
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"name": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            true,
+																Optional:            false,
+																Computed:            false,
+															},
+															"namespace": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            true,
+																Optional:            false,
+																Computed:            false,
+															},
+															"tenant": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            false,
+																Optional:            false,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.UseStateForUnknown(),
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+										"geo_location_label_selector": schema.SingleNestedAttribute{
+											Description:         "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											MarkdownDescription: "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"expressions": schema.ListAttribute{
+													Description:         "expressions expressions contains the kubernetes style label expression for selections.",
+													MarkdownDescription: "expressions expressions contains the kubernetes style label expression for selections.",
+													ElementType:         types.StringType,
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.SizeAtMost(1),
+														listvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 4096)),
+													},
+												},
+											},
+										},
+										"geo_location_set": schema.SingleNestedAttribute{
+											Description:         "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											MarkdownDescription: "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													Description:         "",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+												},
+												"namespace": schema.StringAttribute{
+													Description:         "",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.OneOf([]string{"system"}...),
+													},
+												},
+												"tenant": schema.StringAttribute{
+													Description:         "",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+												},
+											},
+										},
+										"ip_prefix_list": schema.SingleNestedAttribute{
+											Description:         "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
+											MarkdownDescription: "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"invert_match": schema.BoolAttribute{
+													Description:         "invert_matcher Invert the match result.",
+													MarkdownDescription: "invert_matcher Invert the match result.<br>**Default:** `false`",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
+													Default:             booldefault.StaticBool(false),
+												},
+												"ip_prefixes": schema.ListAttribute{
+													Description:         "ip prefixes List of IPv4 prefix strings.",
+													MarkdownDescription: "ip prefixes List of IPv4 prefix strings.",
+													ElementType:         types.StringType,
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.SizeAtMost(128),
+														listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+															regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$`),
+															"must be a valid IPv4 prefix",
+														)),
+														listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
+														listvalidator.UniqueValues(),
+													},
+												},
+												"ipv6_prefixes": schema.ListAttribute{
+													Description:         "ipv6 prefixes List of IPv6 prefix strings.",
+													MarkdownDescription: "ipv6 prefixes List of IPv6 prefix strings.",
+													ElementType:         types.StringType,
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.SizeAtMost(128),
+														listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+															regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+															"must be a valid IPv6 prefix",
+														)),
+														listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
+														listvalidator.UniqueValues(),
+													},
+												},
+											},
+										},
+										"ip_prefix_set": schema.SingleNestedAttribute{
+											Description:         "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.",
+											MarkdownDescription: "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"invert_matcher": schema.BoolAttribute{
+													Description:         "invert_matcher Invert the match result.",
+													MarkdownDescription: "invert_matcher Invert the match result.<br>**Default:** `false`",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
+													Default:             booldefault.StaticBool(false),
+												},
+												"prefix_sets": schema.ListNestedAttribute{
+													Description:         "prefix_sets A list of references to ip_prefix_set objects.",
+													MarkdownDescription: "prefix_sets A list of references to ip_prefix_set objects.",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.SizeAtMost(4),
+													},
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"name": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            true,
+																Optional:            false,
+																Computed:            false,
+															},
+															"namespace": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            true,
+																Optional:            false,
+																Computed:            false,
+															},
+															"tenant": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            false,
+																Optional:            false,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.UseStateForUnknown(),
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+								"score": schema.Int64Attribute{
+									Description:         "Score When multiple load balancing rules match a query, the one with the highest score is chosen",
+									MarkdownDescription: "Score When multiple load balancing rules match a query, the one with the highest score is chosen<br>**Default:** `100`",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Default:             int64default.StaticInt64(100),
+									Validators: []validator.Int64{
+										int64validator.Between(1, 32767),
+									},
+								},
 							},
-						},
-						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
 						},
 					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -963,23 +1008,13 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -990,6 +1025,30 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -1014,6 +1073,11 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			// resource modelToSpecNested RequiredStringField --> Namespace
 			if !fallbackPoolModel.Namespace.IsNull() && !fallbackPoolModel.Namespace.IsUnknown() {
 				fallbackPoolSpec.Namespace = string(fallbackPoolModel.Namespace.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> Tenant
+			if !fallbackPoolModel.Tenant.IsNull() && !fallbackPoolModel.Tenant.IsUnknown() {
+				fallbackPoolSpec.Tenant = string(fallbackPoolModel.Tenant.ValueString())
 			}
 
 		}
@@ -1045,11 +1109,79 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 	}
 
 	{
+		// resource modelToSpecRoot PointerField --> ResponseCache
+		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
+			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
+			spec.ResponseCache = responseCacheSpec
+			var responseCacheModel DnsLoadBalancerRespCache
+
+			// Populate the nested model from the main data model
+			diags.Append(data.ResponseCache.As(ctx, &responseCacheModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
+			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
+				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerRespCacheParametersChoice{}
+				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultResponseCacheParameters
+				if !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsUnknown() {
+					defaultResponseCacheParametersSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_DefaultResponseCacheParameters{}
+					defaultResponseCacheParametersSpecBool.DefaultResponseCacheParameters = &ves_io_schema.Empty{}
+					responseCacheSpec.ResponseCacheParametersChoice = defaultResponseCacheParametersSpecBool
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> ResponseCacheParameters
+				if !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsUnknown() {
+					var dnsLoadBalancerRespCacheParametersModel DnsLoadBalancerRespCacheParameters
+					response.Diagnostics.Append(responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.As(ctx, &dnsLoadBalancerRespCacheParametersModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					responseCacheParametersOneOfSpec := &ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters{}
+					responseCacheParametersOneOfSpec.ResponseCacheParameters = &ves_io_schema_dns_load_balancer.ResponseCacheParameters{}
+					responseCacheSpec.ResponseCacheParametersChoice = responseCacheParametersOneOfSpec
+
+					// resource modelToSpecNested UintField --> CacheCidrIpv4
+					if !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv4.IsNull() && !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv4.IsUnknown() {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv4 = uint32(uint32(dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv4.ValueInt64()))
+					} else {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv4 = uint32(24)
+					}
+
+					// resource modelToSpecNested UintField --> CacheCidrIpv6
+					if !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv6.IsNull() && !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv6.IsUnknown() {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv6 = uint32(uint32(dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv6.ValueInt64()))
+					} else {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv6 = uint32(56)
+					}
+
+					// resource modelToSpecNested UintField --> CacheTtl
+					if !dnsLoadBalancerRespCacheParametersModel.CacheTtl.IsNull() && !dnsLoadBalancerRespCacheParametersModel.CacheTtl.IsUnknown() {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheTtl = uint32(uint32(dnsLoadBalancerRespCacheParametersModel.CacheTtl.ValueInt64()))
+					} else {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheTtl = uint32(3600)
+					}
+
+				}
+
+			}
+
+		}
+	}
+
+	{
 		// resource modelToSpecRoot RequiredPointerField --> RuleList
 		if !data.RuleList.IsNull() && !data.RuleList.IsUnknown() {
 			ruleListSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRuleList{}
 			spec.RuleList = ruleListSpec
-			var ruleListModel DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList
+			var ruleListModel DnsLoadBalancerLoadBalancingRuleList
 
 			// Populate the nested model from the main data model
 			diags.Append(data.RuleList.As(ctx, &ruleListModel, basetypes.ObjectAsOptions{})...)
@@ -1061,7 +1193,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Rules
 			if !ruleListModel.Rules.IsNull() && !ruleListModel.Rules.IsUnknown() && len(ruleListModel.Rules.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var rulesElements []DnsLoadBalancerDnsLoadBalancerLoadBalancingRule
+				var rulesElements []DnsLoadBalancerLoadBalancingRule
 				response.Diagnostics.Append(ruleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
@@ -1078,9 +1210,47 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 					// Recursively process nested elements
 
+					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					if !rulesElement.ActionChoice.IsNull() && !rulesElement.ActionChoice.IsUnknown() {
+						rulesActionChoiceModel := DnsLoadBalancerActionChoice{}
+						response.Diagnostics.Append(rulesElement.ActionChoice.As(ctx, &rulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> Pool
+						if !rulesActionChoiceModel.Pool.IsNull() && !rulesActionChoiceModel.Pool.IsUnknown() {
+							var objectRefTypeModelModel ObjectRefTypeModel
+							response.Diagnostics.Append(rulesActionChoiceModel.Pool.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							poolOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool{}
+							poolOneOfSpec.Pool = &ves_io_schema_views.ObjectRefType{}
+							ruleListSpec.Rules[i].ActionChoice = poolOneOfSpec
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
+								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Namespace
+							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
+								poolOneOfSpec.Pool.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
+							}
+
+							// resource modelToSpecNested StringField --> Tenant
+							if !objectRefTypeModelModel.Tenant.IsNull() && !objectRefTypeModelModel.Tenant.IsUnknown() {
+								poolOneOfSpec.Pool.Tenant = string(objectRefTypeModelModel.Tenant.ValueString())
+							}
+
+						}
+
+					}
+
 					// resource modelToSpecNested RequiredOneOfField --> ClientChoice
 					if !rulesElement.ClientChoice.IsNull() && !rulesElement.ClientChoice.IsUnknown() {
-						rulesClientChoiceModel := DnsLoadBalancerLoadBalancingRuleClientChoice{}
+						rulesClientChoiceModel := DnsLoadBalancerClientChoice{}
 						response.Diagnostics.Append(rulesElement.ClientChoice.As(ctx, &rulesClientChoiceModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
@@ -1088,41 +1258,43 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 						// resource modelToSpecNested PointerOfOneOfField --> AsnList
 						if !rulesClientChoiceModel.AsnList.IsNull() && !rulesClientChoiceModel.AsnList.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnListModel DnsLoadBalancerLoadBalancingRuleAsnList
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnListModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerAsnListModel DnsLoadBalancerAsnList
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerAsnListModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							asnListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList{}
 							asnListOneOfSpec.AsnList = &ves_io_schema_policy.AsnMatchList{}
-							rulesSpec[i].ClientChoice = asnListOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = asnListOneOfSpec
 
-							elements := make([]uint32, 0, len(dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.Elements()))
-							diags := dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
+							{
+								elements := make([]uint32, 0, len(dnsLoadBalancerAsnListModel.AsNumbers.Elements()))
+								diags = dnsLoadBalancerAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnListOneOfSpec.AsnList.AsNumbers = elements
 							}
-							asnListOneOfSpec.AsnList.AsNumbers = elements
 
 						}
 
 						// resource modelToSpecNested PointerOfOneOfField --> AsnMatcher
 						if !rulesClientChoiceModel.AsnMatcher.IsNull() && !rulesClientChoiceModel.AsnMatcher.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnMatcherModel DnsLoadBalancerLoadBalancingRuleAsnMatcher
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnMatcherModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerAsnMatcherModel DnsLoadBalancerAsnMatcher
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerAsnMatcherModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							asnMatcherOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher{}
 							asnMatcherOneOfSpec.AsnMatcher = &ves_io_schema_policy.AsnMatcherType{}
-							rulesSpec[i].ClientChoice = asnMatcherOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = asnMatcherOneOfSpec
 
 							// resource modelToSpecNested RequiredArrayOfPointerField --> AsnSets
-							if !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.Elements()) > 0 {
+							if !dnsLoadBalancerAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerAsnMatcherModel.AsnSets.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
 								var asnSetsElements []ObjectRefTypeModel
-								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
+								response.Diagnostics.Append(dnsLoadBalancerAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1138,77 +1310,142 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 									// Recursively process nested elements
 
-									// resource modelToSpecNested RequiredStringField --> Namespace
-									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
-										asnSetsSpec[i].Namespace = string(asnSetsElement.Namespace.ValueString())
-									}
-
 									// resource modelToSpecNested RequiredStringField --> Name
 									if !asnSetsElement.Name.IsNull() && !asnSetsElement.Name.IsUnknown() {
-										asnSetsSpec[i].Name = string(asnSetsElement.Name.ValueString())
+										asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii].Name = string(asnSetsElement.Name.ValueString())
+									}
+
+									// resource modelToSpecNested RequiredStringField --> Namespace
+									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
+										asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii].Namespace = string(asnSetsElement.Namespace.ValueString())
 									}
 
 								}
+							}
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationLabelSelector
+						if !rulesClientChoiceModel.GeoLocationLabelSelector.IsNull() && !rulesClientChoiceModel.GeoLocationLabelSelector.IsUnknown() {
+							var dnsLoadBalancerGeoLocationLabelSelectorModel DnsLoadBalancerGeoLocationLabelSelector
+							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationLabelSelector.As(ctx, &dnsLoadBalancerGeoLocationLabelSelectorModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							geoLocationLabelSelectorOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector{}
+							geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector = &ves_io_schema.LabelSelectorType{}
+							ruleListSpec.Rules[i].ClientChoice = geoLocationLabelSelectorOneOfSpec
+
+							// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
+							{
+								elements := make([]string, 0, len(dnsLoadBalancerGeoLocationLabelSelectorModel.Expressions.Elements()))
+								diags = dnsLoadBalancerGeoLocationLabelSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector.Expressions = elements
+							}
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationSet
+						if !rulesClientChoiceModel.GeoLocationSet.IsNull() && !rulesClientChoiceModel.GeoLocationSet.IsUnknown() {
+							var objectRefTypeModelModel ObjectRefTypeModel
+							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationSet.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							geoLocationSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet{}
+							geoLocationSetOneOfSpec.GeoLocationSet = &ves_io_schema_views.ObjectRefType{}
+							ruleListSpec.Rules[i].ClientChoice = geoLocationSetOneOfSpec
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
+								geoLocationSetOneOfSpec.GeoLocationSet.Name = string(objectRefTypeModelModel.Name.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Namespace
+							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
+								geoLocationSetOneOfSpec.GeoLocationSet.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
+							}
+
+							// resource modelToSpecNested StringField --> Tenant
+							if !objectRefTypeModelModel.Tenant.IsNull() && !objectRefTypeModelModel.Tenant.IsUnknown() {
+								geoLocationSetOneOfSpec.GeoLocationSet.Tenant = string(objectRefTypeModelModel.Tenant.ValueString())
 							}
 
 						}
 
 						// resource modelToSpecNested PointerOfOneOfField --> IpPrefixList
 						if !rulesClientChoiceModel.IpPrefixList.IsNull() && !rulesClientChoiceModel.IpPrefixList.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleIpPrefixListModel DnsLoadBalancerLoadBalancingRuleIpPrefixList
-							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixList.As(ctx, &dnsLoadBalancerLoadBalancingRuleIpPrefixListModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerIpPrefixListModel DnsLoadBalancerIpPrefixList
+							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixList.As(ctx, &dnsLoadBalancerIpPrefixListModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							ipPrefixListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList{}
 							ipPrefixListOneOfSpec.IpPrefixList = &ves_io_schema_policy.PrefixMatchList{}
-							rulesSpec[i].ClientChoice = ipPrefixListOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = ipPrefixListOneOfSpec
+
+							// resource modelToSpecNested BoolField --> InvertMatch
+							if !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsNull() && !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsUnknown() {
+								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(dnsLoadBalancerIpPrefixListModel.InvertMatch.ValueBool())
+							} else {
+								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(false)
+							}
 
 							// resource modelToSpecNested ArrayOfStringField --> IpPrefixes
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.IsUnknown() {
-								elements := make([]string, 0, len(dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.Elements()))
-								diags := dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.ElementsAs(ctx, &elements, false)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
+							if !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsNull() && !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsUnknown() {
+								{
+									elements := make([]string, 0, len(dnsLoadBalancerIpPrefixListModel.IpPrefixes.Elements()))
+									diags = dnsLoadBalancerIpPrefixListModel.IpPrefixes.ElementsAs(ctx, &elements, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListOneOfSpec.IpPrefixList.IpPrefixes = elements
 								}
-								ipPrefixListOneOfSpec.IpPrefixList.IpPrefixes = elements
 							}
 
 							// resource modelToSpecNested ArrayOfStringField --> Ipv6Prefixes
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.IsUnknown() {
-								elements := make([]string, 0, len(dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.Elements()))
-								diags := dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.ElementsAs(ctx, &elements, false)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
+							if !dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.IsNull() && !dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.IsUnknown() {
+								{
+									elements := make([]string, 0, len(dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.Elements()))
+									diags = dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.ElementsAs(ctx, &elements, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListOneOfSpec.IpPrefixList.Ipv6Prefixes = elements
 								}
-								ipPrefixListOneOfSpec.IpPrefixList.Ipv6Prefixes = elements
-							}
-
-							// resource modelToSpecNested BoolField --> InvertMatch
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.InvertMatch.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.InvertMatch.IsUnknown() {
-								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.InvertMatch.ValueBool())
 							}
 
 						}
 
 						// resource modelToSpecNested PointerOfOneOfField --> IpPrefixSet
 						if !rulesClientChoiceModel.IpPrefixSet.IsNull() && !rulesClientChoiceModel.IpPrefixSet.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel DnsLoadBalancerLoadBalancingRuleIpPrefixSet
-							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixSet.As(ctx, &dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerIpPrefixSetModel DnsLoadBalancerIpPrefixSet
+							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixSet.As(ctx, &dnsLoadBalancerIpPrefixSetModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							ipPrefixSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet{}
 							ipPrefixSetOneOfSpec.IpPrefixSet = &ves_io_schema_policy.IpMatcherType{}
-							rulesSpec[i].ClientChoice = ipPrefixSetOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = ipPrefixSetOneOfSpec
+
+							// resource modelToSpecNested BoolField --> InvertMatcher
+							if !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsNull() && !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsUnknown() {
+								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(dnsLoadBalancerIpPrefixSetModel.InvertMatcher.ValueBool())
+							} else {
+								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(false)
+							}
 
 							// resource modelToSpecNested RequiredArrayOfPointerField --> PrefixSets
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.Elements()) > 0 {
+							if !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsNull() && !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsUnknown() && len(dnsLoadBalancerIpPrefixSetModel.PrefixSets.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
 								var prefixSetsElements []ObjectRefTypeModel
-								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.ElementsAs(ctx, &prefixSetsElements, false)...)
+								response.Diagnostics.Append(dnsLoadBalancerIpPrefixSetModel.PrefixSets.ElementsAs(ctx, &prefixSetsElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1226,98 +1463,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 									// resource modelToSpecNested RequiredStringField --> Name
 									if !prefixSetsElement.Name.IsNull() && !prefixSetsElement.Name.IsUnknown() {
-										prefixSetsSpec[i].Name = string(prefixSetsElement.Name.ValueString())
+										ipPrefixSetOneOfSpec.IpPrefixSet.PrefixSets[ii].Name = string(prefixSetsElement.Name.ValueString())
 									}
 
 									// resource modelToSpecNested RequiredStringField --> Namespace
 									if !prefixSetsElement.Namespace.IsNull() && !prefixSetsElement.Namespace.IsUnknown() {
-										prefixSetsSpec[i].Namespace = string(prefixSetsElement.Namespace.ValueString())
+										ipPrefixSetOneOfSpec.IpPrefixSet.PrefixSets[ii].Namespace = string(prefixSetsElement.Namespace.ValueString())
 									}
 
 								}
-							}
-
-							// resource modelToSpecNested BoolField --> InvertMatcher
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.InvertMatcher.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.InvertMatcher.IsUnknown() {
-								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.InvertMatcher.ValueBool())
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationLabelSelector
-						if !rulesClientChoiceModel.GeoLocationLabelSelector.IsNull() && !rulesClientChoiceModel.GeoLocationLabelSelector.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel DnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelector
-							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationLabelSelector.As(ctx, &dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							geoLocationLabelSelectorOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector{}
-							geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector = &ves_io_schema.LabelSelectorType{}
-							rulesSpec[i].ClientChoice = geoLocationLabelSelectorOneOfSpec
-
-							// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
-							elements := make([]string, 0, len(dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel.Expressions.Elements()))
-							diags = dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector.Expressions = elements
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationSet
-						if !rulesClientChoiceModel.GeoLocationSet.IsNull() && !rulesClientChoiceModel.GeoLocationSet.IsUnknown() {
-							var objectRefTypeModelModel ObjectRefTypeModel
-							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationSet.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							geoLocationSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet{}
-							geoLocationSetOneOfSpec.GeoLocationSet = &ves_io_schema_views.ObjectRefType{}
-							rulesSpec[i].ClientChoice = geoLocationSetOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
-								geoLocationSetOneOfSpec.GeoLocationSet.Name = string(objectRefTypeModelModel.Name.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Namespace
-							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
-								geoLocationSetOneOfSpec.GeoLocationSet.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
-							}
-
-						}
-
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
-					if !rulesElement.ActionChoice.IsNull() && !rulesElement.ActionChoice.IsUnknown() {
-						rulesActionChoiceModel := DnsLoadBalancerLoadBalancingRuleActionChoice{}
-						response.Diagnostics.Append(rulesElement.ActionChoice.As(ctx, &rulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> Pool
-						if !rulesActionChoiceModel.Pool.IsNull() && !rulesActionChoiceModel.Pool.IsUnknown() {
-							var objectRefTypeModelModel ObjectRefTypeModel
-							response.Diagnostics.Append(rulesActionChoiceModel.Pool.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							poolOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool{}
-							poolOneOfSpec.Pool = &ves_io_schema_views.ObjectRefType{}
-							rulesSpec[i].ActionChoice = poolOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> Namespace
-							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
-								poolOneOfSpec.Pool.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
-								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
 							}
 
 						}
@@ -1326,7 +1480,9 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 					// resource modelToSpecNested UintField --> Score
 					if !rulesElement.Score.IsNull() && !rulesElement.Score.IsUnknown() {
-						rulesSpec[i].Score = uint32(uint32(rulesElement.Score.ValueInt64()))
+						ruleListSpec.Rules[i].Score = uint32(uint32(rulesElement.Score.ValueInt64()))
+					} else {
+						ruleListSpec.Rules[i].Score = uint32(100)
 					}
 
 				}
@@ -1335,73 +1491,18 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	{
-		// resource modelToSpecRoot PointerField --> ResponseCache
-		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
-			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
-			spec.ResponseCache = responseCacheSpec
-			var responseCacheModel DnsLoadBalancerDnsLoadBalancerResponseCache
-
-			// Populate the nested model from the main data model
-			diags.Append(data.ResponseCache.As(ctx, &responseCacheModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
-			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
-				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerResponseCacheResponseCacheParametersChoice{}
-				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultResponseCacheParameters
-				if !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsUnknown() {
-					defaultResponseCacheParametersSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_DefaultResponseCacheParameters{}
-					defaultResponseCacheParametersSpecBool.DefaultResponseCacheParameters = &ves_io_schema.Empty{}
-					responseCacheSpec.ResponseCacheParametersChoice = defaultResponseCacheParametersSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> ResponseCacheParameters
-				if !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsUnknown() {
-					var dnsLoadBalancerResponseCacheResponseCacheParametersModel DnsLoadBalancerResponseCacheResponseCacheParameters
-					response.Diagnostics.Append(responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.As(ctx, &dnsLoadBalancerResponseCacheResponseCacheParametersModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					responseCacheParametersOneOfSpec := &ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters{}
-					responseCacheParametersOneOfSpec.ResponseCacheParameters = &ves_io_schema_dns_load_balancer.ResponseCacheParameters{}
-					responseCacheSpec.ResponseCacheParametersChoice = responseCacheParametersOneOfSpec
-
-					// resource modelToSpecNested UintField --> CacheCidrIpv4
-					if !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv4.IsNull() && !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv4.IsUnknown() {
-						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv4 = uint32(uint32(dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv4.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> CacheCidrIpv6
-					if !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv6.IsNull() && !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv6.IsUnknown() {
-						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv6 = uint32(uint32(dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv6.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> CacheTtl
-					if !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheTtl.IsNull() && !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheTtl.IsUnknown() {
-						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheTtl = uint32(uint32(dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheTtl.ValueInt64()))
-					}
-
-				}
-
-			}
-
-		}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_dns_load_balancer.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -1430,6 +1531,101 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1439,86 +1635,67 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
+	// resource SpecToModelRoot ArrayOfPointerField --> DnsZones
+	if len(specData.GetDnsZones()) > 0 {
+		dnsZonesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsZones()))
+		for _, dnsZonesElement := range specData.GetDnsZones() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsZonesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+			// resource specToModelNested RequiredStringField --> Namespace
+			if dnsZonesElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if dnsZonesElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+		}
+
+		{
+			dnsZonesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
+				dnsZonesElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsZones = dnsZonesList
+		}
+	} else {
+		var dnsZonesObjectType = basetypes.ObjectType{
+			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
+		}
+		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
+		var priorValDnsZones types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("dns_zones"), &priorValDnsZones)
+		if !priorValDnsZones.IsNull() && !priorValDnsZones.IsUnknown() {
+			data.DnsZones = priorValDnsZones
+		} else {
+			data.DnsZones = nullDnsZonesList
+		}
+
+	}
 
 	// resource SpecToModelRoot PointerField --> FallbackPool
 	if specData.GetFallbackPool() != nil {
@@ -1533,20 +1710,20 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if fallbackPoolElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(fallbackPoolElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if fallbackPoolElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(fallbackPoolElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if fallbackPoolElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(fallbackPoolElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		fallbackPoolObj, fallbackPoolDiags := utils.GoStructToObjectValue(
@@ -1564,474 +1741,25 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> RecordType
-	if specData.GetRecordType().String() != "" {
-		stringValue := types.StringValue(specData.GetRecordType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.RecordType = listValue
-	} else {
-		// Empty string, set to null
-		data.RecordType = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot RequiredPointerField --> RuleList
-	if specData.GetRuleList() != nil {
-		var dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList{}
-		ruleListElement := specData.GetRuleList()
-
-		// resource specToModelNested RequiredArrayOfPointerField --> Rules
-		if len(ruleListElement.GetRules()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			rulesElements := make([]DnsLoadBalancerDnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
-			for _, rulesElement := range ruleListElement.GetRules() {
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerDnsLoadBalancerLoadBalancingRule{}
-
-				// resource specToModelNested RequiredOneOfField --> ClientChoice
-				// GlobalSpecType
-				if rulesElement.GetClientChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					rulesclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					rulesclientChoiceChoices := rulesElement.GetClientChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> AsnList
-					// GlobalSpecType
-					// false
-					{
-						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
-						asnListAttributeMap := make(map[string]attr.Value)
-
-						if isAsnList && asnListOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
-							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
-							if len(asNumbersValue) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnListAttributeMap["as_numbers"] = listValue
-							} else {
-								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
-							}
-
-							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
-					// GlobalSpecType
-					// false
-					{
-						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
-						asnMatcherAttributeMap := make(map[string]attr.Value)
-
-						if isAsnMatcher && asnMatcherOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
-							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
-								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if asnSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if asnSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Tenant
-									if asnSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
-							}
-
-							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
-					// GlobalSpecType
-					// false
-					{
-						ipPrefixListOptions, isIpPrefixList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList)
-						ipPrefixListAttributeMap := make(map[string]attr.Value)
-
-						if isIpPrefixList && ipPrefixListOptions != nil {
-
-							// resource specToModelNested ArrayOfStringField --> IpPrefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpPrefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpPrefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ip_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// resource specToModelNested ArrayOfStringField --> Ipv6Prefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// resource specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListOptions.IpPrefixList.GetInvertMatch()))
-
-							ipPrefixListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> IpPrefixSet
-					// GlobalSpecType
-					// false
-					{
-						ipPrefixSetOptions, isIpPrefixSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet)
-						ipPrefixSetAttributeMap := make(map[string]attr.Value)
-
-						if isIpPrefixSet && ipPrefixSetOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
-							if len(ipPrefixSetOptions.IpPrefixSet.GetPrefixSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetOptions.IpPrefixSet.GetPrefixSets()))
-								for _, prefixSetsElement := range ipPrefixSetOptions.IpPrefixSet.GetPrefixSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if prefixSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Tenant
-									if prefixSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if prefixSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								prefixSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixSetAttributeMap["prefix_sets"] = prefixSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								ipPrefixSetAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap})
-							}
-
-							// resource specToModelNested BoolField --> InvertMatcher
-							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetOptions.IpPrefixSet.GetInvertMatcher()))
-
-							ipPrefixSetObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> GeoLocationLabelSelector
-					// GlobalSpecType
-					// false
-					{
-						geoLocationLabelSelectorOptions, isGeoLocationLabelSelector := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector)
-						geoLocationLabelSelectorAttributeMap := make(map[string]attr.Value)
-
-						if isGeoLocationLabelSelector && geoLocationLabelSelectorOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfStringField --> Expressions
-							if len(geoLocationLabelSelectorOptions.GeoLocationLabelSelector.GetExpressions()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, geoLocationLabelSelectorOptions.GeoLocationLabelSelector.GetExpressions())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								geoLocationLabelSelectorAttributeMap["expressions"] = listValue
-							} else {
-								geoLocationLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-							}
-
-							geoLocationLabelSelectorObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap, geoLocationLabelSelectorAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = geoLocationLabelSelectorObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> GeoLocationSet
-					// GlobalSpecType
-					// false
-					{
-						geoLocationSetOptions, isGeoLocationSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet)
-						geoLocationSetAttributeMap := make(map[string]attr.Value)
-
-						if isGeoLocationSet && geoLocationSetOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> Name
-							if geoLocationSetOptions.GeoLocationSet.GetName() != "" {
-								geoLocationSetAttributeMap["name"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetName())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["name"] = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> Tenant
-							if geoLocationSetOptions.GeoLocationSet.GetTenant() != "" {
-								geoLocationSetAttributeMap["tenant"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetTenant())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if geoLocationSetOptions.GeoLocationSet.GetNamespace() != "" {
-								geoLocationSetAttributeMap["namespace"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetNamespace())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["namespace"] = types.StringNull()
-							}
-
-							geoLocationSetObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap, geoLocationSetAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = geoLocationSetObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, rulesclientChoiceChoicesObjDiags := types.ObjectValue(
-						DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						rulesclientChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(rulesclientChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested RequiredOneOfField --> ActionChoice
-				// GlobalSpecType
-				if rulesElement.GetActionChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					rulesactionChoiceChoices := rulesElement.GetActionChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> Pool
-					// GlobalSpecType
-					// false
-					{
-						poolOptions, isPool := rulesactionChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool)
-						poolAttributeMap := make(map[string]attr.Value)
-
-						if isPool && poolOptions != nil {
-
-							// resource specToModelNested StringField --> Tenant
-							if poolOptions.Pool.GetTenant() != "" {
-								poolAttributeMap["tenant"] = types.StringValue(poolOptions.Pool.GetTenant())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if poolOptions.Pool.GetNamespace() != "" {
-								poolAttributeMap["namespace"] = types.StringValue(poolOptions.Pool.GetNamespace())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["namespace"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Name
-							if poolOptions.Pool.GetName() != "" {
-								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["name"] = types.StringNull()
-							}
-
-							poolObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesactionChoiceChoicesAttributeMap["pool"] = poolObj
-						} else {
-							rulesactionChoiceChoicesAttributeMap["pool"] = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, rulesactionChoiceChoicesObjDiags := types.ObjectValue(
-						DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						rulesactionChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(rulesactionChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested UintField --> Score
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
-
-				rulesElements = append(rulesElements, dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap}, rulesElements)
-			response.Diagnostics.Append(diags...)
+	{
+		if specData.GetRecordType().String() != "" {
+			stringValue := types.StringValue(specData.GetRecordType().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
-
+			data.RecordType = listValue
 		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
+			// Empty string, set to null
+			data.RecordType = types.ListNull(types.StringType)
 		}
-
-		ruleListObj, ruleListDiags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLoadBalancerRuleListModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel,
-		)
-		response.Diagnostics.Append(ruleListDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.RuleList = ruleListObj
-	} else {
-		data.RuleList = types.ObjectNull(DnsLoadBalancerRuleListModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot PointerField --> ResponseCache
 	if specData.GetResponseCache() != nil {
-		var dnsLoadBalancerDnsLoadBalancerResponseCacheModel = &DnsLoadBalancerDnsLoadBalancerResponseCache{}
+		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
 		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
@@ -2058,22 +1786,23 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			// GlobalSpecType
 			// false
 			{
-				responseCacheParametersOptions, isResponseCacheParameters := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters)
+				responseCacheParametersOptionsWrapper, isResponseCacheParameters := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters)
 				responseCacheParametersAttributeMap := make(map[string]attr.Value)
 
-				if isResponseCacheParameters && responseCacheParametersOptions != nil {
+				if isResponseCacheParameters && responseCacheParametersOptionsWrapper != nil && responseCacheParametersOptionsWrapper.ResponseCacheParameters != nil {
+					responseCacheParametersElement := responseCacheParametersOptionsWrapper.ResponseCacheParameters
 
 					// resource specToModelNested UintField --> CacheCidrIpv4
-					responseCacheParametersAttributeMap["cache_cidr_ipv4"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheCidrIpv4()))
+					responseCacheParametersAttributeMap["cache_cidr_ipv4"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheCidrIpv4()))
 
 					// resource specToModelNested UintField --> CacheCidrIpv6
-					responseCacheParametersAttributeMap["cache_cidr_ipv6"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheCidrIpv6()))
+					responseCacheParametersAttributeMap["cache_cidr_ipv6"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheCidrIpv6()))
 
 					// resource specToModelNested UintField --> CacheTtl
-					responseCacheParametersAttributeMap["cache_ttl"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheTtl()))
+					responseCacheParametersAttributeMap["cache_ttl"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheTtl()))
 
-					responseCacheParametersObj, diags := types.ObjectValue(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap, responseCacheParametersAttributeMap)
-					response.Diagnostics.Append(diags...)
+					responseCacheParametersObj, responseCacheParametersObjDiags := types.ObjectValue(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap, responseCacheParametersAttributeMap)
+					response.Diagnostics.Append(responseCacheParametersObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2096,16 +1825,16 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = finalObj
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
 		}
 
 		responseCacheObj, responseCacheDiags := utils.GoStructToObjectValue(
 			ctx,
 			DnsLoadBalancerResponseCacheModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel,
+			dnsLoadBalancerRespCacheModel,
 		)
 		response.Diagnostics.Append(responseCacheDiags...)
 		if response.Diagnostics.HasError() {
@@ -2116,58 +1845,470 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 		data.ResponseCache = types.ObjectNull(DnsLoadBalancerResponseCacheModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsZones
-	if len(specData.DnsZones) > 0 {
-		dnsZonesElements := make([]ObjectRefTypeModel, 0, len(specData.DnsZones))
+	// resource SpecToModelRoot RequiredPointerField --> RuleList
+	if specData.GetRuleList() != nil {
+		var dnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerLoadBalancingRuleList{}
+		ruleListElement := specData.GetRuleList()
 
-		for _, dnsZonesElement := range specData.DnsZones {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+		// resource specToModelNested RequiredArrayOfPointerField --> Rules
+		if len(ruleListElement.GetRules()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			rulesElements := make([]DnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
+			for _, rulesElement := range ruleListElement.GetRules() {
+				dnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerLoadBalancingRule{}
 
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsZonesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
+				// resource specToModelNested RequiredOneOfField --> ActionChoice
+				// GlobalSpecType
+				if rulesElement.GetActionChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					rulesactionChoiceChoices := rulesElement.GetActionChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> Pool
+					// GlobalSpecType
+					// false
+					{
+						poolOptionsWrapper, isPool := rulesactionChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool)
+						poolAttributeMap := make(map[string]attr.Value)
+
+						if isPool && poolOptionsWrapper != nil && poolOptionsWrapper.Pool != nil {
+							poolElement := poolOptionsWrapper.Pool
+
+							// resource specToModelNested RequiredStringField --> Name
+							if poolElement.GetName() != "" {
+								poolAttributeMap["name"] = types.StringValue(poolElement.GetName())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Namespace
+							if poolElement.GetNamespace() != "" {
+								poolAttributeMap["namespace"] = types.StringValue(poolElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if poolElement.GetTenant() != "" {
+								poolAttributeMap["tenant"] = types.StringValue(poolElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["tenant"] = types.StringNull()
+							}
+
+							poolObj, poolObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
+							response.Diagnostics.Append(poolObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesactionChoiceChoicesAttributeMap["pool"] = poolObj
+						} else {
+							rulesactionChoiceChoicesAttributeMap["pool"] = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, rulesactionChoiceChoicesObjDiags := types.ObjectValue(
+						DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						rulesactionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(rulesactionChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredOneOfField --> ClientChoice
+				// GlobalSpecType
+				if rulesElement.GetClientChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					rulesclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					rulesclientChoiceChoices := rulesElement.GetClientChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> AsnList
+					// GlobalSpecType
+					// false
+					{
+						asnListOptionsWrapper, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
+						asnListAttributeMap := make(map[string]attr.Value)
+
+						if isAsnList && asnListOptionsWrapper != nil && asnListOptionsWrapper.AsnList != nil {
+							asnListElement := asnListOptionsWrapper.AsnList
+
+							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
+							{
+								asNumbersValue := asnListElement.GetAsNumbers()
+								if len(asNumbersValue) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asnListElement.GetAsNumbers())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									asnListAttributeMap["as_numbers"] = listValue
+								} else {
+									asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
+								}
+							}
+
+							asnListObj, asnListObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
+							response.Diagnostics.Append(asnListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
+					// GlobalSpecType
+					// false
+					{
+						asnMatcherOptionsWrapper, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
+						asnMatcherAttributeMap := make(map[string]attr.Value)
+
+						if isAsnMatcher && asnMatcherOptionsWrapper != nil && asnMatcherOptionsWrapper.AsnMatcher != nil {
+							asnMatcherElement := asnMatcherOptionsWrapper.AsnMatcher
+
+							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
+							if len(asnMatcherElement.GetAsnSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherElement.GetAsnSets()))
+								for _, asnSetsElement := range asnMatcherElement.GetAsnSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if asnSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if asnSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if asnSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								asnSetsListValue, asnSetsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
+								response.Diagnostics.Append(asnSetsListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
+							}
+
+							asnMatcherObj, asnMatcherObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
+							response.Diagnostics.Append(asnMatcherObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> GeoLocationLabelSelector
+					// GlobalSpecType
+					// false
+					{
+						geoLocationLabelSelectorOptionsWrapper, isGeoLocationLabelSelector := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector)
+						geoLocationLabelSelectorAttributeMap := make(map[string]attr.Value)
+
+						if isGeoLocationLabelSelector && geoLocationLabelSelectorOptionsWrapper != nil && geoLocationLabelSelectorOptionsWrapper.GeoLocationLabelSelector != nil {
+							geoLocationLabelSelectorElement := geoLocationLabelSelectorOptionsWrapper.GeoLocationLabelSelector
+
+							// resource specToModelNested RequiredArrayOfStringField --> Expressions
+							{
+								if len(geoLocationLabelSelectorElement.GetExpressions()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, geoLocationLabelSelectorElement.GetExpressions())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									geoLocationLabelSelectorAttributeMap["expressions"] = listValue
+								} else {
+									geoLocationLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+								}
+							}
+
+							geoLocationLabelSelectorObj, geoLocationLabelSelectorObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap, geoLocationLabelSelectorAttributeMap)
+							response.Diagnostics.Append(geoLocationLabelSelectorObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = geoLocationLabelSelectorObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> GeoLocationSet
+					// GlobalSpecType
+					// false
+					{
+						geoLocationSetOptionsWrapper, isGeoLocationSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet)
+						geoLocationSetAttributeMap := make(map[string]attr.Value)
+
+						if isGeoLocationSet && geoLocationSetOptionsWrapper != nil && geoLocationSetOptionsWrapper.GeoLocationSet != nil {
+							geoLocationSetElement := geoLocationSetOptionsWrapper.GeoLocationSet
+
+							// resource specToModelNested RequiredStringField --> Name
+							if geoLocationSetElement.GetName() != "" {
+								geoLocationSetAttributeMap["name"] = types.StringValue(geoLocationSetElement.GetName())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Namespace
+							if geoLocationSetElement.GetNamespace() != "" {
+								geoLocationSetAttributeMap["namespace"] = types.StringValue(geoLocationSetElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if geoLocationSetElement.GetTenant() != "" {
+								geoLocationSetAttributeMap["tenant"] = types.StringValue(geoLocationSetElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["tenant"] = types.StringNull()
+							}
+
+							geoLocationSetObj, geoLocationSetObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap, geoLocationSetAttributeMap)
+							response.Diagnostics.Append(geoLocationSetObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = geoLocationSetObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
+					// GlobalSpecType
+					// false
+					{
+						ipPrefixListOptionsWrapper, isIpPrefixList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList)
+						ipPrefixListAttributeMap := make(map[string]attr.Value)
+
+						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
+							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
+
+							// resource specToModelNested BoolField --> InvertMatch
+							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
+
+							// resource specToModelNested ArrayOfStringField --> IpPrefixes
+							{
+								if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpPrefixes())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+								} else {
+									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+								}
+							}
+
+							// resource specToModelNested ArrayOfStringField --> Ipv6Prefixes
+							{
+								if len(ipPrefixListElement.GetIpv6Prefixes()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpv6Prefixes())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+								} else {
+									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+								}
+							}
+
+							ipPrefixListObj, ipPrefixListObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
+							response.Diagnostics.Append(ipPrefixListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> IpPrefixSet
+					// GlobalSpecType
+					// false
+					{
+						ipPrefixSetOptionsWrapper, isIpPrefixSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet)
+						ipPrefixSetAttributeMap := make(map[string]attr.Value)
+
+						if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
+							ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
+
+							// resource specToModelNested BoolField --> InvertMatcher
+							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetElement.GetInvertMatcher()))
+
+							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
+							if len(ipPrefixSetElement.GetPrefixSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetElement.GetPrefixSets()))
+								for _, prefixSetsElement := range ipPrefixSetElement.GetPrefixSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if prefixSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if prefixSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if prefixSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								prefixSetsListValue, prefixSetsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
+								response.Diagnostics.Append(prefixSetsListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								ipPrefixSetAttributeMap["prefix_sets"] = prefixSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								ipPrefixSetAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap})
+							}
+
+							ipPrefixSetObj, ipPrefixSetObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
+							response.Diagnostics.Append(ipPrefixSetObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, rulesclientChoiceChoicesObjDiags := types.ObjectValue(
+						DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						rulesclientChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(rulesclientChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested UintField --> Score
+				dnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
+
+				rulesElements = append(rulesElements, dnsLoadBalancerLoadBalancingRuleModel)
 			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsZonesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap}, rulesElements)
+			response.Diagnostics.Append(rulesListDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
 
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsZonesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
 		}
 
-		dnsZonesList, diags := utils.GoStructSliceToListValue(
+		ruleListObj, ruleListDiags := utils.GoStructToObjectValue(
 			ctx,
-			DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
-			dnsZonesElements,
+			DnsLoadBalancerRuleListModelAttributeMap,
+			dnsLoadBalancerLoadBalancingRuleListModel,
 		)
-
-		response.Diagnostics.Append(diags...)
+		response.Diagnostics.Append(ruleListDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.DnsZones = dnsZonesList
+		data.RuleList = ruleListObj
 	} else {
-		var dnsZonesObjectType = basetypes.ObjectType{
-			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
-		}
-		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
-		data.DnsZones = nullDnsZonesList
+		data.RuleList = types.ObjectNull(DnsLoadBalancerRuleListModelAttributeMap)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2233,6 +2374,102 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -2242,102 +2479,67 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
+	// resource SpecToModelRoot ArrayOfPointerField --> DnsZones
+	if len(specData.GetDnsZones()) > 0 {
+		dnsZonesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsZones()))
+		for _, dnsZonesElement := range specData.GetDnsZones() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsZonesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+			// resource specToModelNested RequiredStringField --> Namespace
+			if dnsZonesElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if dnsZonesElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+		}
+
+		{
+			dnsZonesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
+				dnsZonesElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsZones = dnsZonesList
+		}
+	} else {
+		var dnsZonesObjectType = basetypes.ObjectType{
+			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
+		}
+		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
+		var priorValDnsZones types.List
+		_ = request.State.GetAttribute(ctx, path.Root("dns_zones"), &priorValDnsZones)
+		if !priorValDnsZones.IsNull() && !priorValDnsZones.IsUnknown() {
+			data.DnsZones = priorValDnsZones
+		} else {
+			data.DnsZones = nullDnsZonesList
+		}
+
+	}
 
 	// resource SpecToModelRoot PointerField --> FallbackPool
 	if specData.GetFallbackPool() != nil {
@@ -2352,20 +2554,20 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if fallbackPoolElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(fallbackPoolElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if fallbackPoolElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(fallbackPoolElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if fallbackPoolElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(fallbackPoolElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		fallbackPoolObj, fallbackPoolDiags := utils.GoStructToObjectValue(
@@ -2383,474 +2585,25 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> RecordType
-	if specData.GetRecordType().String() != "" {
-		stringValue := types.StringValue(specData.GetRecordType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.RecordType = listValue
-	} else {
-		// Empty string, set to null
-		data.RecordType = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot RequiredPointerField --> RuleList
-	if specData.GetRuleList() != nil {
-		var dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList{}
-		ruleListElement := specData.GetRuleList()
-
-		// resource specToModelNested RequiredArrayOfPointerField --> Rules
-		if len(ruleListElement.GetRules()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			rulesElements := make([]DnsLoadBalancerDnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
-			for _, rulesElement := range ruleListElement.GetRules() {
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerDnsLoadBalancerLoadBalancingRule{}
-
-				// resource specToModelNested RequiredOneOfField --> ClientChoice
-				// <no value>
-				if rulesElement.GetClientChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					rulesclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					rulesclientChoiceChoices := rulesElement.GetClientChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> AsnList
-					// <no value>
-					// false
-					{
-						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
-						asnListAttributeMap := make(map[string]attr.Value)
-
-						if isAsnList && asnListOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
-							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
-							if len(asNumbersValue) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnListAttributeMap["as_numbers"] = listValue
-							} else {
-								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
-							}
-
-							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
-					// <no value>
-					// false
-					{
-						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
-						asnMatcherAttributeMap := make(map[string]attr.Value)
-
-						if isAsnMatcher && asnMatcherOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
-							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
-								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if asnSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if asnSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Tenant
-									if asnSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
-							}
-
-							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
-					// <no value>
-					// false
-					{
-						ipPrefixListOptions, isIpPrefixList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList)
-						ipPrefixListAttributeMap := make(map[string]attr.Value)
-
-						if isIpPrefixList && ipPrefixListOptions != nil {
-
-							// resource specToModelNested ArrayOfStringField --> IpPrefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpPrefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpPrefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ip_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// resource specToModelNested ArrayOfStringField --> Ipv6Prefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// resource specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListOptions.IpPrefixList.GetInvertMatch()))
-
-							ipPrefixListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> IpPrefixSet
-					// <no value>
-					// false
-					{
-						ipPrefixSetOptions, isIpPrefixSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet)
-						ipPrefixSetAttributeMap := make(map[string]attr.Value)
-
-						if isIpPrefixSet && ipPrefixSetOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
-							if len(ipPrefixSetOptions.IpPrefixSet.GetPrefixSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetOptions.IpPrefixSet.GetPrefixSets()))
-								for _, prefixSetsElement := range ipPrefixSetOptions.IpPrefixSet.GetPrefixSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if prefixSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Tenant
-									if prefixSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if prefixSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								prefixSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixSetAttributeMap["prefix_sets"] = prefixSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								ipPrefixSetAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap})
-							}
-
-							// resource specToModelNested BoolField --> InvertMatcher
-							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetOptions.IpPrefixSet.GetInvertMatcher()))
-
-							ipPrefixSetObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> GeoLocationLabelSelector
-					// <no value>
-					// false
-					{
-						geoLocationLabelSelectorOptions, isGeoLocationLabelSelector := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector)
-						geoLocationLabelSelectorAttributeMap := make(map[string]attr.Value)
-
-						if isGeoLocationLabelSelector && geoLocationLabelSelectorOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfStringField --> Expressions
-							if len(geoLocationLabelSelectorOptions.GeoLocationLabelSelector.GetExpressions()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, geoLocationLabelSelectorOptions.GeoLocationLabelSelector.GetExpressions())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								geoLocationLabelSelectorAttributeMap["expressions"] = listValue
-							} else {
-								geoLocationLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-							}
-
-							geoLocationLabelSelectorObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap, geoLocationLabelSelectorAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = geoLocationLabelSelectorObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> GeoLocationSet
-					// <no value>
-					// false
-					{
-						geoLocationSetOptions, isGeoLocationSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet)
-						geoLocationSetAttributeMap := make(map[string]attr.Value)
-
-						if isGeoLocationSet && geoLocationSetOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> Name
-							if geoLocationSetOptions.GeoLocationSet.GetName() != "" {
-								geoLocationSetAttributeMap["name"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetName())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["name"] = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> Tenant
-							if geoLocationSetOptions.GeoLocationSet.GetTenant() != "" {
-								geoLocationSetAttributeMap["tenant"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetTenant())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if geoLocationSetOptions.GeoLocationSet.GetNamespace() != "" {
-								geoLocationSetAttributeMap["namespace"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetNamespace())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["namespace"] = types.StringNull()
-							}
-
-							geoLocationSetObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap, geoLocationSetAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = geoLocationSetObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, rulesclientChoiceChoicesObjDiags := types.ObjectValue(
-						DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						rulesclientChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(rulesclientChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested RequiredOneOfField --> ActionChoice
-				// <no value>
-				if rulesElement.GetActionChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					rulesactionChoiceChoices := rulesElement.GetActionChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> Pool
-					// <no value>
-					// false
-					{
-						poolOptions, isPool := rulesactionChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool)
-						poolAttributeMap := make(map[string]attr.Value)
-
-						if isPool && poolOptions != nil {
-
-							// resource specToModelNested StringField --> Tenant
-							if poolOptions.Pool.GetTenant() != "" {
-								poolAttributeMap["tenant"] = types.StringValue(poolOptions.Pool.GetTenant())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if poolOptions.Pool.GetNamespace() != "" {
-								poolAttributeMap["namespace"] = types.StringValue(poolOptions.Pool.GetNamespace())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["namespace"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Name
-							if poolOptions.Pool.GetName() != "" {
-								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["name"] = types.StringNull()
-							}
-
-							poolObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesactionChoiceChoicesAttributeMap["pool"] = poolObj
-						} else {
-							rulesactionChoiceChoicesAttributeMap["pool"] = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, rulesactionChoiceChoicesObjDiags := types.ObjectValue(
-						DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						rulesactionChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(rulesactionChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested UintField --> Score
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
-
-				rulesElements = append(rulesElements, dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap}, rulesElements)
-			response.Diagnostics.Append(diags...)
+	{
+		if specData.GetRecordType().String() != "" {
+			stringValue := types.StringValue(specData.GetRecordType().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
-
+			data.RecordType = listValue
 		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
+			// Empty string, set to null
+			data.RecordType = types.ListNull(types.StringType)
 		}
-
-		ruleListObj, ruleListDiags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLoadBalancerRuleListModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel,
-		)
-		response.Diagnostics.Append(ruleListDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.RuleList = ruleListObj
-	} else {
-		data.RuleList = types.ObjectNull(DnsLoadBalancerRuleListModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot PointerField --> ResponseCache
 	if specData.GetResponseCache() != nil {
-		var dnsLoadBalancerDnsLoadBalancerResponseCacheModel = &DnsLoadBalancerDnsLoadBalancerResponseCache{}
+		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
 		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
@@ -2877,22 +2630,23 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 			// <no value>
 			// false
 			{
-				responseCacheParametersOptions, isResponseCacheParameters := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters)
+				responseCacheParametersOptionsWrapper, isResponseCacheParameters := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters)
 				responseCacheParametersAttributeMap := make(map[string]attr.Value)
 
-				if isResponseCacheParameters && responseCacheParametersOptions != nil {
+				if isResponseCacheParameters && responseCacheParametersOptionsWrapper != nil && responseCacheParametersOptionsWrapper.ResponseCacheParameters != nil {
+					responseCacheParametersElement := responseCacheParametersOptionsWrapper.ResponseCacheParameters
 
 					// resource specToModelNested UintField --> CacheCidrIpv4
-					responseCacheParametersAttributeMap["cache_cidr_ipv4"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheCidrIpv4()))
+					responseCacheParametersAttributeMap["cache_cidr_ipv4"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheCidrIpv4()))
 
 					// resource specToModelNested UintField --> CacheCidrIpv6
-					responseCacheParametersAttributeMap["cache_cidr_ipv6"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheCidrIpv6()))
+					responseCacheParametersAttributeMap["cache_cidr_ipv6"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheCidrIpv6()))
 
 					// resource specToModelNested UintField --> CacheTtl
-					responseCacheParametersAttributeMap["cache_ttl"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheTtl()))
+					responseCacheParametersAttributeMap["cache_ttl"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheTtl()))
 
-					responseCacheParametersObj, diags := types.ObjectValue(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap, responseCacheParametersAttributeMap)
-					response.Diagnostics.Append(diags...)
+					responseCacheParametersObj, responseCacheParametersObjDiags := types.ObjectValue(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap, responseCacheParametersAttributeMap)
+					response.Diagnostics.Append(responseCacheParametersObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2915,16 +2669,16 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = finalObj
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
 		}
 
 		responseCacheObj, responseCacheDiags := utils.GoStructToObjectValue(
 			ctx,
 			DnsLoadBalancerResponseCacheModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel,
+			dnsLoadBalancerRespCacheModel,
 		)
 		response.Diagnostics.Append(responseCacheDiags...)
 		if response.Diagnostics.HasError() {
@@ -2935,58 +2689,470 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 		data.ResponseCache = types.ObjectNull(DnsLoadBalancerResponseCacheModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsZones
-	if len(specData.DnsZones) > 0 {
-		dnsZonesElements := make([]ObjectRefTypeModel, 0, len(specData.DnsZones))
+	// resource SpecToModelRoot RequiredPointerField --> RuleList
+	if specData.GetRuleList() != nil {
+		var dnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerLoadBalancingRuleList{}
+		ruleListElement := specData.GetRuleList()
 
-		for _, dnsZonesElement := range specData.DnsZones {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+		// resource specToModelNested RequiredArrayOfPointerField --> Rules
+		if len(ruleListElement.GetRules()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			rulesElements := make([]DnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
+			for _, rulesElement := range ruleListElement.GetRules() {
+				dnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerLoadBalancingRule{}
 
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsZonesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
+				// resource specToModelNested RequiredOneOfField --> ActionChoice
+				// <no value>
+				if rulesElement.GetActionChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					rulesactionChoiceChoices := rulesElement.GetActionChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> Pool
+					// <no value>
+					// false
+					{
+						poolOptionsWrapper, isPool := rulesactionChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool)
+						poolAttributeMap := make(map[string]attr.Value)
+
+						if isPool && poolOptionsWrapper != nil && poolOptionsWrapper.Pool != nil {
+							poolElement := poolOptionsWrapper.Pool
+
+							// resource specToModelNested RequiredStringField --> Name
+							if poolElement.GetName() != "" {
+								poolAttributeMap["name"] = types.StringValue(poolElement.GetName())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Namespace
+							if poolElement.GetNamespace() != "" {
+								poolAttributeMap["namespace"] = types.StringValue(poolElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if poolElement.GetTenant() != "" {
+								poolAttributeMap["tenant"] = types.StringValue(poolElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["tenant"] = types.StringNull()
+							}
+
+							poolObj, poolObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
+							response.Diagnostics.Append(poolObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesactionChoiceChoicesAttributeMap["pool"] = poolObj
+						} else {
+							rulesactionChoiceChoicesAttributeMap["pool"] = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, rulesactionChoiceChoicesObjDiags := types.ObjectValue(
+						DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						rulesactionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(rulesactionChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredOneOfField --> ClientChoice
+				// <no value>
+				if rulesElement.GetClientChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					rulesclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					rulesclientChoiceChoices := rulesElement.GetClientChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> AsnList
+					// <no value>
+					// false
+					{
+						asnListOptionsWrapper, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
+						asnListAttributeMap := make(map[string]attr.Value)
+
+						if isAsnList && asnListOptionsWrapper != nil && asnListOptionsWrapper.AsnList != nil {
+							asnListElement := asnListOptionsWrapper.AsnList
+
+							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
+							{
+								asNumbersValue := asnListElement.GetAsNumbers()
+								if len(asNumbersValue) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asnListElement.GetAsNumbers())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									asnListAttributeMap["as_numbers"] = listValue
+								} else {
+									asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
+								}
+							}
+
+							asnListObj, asnListObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
+							response.Diagnostics.Append(asnListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
+					// <no value>
+					// false
+					{
+						asnMatcherOptionsWrapper, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
+						asnMatcherAttributeMap := make(map[string]attr.Value)
+
+						if isAsnMatcher && asnMatcherOptionsWrapper != nil && asnMatcherOptionsWrapper.AsnMatcher != nil {
+							asnMatcherElement := asnMatcherOptionsWrapper.AsnMatcher
+
+							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
+							if len(asnMatcherElement.GetAsnSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherElement.GetAsnSets()))
+								for _, asnSetsElement := range asnMatcherElement.GetAsnSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if asnSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if asnSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if asnSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								asnSetsListValue, asnSetsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
+								response.Diagnostics.Append(asnSetsListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
+							}
+
+							asnMatcherObj, asnMatcherObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
+							response.Diagnostics.Append(asnMatcherObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> GeoLocationLabelSelector
+					// <no value>
+					// false
+					{
+						geoLocationLabelSelectorOptionsWrapper, isGeoLocationLabelSelector := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector)
+						geoLocationLabelSelectorAttributeMap := make(map[string]attr.Value)
+
+						if isGeoLocationLabelSelector && geoLocationLabelSelectorOptionsWrapper != nil && geoLocationLabelSelectorOptionsWrapper.GeoLocationLabelSelector != nil {
+							geoLocationLabelSelectorElement := geoLocationLabelSelectorOptionsWrapper.GeoLocationLabelSelector
+
+							// resource specToModelNested RequiredArrayOfStringField --> Expressions
+							{
+								if len(geoLocationLabelSelectorElement.GetExpressions()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, geoLocationLabelSelectorElement.GetExpressions())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									geoLocationLabelSelectorAttributeMap["expressions"] = listValue
+								} else {
+									geoLocationLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+								}
+							}
+
+							geoLocationLabelSelectorObj, geoLocationLabelSelectorObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap, geoLocationLabelSelectorAttributeMap)
+							response.Diagnostics.Append(geoLocationLabelSelectorObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = geoLocationLabelSelectorObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> GeoLocationSet
+					// <no value>
+					// false
+					{
+						geoLocationSetOptionsWrapper, isGeoLocationSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet)
+						geoLocationSetAttributeMap := make(map[string]attr.Value)
+
+						if isGeoLocationSet && geoLocationSetOptionsWrapper != nil && geoLocationSetOptionsWrapper.GeoLocationSet != nil {
+							geoLocationSetElement := geoLocationSetOptionsWrapper.GeoLocationSet
+
+							// resource specToModelNested RequiredStringField --> Name
+							if geoLocationSetElement.GetName() != "" {
+								geoLocationSetAttributeMap["name"] = types.StringValue(geoLocationSetElement.GetName())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Namespace
+							if geoLocationSetElement.GetNamespace() != "" {
+								geoLocationSetAttributeMap["namespace"] = types.StringValue(geoLocationSetElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if geoLocationSetElement.GetTenant() != "" {
+								geoLocationSetAttributeMap["tenant"] = types.StringValue(geoLocationSetElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["tenant"] = types.StringNull()
+							}
+
+							geoLocationSetObj, geoLocationSetObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap, geoLocationSetAttributeMap)
+							response.Diagnostics.Append(geoLocationSetObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = geoLocationSetObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
+					// <no value>
+					// false
+					{
+						ipPrefixListOptionsWrapper, isIpPrefixList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList)
+						ipPrefixListAttributeMap := make(map[string]attr.Value)
+
+						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
+							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
+
+							// resource specToModelNested BoolField --> InvertMatch
+							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
+
+							// resource specToModelNested ArrayOfStringField --> IpPrefixes
+							{
+								if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpPrefixes())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+								} else {
+									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+								}
+							}
+
+							// resource specToModelNested ArrayOfStringField --> Ipv6Prefixes
+							{
+								if len(ipPrefixListElement.GetIpv6Prefixes()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpv6Prefixes())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+								} else {
+									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+								}
+							}
+
+							ipPrefixListObj, ipPrefixListObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
+							response.Diagnostics.Append(ipPrefixListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> IpPrefixSet
+					// <no value>
+					// false
+					{
+						ipPrefixSetOptionsWrapper, isIpPrefixSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet)
+						ipPrefixSetAttributeMap := make(map[string]attr.Value)
+
+						if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
+							ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
+
+							// resource specToModelNested BoolField --> InvertMatcher
+							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetElement.GetInvertMatcher()))
+
+							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
+							if len(ipPrefixSetElement.GetPrefixSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetElement.GetPrefixSets()))
+								for _, prefixSetsElement := range ipPrefixSetElement.GetPrefixSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if prefixSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if prefixSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if prefixSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								prefixSetsListValue, prefixSetsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
+								response.Diagnostics.Append(prefixSetsListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								ipPrefixSetAttributeMap["prefix_sets"] = prefixSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								ipPrefixSetAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap})
+							}
+
+							ipPrefixSetObj, ipPrefixSetObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
+							response.Diagnostics.Append(ipPrefixSetObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, rulesclientChoiceChoicesObjDiags := types.ObjectValue(
+						DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						rulesclientChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(rulesclientChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested UintField --> Score
+				dnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
+
+				rulesElements = append(rulesElements, dnsLoadBalancerLoadBalancingRuleModel)
 			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsZonesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap}, rulesElements)
+			response.Diagnostics.Append(rulesListDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
 
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsZonesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
 		}
 
-		dnsZonesList, diags := utils.GoStructSliceToListValue(
+		ruleListObj, ruleListDiags := utils.GoStructToObjectValue(
 			ctx,
-			DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
-			dnsZonesElements,
+			DnsLoadBalancerRuleListModelAttributeMap,
+			dnsLoadBalancerLoadBalancingRuleListModel,
 		)
-
-		response.Diagnostics.Append(diags...)
+		response.Diagnostics.Append(ruleListDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.DnsZones = dnsZonesList
+		data.RuleList = ruleListObj
 	} else {
-		var dnsZonesObjectType = basetypes.ObjectType{
-			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
-		}
-		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
-		data.DnsZones = nullDnsZonesList
+		data.RuleList = types.ObjectNull(DnsLoadBalancerRuleListModelAttributeMap)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3006,6 +3172,25 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCDnsLoadBalancerModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -3036,23 +3221,13 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -3063,6 +3238,30 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -3087,6 +3286,11 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			// resource modelToSpecNested RequiredStringField --> Namespace
 			if !fallbackPoolModel.Namespace.IsNull() && !fallbackPoolModel.Namespace.IsUnknown() {
 				fallbackPoolSpec.Namespace = string(fallbackPoolModel.Namespace.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> Tenant
+			if !fallbackPoolModel.Tenant.IsNull() && !fallbackPoolModel.Tenant.IsUnknown() {
+				fallbackPoolSpec.Tenant = string(fallbackPoolModel.Tenant.ValueString())
 			}
 
 		}
@@ -3118,11 +3322,79 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	}
 
 	{
+		// resource modelToSpecRoot PointerField --> ResponseCache
+		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
+			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
+			spec.ResponseCache = responseCacheSpec
+			var responseCacheModel DnsLoadBalancerRespCache
+
+			// Populate the nested model from the main data model
+			diags.Append(data.ResponseCache.As(ctx, &responseCacheModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
+			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
+				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerRespCacheParametersChoice{}
+				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultResponseCacheParameters
+				if !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsUnknown() {
+					defaultResponseCacheParametersSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_DefaultResponseCacheParameters{}
+					defaultResponseCacheParametersSpecBool.DefaultResponseCacheParameters = &ves_io_schema.Empty{}
+					responseCacheSpec.ResponseCacheParametersChoice = defaultResponseCacheParametersSpecBool
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> ResponseCacheParameters
+				if !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsUnknown() {
+					var dnsLoadBalancerRespCacheParametersModel DnsLoadBalancerRespCacheParameters
+					response.Diagnostics.Append(responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.As(ctx, &dnsLoadBalancerRespCacheParametersModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					responseCacheParametersOneOfSpec := &ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters{}
+					responseCacheParametersOneOfSpec.ResponseCacheParameters = &ves_io_schema_dns_load_balancer.ResponseCacheParameters{}
+					responseCacheSpec.ResponseCacheParametersChoice = responseCacheParametersOneOfSpec
+
+					// resource modelToSpecNested UintField --> CacheCidrIpv4
+					if !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv4.IsNull() && !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv4.IsUnknown() {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv4 = uint32(uint32(dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv4.ValueInt64()))
+					} else {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv4 = uint32(24)
+					}
+
+					// resource modelToSpecNested UintField --> CacheCidrIpv6
+					if !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv6.IsNull() && !dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv6.IsUnknown() {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv6 = uint32(uint32(dnsLoadBalancerRespCacheParametersModel.CacheCidrIpv6.ValueInt64()))
+					} else {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv6 = uint32(56)
+					}
+
+					// resource modelToSpecNested UintField --> CacheTtl
+					if !dnsLoadBalancerRespCacheParametersModel.CacheTtl.IsNull() && !dnsLoadBalancerRespCacheParametersModel.CacheTtl.IsUnknown() {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheTtl = uint32(uint32(dnsLoadBalancerRespCacheParametersModel.CacheTtl.ValueInt64()))
+					} else {
+						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheTtl = uint32(3600)
+					}
+
+				}
+
+			}
+
+		}
+	}
+
+	{
 		// resource modelToSpecRoot RequiredPointerField --> RuleList
 		if !data.RuleList.IsNull() && !data.RuleList.IsUnknown() {
 			ruleListSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRuleList{}
 			spec.RuleList = ruleListSpec
-			var ruleListModel DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList
+			var ruleListModel DnsLoadBalancerLoadBalancingRuleList
 
 			// Populate the nested model from the main data model
 			diags.Append(data.RuleList.As(ctx, &ruleListModel, basetypes.ObjectAsOptions{})...)
@@ -3134,7 +3406,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Rules
 			if !ruleListModel.Rules.IsNull() && !ruleListModel.Rules.IsUnknown() && len(ruleListModel.Rules.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var rulesElements []DnsLoadBalancerDnsLoadBalancerLoadBalancingRule
+				var rulesElements []DnsLoadBalancerLoadBalancingRule
 				response.Diagnostics.Append(ruleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
@@ -3151,9 +3423,47 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 					// Recursively process nested elements
 
+					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					if !rulesElement.ActionChoice.IsNull() && !rulesElement.ActionChoice.IsUnknown() {
+						rulesActionChoiceModel := DnsLoadBalancerActionChoice{}
+						response.Diagnostics.Append(rulesElement.ActionChoice.As(ctx, &rulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> Pool
+						if !rulesActionChoiceModel.Pool.IsNull() && !rulesActionChoiceModel.Pool.IsUnknown() {
+							var objectRefTypeModelModel ObjectRefTypeModel
+							response.Diagnostics.Append(rulesActionChoiceModel.Pool.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							poolOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool{}
+							poolOneOfSpec.Pool = &ves_io_schema_views.ObjectRefType{}
+							ruleListSpec.Rules[i].ActionChoice = poolOneOfSpec
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
+								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Namespace
+							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
+								poolOneOfSpec.Pool.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
+							}
+
+							// resource modelToSpecNested StringField --> Tenant
+							if !objectRefTypeModelModel.Tenant.IsNull() && !objectRefTypeModelModel.Tenant.IsUnknown() {
+								poolOneOfSpec.Pool.Tenant = string(objectRefTypeModelModel.Tenant.ValueString())
+							}
+
+						}
+
+					}
+
 					// resource modelToSpecNested RequiredOneOfField --> ClientChoice
 					if !rulesElement.ClientChoice.IsNull() && !rulesElement.ClientChoice.IsUnknown() {
-						rulesClientChoiceModel := DnsLoadBalancerLoadBalancingRuleClientChoice{}
+						rulesClientChoiceModel := DnsLoadBalancerClientChoice{}
 						response.Diagnostics.Append(rulesElement.ClientChoice.As(ctx, &rulesClientChoiceModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
@@ -3161,41 +3471,43 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 						// resource modelToSpecNested PointerOfOneOfField --> AsnList
 						if !rulesClientChoiceModel.AsnList.IsNull() && !rulesClientChoiceModel.AsnList.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnListModel DnsLoadBalancerLoadBalancingRuleAsnList
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnListModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerAsnListModel DnsLoadBalancerAsnList
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerAsnListModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							asnListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList{}
 							asnListOneOfSpec.AsnList = &ves_io_schema_policy.AsnMatchList{}
-							rulesSpec[i].ClientChoice = asnListOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = asnListOneOfSpec
 
-							elements := make([]uint32, 0, len(dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.Elements()))
-							diags := dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
+							{
+								elements := make([]uint32, 0, len(dnsLoadBalancerAsnListModel.AsNumbers.Elements()))
+								diags = dnsLoadBalancerAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnListOneOfSpec.AsnList.AsNumbers = elements
 							}
-							asnListOneOfSpec.AsnList.AsNumbers = elements
 
 						}
 
 						// resource modelToSpecNested PointerOfOneOfField --> AsnMatcher
 						if !rulesClientChoiceModel.AsnMatcher.IsNull() && !rulesClientChoiceModel.AsnMatcher.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnMatcherModel DnsLoadBalancerLoadBalancingRuleAsnMatcher
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnMatcherModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerAsnMatcherModel DnsLoadBalancerAsnMatcher
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerAsnMatcherModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							asnMatcherOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher{}
 							asnMatcherOneOfSpec.AsnMatcher = &ves_io_schema_policy.AsnMatcherType{}
-							rulesSpec[i].ClientChoice = asnMatcherOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = asnMatcherOneOfSpec
 
 							// resource modelToSpecNested RequiredArrayOfPointerField --> AsnSets
-							if !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.Elements()) > 0 {
+							if !dnsLoadBalancerAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerAsnMatcherModel.AsnSets.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
 								var asnSetsElements []ObjectRefTypeModel
-								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
+								response.Diagnostics.Append(dnsLoadBalancerAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -3211,77 +3523,142 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 									// Recursively process nested elements
 
-									// resource modelToSpecNested RequiredStringField --> Namespace
-									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
-										asnSetsSpec[i].Namespace = string(asnSetsElement.Namespace.ValueString())
-									}
-
 									// resource modelToSpecNested RequiredStringField --> Name
 									if !asnSetsElement.Name.IsNull() && !asnSetsElement.Name.IsUnknown() {
-										asnSetsSpec[i].Name = string(asnSetsElement.Name.ValueString())
+										asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii].Name = string(asnSetsElement.Name.ValueString())
+									}
+
+									// resource modelToSpecNested RequiredStringField --> Namespace
+									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
+										asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii].Namespace = string(asnSetsElement.Namespace.ValueString())
 									}
 
 								}
+							}
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationLabelSelector
+						if !rulesClientChoiceModel.GeoLocationLabelSelector.IsNull() && !rulesClientChoiceModel.GeoLocationLabelSelector.IsUnknown() {
+							var dnsLoadBalancerGeoLocationLabelSelectorModel DnsLoadBalancerGeoLocationLabelSelector
+							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationLabelSelector.As(ctx, &dnsLoadBalancerGeoLocationLabelSelectorModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							geoLocationLabelSelectorOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector{}
+							geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector = &ves_io_schema.LabelSelectorType{}
+							ruleListSpec.Rules[i].ClientChoice = geoLocationLabelSelectorOneOfSpec
+
+							// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
+							{
+								elements := make([]string, 0, len(dnsLoadBalancerGeoLocationLabelSelectorModel.Expressions.Elements()))
+								diags = dnsLoadBalancerGeoLocationLabelSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector.Expressions = elements
+							}
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationSet
+						if !rulesClientChoiceModel.GeoLocationSet.IsNull() && !rulesClientChoiceModel.GeoLocationSet.IsUnknown() {
+							var objectRefTypeModelModel ObjectRefTypeModel
+							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationSet.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							geoLocationSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet{}
+							geoLocationSetOneOfSpec.GeoLocationSet = &ves_io_schema_views.ObjectRefType{}
+							ruleListSpec.Rules[i].ClientChoice = geoLocationSetOneOfSpec
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
+								geoLocationSetOneOfSpec.GeoLocationSet.Name = string(objectRefTypeModelModel.Name.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Namespace
+							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
+								geoLocationSetOneOfSpec.GeoLocationSet.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
+							}
+
+							// resource modelToSpecNested StringField --> Tenant
+							if !objectRefTypeModelModel.Tenant.IsNull() && !objectRefTypeModelModel.Tenant.IsUnknown() {
+								geoLocationSetOneOfSpec.GeoLocationSet.Tenant = string(objectRefTypeModelModel.Tenant.ValueString())
 							}
 
 						}
 
 						// resource modelToSpecNested PointerOfOneOfField --> IpPrefixList
 						if !rulesClientChoiceModel.IpPrefixList.IsNull() && !rulesClientChoiceModel.IpPrefixList.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleIpPrefixListModel DnsLoadBalancerLoadBalancingRuleIpPrefixList
-							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixList.As(ctx, &dnsLoadBalancerLoadBalancingRuleIpPrefixListModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerIpPrefixListModel DnsLoadBalancerIpPrefixList
+							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixList.As(ctx, &dnsLoadBalancerIpPrefixListModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							ipPrefixListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList{}
 							ipPrefixListOneOfSpec.IpPrefixList = &ves_io_schema_policy.PrefixMatchList{}
-							rulesSpec[i].ClientChoice = ipPrefixListOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = ipPrefixListOneOfSpec
+
+							// resource modelToSpecNested BoolField --> InvertMatch
+							if !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsNull() && !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsUnknown() {
+								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(dnsLoadBalancerIpPrefixListModel.InvertMatch.ValueBool())
+							} else {
+								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(false)
+							}
 
 							// resource modelToSpecNested ArrayOfStringField --> IpPrefixes
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.IsUnknown() {
-								elements := make([]string, 0, len(dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.Elements()))
-								diags := dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.IpPrefixes.ElementsAs(ctx, &elements, false)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
+							if !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsNull() && !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsUnknown() {
+								{
+									elements := make([]string, 0, len(dnsLoadBalancerIpPrefixListModel.IpPrefixes.Elements()))
+									diags = dnsLoadBalancerIpPrefixListModel.IpPrefixes.ElementsAs(ctx, &elements, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListOneOfSpec.IpPrefixList.IpPrefixes = elements
 								}
-								ipPrefixListOneOfSpec.IpPrefixList.IpPrefixes = elements
 							}
 
 							// resource modelToSpecNested ArrayOfStringField --> Ipv6Prefixes
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.IsUnknown() {
-								elements := make([]string, 0, len(dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.Elements()))
-								diags := dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.Ipv6Prefixes.ElementsAs(ctx, &elements, false)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
+							if !dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.IsNull() && !dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.IsUnknown() {
+								{
+									elements := make([]string, 0, len(dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.Elements()))
+									diags = dnsLoadBalancerIpPrefixListModel.Ipv6Prefixes.ElementsAs(ctx, &elements, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListOneOfSpec.IpPrefixList.Ipv6Prefixes = elements
 								}
-								ipPrefixListOneOfSpec.IpPrefixList.Ipv6Prefixes = elements
-							}
-
-							// resource modelToSpecNested BoolField --> InvertMatch
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.InvertMatch.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.InvertMatch.IsUnknown() {
-								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(dnsLoadBalancerLoadBalancingRuleIpPrefixListModel.InvertMatch.ValueBool())
 							}
 
 						}
 
 						// resource modelToSpecNested PointerOfOneOfField --> IpPrefixSet
 						if !rulesClientChoiceModel.IpPrefixSet.IsNull() && !rulesClientChoiceModel.IpPrefixSet.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel DnsLoadBalancerLoadBalancingRuleIpPrefixSet
-							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixSet.As(ctx, &dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel, basetypes.ObjectAsOptions{})...)
+							var dnsLoadBalancerIpPrefixSetModel DnsLoadBalancerIpPrefixSet
+							response.Diagnostics.Append(rulesClientChoiceModel.IpPrefixSet.As(ctx, &dnsLoadBalancerIpPrefixSetModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							ipPrefixSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet{}
 							ipPrefixSetOneOfSpec.IpPrefixSet = &ves_io_schema_policy.IpMatcherType{}
-							rulesSpec[i].ClientChoice = ipPrefixSetOneOfSpec
+							ruleListSpec.Rules[i].ClientChoice = ipPrefixSetOneOfSpec
+
+							// resource modelToSpecNested BoolField --> InvertMatcher
+							if !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsNull() && !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsUnknown() {
+								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(dnsLoadBalancerIpPrefixSetModel.InvertMatcher.ValueBool())
+							} else {
+								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(false)
+							}
 
 							// resource modelToSpecNested RequiredArrayOfPointerField --> PrefixSets
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.Elements()) > 0 {
+							if !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsNull() && !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsUnknown() && len(dnsLoadBalancerIpPrefixSetModel.PrefixSets.Elements()) > 0 {
 								// 1. Convert the types.List into a slice of the model's Go struct
 								var prefixSetsElements []ObjectRefTypeModel
-								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.PrefixSets.ElementsAs(ctx, &prefixSetsElements, false)...)
+								response.Diagnostics.Append(dnsLoadBalancerIpPrefixSetModel.PrefixSets.ElementsAs(ctx, &prefixSetsElements, false)...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -3299,98 +3676,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 									// resource modelToSpecNested RequiredStringField --> Name
 									if !prefixSetsElement.Name.IsNull() && !prefixSetsElement.Name.IsUnknown() {
-										prefixSetsSpec[i].Name = string(prefixSetsElement.Name.ValueString())
+										ipPrefixSetOneOfSpec.IpPrefixSet.PrefixSets[ii].Name = string(prefixSetsElement.Name.ValueString())
 									}
 
 									// resource modelToSpecNested RequiredStringField --> Namespace
 									if !prefixSetsElement.Namespace.IsNull() && !prefixSetsElement.Namespace.IsUnknown() {
-										prefixSetsSpec[i].Namespace = string(prefixSetsElement.Namespace.ValueString())
+										ipPrefixSetOneOfSpec.IpPrefixSet.PrefixSets[ii].Namespace = string(prefixSetsElement.Namespace.ValueString())
 									}
 
 								}
-							}
-
-							// resource modelToSpecNested BoolField --> InvertMatcher
-							if !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.InvertMatcher.IsNull() && !dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.InvertMatcher.IsUnknown() {
-								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(dnsLoadBalancerLoadBalancingRuleIpPrefixSetModel.InvertMatcher.ValueBool())
-							}
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationLabelSelector
-						if !rulesClientChoiceModel.GeoLocationLabelSelector.IsNull() && !rulesClientChoiceModel.GeoLocationLabelSelector.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel DnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelector
-							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationLabelSelector.As(ctx, &dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							geoLocationLabelSelectorOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector{}
-							geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector = &ves_io_schema.LabelSelectorType{}
-							rulesSpec[i].ClientChoice = geoLocationLabelSelectorOneOfSpec
-
-							// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
-							elements := make([]string, 0, len(dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel.Expressions.Elements()))
-							diags = dnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							geoLocationLabelSelectorOneOfSpec.GeoLocationLabelSelector.Expressions = elements
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> GeoLocationSet
-						if !rulesClientChoiceModel.GeoLocationSet.IsNull() && !rulesClientChoiceModel.GeoLocationSet.IsUnknown() {
-							var objectRefTypeModelModel ObjectRefTypeModel
-							response.Diagnostics.Append(rulesClientChoiceModel.GeoLocationSet.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							geoLocationSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet{}
-							geoLocationSetOneOfSpec.GeoLocationSet = &ves_io_schema_views.ObjectRefType{}
-							rulesSpec[i].ClientChoice = geoLocationSetOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
-								geoLocationSetOneOfSpec.GeoLocationSet.Name = string(objectRefTypeModelModel.Name.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Namespace
-							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
-								geoLocationSetOneOfSpec.GeoLocationSet.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
-							}
-
-						}
-
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
-					if !rulesElement.ActionChoice.IsNull() && !rulesElement.ActionChoice.IsUnknown() {
-						rulesActionChoiceModel := DnsLoadBalancerLoadBalancingRuleActionChoice{}
-						response.Diagnostics.Append(rulesElement.ActionChoice.As(ctx, &rulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> Pool
-						if !rulesActionChoiceModel.Pool.IsNull() && !rulesActionChoiceModel.Pool.IsUnknown() {
-							var objectRefTypeModelModel ObjectRefTypeModel
-							response.Diagnostics.Append(rulesActionChoiceModel.Pool.As(ctx, &objectRefTypeModelModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							poolOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool{}
-							poolOneOfSpec.Pool = &ves_io_schema_views.ObjectRefType{}
-							rulesSpec[i].ActionChoice = poolOneOfSpec
-
-							// resource modelToSpecNested RequiredStringField --> Namespace
-							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
-								poolOneOfSpec.Pool.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
-							}
-
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
-								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
 							}
 
 						}
@@ -3399,7 +3693,9 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 					// resource modelToSpecNested UintField --> Score
 					if !rulesElement.Score.IsNull() && !rulesElement.Score.IsUnknown() {
-						rulesSpec[i].Score = uint32(uint32(rulesElement.Score.ValueInt64()))
+						ruleListSpec.Rules[i].Score = uint32(uint32(rulesElement.Score.ValueInt64()))
+					} else {
+						ruleListSpec.Rules[i].Score = uint32(100)
 					}
 
 				}
@@ -3408,66 +3704,11 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	{
-		// resource modelToSpecRoot PointerField --> ResponseCache
-		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
-			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
-			spec.ResponseCache = responseCacheSpec
-			var responseCacheModel DnsLoadBalancerDnsLoadBalancerResponseCache
-
-			// Populate the nested model from the main data model
-			diags.Append(data.ResponseCache.As(ctx, &responseCacheModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
-			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
-				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerResponseCacheResponseCacheParametersChoice{}
-				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultResponseCacheParameters
-				if !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.DefaultResponseCacheParameters.IsUnknown() {
-					defaultResponseCacheParametersSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_DefaultResponseCacheParameters{}
-					defaultResponseCacheParametersSpecBool.DefaultResponseCacheParameters = &ves_io_schema.Empty{}
-					responseCacheSpec.ResponseCacheParametersChoice = defaultResponseCacheParametersSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> ResponseCacheParameters
-				if !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsNull() && !responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.IsUnknown() {
-					var dnsLoadBalancerResponseCacheResponseCacheParametersModel DnsLoadBalancerResponseCacheResponseCacheParameters
-					response.Diagnostics.Append(responseCacheResponseCacheParametersChoiceModel.ResponseCacheParameters.As(ctx, &dnsLoadBalancerResponseCacheResponseCacheParametersModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					responseCacheParametersOneOfSpec := &ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters{}
-					responseCacheParametersOneOfSpec.ResponseCacheParameters = &ves_io_schema_dns_load_balancer.ResponseCacheParameters{}
-					responseCacheSpec.ResponseCacheParametersChoice = responseCacheParametersOneOfSpec
-
-					// resource modelToSpecNested UintField --> CacheCidrIpv4
-					if !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv4.IsNull() && !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv4.IsUnknown() {
-						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv4 = uint32(uint32(dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv4.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> CacheCidrIpv6
-					if !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv6.IsNull() && !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv6.IsUnknown() {
-						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheCidrIpv6 = uint32(uint32(dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheCidrIpv6.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> CacheTtl
-					if !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheTtl.IsNull() && !dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheTtl.IsUnknown() {
-						responseCacheParametersOneOfSpec.ResponseCacheParameters.CacheTtl = uint32(uint32(dnsLoadBalancerResponseCacheResponseCacheParametersModel.CacheTtl.ValueInt64()))
-					}
-
-				}
-
-			}
-
-		}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3504,6 +3745,101 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -3513,102 +3849,67 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
+	// resource SpecToModelRoot ArrayOfPointerField --> DnsZones
+	if len(specData.GetDnsZones()) > 0 {
+		dnsZonesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsZones()))
+		for _, dnsZonesElement := range specData.GetDnsZones() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsZonesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+			// resource specToModelNested RequiredStringField --> Namespace
+			if dnsZonesElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if dnsZonesElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+		}
+
+		{
+			dnsZonesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
+				dnsZonesElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsZones = dnsZonesList
+		}
+	} else {
+		var dnsZonesObjectType = basetypes.ObjectType{
+			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
+		}
+		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
+		var priorValDnsZones types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("dns_zones"), &priorValDnsZones)
+		if !priorValDnsZones.IsNull() && !priorValDnsZones.IsUnknown() {
+			data.DnsZones = priorValDnsZones
+		} else {
+			data.DnsZones = nullDnsZonesList
+		}
+
+	}
 
 	// resource SpecToModelRoot PointerField --> FallbackPool
 	if specData.GetFallbackPool() != nil {
@@ -3623,20 +3924,20 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if fallbackPoolElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(fallbackPoolElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if fallbackPoolElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(fallbackPoolElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if fallbackPoolElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(fallbackPoolElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		fallbackPoolObj, fallbackPoolDiags := utils.GoStructToObjectValue(
@@ -3654,474 +3955,25 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> RecordType
-	if specData.GetRecordType().String() != "" {
-		stringValue := types.StringValue(specData.GetRecordType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.RecordType = listValue
-	} else {
-		// Empty string, set to null
-		data.RecordType = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot RequiredPointerField --> RuleList
-	if specData.GetRuleList() != nil {
-		var dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerDnsLoadBalancerLoadBalancingRuleList{}
-		ruleListElement := specData.GetRuleList()
-
-		// resource specToModelNested RequiredArrayOfPointerField --> Rules
-		if len(ruleListElement.GetRules()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			rulesElements := make([]DnsLoadBalancerDnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
-			for _, rulesElement := range ruleListElement.GetRules() {
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerDnsLoadBalancerLoadBalancingRule{}
-
-				// resource specToModelNested RequiredOneOfField --> ClientChoice
-				// GlobalSpecType
-				if rulesElement.GetClientChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					rulesclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					rulesclientChoiceChoices := rulesElement.GetClientChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> AsnList
-					// GlobalSpecType
-					// false
-					{
-						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
-						asnListAttributeMap := make(map[string]attr.Value)
-
-						if isAsnList && asnListOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
-							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
-							if len(asNumbersValue) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnListAttributeMap["as_numbers"] = listValue
-							} else {
-								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
-							}
-
-							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
-					// GlobalSpecType
-					// false
-					{
-						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
-						asnMatcherAttributeMap := make(map[string]attr.Value)
-
-						if isAsnMatcher && asnMatcherOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
-							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
-								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if asnSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if asnSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Tenant
-									if asnSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
-							}
-
-							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
-					// GlobalSpecType
-					// false
-					{
-						ipPrefixListOptions, isIpPrefixList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList)
-						ipPrefixListAttributeMap := make(map[string]attr.Value)
-
-						if isIpPrefixList && ipPrefixListOptions != nil {
-
-							// resource specToModelNested ArrayOfStringField --> IpPrefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpPrefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpPrefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ip_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// resource specToModelNested ArrayOfStringField --> Ipv6Prefixes
-							if len(ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, ipPrefixListOptions.IpPrefixList.GetIpv6Prefixes())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
-							} else {
-								ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-							}
-
-							// resource specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListOptions.IpPrefixList.GetInvertMatch()))
-
-							ipPrefixListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> IpPrefixSet
-					// GlobalSpecType
-					// false
-					{
-						ipPrefixSetOptions, isIpPrefixSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet)
-						ipPrefixSetAttributeMap := make(map[string]attr.Value)
-
-						if isIpPrefixSet && ipPrefixSetOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
-							if len(ipPrefixSetOptions.IpPrefixSet.GetPrefixSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetOptions.IpPrefixSet.GetPrefixSets()))
-								for _, prefixSetsElement := range ipPrefixSetOptions.IpPrefixSet.GetPrefixSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if prefixSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// resource specToModelNested StringField --> Tenant
-									if prefixSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if prefixSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								prefixSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								ipPrefixSetAttributeMap["prefix_sets"] = prefixSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								ipPrefixSetAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap})
-							}
-
-							// resource specToModelNested BoolField --> InvertMatcher
-							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetOptions.IpPrefixSet.GetInvertMatcher()))
-
-							ipPrefixSetObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> GeoLocationLabelSelector
-					// GlobalSpecType
-					// false
-					{
-						geoLocationLabelSelectorOptions, isGeoLocationLabelSelector := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector)
-						geoLocationLabelSelectorAttributeMap := make(map[string]attr.Value)
-
-						if isGeoLocationLabelSelector && geoLocationLabelSelectorOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfStringField --> Expressions
-							if len(geoLocationLabelSelectorOptions.GeoLocationLabelSelector.GetExpressions()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, geoLocationLabelSelectorOptions.GeoLocationLabelSelector.GetExpressions())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								geoLocationLabelSelectorAttributeMap["expressions"] = listValue
-							} else {
-								geoLocationLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-							}
-
-							geoLocationLabelSelectorObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap, geoLocationLabelSelectorAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = geoLocationLabelSelectorObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> GeoLocationSet
-					// GlobalSpecType
-					// false
-					{
-						geoLocationSetOptions, isGeoLocationSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet)
-						geoLocationSetAttributeMap := make(map[string]attr.Value)
-
-						if isGeoLocationSet && geoLocationSetOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> Name
-							if geoLocationSetOptions.GeoLocationSet.GetName() != "" {
-								geoLocationSetAttributeMap["name"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetName())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["name"] = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> Tenant
-							if geoLocationSetOptions.GeoLocationSet.GetTenant() != "" {
-								geoLocationSetAttributeMap["tenant"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetTenant())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if geoLocationSetOptions.GeoLocationSet.GetNamespace() != "" {
-								geoLocationSetAttributeMap["namespace"] = types.StringValue(geoLocationSetOptions.GeoLocationSet.GetNamespace())
-							} else {
-								// Empty string, set to null
-								geoLocationSetAttributeMap["namespace"] = types.StringNull()
-							}
-
-							geoLocationSetObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap, geoLocationSetAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = geoLocationSetObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, rulesclientChoiceChoicesObjDiags := types.ObjectValue(
-						DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						rulesclientChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(rulesclientChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested RequiredOneOfField --> ActionChoice
-				// GlobalSpecType
-				if rulesElement.GetActionChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					rulesactionChoiceChoices := rulesElement.GetActionChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> Pool
-					// GlobalSpecType
-					// false
-					{
-						poolOptions, isPool := rulesactionChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool)
-						poolAttributeMap := make(map[string]attr.Value)
-
-						if isPool && poolOptions != nil {
-
-							// resource specToModelNested StringField --> Tenant
-							if poolOptions.Pool.GetTenant() != "" {
-								poolAttributeMap["tenant"] = types.StringValue(poolOptions.Pool.GetTenant())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if poolOptions.Pool.GetNamespace() != "" {
-								poolAttributeMap["namespace"] = types.StringValue(poolOptions.Pool.GetNamespace())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["namespace"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Name
-							if poolOptions.Pool.GetName() != "" {
-								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["name"] = types.StringNull()
-							}
-
-							poolObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesactionChoiceChoicesAttributeMap["pool"] = poolObj
-						} else {
-							rulesactionChoiceChoicesAttributeMap["pool"] = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, rulesactionChoiceChoicesObjDiags := types.ObjectValue(
-						DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						rulesactionChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(rulesactionChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested UintField --> Score
-				dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
-
-				rulesElements = append(rulesElements, dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap}, rulesElements)
-			response.Diagnostics.Append(diags...)
+	{
+		if specData.GetRecordType().String() != "" {
+			stringValue := types.StringValue(specData.GetRecordType().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
-
+			data.RecordType = listValue
 		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
+			// Empty string, set to null
+			data.RecordType = types.ListNull(types.StringType)
 		}
-
-		ruleListObj, ruleListDiags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLoadBalancerRuleListModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerLoadBalancingRuleListModel,
-		)
-		response.Diagnostics.Append(ruleListDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.RuleList = ruleListObj
-	} else {
-		data.RuleList = types.ObjectNull(DnsLoadBalancerRuleListModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot PointerField --> ResponseCache
 	if specData.GetResponseCache() != nil {
-		var dnsLoadBalancerDnsLoadBalancerResponseCacheModel = &DnsLoadBalancerDnsLoadBalancerResponseCache{}
+		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
 		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
@@ -4148,22 +4000,23 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			// GlobalSpecType
 			// false
 			{
-				responseCacheParametersOptions, isResponseCacheParameters := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters)
+				responseCacheParametersOptionsWrapper, isResponseCacheParameters := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_ResponseCacheParameters)
 				responseCacheParametersAttributeMap := make(map[string]attr.Value)
 
-				if isResponseCacheParameters && responseCacheParametersOptions != nil {
+				if isResponseCacheParameters && responseCacheParametersOptionsWrapper != nil && responseCacheParametersOptionsWrapper.ResponseCacheParameters != nil {
+					responseCacheParametersElement := responseCacheParametersOptionsWrapper.ResponseCacheParameters
 
 					// resource specToModelNested UintField --> CacheCidrIpv4
-					responseCacheParametersAttributeMap["cache_cidr_ipv4"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheCidrIpv4()))
+					responseCacheParametersAttributeMap["cache_cidr_ipv4"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheCidrIpv4()))
 
 					// resource specToModelNested UintField --> CacheCidrIpv6
-					responseCacheParametersAttributeMap["cache_cidr_ipv6"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheCidrIpv6()))
+					responseCacheParametersAttributeMap["cache_cidr_ipv6"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheCidrIpv6()))
 
 					// resource specToModelNested UintField --> CacheTtl
-					responseCacheParametersAttributeMap["cache_ttl"] = types.Int64Value(int64(responseCacheParametersOptions.ResponseCacheParameters.GetCacheTtl()))
+					responseCacheParametersAttributeMap["cache_ttl"] = types.Int64Value(int64(responseCacheParametersElement.GetCacheTtl()))
 
-					responseCacheParametersObj, diags := types.ObjectValue(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap, responseCacheParametersAttributeMap)
-					response.Diagnostics.Append(diags...)
+					responseCacheParametersObj, responseCacheParametersObjDiags := types.ObjectValue(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap, responseCacheParametersAttributeMap)
+					response.Diagnostics.Append(responseCacheParametersObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -4186,16 +4039,16 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = finalObj
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
 		}
 
 		responseCacheObj, responseCacheDiags := utils.GoStructToObjectValue(
 			ctx,
 			DnsLoadBalancerResponseCacheModelAttributeMap,
-			dnsLoadBalancerDnsLoadBalancerResponseCacheModel,
+			dnsLoadBalancerRespCacheModel,
 		)
 		response.Diagnostics.Append(responseCacheDiags...)
 		if response.Diagnostics.HasError() {
@@ -4206,58 +4059,496 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		data.ResponseCache = types.ObjectNull(DnsLoadBalancerResponseCacheModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsZones
-	if len(specData.DnsZones) > 0 {
-		dnsZonesElements := make([]ObjectRefTypeModel, 0, len(specData.DnsZones))
+	// resource SpecToModelRoot RequiredPointerField --> RuleList
+	if specData.GetRuleList() != nil {
+		var dnsLoadBalancerLoadBalancingRuleListModel = &DnsLoadBalancerLoadBalancingRuleList{}
+		ruleListElement := specData.GetRuleList()
 
-		for _, dnsZonesElement := range specData.DnsZones {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+		// resource specToModelNested RequiredArrayOfPointerField --> Rules
+		if len(ruleListElement.GetRules()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			rulesElements := make([]DnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
+			for _, rulesElement := range ruleListElement.GetRules() {
+				dnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerLoadBalancingRule{}
 
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsZonesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
+				// resource specToModelNested RequiredOneOfField --> ActionChoice
+				// GlobalSpecType
+				if rulesElement.GetActionChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					rulesactionChoiceChoices := rulesElement.GetActionChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> Pool
+					// GlobalSpecType
+					// false
+					{
+						poolOptionsWrapper, isPool := rulesactionChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_Pool)
+						poolAttributeMap := make(map[string]attr.Value)
+
+						if isPool && poolOptionsWrapper != nil && poolOptionsWrapper.Pool != nil {
+							poolElement := poolOptionsWrapper.Pool
+
+							// resource specToModelNested RequiredStringField --> Name
+							if poolElement.GetName() != "" {
+								poolAttributeMap["name"] = types.StringValue(poolElement.GetName())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Namespace
+							if poolElement.GetNamespace() != "" {
+								poolAttributeMap["namespace"] = types.StringValue(poolElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if poolElement.GetTenant() != "" {
+								poolAttributeMap["tenant"] = types.StringValue(poolElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["tenant"] = types.StringNull()
+							}
+
+							poolObj, poolObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
+							response.Diagnostics.Append(poolObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesactionChoiceChoicesAttributeMap["pool"] = poolObj
+						} else {
+							rulesactionChoiceChoicesAttributeMap["pool"] = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, rulesactionChoiceChoicesObjDiags := types.ObjectValue(
+						DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						rulesactionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(rulesactionChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dnsLoadBalancerLoadBalancingRuleModel.ActionChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredOneOfField --> ClientChoice
+				// GlobalSpecType
+				if rulesElement.GetClientChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					rulesclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					rulesclientChoiceChoices := rulesElement.GetClientChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> AsnList
+					// GlobalSpecType
+					// false
+					{
+						asnListOptionsWrapper, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
+						asnListAttributeMap := make(map[string]attr.Value)
+
+						if isAsnList && asnListOptionsWrapper != nil && asnListOptionsWrapper.AsnList != nil {
+							asnListElement := asnListOptionsWrapper.AsnList
+
+							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
+							{
+								asNumbersValue := asnListElement.GetAsNumbers()
+								if len(asNumbersValue) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asnListElement.GetAsNumbers())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									asnListAttributeMap["as_numbers"] = listValue
+								} else {
+									asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
+								}
+							}
+
+							asnListObj, asnListObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
+							response.Diagnostics.Append(asnListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
+					// GlobalSpecType
+					// false
+					{
+						asnMatcherOptionsWrapper, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
+						asnMatcherAttributeMap := make(map[string]attr.Value)
+
+						if isAsnMatcher && asnMatcherOptionsWrapper != nil && asnMatcherOptionsWrapper.AsnMatcher != nil {
+							asnMatcherElement := asnMatcherOptionsWrapper.AsnMatcher
+
+							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
+							if len(asnMatcherElement.GetAsnSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherElement.GetAsnSets()))
+								for _, asnSetsElement := range asnMatcherElement.GetAsnSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if asnSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if asnSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if asnSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								asnSetsListValue, asnSetsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
+								response.Diagnostics.Append(asnSetsListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
+							}
+
+							asnMatcherObj, asnMatcherObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
+							response.Diagnostics.Append(asnMatcherObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> GeoLocationLabelSelector
+					// GlobalSpecType
+					// false
+					{
+						geoLocationLabelSelectorOptionsWrapper, isGeoLocationLabelSelector := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationLabelSelector)
+						geoLocationLabelSelectorAttributeMap := make(map[string]attr.Value)
+
+						if isGeoLocationLabelSelector && geoLocationLabelSelectorOptionsWrapper != nil && geoLocationLabelSelectorOptionsWrapper.GeoLocationLabelSelector != nil {
+							geoLocationLabelSelectorElement := geoLocationLabelSelectorOptionsWrapper.GeoLocationLabelSelector
+
+							// resource specToModelNested RequiredArrayOfStringField --> Expressions
+							{
+								if len(geoLocationLabelSelectorElement.GetExpressions()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, geoLocationLabelSelectorElement.GetExpressions())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									geoLocationLabelSelectorAttributeMap["expressions"] = listValue
+								} else {
+									geoLocationLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+								}
+							}
+
+							geoLocationLabelSelectorObj, geoLocationLabelSelectorObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap, geoLocationLabelSelectorAttributeMap)
+							response.Diagnostics.Append(geoLocationLabelSelectorObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = geoLocationLabelSelectorObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["geo_location_label_selector"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationLabelSelectorModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> GeoLocationSet
+					// GlobalSpecType
+					// false
+					{
+						geoLocationSetOptionsWrapper, isGeoLocationSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_GeoLocationSet)
+						geoLocationSetAttributeMap := make(map[string]attr.Value)
+
+						if isGeoLocationSet && geoLocationSetOptionsWrapper != nil && geoLocationSetOptionsWrapper.GeoLocationSet != nil {
+							geoLocationSetElement := geoLocationSetOptionsWrapper.GeoLocationSet
+
+							// resource specToModelNested RequiredStringField --> Name
+							if geoLocationSetElement.GetName() != "" {
+								geoLocationSetAttributeMap["name"] = types.StringValue(geoLocationSetElement.GetName())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Namespace
+							if geoLocationSetElement.GetNamespace() != "" {
+								geoLocationSetAttributeMap["namespace"] = types.StringValue(geoLocationSetElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if geoLocationSetElement.GetTenant() != "" {
+								geoLocationSetAttributeMap["tenant"] = types.StringValue(geoLocationSetElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								geoLocationSetAttributeMap["tenant"] = types.StringNull()
+							}
+
+							geoLocationSetObj, geoLocationSetObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap, geoLocationSetAttributeMap)
+							response.Diagnostics.Append(geoLocationSetObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = geoLocationSetObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["geo_location_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
+					// GlobalSpecType
+					// false
+					{
+						ipPrefixListOptionsWrapper, isIpPrefixList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixList)
+						ipPrefixListAttributeMap := make(map[string]attr.Value)
+
+						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
+							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
+
+							// resource specToModelNested BoolField --> InvertMatch
+							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
+
+							// resource specToModelNested ArrayOfStringField --> IpPrefixes
+							{
+								if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpPrefixes())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+								} else {
+									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+								}
+							}
+
+							// resource specToModelNested ArrayOfStringField --> Ipv6Prefixes
+							{
+								if len(ipPrefixListElement.GetIpv6Prefixes()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipPrefixListElement.GetIpv6Prefixes())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+								} else {
+									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+								}
+							}
+
+							ipPrefixListObj, ipPrefixListObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap, ipPrefixListAttributeMap)
+							response.Diagnostics.Append(ipPrefixListObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = ipPrefixListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> IpPrefixSet
+					// GlobalSpecType
+					// false
+					{
+						ipPrefixSetOptionsWrapper, isIpPrefixSet := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet)
+						ipPrefixSetAttributeMap := make(map[string]attr.Value)
+
+						if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
+							ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
+
+							// resource specToModelNested BoolField --> InvertMatcher
+							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetElement.GetInvertMatcher()))
+
+							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
+							if len(ipPrefixSetElement.GetPrefixSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								prefixSetsElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetElement.GetPrefixSets()))
+								for _, prefixSetsElement := range ipPrefixSetElement.GetPrefixSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if prefixSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(prefixSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if prefixSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(prefixSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if prefixSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(prefixSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									prefixSetsElements = append(prefixSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								prefixSetsListValue, prefixSetsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap}, prefixSetsElements)
+								response.Diagnostics.Append(prefixSetsListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								ipPrefixSetAttributeMap["prefix_sets"] = prefixSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								ipPrefixSetAttributeMap["prefix_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerPrefixSetsObjectRefModelAttributeMap})
+							}
+
+							ipPrefixSetObj, ipPrefixSetObjDiags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
+							response.Diagnostics.Append(ipPrefixSetObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, rulesclientChoiceChoicesObjDiags := types.ObjectValue(
+						DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						rulesclientChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(rulesclientChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dnsLoadBalancerLoadBalancingRuleModel.ClientChoice = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested UintField --> Score
+				dnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
+
+				rulesElements = append(rulesElements, dnsLoadBalancerLoadBalancingRuleModel)
 			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsZonesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap}, rulesElements)
+			response.Diagnostics.Append(rulesListDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = rulesListValue
 
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsZonesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsZonesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			dnsLoadBalancerLoadBalancingRuleListModel.Rules = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerRuleListRulesModelAttributeMap})
 		}
 
-		dnsZonesList, diags := utils.GoStructSliceToListValue(
+		ruleListObj, ruleListDiags := utils.GoStructToObjectValue(
 			ctx,
-			DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
-			dnsZonesElements,
+			DnsLoadBalancerRuleListModelAttributeMap,
+			dnsLoadBalancerLoadBalancingRuleListModel,
 		)
-
-		response.Diagnostics.Append(diags...)
+		response.Diagnostics.Append(ruleListDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.DnsZones = dnsZonesList
+		data.RuleList = ruleListObj
 	} else {
-		var dnsZonesObjectType = basetypes.ObjectType{
-			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
+		data.RuleList = types.ObjectNull(DnsLoadBalancerRuleListModelAttributeMap)
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
 		}
-		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
-		data.DnsZones = nullDnsZonesList
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -4294,9 +4585,8 @@ func (r *ResourceF5XCDnsLoadBalancer) Delete(ctx context.Context, request resour
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -4311,19 +4601,32 @@ func (r *ResourceF5XCDnsLoadBalancer) Delete(ctx context.Context, request resour
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCDnsLoadBalancer) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Virtual K8s object exposes a Kubernetes API endpoint in the namespace that operates on all the physical Kubernetes clusters in each of\nthe sites that are selected by the virtual-site referred to in the object.\n\nVirtual K8s supports only a subset of Kubernetes APIs related to application management.\n\nRead and write operations are currently supported on the following Kubernetes API resources:\n1. Deployment v1 apps\n2. StatefulSet v1 apps\n3. DaemonSet v1 apps\n4. Job v1 batch\n5. CronJob v1beta1 batch\n6. Service v1 core with type ClusterIP\n7. Secret v1 core\n8. ConfigMap v1 core\n9. ServiceAccount v1 core\n10. PersistentVolumeClaim v1 core\n\nOnly delete is supported on Pod v1 core.\n\nRead only operations are currently supported on the following Kubernetes API resources:\n1. Pod v1 core\n2. ReplicaSet v1 apps\n3. Endpoints v1 core\n4. Node v1 core\n5. Namespace v1 core\n6. PersistentVolume v1 core\n7. Event v1 core\n\nThe semantics of using Kubernetes APIs on a Virtual K8s object are different compared to those on a single Kubernetes cluster since the\nKubernetes resource objects created using the Virtual K8s API will be instantiated in all the physical Kubernetes clusters in each\nof the sites selected by the virtual-site referred to in the object. In a single Kubernetes cluster, when a Deployment resource is created\nwith Replicas set to 3, the expectation is that 3 Pods will be created on the Kubernetes cluster. On the Virtual K8S API, when a Deployment\nresource is created with Replicas set to 3, the total number of Pods created is equal to the number of Replicas times the number of physical\nclusters in each of the sites selected by the referred to virtual-site. For example, if the virtual-site associated with Virtual K8s object\nselects 3 sites each having 1 physical Kubernetes cluster, then the total number of Pods created will be 9.\n\nKubernetes API resource objects can also be created with the annotation ves.io/virtual-sites=\u003cvirtual-site-namespace\u003e/\u003cvirtual-site-name\u003e\nand those objects will be instantiated in all physical Kubernetes clusters in each of the sites selected by the virtual-site specified in the\nannotation only and not using the virtual-site specified in the Virtual K8s object. This provides an override mechanism to select different\nvirtual-sites for the Kubernetes API resource to be instantiated on. The virtual-site referred to in the Virtual K8s can hence be thought\nof as the default virtual-site for all the Kubernetes API resource objects created on the Virtual K8s API without the above annotation.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2277,6 +2304,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -2455,7 +2503,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2519,7 +2566,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -2585,7 +2631,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2671,7 +2716,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -2990,7 +3034,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -3186,7 +3229,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates virtual_k8s is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {

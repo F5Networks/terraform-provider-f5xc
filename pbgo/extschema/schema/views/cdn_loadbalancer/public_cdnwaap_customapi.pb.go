@@ -11,6 +11,12 @@ package cdn_loadbalancer
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -22,11 +28,6 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dos_mitigation"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	common_security "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_security"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -908,10 +909,7 @@ func (m *CDNLoadBalancerList) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCdnwaapCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCdnwaapCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -1063,10 +1061,7 @@ func (m *GetCDNSecurityConfigReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCdnwaapCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCdnwaapCustomapi
 			}
 			if (iNdEx + skippy) > l {

@@ -35,39 +35,44 @@ type HealthcheckGlobalSpecTypeHealthCheckChoice struct {
 }
 
 type HealthcheckGlobalSpecTypeHttpHealthCheck struct {
+	ExpectedResponse       types.String `tfsdk:"expected_response"`
+	ExpectedStatusCodes    types.List   `tfsdk:"expected_status_codes"`
+	Headers                types.Map    `tfsdk:"headers"`
 	HostHeaderChoice       types.Object `tfsdk:"host_header_choice"`
 	Path                   types.String `tfsdk:"path"`
-	Headers                types.Map    `tfsdk:"headers"`
 	RequestHeadersToRemove types.List   `tfsdk:"request_headers_to_remove"`
 	UseHttp2               types.Bool   `tfsdk:"use_http2"`
-	ExpectedStatusCodes    types.List   `tfsdk:"expected_status_codes"`
-	ExpectedResponse       types.String `tfsdk:"expected_response"`
 }
 
 type HealthcheckHttpHealthCheckHostHeaderChoice struct {
-	UseOriginServerName types.Bool   `tfsdk:"use_origin_server_name"`
 	HostHeader          types.String `tfsdk:"host_header"`
+	UseOriginServerName types.Bool   `tfsdk:"use_origin_server_name"`
 }
 
 type HealthcheckGlobalSpecTypeTcpHealthCheck struct {
-	SendPayload      types.String `tfsdk:"send_payload"`
 	ExpectedResponse types.String `tfsdk:"expected_response"`
+	SendPayload      types.String `tfsdk:"send_payload"`
+}
+
+type HealthcheckGlobalSpecTypeJitterChoice struct {
+	DefaultJitter types.Bool  `tfsdk:"default_jitter"`
+	JitterPercent types.Int64 `tfsdk:"jitter_percent"`
 }
 
 // DataSourceF5XCHealthcheckModel describes the resource data model.
 type DataSourceF5XCHealthcheckModel struct {
+	Annotations        types.Map      `tfsdk:"annotations"`
 	Description        types.String   `tfsdk:"description"`
+	Labels             types.Map      `tfsdk:"labels"`
 	Name               types.String   `tfsdk:"name"`
 	Namespace          types.String   `tfsdk:"namespace"`
 	Uid                types.String   `tfsdk:"uid"`
-	Labels             types.Map      `tfsdk:"labels"`
-	Annotations        types.Map      `tfsdk:"annotations"`
-	JitterPercent      types.Int64    `tfsdk:"jitter_percent"`
 	HealthCheckChoice  types.Object   `tfsdk:"health_check_choice"`
-	Timeout            types.Int64    `tfsdk:"timeout"`
-	Interval           types.Int64    `tfsdk:"interval"`
-	UnhealthyThreshold types.Int64    `tfsdk:"unhealthy_threshold"`
 	HealthyThreshold   types.Int64    `tfsdk:"healthy_threshold"`
+	Interval           types.Int64    `tfsdk:"interval"`
+	JitterChoice       types.Object   `tfsdk:"jitter_choice"`
+	Timeout            types.Int64    `tfsdk:"timeout"`
+	UnhealthyThreshold types.Int64    `tfsdk:"unhealthy_threshold"`
 	Timeouts           timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -87,35 +92,42 @@ var HealthcheckHealthCheckModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> HttpHealthCheck
 var HealthcheckHealthCheckHttpHealthCheckModelAttributeMap = map[string]attr.Type{
 
+	"expected_response": types.StringType,
+	"expected_status_codes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"headers": types.MapType{
+		ElemType: types.StringType,
+	},
 	"host_header_choice": types.ObjectType{
 		AttrTypes: HealthcheckHealthCheckHttpHealthCheckHostHeaderChoiceModelAttributeMap,
 	},
 	"path": types.StringType,
-	"headers": types.MapType{
-		ElemType: types.StringType,
-	},
 	"request_headers_to_remove": types.ListType{
 		ElemType: types.StringType,
 	},
 	"use_http2": types.BoolType,
-	"expected_status_codes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"expected_response": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> HostHeaderChoice
 var HealthcheckHealthCheckHttpHealthCheckHostHeaderChoiceModelAttributeMap = map[string]attr.Type{
 
-	"use_origin_server_name": types.BoolType,
 	"host_header":            types.StringType,
+	"use_origin_server_name": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> TcpHealthCheck
 var HealthcheckHealthCheckTcpHealthCheckModelAttributeMap = map[string]attr.Type{
 
-	"send_payload":      types.StringType,
 	"expected_response": types.StringType,
+	"send_payload":      types.StringType,
+}
+
+// Attribute map for OneOfField --> JitterChoice
+var HealthcheckJitterChoiceModelAttributeMap = map[string]attr.Type{
+
+	"default_jitter": types.BoolType,
+	"jitter_percent": types.Int64Type,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -132,15 +144,29 @@ func (d *DataSourceF5XCHealthcheck) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Healthcheck data source",
-		Description:         "Healthcheck data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a healthcheck This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of healthcheck) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a healthcheck This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of healthcheck) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -160,26 +186,6 @@ func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasour
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"jitter_percent": schema.Int64Attribute{
-				Description: "jitter percent Add a random amount of time as a percent value to the interval between successive healthcheck requests.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"health_check_choice": schema.SingleNestedAttribute{
 				Description: "health_check Specifies whether to perform HTTP Health Check or TCP Health check",
 				Required:    false,
@@ -192,20 +198,40 @@ func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasour
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
+							"expected_response": schema.StringAttribute{
+								Description: "Expected response Raw bytes expected in the response of http health check. Input is to be given in Hex encoded format. If left empty, then response body is not considered for evaluating health check status.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"expected_status_codes": schema.ListAttribute{
+								Description: "Expected Status Codes Specifies a list of HTTP response status codes considered healthy. To treat default HTTP expected status code 200 as healthy, user has to configure it explicitly. This is a list of strings, each of which is single HTTP status code or a range with start and end values separated by '-'.",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"headers": schema.MapAttribute{
+								Description: "Headers to add in health check request Specifies a list of HTTP headers that should be added to each request that is sent to the health checked cluster. This is a list of key-value pairs.",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
 							"host_header_choice": schema.SingleNestedAttribute{
 								Description: "host header choice Specify the value of host header in the HTTP health check request.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"use_origin_server_name": schema.BoolAttribute{
-										Description: "use origin server name Use the origin server name.",
+									"host_header": schema.StringAttribute{
+										Description: "host_header The value of the host header.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
-									"host_header": schema.StringAttribute{
-										Description: "host_header The value of the host header.",
+									"use_origin_server_name": schema.BoolAttribute{
+										Description: "use origin server name Use the origin server name.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
@@ -214,13 +240,6 @@ func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasour
 							},
 							"path": schema.StringAttribute{
 								Description: "path Specifies the HTTP path that will be requested during health checking.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"headers": schema.MapAttribute{
-								Description: "Headers to add in health check request Specifies a list of HTTP headers that should be added to each request that is sent to the health checked cluster. This is a list of key-value pairs.",
-								ElementType: types.StringType,
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -238,19 +257,6 @@ func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasour
 								Optional:    false,
 								Computed:    true,
 							},
-							"expected_status_codes": schema.ListAttribute{
-								Description: "Expected Status Codes Specifies a list of HTTP response status codes considered healthy. To treat default HTTP expected status code 200 as healthy, user has to configure it explicitly. This is a list of strings, each of which is single HTTP status code or a range with start and end values separated by '-'.",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"expected_response": schema.StringAttribute{
-								Description: "Expected response Raw bytes expected in the response of http health check. Input is to be given in Hex encoded format. If left empty, then response body is not considered for evaluating health check status.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
 						},
 					},
 					"tcp_health_check": schema.SingleNestedAttribute{
@@ -259,14 +265,14 @@ func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasour
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"send_payload": schema.StringAttribute{
-								Description: "send payload raw bytes sent in the request. Empty payloads imply a connect-only health check. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
+							"expected_response": schema.StringAttribute{
+								Description: "expected response raw bytes expected in the request. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 							},
-							"expected_response": schema.StringAttribute{
-								Description: "expected response raw bytes expected in the request. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
+							"send_payload": schema.StringAttribute{
+								Description: "send payload raw bytes sent in the request. Empty payloads imply a connect-only health check. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -281,8 +287,8 @@ func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasour
 					},
 				},
 			},
-			"timeout": schema.Int64Attribute{
-				Description: "timeout Timeout in seconds to wait for successful response. In other words, it is the time to wait for a health check response. If the timeout is reached the health check attempt will be considered a failure.",
+			"healthy_threshold": schema.Int64Attribute{
+				Description: "healthy threshold Number of successful responses before declaring healthy. In other words, this is the number of healthy health checks required before a host is marked healthy. Note that during startup, only a single successful health check is required to mark a host healthy.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -293,14 +299,34 @@ func (r *DataSourceF5XCHealthcheck) Schema(ctx context.Context, request datasour
 				Optional:    false,
 				Computed:    true,
 			},
-			"unhealthy_threshold": schema.Int64Attribute{
-				Description: "unhealthy threshold Number of failed responses before declaring unhealthy. In other words, this is the number of unhealthy health checks required before a host is marked unhealthy. Note that for http health checking if a host responds with 503 this threshold is ignored and the host is considered unhealthy immediately.",
+			"jitter_choice": schema.SingleNestedAttribute{
+				Description: "jitter_choice Configure jitter as a percentage of the health check interval to add random variation between successive requests.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"default_jitter": schema.BoolAttribute{
+						Description: "default_jitter Use the default jitter value of 30 percent of the health check interval.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"jitter_percent": schema.Int64Attribute{
+						Description: "jitter_percent Specify a custom jitter value as a percentage of the health check interval. Valid values are 0 (to disable jitter) and 10 to 50.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
+			"timeout": schema.Int64Attribute{
+				Description: "timeout Timeout in seconds to wait for successful response. In other words, it is the time to wait for a health check response. If the timeout is reached the health check attempt will be considered a failure.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 			},
-			"healthy_threshold": schema.Int64Attribute{
-				Description: "healthy threshold Number of successful responses before declaring healthy. In other words, this is the number of healthy health checks required before a host is marked healthy. Note that during startup, only a single successful health check is required to mark a host healthy.",
+			"unhealthy_threshold": schema.Int64Attribute{
+				Description: "unhealthy threshold Number of failed responses before declaring unhealthy. In other words, this is the number of unhealthy health checks required before a host is marked unhealthy. Note that for http health checking if a host responds with 503 this threshold is ignored and the host is considered unhealthy immediately.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -352,15 +378,14 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -375,36 +400,6 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -424,13 +419,35 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot UintField --> JitterPercent
-	jitterPercentValue := specData.GetJitterPercent()
-	if jitterPercentValue > 0 {
-		data.JitterPercent = types.Int64Value(int64(jitterPercentValue))
-	} else {
-		data.JitterPercent = types.Int64Null()
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
 	}
+
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredOneOfField --> HealthCheck
 	// false
@@ -450,31 +467,61 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		// <no value>
 		// false
 		{
-			httpHealthCheckOptions, isHttpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_HttpHealthCheck)
+			httpHealthCheckOptionsWrapper, isHttpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_HttpHealthCheck)
 			httpHealthCheckAttributeMap := make(map[string]attr.Value)
 
-			if isHttpHealthCheck && httpHealthCheckOptions != nil {
+			if isHttpHealthCheck && httpHealthCheckOptionsWrapper != nil && httpHealthCheckOptionsWrapper.HttpHealthCheck != nil {
+				httpHealthCheckElement := httpHealthCheckOptionsWrapper.HttpHealthCheck
+
+				// data specToModelNested StringField --> ExpectedResponse
+				if httpHealthCheckElement.GetExpectedResponse() != "" {
+					httpHealthCheckAttributeMap["expected_response"] = types.StringValue(httpHealthCheckElement.GetExpectedResponse())
+				} else {
+					// Empty string, set to null
+					httpHealthCheckAttributeMap["expected_response"] = types.StringNull()
+				}
+
+				// data specToModelNested ArrayOfStringField --> ExpectedStatusCodes
+				if len(httpHealthCheckElement.GetExpectedStatusCodes()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, httpHealthCheckElement.GetExpectedStatusCodes())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					httpHealthCheckAttributeMap["expected_status_codes"] = listValue
+				} else {
+					httpHealthCheckAttributeMap["expected_status_codes"] = types.ListNull(types.StringType)
+				}
+
+				// data specToModelNested MapOfStringField --> Headers
+				if httpHealthCheckElement.GetHeaders() != nil {
+					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+					headersMap, headersDiags := utils.StringMapToTerraformMap(httpHealthCheckElement.GetHeaders())
+					response.Diagnostics.Append(headersDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					// Assign the typed map to the model
+					httpHealthCheckAttributeMap["headers"] = headersMap
+				} else {
+					// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
+					// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
+					// API returned nil (Protobuf omits empty maps). Set to null.
+					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
+					httpHealthCheckAttributeMap["headers"] = types.MapNull(types.StringType)
+				}
 
 				// data specToModelNested RequiredOneOfField --> HostHeaderChoice
 				// <no value>
-				if httpHealthCheckOptions.HttpHealthCheck.GetHostHeaderChoice() != nil {
+				if httpHealthCheckElement.GetHostHeaderChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckhostHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					httpHealthCheckhostHeaderChoiceChoices := httpHealthCheckOptions.HttpHealthCheck.GetHostHeaderChoice()
+					httpHealthCheckhostHeaderChoiceChoices := httpHealthCheckElement.GetHostHeaderChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> UseOriginServerName
-					_, isUseOriginServerName := httpHealthCheckhostHeaderChoiceChoices.(*ves_io_schema_healthcheck.HttpHealthCheck_UseOriginServerName)
-
-					if isUseOriginServerName {
-						httpHealthCheckhostHeaderChoiceChoicesAttributeMap["use_origin_server_name"] = types.BoolValue(true)
-					} else {
-						httpHealthCheckhostHeaderChoiceChoicesAttributeMap["use_origin_server_name"] = types.BoolNull()
-					}
 
 					// data specToModelNested StringOfOneOfField --> HostHeader
 					hostHeaderItem, isHostHeader := httpHealthCheckhostHeaderChoiceChoices.(*ves_io_schema_healthcheck.HttpHealthCheck_HostHeader)
@@ -484,6 +531,15 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 					} else {
 						// Empty string, set to null
 						httpHealthCheckhostHeaderChoiceChoicesAttributeMap["host_header"] = types.StringNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> UseOriginServerName
+					_, isUseOriginServerName := httpHealthCheckhostHeaderChoiceChoices.(*ves_io_schema_healthcheck.HttpHealthCheck_UseOriginServerName)
+
+					if isUseOriginServerName {
+						httpHealthCheckhostHeaderChoiceChoicesAttributeMap["use_origin_server_name"] = types.BoolValue(true)
+					} else {
+						httpHealthCheckhostHeaderChoiceChoicesAttributeMap["use_origin_server_name"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -506,32 +562,17 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 				}
 
 				// data specToModelNested RequiredStringField --> Path
-				if httpHealthCheckOptions.HttpHealthCheck.GetPath() != "" {
-					httpHealthCheckAttributeMap["path"] = types.StringValue(httpHealthCheckOptions.HttpHealthCheck.GetPath())
+				if httpHealthCheckElement.GetPath() != "" {
+					httpHealthCheckAttributeMap["path"] = types.StringValue(httpHealthCheckElement.GetPath())
 				} else {
 					// Empty string, set to null
 					httpHealthCheckAttributeMap["path"] = types.StringNull()
 				}
 
-				// data specToModelNested MapOfStringField --> Headers
-				if httpHealthCheckOptions.HttpHealthCheck.GetHeaders() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					headersMap, headersDiags := utils.StringMapToTerraformMap(httpHealthCheckOptions.HttpHealthCheck.GetHeaders())
-					response.Diagnostics.Append(headersDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					httpHealthCheckAttributeMap["headers"] = headersMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					httpHealthCheckAttributeMap["headers"] = types.MapNull(types.StringType)
-				}
-
 				// data specToModelNested ArrayOfStringField --> RequestHeadersToRemove
-				if len(httpHealthCheckOptions.HttpHealthCheck.GetRequestHeadersToRemove()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, httpHealthCheckOptions.HttpHealthCheck.GetRequestHeadersToRemove())
-					response.Diagnostics.Append(diags...)
+				if len(httpHealthCheckElement.GetRequestHeadersToRemove()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, httpHealthCheckElement.GetRequestHeadersToRemove())
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -541,30 +582,10 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 				}
 
 				// data specToModelNested BoolField --> UseHttp2
-				httpHealthCheckAttributeMap["use_http2"] = types.BoolValue(bool(httpHealthCheckOptions.HttpHealthCheck.GetUseHttp2()))
+				httpHealthCheckAttributeMap["use_http2"] = types.BoolValue(bool(httpHealthCheckElement.GetUseHttp2()))
 
-				// data specToModelNested ArrayOfStringField --> ExpectedStatusCodes
-				if len(httpHealthCheckOptions.HttpHealthCheck.GetExpectedStatusCodes()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, httpHealthCheckOptions.HttpHealthCheck.GetExpectedStatusCodes())
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					httpHealthCheckAttributeMap["expected_status_codes"] = listValue
-				} else {
-					httpHealthCheckAttributeMap["expected_status_codes"] = types.ListNull(types.StringType)
-				}
-
-				// data specToModelNested StringField --> ExpectedResponse
-				if httpHealthCheckOptions.HttpHealthCheck.GetExpectedResponse() != "" {
-					httpHealthCheckAttributeMap["expected_response"] = types.StringValue(httpHealthCheckOptions.HttpHealthCheck.GetExpectedResponse())
-				} else {
-					// Empty string, set to null
-					httpHealthCheckAttributeMap["expected_response"] = types.StringNull()
-				}
-
-				httpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckHttpHealthCheckModelAttributeMap, httpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
+				httpHealthCheckObj, httpHealthCheckObjDiags := types.ObjectValue(HealthcheckHealthCheckHttpHealthCheckModelAttributeMap, httpHealthCheckAttributeMap)
+				response.Diagnostics.Append(httpHealthCheckObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -578,29 +599,30 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		// <no value>
 		// false
 		{
-			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
+			tcpHealthCheckOptionsWrapper, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
 			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
 
-			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
-
-				// data specToModelNested StringField --> SendPayload
-				if tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload() != "" {
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
-				}
+			if isTcpHealthCheck && tcpHealthCheckOptionsWrapper != nil && tcpHealthCheckOptionsWrapper.TcpHealthCheck != nil {
+				tcpHealthCheckElement := tcpHealthCheckOptionsWrapper.TcpHealthCheck
 
 				// data specToModelNested StringField --> ExpectedResponse
-				if tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse() != "" {
-					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse())
+				if tcpHealthCheckElement.GetExpectedResponse() != "" {
+					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckElement.GetExpectedResponse())
 				} else {
 					// Empty string, set to null
 					tcpHealthCheckAttributeMap["expected_response"] = types.StringNull()
 				}
 
-				tcpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// data specToModelNested StringField --> SendPayload
+				if tcpHealthCheckElement.GetSendPayload() != "" {
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckElement.GetSendPayload())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
+				}
+
+				tcpHealthCheckObj, tcpHealthCheckObjDiags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
+				response.Diagnostics.Append(tcpHealthCheckObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -620,39 +642,23 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		healthCheckChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			HealthcheckHealthCheckModelAttributeMap,
-			healthCheckChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			healthCheckChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				HealthcheckHealthCheckModelAttributeMap,
+				healthCheckChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.HealthCheckChoice = healthCheckChoiceObj
+			// Assign the final object to the root data model.
+			data.HealthCheckChoice = healthCheckChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.HealthCheckChoice = types.ObjectNull(HealthcheckHealthCheckModelAttributeMap)
-	}
-
-	// data SpecToModelRoot RequiredUintField --> Timeout
-	timeoutValue := specData.GetTimeout()
-	if timeoutValue > 0 {
-		data.Timeout = types.Int64Value(int64(timeoutValue))
-	}
-
-	// data SpecToModelRoot RequiredUintField --> Interval
-	intervalValue := specData.GetInterval()
-	if intervalValue > 0 {
-		data.Interval = types.Int64Value(int64(intervalValue))
-	}
-
-	// data SpecToModelRoot RequiredUintField --> UnhealthyThreshold
-	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
-	if unhealthyThresholdValue > 0 {
-		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
 	}
 
 	// data SpecToModelRoot RequiredUintField --> HealthyThreshold
@@ -661,8 +667,79 @@ func (d *DataSourceF5XCHealthcheck) Read(ctx context.Context, request datasource
 		data.HealthyThreshold = types.Int64Value(int64(healthyThresholdValue))
 	}
 
+	// data SpecToModelRoot RequiredUintField --> Interval
+	intervalValue := specData.GetInterval()
+	if intervalValue > 0 {
+		data.Interval = types.Int64Value(int64(intervalValue))
+	}
+
+	// data SpecToModelRoot OneOfField --> JitterChoice
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetJitterChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		jitterChoiceChoices := specData.GetJitterChoice()
+
+		// The model struct that will be populated by the nested template.
+		var jitterChoiceChoicesModel = &HealthcheckGlobalSpecTypeJitterChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> DefaultJitter
+		_, isDefaultJitter := jitterChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_DefaultJitter)
+
+		if isDefaultJitter {
+			jitterChoiceChoicesModel.DefaultJitter = types.BoolValue(true)
+		} else {
+			jitterChoiceChoicesModel.DefaultJitter = types.BoolNull()
+		}
+
+		// data specToModelNested UintOfOneOfField --> JitterPercent
+		jitterPercentItem, isJitterPercent := jitterChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_JitterPercent)
+
+		if isJitterPercent {
+			jitterChoiceChoicesModel.JitterPercent = types.Int64Value(int64(jitterPercentItem.JitterPercent))
+		} else {
+			// Empty uint, set to null
+			jitterChoiceChoicesModel.JitterPercent = types.Int64Null()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			jitterChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				HealthcheckJitterChoiceModelAttributeMap,
+				jitterChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.JitterChoice = jitterChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.JitterChoice = types.ObjectNull(HealthcheckJitterChoiceModelAttributeMap)
+	}
+
+	// data SpecToModelRoot RequiredUintField --> Timeout
+	timeoutValue := specData.GetTimeout()
+	if timeoutValue > 0 {
+		data.Timeout = types.Int64Value(int64(timeoutValue))
+	}
+
+	// data SpecToModelRoot RequiredUintField --> UnhealthyThreshold
+	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
+	if unhealthyThresholdValue > 0 {
+		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
+	}
+
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

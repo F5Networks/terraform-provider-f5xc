@@ -1241,10 +1241,7 @@ var APISwaggerJSON string = `{
         "description": "Configures Bot allowlist Policy",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1311,6 +1308,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1411,6 +1414,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1527,6 +1536,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1731,7 +1746,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates bot_allowlist_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -1889,6 +1903,23 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "x-displayName: \"In Use Version\"\nx-example: \"1.0\"\nThe version of policy deployed to cluster\nThe version format should be X.0",
                     "title": "In Use Version"
+                }
+            }
+        },
+        "bot_defenseCosseBotInfraWithDeliveredVersion": {
+            "type": "object",
+            "description": "x-displayName: \"CoSSE Bot Infrastructure with Delivered version\"\nCoSSE Bot Infra Name with its delivered version",
+            "title": "CoSSE Bot Infrastructure with Delivered Version",
+            "properties": {
+                "cosse_bot_infra_name": {
+                    "type": "string",
+                    "description": "x-displayName: \"CoSSE Bot Infra name\"\nx-example: \"cosse-cluster-1\"\nThe cosse cluster id delivered this policy",
+                    "title": "CoSSE Bot Infra Name"
+                },
+                "delivered_version": {
+                    "type": "string",
+                    "description": "x-displayName: \"Delivered Version\"\nx-example: \"1.0\"\nThe version of policy delivered to cluster\nThe version format should be X.0",
+                    "title": "Delivered Version"
                 }
             }
         },
@@ -2099,6 +2130,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaConditionType": {
             "type": "object",
             "description": "Conditions are used in the object status to describe the current state of the\nobject, e.g. Ready, Succeeded, etc.",
@@ -2275,7 +2327,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -2341,7 +2392,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2427,7 +2477,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

@@ -13,20 +13,25 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/golang/protobuf/descriptor"
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
+// Suppress "imported and not used" errors
 var _ codes.Code
 var _ io.Reader
 var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
+var _ = descriptor.ForMessage
+var _ = metadata.Join
 
 func request_AppSecurityClientRuleAPI_GetSuggestedBlockClientRule_0(ctx context.Context, marshaler runtime.Marshaler, client AppSecurityClientRuleAPIClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetSuggestedBlockClientRuleReq
@@ -583,11 +588,14 @@ func local_request_AppSecurityClientRuleAPI_GetSuggestedDDoSMitigationRuleForCDN
 // RegisterAppSecurityClientRuleAPIHandlerServer registers the http handlers for service AppSecurityClientRuleAPI to "mux".
 // UnaryRPC     :call AppSecurityClientRuleAPIServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterAppSecurityClientRuleAPIHandlerFromEndpoint instead.
 func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *runtime.ServeMux, server AppSecurityClientRuleAPIServer) error {
 
 	mux.Handle("POST", pattern_AppSecurityClientRuleAPI_GetSuggestedBlockClientRule_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -595,6 +603,7 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityClientRuleAPI_GetSuggestedBlockClientRule_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -608,6 +617,8 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityClientRuleAPI_GetSuggestedBlockClientRuleForCDN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -615,6 +626,7 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityClientRuleAPI_GetSuggestedBlockClientRuleForCDN_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -628,6 +640,8 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityClientRuleAPI_GetSuggestedTrustClientRule_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -635,6 +649,7 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityClientRuleAPI_GetSuggestedTrustClientRule_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -648,6 +663,8 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityClientRuleAPI_GetSuggestedTrustClientRuleForCDN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -655,6 +672,7 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityClientRuleAPI_GetSuggestedTrustClientRuleForCDN_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -668,6 +686,8 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityClientRuleAPI_GetSuggestedDDoSMitigationRule_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -675,6 +695,7 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityClientRuleAPI_GetSuggestedDDoSMitigationRule_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -688,6 +709,8 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 	mux.Handle("POST", pattern_AppSecurityClientRuleAPI_GetSuggestedDDoSMitigationRuleForCDN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -695,6 +718,7 @@ func RegisterAppSecurityClientRuleAPIHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		resp, md, err := local_request_AppSecurityClientRuleAPI_GetSuggestedDDoSMitigationRuleForCDN_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)

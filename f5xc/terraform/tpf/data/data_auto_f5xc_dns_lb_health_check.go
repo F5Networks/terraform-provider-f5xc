@@ -30,99 +30,127 @@ type DataSourceF5XCDnsLbHealthCheck struct {
 }
 
 type DnsLbHealthCheckGlobalSpecTypeHealthCheckChoice struct {
-	IcmpHealthCheck   types.Bool   `tfsdk:"icmp_health_check"`
-	HttpsHealthCheck  types.Object `tfsdk:"https_health_check"`
-	TcpHexHealthCheck types.Object `tfsdk:"tcp_hex_health_check"`
 	HttpHealthCheck   types.Object `tfsdk:"http_health_check"`
+	HttpsHealthCheck  types.Object `tfsdk:"https_health_check"`
+	IcmpHealthCheck   types.Bool   `tfsdk:"icmp_health_check"`
 	TcpHealthCheck    types.Object `tfsdk:"tcp_health_check"`
+	TcpHexHealthCheck types.Object `tfsdk:"tcp_hex_health_check"`
 	UdpHealthCheck    types.Object `tfsdk:"udp_health_check"`
 }
 
-type DnsLbHealthCheckGlobalSpecTypeHttpsHealthCheck struct {
-	Send                     types.String `tfsdk:"send"`
-	Receive                  types.String `tfsdk:"receive"`
+type DnsLbHealthCheckGlobalSpecTypeHttpHealthCheck struct {
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
+	Receive                  types.String `tfsdk:"receive"`
+	Send                     types.String `tfsdk:"send"`
 	VirtualHostChoice        types.Object `tfsdk:"virtual_host_choice"`
 }
 
 type DnsLbHealthCheckHttpHealthCheckVirtualHostChoice struct {
 	DisableVirtualHost      types.Bool   `tfsdk:"disable_virtual_host"`
-	VirtualHost             types.String `tfsdk:"virtual_host"`
 	InheritLoadBalancerFqdn types.Bool   `tfsdk:"inherit_load_balancer_fqdn"`
+	VirtualHost             types.String `tfsdk:"virtual_host"`
 }
 
-type DnsLbHealthCheckGlobalSpecTypeTcpHexHealthCheck struct {
-	Send                     types.String `tfsdk:"send"`
-	Receive                  types.String `tfsdk:"receive"`
+type DnsLbHealthCheckGlobalSpecTypeHttpsHealthCheck struct {
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
-}
-
-type DnsLbHealthCheckGlobalSpecTypeHttpHealthCheck struct {
-	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
+	Receive                  types.String `tfsdk:"receive"`
+	Send                     types.String `tfsdk:"send"`
 	VirtualHostChoice        types.Object `tfsdk:"virtual_host_choice"`
-	Send                     types.String `tfsdk:"send"`
-	Receive                  types.String `tfsdk:"receive"`
-	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 }
 
 type DnsLbHealthCheckGlobalSpecTypeTcpHealthCheck struct {
-	Send                     types.String `tfsdk:"send"`
-	Receive                  types.String `tfsdk:"receive"`
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
+	Receive                  types.String `tfsdk:"receive"`
+	Send                     types.String `tfsdk:"send"`
+}
+
+type DnsLbHealthCheckGlobalSpecTypeTcpHexHealthCheck struct {
+	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
+	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
+	Receive                  types.String `tfsdk:"receive"`
+	Send                     types.String `tfsdk:"send"`
 }
 
 type DnsLbHealthCheckGlobalSpecTypeUdpHealthCheck struct {
-	Send                     types.String `tfsdk:"send"`
-	Receive                  types.String `tfsdk:"receive"`
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
+	Receive                  types.String `tfsdk:"receive"`
+	Send                     types.String `tfsdk:"send"`
 }
 
 // DataSourceF5XCDnsLbHealthCheckModel describes the resource data model.
 type DataSourceF5XCDnsLbHealthCheckModel struct {
-	Uid               types.String   `tfsdk:"uid"`
-	Labels            types.Map      `tfsdk:"labels"`
 	Annotations       types.Map      `tfsdk:"annotations"`
 	Description       types.String   `tfsdk:"description"`
+	Labels            types.Map      `tfsdk:"labels"`
 	Name              types.String   `tfsdk:"name"`
 	Namespace         types.String   `tfsdk:"namespace"`
-	HealthCheckChoice types.Object   `tfsdk:"health_check_choice"`
+	Uid               types.String   `tfsdk:"uid"`
 	DnsLbPools        types.List     `tfsdk:"dns_lb_pools"`
+	HealthCheckChoice types.Object   `tfsdk:"health_check_choice"`
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for ArrayOfPointerField --> DnsLbPools
+var DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
 // Attribute map for RequiredOneOfField --> HealthCheck
 var DnsLbHealthCheckHealthCheckModelAttributeMap = map[string]attr.Type{
 
-	"icmp_health_check": types.BoolType,
-	"https_health_check": types.ObjectType{
-		AttrTypes: DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap,
-	},
-	"tcp_hex_health_check": types.ObjectType{
-		AttrTypes: DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap,
-	},
 	"http_health_check": types.ObjectType{
 		AttrTypes: DnsLbHealthCheckHealthCheckHttpHealthCheckModelAttributeMap,
 	},
+	"https_health_check": types.ObjectType{
+		AttrTypes: DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap,
+	},
+	"icmp_health_check": types.BoolType,
 	"tcp_health_check": types.ObjectType{
 		AttrTypes: DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap,
+	},
+	"tcp_hex_health_check": types.ObjectType{
+		AttrTypes: DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap,
 	},
 	"udp_health_check": types.ObjectType{
 		AttrTypes: DnsLbHealthCheckHealthCheckUdpHealthCheckModelAttributeMap,
 	},
 }
 
+// Attribute map for PointerOfOneOfField --> HttpHealthCheck
+var DnsLbHealthCheckHealthCheckHttpHealthCheckModelAttributeMap = map[string]attr.Type{
+
+	"health_check_port":           types.Int64Type,
+	"health_check_secondary_port": types.Int64Type,
+	"receive":                     types.StringType,
+	"send":                        types.StringType,
+	"virtual_host_choice": types.ObjectType{
+		AttrTypes: DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> VirtualHostChoice
+var DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_virtual_host":       types.BoolType,
+	"inherit_load_balancer_fqdn": types.BoolType,
+	"virtual_host":               types.StringType,
+}
+
 // Attribute map for PointerOfOneOfField --> HttpsHealthCheck
 var DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap = map[string]attr.Type{
 
-	"send":                        types.StringType,
-	"receive":                     types.StringType,
 	"health_check_port":           types.Int64Type,
 	"health_check_secondary_port": types.Int64Type,
+	"receive":                     types.StringType,
+	"send":                        types.StringType,
 	"virtual_host_choice": types.ObjectType{
 		AttrTypes: DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap,
 	},
@@ -132,63 +160,35 @@ var DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap = map[string]at
 var DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_virtual_host":       types.BoolType,
-	"virtual_host":               types.StringType,
 	"inherit_load_balancer_fqdn": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> TcpHexHealthCheck
-var DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap = map[string]attr.Type{
-
-	"send":                        types.StringType,
-	"receive":                     types.StringType,
-	"health_check_port":           types.Int64Type,
-	"health_check_secondary_port": types.Int64Type,
-}
-
-// Attribute map for PointerOfOneOfField --> HttpHealthCheck
-var DnsLbHealthCheckHealthCheckHttpHealthCheckModelAttributeMap = map[string]attr.Type{
-
-	"health_check_secondary_port": types.Int64Type,
-	"virtual_host_choice": types.ObjectType{
-		AttrTypes: DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap,
-	},
-	"send":              types.StringType,
-	"receive":           types.StringType,
-	"health_check_port": types.Int64Type,
-}
-
-// Attribute map for RequiredOneOfField --> VirtualHostChoice
-var DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_virtual_host":       types.BoolType,
 	"virtual_host":               types.StringType,
-	"inherit_load_balancer_fqdn": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> TcpHealthCheck
 var DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap = map[string]attr.Type{
 
-	"send":                        types.StringType,
-	"receive":                     types.StringType,
 	"health_check_port":           types.Int64Type,
 	"health_check_secondary_port": types.Int64Type,
+	"receive":                     types.StringType,
+	"send":                        types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> TcpHexHealthCheck
+var DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap = map[string]attr.Type{
+
+	"health_check_port":           types.Int64Type,
+	"health_check_secondary_port": types.Int64Type,
+	"receive":                     types.StringType,
+	"send":                        types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> UdpHealthCheck
 var DnsLbHealthCheckHealthCheckUdpHealthCheckModelAttributeMap = map[string]attr.Type{
 
-	"send":                        types.StringType,
-	"receive":                     types.StringType,
 	"health_check_port":           types.Int64Type,
 	"health_check_secondary_port": types.Int64Type,
-}
-
-// Attribute map for ArrayOfPointerField --> DnsLbPools
-var DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
+	"receive":                     types.StringType,
+	"send":                        types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -205,23 +205,10 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "DnsLbHealthCheck data source",
-		Description:         "DnsLbHealthCheck data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a dns_lb_health_check This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_health_check) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a dns_lb_health_check This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_health_check) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"annotations": schema.MapAttribute{
 				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				Required:    false,
@@ -235,6 +222,13 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 				Optional:    false,
 				Computed:    true,
 			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -247,17 +241,103 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 				Optional:    true,
 				Computed:    true,
 			},
+			"uid": schema.StringAttribute{
+				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"dns_lb_pools": schema.ListNestedAttribute{
+				Description: "backref_objs a list of DNS Load balancer pools associated with this health check",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"tenant": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+					},
+				},
+			},
 			"health_check_choice": schema.SingleNestedAttribute{
 				Description: "Type of Health Check Select type of health check",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"icmp_health_check": schema.BoolAttribute{
-						Description: "ICMP Health Check ICMP Health Check",
+					"http_health_check": schema.SingleNestedAttribute{
+						Description: "HTTP Health Check HTTP Health Check",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"health_check_port": schema.Int64Attribute{
+								Description: "Health check port Port used for performing health check",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"health_check_secondary_port": schema.Int64Attribute{
+								Description: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"receive": schema.StringAttribute{
+								Description: "Receive String Regular expression used to match against the response to the health check's request. Mark node up upon receipt of a successful regular expression match. Uses re2 regular expression syntax.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"send": schema.StringAttribute{
+								Description: "Send String HTTP payload to send to the target",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"virtual_host_choice": schema.SingleNestedAttribute{
+								Description: "Virtual Host",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"disable_virtual_host": schema.BoolAttribute{
+										Description: "Disable Virtual Host",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"inherit_load_balancer_fqdn": schema.BoolAttribute{
+										Description: "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"virtual_host": schema.StringAttribute{
+										Description: "Enable Virtual Host Name of the virtual host to use for SNI.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+						},
 					},
 					"https_health_check": schema.SingleNestedAttribute{
 						Description: "HTTPS Health Check HTTPS Health Check",
@@ -265,8 +345,14 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"send": schema.StringAttribute{
-								Description: "Send String HTTP payload to send to the target",
+							"health_check_port": schema.Int64Attribute{
+								Description: "Health check port Port used for performing health check",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"health_check_secondary_port": schema.Int64Attribute{
+								Description: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -277,14 +363,8 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 								Optional:    false,
 								Computed:    true,
 							},
-							"health_check_port": schema.Int64Attribute{
-								Description: "Health check port Port used for performing health check",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"health_check_secondary_port": schema.Int64Attribute{
-								Description: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+							"send": schema.StringAttribute{
+								Description: "Send String HTTP payload to send to the target",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -301,74 +381,8 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 										Optional:    false,
 										Computed:    true,
 									},
-									"virtual_host": schema.StringAttribute{
-										Description: "Enable Virtual Host Name of the virtual host to use for SNI.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
 									"inherit_load_balancer_fqdn": schema.BoolAttribute{
 										Description: "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
-						},
-					},
-					"tcp_hex_health_check": schema.SingleNestedAttribute{
-						Description: "TCP Hex Health Check TCP Health Check with Hex Encoded Payload",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"send": schema.StringAttribute{
-								Description: "Send Payload Hex encoded raw bytes sent in the request. Empty payloads imply a connect-only health check.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"receive": schema.StringAttribute{
-								Description: "Receive Payload Hex encoded raw bytes expected in the response.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"health_check_port": schema.Int64Attribute{
-								Description: "Health check port Port used for performing health check",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"health_check_secondary_port": schema.Int64Attribute{
-								Description: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"http_health_check": schema.SingleNestedAttribute{
-						Description: "HTTP Health Check HTTP Health Check",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"health_check_secondary_port": schema.Int64Attribute{
-								Description: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"virtual_host_choice": schema.SingleNestedAttribute{
-								Description: "Virtual Host",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"disable_virtual_host": schema.BoolAttribute{
-										Description: "Disable Virtual Host",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
@@ -379,33 +393,15 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 										Optional:    false,
 										Computed:    true,
 									},
-									"inherit_load_balancer_fqdn": schema.BoolAttribute{
-										Description: "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
 								},
 							},
-							"send": schema.StringAttribute{
-								Description: "Send String HTTP payload to send to the target",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"receive": schema.StringAttribute{
-								Description: "Receive String Regular expression used to match against the response to the health check's request. Mark node up upon receipt of a successful regular expression match. Uses re2 regular expression syntax.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"health_check_port": schema.Int64Attribute{
-								Description: "Health check port Port used for performing health check",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
 						},
+					},
+					"icmp_health_check": schema.BoolAttribute{
+						Description: "ICMP Health Check ICMP Health Check",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
 					},
 					"tcp_health_check": schema.SingleNestedAttribute{
 						Description: "TCP Health Check TCP Health Check",
@@ -413,8 +409,14 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"send": schema.StringAttribute{
-								Description: "Send String Send this string to target (default empty. When send and receive are both empty, monitor just tests 3WHS)",
+							"health_check_port": schema.Int64Attribute{
+								Description: "Health check port Port used for performing health check",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"health_check_secondary_port": schema.Int64Attribute{
+								Description: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -425,6 +427,20 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 								Optional:    false,
 								Computed:    true,
 							},
+							"send": schema.StringAttribute{
+								Description: "Send String Send this string to target (default empty. When send and receive are both empty, monitor just tests 3WHS)",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"tcp_hex_health_check": schema.SingleNestedAttribute{
+						Description: "TCP Hex Health Check TCP Health Check with Hex Encoded Payload",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
 							"health_check_port": schema.Int64Attribute{
 								Description: "Health check port Port used for performing health check",
 								Required:    false,
@@ -433,6 +449,18 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 							},
 							"health_check_secondary_port": schema.Int64Attribute{
 								Description: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"receive": schema.StringAttribute{
+								Description: "Receive Payload Hex encoded raw bytes expected in the response.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"send": schema.StringAttribute{
+								Description: "Send Payload Hex encoded raw bytes sent in the request. Empty payloads imply a connect-only health check.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -445,18 +473,6 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"send": schema.StringAttribute{
-								Description: "Send String UDP payload",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"receive": schema.StringAttribute{
-								Description: "Receive String UDP response to be matched. It can be a regex.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
 							"health_check_port": schema.Int64Attribute{
 								Description: "Health check port Port used for performing health check",
 								Required:    false,
@@ -469,34 +485,18 @@ func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request dat
 								Optional:    false,
 								Computed:    true,
 							},
-						},
-					},
-				},
-			},
-			"dns_lb_pools": schema.ListNestedAttribute{
-				Description: "backref_objs a list of DNS Load balancer pools associated with this health check",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
+							"receive": schema.StringAttribute{
+								Description: "Receive String UDP response to be matched. It can be a regex.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"send": schema.StringAttribute{
+								Description: "Send String UDP payload",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
 						},
 					},
 				},
@@ -548,15 +548,14 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -571,27 +570,6 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -614,11 +592,88 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot ArrayOfPointerField --> DnsLbPools
+	if len(specData.GetDnsLbPools()) > 0 {
+		dnsLbPoolsElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsLbPools()))
+
+		for _, dnsLbPoolsElement := range specData.GetDnsLbPools() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested RequiredStringField --> Name
+			if dnsLbPoolsElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsLbPoolsElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if dnsLbPoolsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(dnsLbPoolsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Tenant
+			if dnsLbPoolsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dnsLbPoolsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			dnsLbPoolsElements = append(dnsLbPoolsElements, objectRefTypeModelModel)
+		}
+
+		{
+			dnsLbPoolsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap,
+				dnsLbPoolsElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsLbPools = dnsLbPoolsList
+		}
+	} else {
+		var dnsLbPoolsObjectType = basetypes.ObjectType{
+			AttrTypes: DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap,
+		}
+		nullDnsLbPoolsList := basetypes.NewListNull(dnsLbPoolsObjectType)
+		data.DnsLbPools = nullDnsLbPoolsList
+	}
 
 	// data SpecToModelRoot RequiredOneOfField --> HealthCheck
 	// false
@@ -634,179 +689,47 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> IcmpHealthCheck
-		_, isIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_IcmpHealthCheck)
-
-		if isIcmpHealthCheck {
-			healthCheckChoiceChoicesModel.IcmpHealthCheck = types.BoolValue(true)
-		} else {
-			healthCheckChoiceChoicesModel.IcmpHealthCheck = types.BoolNull()
-		}
-
-		// data specToModelNested PointerOfOneOfField --> HttpsHealthCheck
-		// <no value>
-		// false
-		{
-			httpsHealthCheckOptions, isHttpsHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_HttpsHealthCheck)
-			httpsHealthCheckAttributeMap := make(map[string]attr.Value)
-
-			if isHttpsHealthCheck && httpsHealthCheckOptions != nil {
-
-				// data specToModelNested StringField --> Send
-				if httpsHealthCheckOptions.HttpsHealthCheck.GetSend() != "" {
-					httpsHealthCheckAttributeMap["send"] = types.StringValue(httpsHealthCheckOptions.HttpsHealthCheck.GetSend())
-				} else {
-					// Empty string, set to null
-					httpsHealthCheckAttributeMap["send"] = types.StringNull()
-				}
-
-				// data specToModelNested StringField --> Receive
-				if httpsHealthCheckOptions.HttpsHealthCheck.GetReceive() != "" {
-					httpsHealthCheckAttributeMap["receive"] = types.StringValue(httpsHealthCheckOptions.HttpsHealthCheck.GetReceive())
-				} else {
-					// Empty string, set to null
-					httpsHealthCheckAttributeMap["receive"] = types.StringNull()
-				}
-
-				// data specToModelNested RequiredUintField --> HealthCheckPort
-				httpsHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(httpsHealthCheckOptions.HttpsHealthCheck.GetHealthCheckPort()))
-
-				// data specToModelNested UintField --> HealthCheckSecondaryPort
-				httpsHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(httpsHealthCheckOptions.HttpsHealthCheck.GetHealthCheckSecondaryPort()))
-
-				// data specToModelNested RequiredOneOfField --> VirtualHostChoice
-				// <no value>
-				if httpsHealthCheckOptions.HttpsHealthCheck.GetVirtualHostChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					httpsHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					httpsHealthCheckvirtualHostChoiceChoices := httpsHealthCheckOptions.HttpsHealthCheck.GetVirtualHostChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> DisableVirtualHost
-					_, isDisableVirtualHost := httpsHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_DisableVirtualHost)
-
-					if isDisableVirtualHost {
-						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["disable_virtual_host"] = types.BoolValue(true)
-					} else {
-						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["disable_virtual_host"] = types.BoolNull()
-					}
-
-					// data specToModelNested StringOfOneOfField --> VirtualHost
-					virtualHostItem, isVirtualHost := httpsHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_VirtualHost)
-
-					if isVirtualHost {
-						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["virtual_host"] = types.StringValue(string(virtualHostItem.VirtualHost))
-					} else {
-						// Empty string, set to null
-						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["virtual_host"] = types.StringNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> InheritLoadBalancerFqdn
-					_, isInheritLoadBalancerFqdn := httpsHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_InheritLoadBalancerFqdn)
-
-					if isInheritLoadBalancerFqdn {
-						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolValue(true)
-					} else {
-						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, httpsHealthCheckvirtualHostChoiceChoicesObjDiags := types.ObjectValue(
-						DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(httpsHealthCheckvirtualHostChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					httpsHealthCheckAttributeMap["virtual_host_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpsHealthCheckAttributeMap["virtual_host_choice"] = types.ObjectNull(DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap)
-				}
-
-				httpsHealthCheckObj, diags := types.ObjectValue(DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap, httpsHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				healthCheckChoiceChoicesModel.HttpsHealthCheck = httpsHealthCheckObj
-			} else {
-				healthCheckChoiceChoicesModel.HttpsHealthCheck = types.ObjectNull(DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> TcpHexHealthCheck
-		// <no value>
-		// false
-		{
-			tcpHexHealthCheckOptions, isTcpHexHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_TcpHexHealthCheck)
-			tcpHexHealthCheckAttributeMap := make(map[string]attr.Value)
-
-			if isTcpHexHealthCheck && tcpHexHealthCheckOptions != nil {
-
-				// data specToModelNested StringField --> Send
-				if tcpHexHealthCheckOptions.TcpHexHealthCheck.GetSend() != "" {
-					tcpHexHealthCheckAttributeMap["send"] = types.StringValue(tcpHexHealthCheckOptions.TcpHexHealthCheck.GetSend())
-				} else {
-					// Empty string, set to null
-					tcpHexHealthCheckAttributeMap["send"] = types.StringNull()
-				}
-
-				// data specToModelNested StringField --> Receive
-				if tcpHexHealthCheckOptions.TcpHexHealthCheck.GetReceive() != "" {
-					tcpHexHealthCheckAttributeMap["receive"] = types.StringValue(tcpHexHealthCheckOptions.TcpHexHealthCheck.GetReceive())
-				} else {
-					// Empty string, set to null
-					tcpHexHealthCheckAttributeMap["receive"] = types.StringNull()
-				}
-
-				// data specToModelNested RequiredUintField --> HealthCheckPort
-				tcpHexHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(tcpHexHealthCheckOptions.TcpHexHealthCheck.GetHealthCheckPort()))
-
-				// data specToModelNested UintField --> HealthCheckSecondaryPort
-				tcpHexHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHexHealthCheckOptions.TcpHexHealthCheck.GetHealthCheckSecondaryPort()))
-
-				tcpHexHealthCheckObj, diags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap, tcpHexHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				healthCheckChoiceChoicesModel.TcpHexHealthCheck = tcpHexHealthCheckObj
-			} else {
-				healthCheckChoiceChoicesModel.TcpHexHealthCheck = types.ObjectNull(DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap)
-			}
-		}
-
 		// data specToModelNested PointerOfOneOfField --> HttpHealthCheck
 		// <no value>
 		// false
 		{
-			httpHealthCheckOptions, isHttpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_HttpHealthCheck)
+			httpHealthCheckOptionsWrapper, isHttpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_HttpHealthCheck)
 			httpHealthCheckAttributeMap := make(map[string]attr.Value)
 
-			if isHttpHealthCheck && httpHealthCheckOptions != nil {
+			if isHttpHealthCheck && httpHealthCheckOptionsWrapper != nil && httpHealthCheckOptionsWrapper.HttpHealthCheck != nil {
+				httpHealthCheckElement := httpHealthCheckOptionsWrapper.HttpHealthCheck
+
+				// data specToModelNested RequiredUintField --> HealthCheckPort
+				httpHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(httpHealthCheckElement.GetHealthCheckPort()))
 
 				// data specToModelNested UintField --> HealthCheckSecondaryPort
-				httpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(httpHealthCheckOptions.HttpHealthCheck.GetHealthCheckSecondaryPort()))
+				httpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(httpHealthCheckElement.GetHealthCheckSecondaryPort()))
+
+				// data specToModelNested StringField --> Receive
+				if httpHealthCheckElement.GetReceive() != "" {
+					httpHealthCheckAttributeMap["receive"] = types.StringValue(httpHealthCheckElement.GetReceive())
+				} else {
+					// Empty string, set to null
+					httpHealthCheckAttributeMap["receive"] = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Send
+				if httpHealthCheckElement.GetSend() != "" {
+					httpHealthCheckAttributeMap["send"] = types.StringValue(httpHealthCheckElement.GetSend())
+				} else {
+					// Empty string, set to null
+					httpHealthCheckAttributeMap["send"] = types.StringNull()
+				}
 
 				// data specToModelNested RequiredOneOfField --> VirtualHostChoice
 				// <no value>
-				if httpHealthCheckOptions.HttpHealthCheck.GetVirtualHostChoice() != nil {
+				if httpHealthCheckElement.GetVirtualHostChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					httpHealthCheckvirtualHostChoiceChoices := httpHealthCheckOptions.HttpHealthCheck.GetVirtualHostChoice()
+					httpHealthCheckvirtualHostChoiceChoices := httpHealthCheckElement.GetVirtualHostChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -819,6 +742,15 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 						httpHealthCheckvirtualHostChoiceChoicesAttributeMap["disable_virtual_host"] = types.BoolNull()
 					}
 
+					// data specToModelNested BoolOfOneOfPointerField --> InheritLoadBalancerFqdn
+					_, isInheritLoadBalancerFqdn := httpHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_InheritLoadBalancerFqdn)
+
+					if isInheritLoadBalancerFqdn {
+						httpHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolValue(true)
+					} else {
+						httpHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolNull()
+					}
+
 					// data specToModelNested StringOfOneOfField --> VirtualHost
 					virtualHostItem, isVirtualHost := httpHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_VirtualHost)
 
@@ -827,15 +759,6 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 					} else {
 						// Empty string, set to null
 						httpHealthCheckvirtualHostChoiceChoicesAttributeMap["virtual_host"] = types.StringNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> InheritLoadBalancerFqdn
-					_, isInheritLoadBalancerFqdn := httpHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_InheritLoadBalancerFqdn)
-
-					if isInheritLoadBalancerFqdn {
-						httpHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolValue(true)
-					} else {
-						httpHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -857,27 +780,8 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 					httpHealthCheckAttributeMap["virtual_host_choice"] = types.ObjectNull(DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap)
 				}
 
-				// data specToModelNested StringField --> Send
-				if httpHealthCheckOptions.HttpHealthCheck.GetSend() != "" {
-					httpHealthCheckAttributeMap["send"] = types.StringValue(httpHealthCheckOptions.HttpHealthCheck.GetSend())
-				} else {
-					// Empty string, set to null
-					httpHealthCheckAttributeMap["send"] = types.StringNull()
-				}
-
-				// data specToModelNested StringField --> Receive
-				if httpHealthCheckOptions.HttpHealthCheck.GetReceive() != "" {
-					httpHealthCheckAttributeMap["receive"] = types.StringValue(httpHealthCheckOptions.HttpHealthCheck.GetReceive())
-				} else {
-					// Empty string, set to null
-					httpHealthCheckAttributeMap["receive"] = types.StringNull()
-				}
-
-				// data specToModelNested RequiredUintField --> HealthCheckPort
-				httpHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(httpHealthCheckOptions.HttpHealthCheck.GetHealthCheckPort()))
-
-				httpHealthCheckObj, diags := types.ObjectValue(DnsLbHealthCheckHealthCheckHttpHealthCheckModelAttributeMap, httpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
+				httpHealthCheckObj, httpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckHttpHealthCheckModelAttributeMap, httpHealthCheckAttributeMap)
+				response.Diagnostics.Append(httpHealthCheckObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -887,39 +791,151 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 			}
 		}
 
+		// data specToModelNested PointerOfOneOfField --> HttpsHealthCheck
+		// <no value>
+		// false
+		{
+			httpsHealthCheckOptionsWrapper, isHttpsHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_HttpsHealthCheck)
+			httpsHealthCheckAttributeMap := make(map[string]attr.Value)
+
+			if isHttpsHealthCheck && httpsHealthCheckOptionsWrapper != nil && httpsHealthCheckOptionsWrapper.HttpsHealthCheck != nil {
+				httpsHealthCheckElement := httpsHealthCheckOptionsWrapper.HttpsHealthCheck
+
+				// data specToModelNested RequiredUintField --> HealthCheckPort
+				httpsHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(httpsHealthCheckElement.GetHealthCheckPort()))
+
+				// data specToModelNested UintField --> HealthCheckSecondaryPort
+				httpsHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(httpsHealthCheckElement.GetHealthCheckSecondaryPort()))
+
+				// data specToModelNested StringField --> Receive
+				if httpsHealthCheckElement.GetReceive() != "" {
+					httpsHealthCheckAttributeMap["receive"] = types.StringValue(httpsHealthCheckElement.GetReceive())
+				} else {
+					// Empty string, set to null
+					httpsHealthCheckAttributeMap["receive"] = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Send
+				if httpsHealthCheckElement.GetSend() != "" {
+					httpsHealthCheckAttributeMap["send"] = types.StringValue(httpsHealthCheckElement.GetSend())
+				} else {
+					// Empty string, set to null
+					httpsHealthCheckAttributeMap["send"] = types.StringNull()
+				}
+
+				// data specToModelNested RequiredOneOfField --> VirtualHostChoice
+				// <no value>
+				if httpsHealthCheckElement.GetVirtualHostChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					httpsHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					httpsHealthCheckvirtualHostChoiceChoices := httpsHealthCheckElement.GetVirtualHostChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> DisableVirtualHost
+					_, isDisableVirtualHost := httpsHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_DisableVirtualHost)
+
+					if isDisableVirtualHost {
+						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["disable_virtual_host"] = types.BoolValue(true)
+					} else {
+						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["disable_virtual_host"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> InheritLoadBalancerFqdn
+					_, isInheritLoadBalancerFqdn := httpsHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_InheritLoadBalancerFqdn)
+
+					if isInheritLoadBalancerFqdn {
+						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolValue(true)
+					} else {
+						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["inherit_load_balancer_fqdn"] = types.BoolNull()
+					}
+
+					// data specToModelNested StringOfOneOfField --> VirtualHost
+					virtualHostItem, isVirtualHost := httpsHealthCheckvirtualHostChoiceChoices.(*ves_io_schema_dns_lb_health_check.HttpHealthCheck_VirtualHost)
+
+					if isVirtualHost {
+						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["virtual_host"] = types.StringValue(string(virtualHostItem.VirtualHost))
+					} else {
+						// Empty string, set to null
+						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap["virtual_host"] = types.StringNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, httpsHealthCheckvirtualHostChoiceChoicesObjDiags := types.ObjectValue(
+						DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						httpsHealthCheckvirtualHostChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(httpsHealthCheckvirtualHostChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					httpsHealthCheckAttributeMap["virtual_host_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					httpsHealthCheckAttributeMap["virtual_host_choice"] = types.ObjectNull(DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap)
+				}
+
+				httpsHealthCheckObj, httpsHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap, httpsHealthCheckAttributeMap)
+				response.Diagnostics.Append(httpsHealthCheckObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				healthCheckChoiceChoicesModel.HttpsHealthCheck = httpsHealthCheckObj
+			} else {
+				healthCheckChoiceChoicesModel.HttpsHealthCheck = types.ObjectNull(DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> IcmpHealthCheck
+		_, isIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_IcmpHealthCheck)
+
+		if isIcmpHealthCheck {
+			healthCheckChoiceChoicesModel.IcmpHealthCheck = types.BoolValue(true)
+		} else {
+			healthCheckChoiceChoicesModel.IcmpHealthCheck = types.BoolNull()
+		}
+
 		// data specToModelNested PointerOfOneOfField --> TcpHealthCheck
 		// <no value>
 		// false
 		{
-			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_TcpHealthCheck)
+			tcpHealthCheckOptionsWrapper, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_TcpHealthCheck)
 			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
 
-			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
+			if isTcpHealthCheck && tcpHealthCheckOptionsWrapper != nil && tcpHealthCheckOptionsWrapper.TcpHealthCheck != nil {
+				tcpHealthCheckElement := tcpHealthCheckOptionsWrapper.TcpHealthCheck
 
-				// data specToModelNested StringField --> Send
-				if tcpHealthCheckOptions.TcpHealthCheck.GetSend() != "" {
-					tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSend())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send"] = types.StringNull()
-				}
+				// data specToModelNested RequiredUintField --> HealthCheckPort
+				tcpHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(tcpHealthCheckElement.GetHealthCheckPort()))
+
+				// data specToModelNested UintField --> HealthCheckSecondaryPort
+				tcpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHealthCheckElement.GetHealthCheckSecondaryPort()))
 
 				// data specToModelNested StringField --> Receive
-				if tcpHealthCheckOptions.TcpHealthCheck.GetReceive() != "" {
-					tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetReceive())
+				if tcpHealthCheckElement.GetReceive() != "" {
+					tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
 				} else {
 					// Empty string, set to null
 					tcpHealthCheckAttributeMap["receive"] = types.StringNull()
 				}
 
-				// data specToModelNested RequiredUintField --> HealthCheckPort
-				tcpHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(tcpHealthCheckOptions.TcpHealthCheck.GetHealthCheckPort()))
+				// data specToModelNested StringField --> Send
+				if tcpHealthCheckElement.GetSend() != "" {
+					tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["send"] = types.StringNull()
+				}
 
-				// data specToModelNested UintField --> HealthCheckSecondaryPort
-				tcpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHealthCheckOptions.TcpHealthCheck.GetHealthCheckSecondaryPort()))
-
-				tcpHealthCheckObj, diags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
+				tcpHealthCheckObj, tcpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
+				response.Diagnostics.Append(tcpHealthCheckObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -929,39 +945,83 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 			}
 		}
 
+		// data specToModelNested PointerOfOneOfField --> TcpHexHealthCheck
+		// <no value>
+		// false
+		{
+			tcpHexHealthCheckOptionsWrapper, isTcpHexHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_TcpHexHealthCheck)
+			tcpHexHealthCheckAttributeMap := make(map[string]attr.Value)
+
+			if isTcpHexHealthCheck && tcpHexHealthCheckOptionsWrapper != nil && tcpHexHealthCheckOptionsWrapper.TcpHexHealthCheck != nil {
+				tcpHexHealthCheckElement := tcpHexHealthCheckOptionsWrapper.TcpHexHealthCheck
+
+				// data specToModelNested RequiredUintField --> HealthCheckPort
+				tcpHexHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(tcpHexHealthCheckElement.GetHealthCheckPort()))
+
+				// data specToModelNested UintField --> HealthCheckSecondaryPort
+				tcpHexHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHexHealthCheckElement.GetHealthCheckSecondaryPort()))
+
+				// data specToModelNested StringField --> Receive
+				if tcpHexHealthCheckElement.GetReceive() != "" {
+					tcpHexHealthCheckAttributeMap["receive"] = types.StringValue(tcpHexHealthCheckElement.GetReceive())
+				} else {
+					// Empty string, set to null
+					tcpHexHealthCheckAttributeMap["receive"] = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Send
+				if tcpHexHealthCheckElement.GetSend() != "" {
+					tcpHexHealthCheckAttributeMap["send"] = types.StringValue(tcpHexHealthCheckElement.GetSend())
+				} else {
+					// Empty string, set to null
+					tcpHexHealthCheckAttributeMap["send"] = types.StringNull()
+				}
+
+				tcpHexHealthCheckObj, tcpHexHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap, tcpHexHealthCheckAttributeMap)
+				response.Diagnostics.Append(tcpHexHealthCheckObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				healthCheckChoiceChoicesModel.TcpHexHealthCheck = tcpHexHealthCheckObj
+			} else {
+				healthCheckChoiceChoicesModel.TcpHexHealthCheck = types.ObjectNull(DnsLbHealthCheckHealthCheckTcpHexHealthCheckModelAttributeMap)
+			}
+		}
+
 		// data specToModelNested PointerOfOneOfField --> UdpHealthCheck
 		// <no value>
 		// false
 		{
-			udpHealthCheckOptions, isUdpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_UdpHealthCheck)
+			udpHealthCheckOptionsWrapper, isUdpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_dns_lb_health_check.GlobalSpecType_UdpHealthCheck)
 			udpHealthCheckAttributeMap := make(map[string]attr.Value)
 
-			if isUdpHealthCheck && udpHealthCheckOptions != nil {
+			if isUdpHealthCheck && udpHealthCheckOptionsWrapper != nil && udpHealthCheckOptionsWrapper.UdpHealthCheck != nil {
+				udpHealthCheckElement := udpHealthCheckOptionsWrapper.UdpHealthCheck
 
-				// data specToModelNested RequiredStringField --> Send
-				if udpHealthCheckOptions.UdpHealthCheck.GetSend() != "" {
-					udpHealthCheckAttributeMap["send"] = types.StringValue(udpHealthCheckOptions.UdpHealthCheck.GetSend())
-				} else {
-					// Empty string, set to null
-					udpHealthCheckAttributeMap["send"] = types.StringNull()
-				}
+				// data specToModelNested RequiredUintField --> HealthCheckPort
+				udpHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(udpHealthCheckElement.GetHealthCheckPort()))
+
+				// data specToModelNested UintField --> HealthCheckSecondaryPort
+				udpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(udpHealthCheckElement.GetHealthCheckSecondaryPort()))
 
 				// data specToModelNested RequiredStringField --> Receive
-				if udpHealthCheckOptions.UdpHealthCheck.GetReceive() != "" {
-					udpHealthCheckAttributeMap["receive"] = types.StringValue(udpHealthCheckOptions.UdpHealthCheck.GetReceive())
+				if udpHealthCheckElement.GetReceive() != "" {
+					udpHealthCheckAttributeMap["receive"] = types.StringValue(udpHealthCheckElement.GetReceive())
 				} else {
 					// Empty string, set to null
 					udpHealthCheckAttributeMap["receive"] = types.StringNull()
 				}
 
-				// data specToModelNested RequiredUintField --> HealthCheckPort
-				udpHealthCheckAttributeMap["health_check_port"] = types.Int64Value(int64(udpHealthCheckOptions.UdpHealthCheck.GetHealthCheckPort()))
+				// data specToModelNested RequiredStringField --> Send
+				if udpHealthCheckElement.GetSend() != "" {
+					udpHealthCheckAttributeMap["send"] = types.StringValue(udpHealthCheckElement.GetSend())
+				} else {
+					// Empty string, set to null
+					udpHealthCheckAttributeMap["send"] = types.StringNull()
+				}
 
-				// data specToModelNested UintField --> HealthCheckSecondaryPort
-				udpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(udpHealthCheckOptions.UdpHealthCheck.GetHealthCheckSecondaryPort()))
-
-				udpHealthCheckObj, diags := types.ObjectValue(DnsLbHealthCheckHealthCheckUdpHealthCheckModelAttributeMap, udpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
+				udpHealthCheckObj, udpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckUdpHealthCheckModelAttributeMap, udpHealthCheckAttributeMap)
+				response.Diagnostics.Append(udpHealthCheckObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -972,79 +1032,27 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		healthCheckChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLbHealthCheckHealthCheckModelAttributeMap,
-			healthCheckChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			healthCheckChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				DnsLbHealthCheckHealthCheckModelAttributeMap,
+				healthCheckChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.HealthCheckChoice = healthCheckChoiceObj
+			// Assign the final object to the root data model.
+			data.HealthCheckChoice = healthCheckChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.HealthCheckChoice = types.ObjectNull(DnsLbHealthCheckHealthCheckModelAttributeMap)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> DnsLbPools
-	if len(specData.DnsLbPools) > 0 {
-		dnsLbPoolsElements := make([]ObjectRefTypeModel, 0, len(specData.DnsLbPools))
-
-		for _, dnsLbPoolsElement := range specData.DnsLbPools {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested StringField --> Tenant
-			if dnsLbPoolsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsLbPoolsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if dnsLbPoolsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsLbPoolsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Name
-			if dnsLbPoolsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsLbPoolsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			dnsLbPoolsElements = append(dnsLbPoolsElements, objectRefTypeModelModel)
-		}
-
-		dnsLbPoolsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap,
-			dnsLbPoolsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.DnsLbPools = dnsLbPoolsList
-	} else {
-		var dnsLbPoolsObjectType = basetypes.ObjectType{
-			AttrTypes: DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap,
-		}
-		nullDnsLbPoolsList := basetypes.NewListNull(dnsLbPoolsObjectType)
-		data.DnsLbPools = nullDnsLbPoolsList
-	}
-
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

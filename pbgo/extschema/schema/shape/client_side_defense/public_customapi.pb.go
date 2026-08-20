@@ -11,6 +11,13 @@ package client_side_defense
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -21,12 +28,6 @@ import (
 	status "google.golang.org/grpc/status"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -7338,10 +7339,7 @@ func (m *UpdateScriptApprovalStatusRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7423,10 +7421,7 @@ func (m *UpdateScriptApprovalStatusResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7604,10 +7599,7 @@ func (m *ListInlineScriptsRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7691,10 +7683,7 @@ func (m *ListInlineScriptsResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7974,10 +7963,7 @@ func (m *InlineScript) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8123,10 +8109,7 @@ func (m *GetScriptsOverviewRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8233,10 +8216,7 @@ func (m *ApprovalStatusCounts) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8343,10 +8323,7 @@ func (m *MitigationStatusCounts) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8453,10 +8430,7 @@ func (m *BehaviorMetrics) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8633,10 +8607,7 @@ func (m *GetScriptsOverviewResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8782,10 +8753,7 @@ func (m *BulkDeleteDomainsRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8855,10 +8823,7 @@ func (m *BulkDeleteDomainsResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -8991,10 +8956,7 @@ func (m *ReportFilter) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -9142,10 +9104,7 @@ func (m *ScriptsReportCriteria) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -9325,10 +9284,7 @@ func (m *AffectedUsersReportCriteria) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -9448,10 +9404,7 @@ func (m *ReportCriteria) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -9788,10 +9741,7 @@ func (m *Report) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -10147,10 +10097,7 @@ func (m *ReportWithHistory) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -10232,10 +10179,7 @@ func (m *ListReportsWithHistoryRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -10319,10 +10263,7 @@ func (m *ListReportsWithHistoryResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -10511,10 +10452,7 @@ func (m *CreateReportRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -10600,10 +10538,7 @@ func (m *CreateReportResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -10717,10 +10652,7 @@ func (m *GetDownloadReportPresignedUrlRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -10821,10 +10753,7 @@ func (m *GetDownloadReportPresignedUrlResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {

@@ -12,6 +12,12 @@ import (
 	bytes "bytes"
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -22,11 +28,6 @@ import (
 	status "google.golang.org/grpc/status"
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1249,6 +1250,474 @@ func (m *InitiateZoneTransferResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_InitiateZoneTransferResponse proto.InternalMessageInfo
 
+// Get CryptoKeys Request
+//
+// x-displayName: "Get CryptoKeys Request"
+type GetCryptoKeysRequest struct {
+	// Namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "system"
+	// Namespace is always system for dns_zone
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// Zone Name
+	//
+	// x-displayName: "Zone Name"
+	// x-required
+	ZoneName string `protobuf:"bytes,2,opt,name=zone_name,json=zoneName,proto3" json:"zone_name,omitempty"`
+}
+
+func (m *GetCryptoKeysRequest) Reset()      { *m = GetCryptoKeysRequest{} }
+func (*GetCryptoKeysRequest) ProtoMessage() {}
+func (*GetCryptoKeysRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{19}
+}
+func (m *GetCryptoKeysRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetCryptoKeysRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetCryptoKeysRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetCryptoKeysRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetCryptoKeysRequest.Merge(m, src)
+}
+func (m *GetCryptoKeysRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetCryptoKeysRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetCryptoKeysRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetCryptoKeysRequest proto.InternalMessageInfo
+
+func (m *GetCryptoKeysRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *GetCryptoKeysRequest) GetZoneName() string {
+	if m != nil {
+		return m.ZoneName
+	}
+	return ""
+}
+
+// Get CryptoKeys Response
+//
+// x-displayName: "Add CryptoKey Response"
+type GetCryptoKeysResponse struct {
+	Keys []*CryptoKey `protobuf:"bytes,1,rep,name=keys,proto3" json:"keys,omitempty"`
+}
+
+func (m *GetCryptoKeysResponse) Reset()      { *m = GetCryptoKeysResponse{} }
+func (*GetCryptoKeysResponse) ProtoMessage() {}
+func (*GetCryptoKeysResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{20}
+}
+func (m *GetCryptoKeysResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetCryptoKeysResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetCryptoKeysResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetCryptoKeysResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetCryptoKeysResponse.Merge(m, src)
+}
+func (m *GetCryptoKeysResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetCryptoKeysResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetCryptoKeysResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetCryptoKeysResponse proto.InternalMessageInfo
+
+func (m *GetCryptoKeysResponse) GetKeys() []*CryptoKey {
+	if m != nil {
+		return m.Keys
+	}
+	return nil
+}
+
+// Add CryptoKey Request
+//
+// x-displayName: "Add CryptoKey Request"
+type AddCryptoKeyRequest struct {
+	// Namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "system"
+	// Namespace is always system for dns_zone
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// Zone Name
+	//
+	// x-displayName: "Zone Name"
+	// x-required
+	ZoneName string `protobuf:"bytes,2,opt,name=zone_name,json=zoneName,proto3" json:"zone_name,omitempty"`
+	// Key Type
+	//
+	// x-displayName: "Key Type"
+	// x-required
+	KeyType string `protobuf:"bytes,3,opt,name=key_type,json=keyType,proto3" json:"key_type,omitempty"`
+}
+
+func (m *AddCryptoKeyRequest) Reset()      { *m = AddCryptoKeyRequest{} }
+func (*AddCryptoKeyRequest) ProtoMessage() {}
+func (*AddCryptoKeyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{21}
+}
+func (m *AddCryptoKeyRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AddCryptoKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AddCryptoKeyRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AddCryptoKeyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddCryptoKeyRequest.Merge(m, src)
+}
+func (m *AddCryptoKeyRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *AddCryptoKeyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddCryptoKeyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddCryptoKeyRequest proto.InternalMessageInfo
+
+func (m *AddCryptoKeyRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *AddCryptoKeyRequest) GetZoneName() string {
+	if m != nil {
+		return m.ZoneName
+	}
+	return ""
+}
+
+func (m *AddCryptoKeyRequest) GetKeyType() string {
+	if m != nil {
+		return m.KeyType
+	}
+	return ""
+}
+
+// Add CryptoKey Response
+//
+// x-displayName: "Add CryptoKey Response"
+type AddCryptoKeyResponse struct {
+	Key *CryptoKey `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+}
+
+func (m *AddCryptoKeyResponse) Reset()      { *m = AddCryptoKeyResponse{} }
+func (*AddCryptoKeyResponse) ProtoMessage() {}
+func (*AddCryptoKeyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{22}
+}
+func (m *AddCryptoKeyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AddCryptoKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AddCryptoKeyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AddCryptoKeyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddCryptoKeyResponse.Merge(m, src)
+}
+func (m *AddCryptoKeyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *AddCryptoKeyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddCryptoKeyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddCryptoKeyResponse proto.InternalMessageInfo
+
+func (m *AddCryptoKeyResponse) GetKey() *CryptoKey {
+	if m != nil {
+		return m.Key
+	}
+	return nil
+}
+
+// Edit CryptoKey Request
+//
+// x-displayName: "Edit CryptoKey Request"
+type EditCryptoKeyRequest struct {
+	// Namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "system"
+	// Namespace is always system for dns_zone
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// Zone Name
+	//
+	// x-displayName: "Zone Name"
+	// x-required
+	ZoneName string `protobuf:"bytes,2,opt,name=zone_name,json=zoneName,proto3" json:"zone_name,omitempty"`
+	// Key Id
+	//
+	// x-displayName: "Key ID"
+	// x-required
+	KeyId uint32 `protobuf:"varint,3,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
+	// Active
+	//
+	// x-displayName: "Active"
+	// x-required
+	Active bool `protobuf:"varint,4,opt,name=active,proto3" json:"active,omitempty"`
+}
+
+func (m *EditCryptoKeyRequest) Reset()      { *m = EditCryptoKeyRequest{} }
+func (*EditCryptoKeyRequest) ProtoMessage() {}
+func (*EditCryptoKeyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{23}
+}
+func (m *EditCryptoKeyRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *EditCryptoKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_EditCryptoKeyRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *EditCryptoKeyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EditCryptoKeyRequest.Merge(m, src)
+}
+func (m *EditCryptoKeyRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *EditCryptoKeyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_EditCryptoKeyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EditCryptoKeyRequest proto.InternalMessageInfo
+
+func (m *EditCryptoKeyRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *EditCryptoKeyRequest) GetZoneName() string {
+	if m != nil {
+		return m.ZoneName
+	}
+	return ""
+}
+
+func (m *EditCryptoKeyRequest) GetKeyId() uint32 {
+	if m != nil {
+		return m.KeyId
+	}
+	return 0
+}
+
+func (m *EditCryptoKeyRequest) GetActive() bool {
+	if m != nil {
+		return m.Active
+	}
+	return false
+}
+
+// Edit CryptoKey Response
+//
+// x-displayName: "Edit CryptoKey Response"
+type EditCryptoKeyResponse struct {
+}
+
+func (m *EditCryptoKeyResponse) Reset()      { *m = EditCryptoKeyResponse{} }
+func (*EditCryptoKeyResponse) ProtoMessage() {}
+func (*EditCryptoKeyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{24}
+}
+func (m *EditCryptoKeyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *EditCryptoKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_EditCryptoKeyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *EditCryptoKeyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EditCryptoKeyResponse.Merge(m, src)
+}
+func (m *EditCryptoKeyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *EditCryptoKeyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_EditCryptoKeyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EditCryptoKeyResponse proto.InternalMessageInfo
+
+// Delete CryptoKey Request
+//
+// x-displayName: "Delete CryptoKey Request"
+type DeleteCryptoKeyRequest struct {
+	// Namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "system"
+	// Namespace is always system for dns_zone
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// Zone Name
+	//
+	// x-displayName: "Zone Name"
+	// x-required
+	ZoneName string `protobuf:"bytes,2,opt,name=zone_name,json=zoneName,proto3" json:"zone_name,omitempty"`
+	// Key Id
+	//
+	// x-displayName: "Key ID"
+	// x-required
+	KeyId uint32 `protobuf:"varint,3,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
+}
+
+func (m *DeleteCryptoKeyRequest) Reset()      { *m = DeleteCryptoKeyRequest{} }
+func (*DeleteCryptoKeyRequest) ProtoMessage() {}
+func (*DeleteCryptoKeyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{25}
+}
+func (m *DeleteCryptoKeyRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteCryptoKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteCryptoKeyRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteCryptoKeyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteCryptoKeyRequest.Merge(m, src)
+}
+func (m *DeleteCryptoKeyRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteCryptoKeyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteCryptoKeyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteCryptoKeyRequest proto.InternalMessageInfo
+
+func (m *DeleteCryptoKeyRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *DeleteCryptoKeyRequest) GetZoneName() string {
+	if m != nil {
+		return m.ZoneName
+	}
+	return ""
+}
+
+func (m *DeleteCryptoKeyRequest) GetKeyId() uint32 {
+	if m != nil {
+		return m.KeyId
+	}
+	return 0
+}
+
+// Delete CryptoKey Response
+//
+// x-displayName: "Delete CryptoKey Response"
+type DeleteCryptoKeyResponse struct {
+}
+
+func (m *DeleteCryptoKeyResponse) Reset()      { *m = DeleteCryptoKeyResponse{} }
+func (*DeleteCryptoKeyResponse) ProtoMessage() {}
+func (*DeleteCryptoKeyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8810baad339dc204, []int{26}
+}
+func (m *DeleteCryptoKeyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DeleteCryptoKeyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_DeleteCryptoKeyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *DeleteCryptoKeyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteCryptoKeyResponse.Merge(m, src)
+}
+func (m *DeleteCryptoKeyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *DeleteCryptoKeyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteCryptoKeyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteCryptoKeyResponse proto.InternalMessageInfo
+
 // Valid Zone
 //
 // x-displayName: "Valid Zone"
@@ -1266,7 +1735,7 @@ type ValidZone struct {
 func (m *ValidZone) Reset()      { *m = ValidZone{} }
 func (*ValidZone) ProtoMessage() {}
 func (*ValidZone) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8810baad339dc204, []int{19}
+	return fileDescriptor_8810baad339dc204, []int{27}
 }
 func (m *ValidZone) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1326,7 +1795,7 @@ type InvalidZone struct {
 func (m *InvalidZone) Reset()      { *m = InvalidZone{} }
 func (*InvalidZone) ProtoMessage() {}
 func (*InvalidZone) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8810baad339dc204, []int{20}
+	return fileDescriptor_8810baad339dc204, []int{28}
 }
 func (m *InvalidZone) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1391,7 +1860,7 @@ type ExportZoneFileRequest struct {
 func (m *ExportZoneFileRequest) Reset()      { *m = ExportZoneFileRequest{} }
 func (*ExportZoneFileRequest) ProtoMessage() {}
 func (*ExportZoneFileRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8810baad339dc204, []int{21}
+	return fileDescriptor_8810baad339dc204, []int{29}
 }
 func (m *ExportZoneFileRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1449,7 +1918,7 @@ type ExportZoneFileResponse struct {
 func (m *ExportZoneFileResponse) Reset()      { *m = ExportZoneFileResponse{} }
 func (*ExportZoneFileResponse) ProtoMessage() {}
 func (*ExportZoneFileResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8810baad339dc204, []int{22}
+	return fileDescriptor_8810baad339dc204, []int{30}
 }
 func (m *ExportZoneFileResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1524,6 +1993,22 @@ func init() {
 	golang_proto.RegisterType((*InitiateZoneTransferRequest)(nil), "ves.io.schema.dns_zone.InitiateZoneTransferRequest")
 	proto.RegisterType((*InitiateZoneTransferResponse)(nil), "ves.io.schema.dns_zone.InitiateZoneTransferResponse")
 	golang_proto.RegisterType((*InitiateZoneTransferResponse)(nil), "ves.io.schema.dns_zone.InitiateZoneTransferResponse")
+	proto.RegisterType((*GetCryptoKeysRequest)(nil), "ves.io.schema.dns_zone.GetCryptoKeysRequest")
+	golang_proto.RegisterType((*GetCryptoKeysRequest)(nil), "ves.io.schema.dns_zone.GetCryptoKeysRequest")
+	proto.RegisterType((*GetCryptoKeysResponse)(nil), "ves.io.schema.dns_zone.GetCryptoKeysResponse")
+	golang_proto.RegisterType((*GetCryptoKeysResponse)(nil), "ves.io.schema.dns_zone.GetCryptoKeysResponse")
+	proto.RegisterType((*AddCryptoKeyRequest)(nil), "ves.io.schema.dns_zone.AddCryptoKeyRequest")
+	golang_proto.RegisterType((*AddCryptoKeyRequest)(nil), "ves.io.schema.dns_zone.AddCryptoKeyRequest")
+	proto.RegisterType((*AddCryptoKeyResponse)(nil), "ves.io.schema.dns_zone.AddCryptoKeyResponse")
+	golang_proto.RegisterType((*AddCryptoKeyResponse)(nil), "ves.io.schema.dns_zone.AddCryptoKeyResponse")
+	proto.RegisterType((*EditCryptoKeyRequest)(nil), "ves.io.schema.dns_zone.EditCryptoKeyRequest")
+	golang_proto.RegisterType((*EditCryptoKeyRequest)(nil), "ves.io.schema.dns_zone.EditCryptoKeyRequest")
+	proto.RegisterType((*EditCryptoKeyResponse)(nil), "ves.io.schema.dns_zone.EditCryptoKeyResponse")
+	golang_proto.RegisterType((*EditCryptoKeyResponse)(nil), "ves.io.schema.dns_zone.EditCryptoKeyResponse")
+	proto.RegisterType((*DeleteCryptoKeyRequest)(nil), "ves.io.schema.dns_zone.DeleteCryptoKeyRequest")
+	golang_proto.RegisterType((*DeleteCryptoKeyRequest)(nil), "ves.io.schema.dns_zone.DeleteCryptoKeyRequest")
+	proto.RegisterType((*DeleteCryptoKeyResponse)(nil), "ves.io.schema.dns_zone.DeleteCryptoKeyResponse")
+	golang_proto.RegisterType((*DeleteCryptoKeyResponse)(nil), "ves.io.schema.dns_zone.DeleteCryptoKeyResponse")
 	proto.RegisterType((*ValidZone)(nil), "ves.io.schema.dns_zone.ValidZone")
 	golang_proto.RegisterType((*ValidZone)(nil), "ves.io.schema.dns_zone.ValidZone")
 	proto.RegisterType((*InvalidZone)(nil), "ves.io.schema.dns_zone.InvalidZone")
@@ -1542,125 +2027,143 @@ func init() {
 }
 
 var fileDescriptor_8810baad339dc204 = []byte{
-	// 1878 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x58, 0xcd, 0x6f, 0x1b, 0xc7,
-	0x15, 0xd7, 0x90, 0x94, 0x4c, 0x8e, 0xbe, 0xa8, 0x4d, 0x63, 0xd3, 0xb4, 0xcb, 0xc8, 0x6b, 0xa0,
-	0x88, 0x0d, 0x91, 0x94, 0xa5, 0xaa, 0x76, 0x55, 0xd7, 0x80, 0x25, 0xd9, 0xb2, 0xe4, 0x44, 0x4e,
-	0x97, 0xae, 0x91, 0xa6, 0x45, 0x89, 0xd5, 0x72, 0x48, 0x4d, 0xcc, 0xdd, 0xd9, 0xce, 0x0c, 0x19,
-	0x49, 0x81, 0x01, 0xc1, 0xed, 0xa1, 0x3d, 0x14, 0x08, 0xd0, 0x4b, 0x51, 0xa0, 0x40, 0x8f, 0x3d,
-	0xf4, 0x0f, 0x28, 0xea, 0x8b, 0x6f, 0x36, 0x7a, 0x08, 0x8c, 0x16, 0x05, 0x72, 0xe8, 0xa1, 0xa6,
-	0x02, 0x34, 0x3d, 0x14, 0x08, 0x72, 0xee, 0x17, 0xe6, 0x63, 0x97, 0x1f, 0xe2, 0xca, 0x54, 0x25,
-	0x20, 0x27, 0x2e, 0x67, 0xde, 0xfb, 0xbd, 0xf7, 0x7b, 0xf3, 0xde, 0x9b, 0xb7, 0x0b, 0xf3, 0x4d,
-	0xc4, 0x0a, 0x98, 0x14, 0x99, 0xb3, 0x85, 0x5c, 0xbb, 0x58, 0xf1, 0x58, 0x79, 0x97, 0x78, 0xa8,
-	0xe8, 0x37, 0x36, 0xeb, 0xd8, 0x29, 0x3b, 0x0d, 0xc6, 0x89, 0x6b, 0xfb, 0xb8, 0xe0, 0x53, 0xc2,
-	0x89, 0x71, 0x5a, 0x89, 0x17, 0x94, 0x78, 0x21, 0x10, 0xcf, 0xe6, 0x6b, 0x98, 0x6f, 0x35, 0x36,
-	0x0b, 0x0e, 0x71, 0x8b, 0x35, 0x52, 0x23, 0x45, 0x29, 0xbe, 0xd9, 0xa8, 0xca, 0x7f, 0xf2, 0x8f,
-	0x7c, 0x52, 0x30, 0xd9, 0xf3, 0x35, 0x42, 0x6a, 0x75, 0x54, 0xb4, 0x7d, 0x5c, 0xb4, 0x3d, 0x8f,
-	0x70, 0x9b, 0x63, 0xe2, 0xb1, 0x9e, 0xdd, 0x10, 0x83, 0x71, 0xda, 0x70, 0xb8, 0xde, 0x7d, 0xa3,
-	0x77, 0x97, 0x63, 0x17, 0x31, 0x6e, 0xbb, 0xbe, 0x16, 0xb8, 0x18, 0x41, 0x89, 0x6c, 0xbe, 0x8f,
-	0x42, 0x14, 0x33, 0x42, 0x88, 0xef, 0xf8, 0x28, 0xf0, 0xe3, 0x5c, 0xb7, 0x0c, 0xf1, 0x3b, 0x9d,
-	0x3c, 0xdb, 0xbd, 0xd9, 0xa9, 0x77, 0xbe, 0x7b, 0xab, 0x69, 0xd7, 0x71, 0xc5, 0xe6, 0xa8, 0xbf,
-	0xe5, 0x26, 0x62, 0xc8, 0x6b, 0xf6, 0x80, 0x4f, 0xf7, 0xc8, 0x60, 0xf4, 0x41, 0xb9, 0x4b, 0xc2,
-	0x24, 0xf0, 0xf5, 0x35, 0xd7, 0x27, 0x94, 0xdf, 0x5e, 0x58, 0x2e, 0xbd, 0x47, 0x3c, 0x64, 0xa1,
-	0x1f, 0x35, 0x10, 0xe3, 0xc6, 0x03, 0x38, 0xee, 0x10, 0xaf, 0x8a, 0x6b, 0x0d, 0x2a, 0x83, 0x9a,
-	0x01, 0xd3, 0xe0, 0xcd, 0xd1, 0xb9, 0xd9, 0x42, 0xff, 0x93, 0x2b, 0x08, 0xfd, 0x95, 0x0d, 0x09,
-	0xb1, 0xdc, 0xa9, 0x67, 0x75, 0xc3, 0x98, 0xff, 0x02, 0xf0, 0x74, 0xaf, 0x45, 0xe6, 0x13, 0x8f,
-	0x21, 0xe3, 0x3a, 0x4c, 0xba, 0x88, 0xdb, 0x15, 0x9b, 0xdb, 0xda, 0xda, 0x74, 0x8f, 0xb5, 0x7b,
-	0x32, 0xf4, 0xab, 0x88, 0xbf, 0x8d, 0xb8, 0x7d, 0x7f, 0xc7, 0x47, 0x56, 0xa8, 0x61, 0xdc, 0x83,
-	0x93, 0x6c, 0x87, 0x71, 0xe4, 0x96, 0x43, 0x90, 0xb8, 0x04, 0xf9, 0x5a, 0x0f, 0x48, 0x49, 0x4a,
-	0x1d, 0x84, 0x9a, 0x50, 0xea, 0x6f, 0x07, 0x80, 0x77, 0x60, 0x82, 0xf9, 0xc8, 0xc9, 0xc4, 0x24,
-	0xca, 0xc5, 0x28, 0xe2, 0xab, 0x88, 0x97, 0x7c, 0xe4, 0x08, 0x88, 0xa5, 0xc9, 0x5f, 0x3d, 0x1a,
-	0x13, 0x3a, 0x85, 0x9a, 0x53, 0x16, 0xbf, 0x96, 0x44, 0x58, 0x4c, 0xfd, 0xf1, 0xc6, 0x88, 0xb2,
-	0x67, 0xfe, 0x0e, 0xc0, 0x4c, 0x54, 0xa8, 0x8c, 0x45, 0x38, 0x2a, 0x60, 0x19, 0xa2, 0x4d, 0xec,
-	0x20, 0x6d, 0xf8, 0x4c, 0x41, 0x25, 0x6a, 0x21, 0x48, 0xd4, 0x42, 0x49, 0xa6, 0xf1, 0x9d, 0x21,
-	0x0b, 0x56, 0x3c, 0x56, 0x52, 0xc2, 0xc6, 0x75, 0x38, 0x66, 0x77, 0x2a, 0xc7, 0x5f, 0xa5, 0x3c,
-	0x6a, 0xb7, 0xb5, 0x97, 0xd2, 0x30, 0x29, 0x94, 0x45, 0xf6, 0x19, 0x89, 0x17, 0x4f, 0x00, 0x58,
-	0x4f, 0x24, 0x41, 0x3a, 0x66, 0xfe, 0x07, 0xc0, 0x29, 0x75, 0x5a, 0x37, 0xdf, 0xbd, 0x6d, 0x05,
-	0xb9, 0x31, 0x0b, 0x27, 0x7c, 0x8a, 0x5d, 0x9b, 0xee, 0x48, 0x73, 0x88, 0x4a, 0x6b, 0xa9, 0xa5,
-	0xd4, 0x1f, 0xfe, 0xf1, 0x34, 0x9e, 0xa0, 0xb1, 0x6d, 0x60, 0x8d, 0x6b, 0x81, 0x92, 0xdc, 0x37,
-	0x8a, 0x70, 0xb4, 0x42, 0x5c, 0x1b, 0x7b, 0x65, 0xcf, 0x76, 0x51, 0xe6, 0x94, 0x14, 0x9f, 0x10,
-	0xe2, 0x29, 0x7a, 0x2a, 0x0d, 0x32, 0x7b, 0xb1, 0x2d, 0x60, 0x41, 0x25, 0xb2, 0x61, 0xbb, 0xc8,
-	0xf8, 0x21, 0x34, 0x38, 0xc3, 0xb5, 0x72, 0x77, 0x0e, 0x26, 0x25, 0xa9, 0x4b, 0x51, 0x47, 0x71,
-	0xbf, 0xb4, 0xb6, 0xda, 0x15, 0xd1, 0x25, 0xc9, 0xc5, 0x9a, 0x12, 0x50, 0x5d, 0x1b, 0x8b, 0xc9,
-	0x2f, 0x6e, 0x0c, 0x5f, 0x9d, 0x99, 0x9f, 0xb9, 0xa6, 0x88, 0xae, 0x27, 0x92, 0xb1, 0x74, 0x7c,
-	0x3d, 0x91, 0x4c, 0xa4, 0x87, 0xd7, 0x13, 0xc9, 0xe1, 0xf4, 0xc8, 0x7a, 0x22, 0x39, 0x92, 0x3e,
-	0x65, 0x7e, 0x0a, 0xe0, 0xd4, 0x01, 0x58, 0x63, 0x16, 0x8e, 0x4b, 0xef, 0x1e, 0xa2, 0x1d, 0x45,
-	0x08, 0x48, 0x42, 0x63, 0x82, 0xd0, 0x29, 0x3a, 0xac, 0xe8, 0x8c, 0x0a, 0x91, 0xbb, 0x68, 0x47,
-	0xf2, 0x79, 0xa0, 0xf9, 0x08, 0x0d, 0xbb, 0x5e, 0x23, 0x14, 0xf3, 0x2d, 0x57, 0x9e, 0xf0, 0xc4,
-	0xdc, 0x9b, 0x87, 0xf1, 0xb9, 0x8b, 0x76, 0x6e, 0x06, 0xf2, 0x56, 0x5a, 0x43, 0x86, 0x2b, 0xc6,
-	0x2d, 0x38, 0x11, 0xe2, 0x36, 0xed, 0x7a, 0x23, 0x38, 0xf8, 0xb3, 0xbd, 0x49, 0x8f, 0x1c, 0x8a,
-	0xb8, 0x4c, 0x52, 0x15, 0x93, 0x31, 0x0d, 0xf5, 0x40, 0x28, 0x99, 0x18, 0x1a, 0x9d, 0xc7, 0xac,
-	0x0b, 0xb2, 0xd4, 0xbf, 0x07, 0xe4, 0xa3, 0xfc, 0x7d, 0x47, 0x9d, 0xf9, 0xca, 0x46, 0xa9, 0xa3,
-	0x28, 0x7a, 0x1b, 0xc0, 0x0f, 0x60, 0x66, 0x15, 0x71, 0x0b, 0xb9, 0x84, 0x23, 0x51, 0x02, 0xb7,
-	0x71, 0x3d, 0x6c, 0x3a, 0xe7, 0x61, 0x4a, 0x84, 0x93, 0xf9, 0xb6, 0xa3, 0x63, 0x6a, 0xb5, 0x17,
-	0x0c, 0x13, 0x8e, 0x07, 0xa6, 0x54, 0xd4, 0x63, 0x52, 0x42, 0xd4, 0x8c, 0x00, 0x12, 0x71, 0x36,
-	0xaf, 0xc1, 0xb3, 0x7d, 0xd0, 0x35, 0x9f, 0x73, 0x30, 0x25, 0x95, 0xab, 0xb8, 0x1e, 0xc0, 0x27,
-	0x77, 0xb5, 0x90, 0xf9, 0x7d, 0x78, 0x66, 0x15, 0xf1, 0xb7, 0x88, 0x63, 0xd7, 0x4f, 0xde, 0xad,
-	0x1f, 0x03, 0xc9, 0xba, 0x07, 0x5d, 0xbb, 0xb5, 0x0e, 0x5f, 0xab, 0xdb, 0x8c, 0x97, 0xed, 0xed,
-	0x2a, 0x2d, 0x87, 0xb7, 0x50, 0x26, 0x25, 0x83, 0x9d, 0x3d, 0x50, 0xc1, 0xf7, 0x03, 0x09, 0x6b,
-	0x4a, 0xa8, 0xdd, 0xdc, 0xae, 0xd2, 0x70, 0xa9, 0x9b, 0x62, 0xac, 0x87, 0xe2, 0x26, 0xcc, 0x75,
-	0x3a, 0x61, 0x21, 0x87, 0xd0, 0x8a, 0xf0, 0x8f, 0x9d, 0x1c, 0xd3, 0x15, 0xf8, 0x46, 0xa4, 0x0d,
-	0xcd, 0xf7, 0x02, 0x1c, 0xa3, 0x72, 0x59, 0x82, 0xb0, 0x0c, 0x98, 0x8e, 0x0b, 0x14, 0xda, 0x16,
-	0x35, 0x4d, 0x98, 0x5c, 0xae, 0xab, 0xdb, 0xc8, 0x38, 0x0d, 0x47, 0x38, 0xf2, 0x6c, 0x8f, 0x6b,
-	0x87, 0xf4, 0x3f, 0xb3, 0x04, 0x53, 0x5a, 0x86, 0xf9, 0xc6, 0x45, 0x38, 0xce, 0x1a, 0x8e, 0x83,
-	0x98, 0x72, 0x2f, 0x00, 0x1d, 0xd3, 0x8b, 0xc2, 0x15, 0x26, 0x0c, 0x57, 0x6d, 0x5c, 0x47, 0x15,
-	0x2d, 0x13, 0x53, 0x86, 0xd5, 0x9a, 0x14, 0x31, 0xdf, 0x87, 0x67, 0x55, 0x21, 0x2c, 0xad, 0x6d,
-	0xac, 0x3c, 0xd0, 0x37, 0x6e, 0x10, 0x9d, 0x8b, 0x30, 0x11, 0xa6, 0xce, 0xd8, 0xd2, 0xe4, 0xf3,
-	0x47, 0x40, 0x16, 0xfc, 0xee, 0x70, 0x66, 0x6f, 0x6f, 0x0f, 0x58, 0x72, 0xd3, 0x98, 0x86, 0xa3,
-	0x15, 0xc4, 0x1c, 0x8a, 0xe5, 0x3d, 0x1b, 0x86, 0xa8, 0xbd, 0xb4, 0x38, 0xf2, 0xc5, 0x8d, 0xf8,
-	0xdc, 0xcc, 0x15, 0xf3, 0x97, 0x00, 0x9e, 0x69, 0x1b, 0x5b, 0xa6, 0xe8, 0xc4, 0x4d, 0x19, 0x05,
-	0x98, 0xc6, 0x35, 0x8f, 0x50, 0xa4, 0x0e, 0xad, 0x8e, 0x19, 0xcf, 0xc4, 0x05, 0xeb, 0xa5, 0xc4,
-	0x67, 0xa2, 0x0b, 0x4c, 0xa8, 0x5d, 0xc1, 0xfd, 0x2d, 0xcc, 0x78, 0xe8, 0xda, 0x3f, 0x41, 0xd0,
-	0x10, 0x84, 0x6b, 0xe1, 0xc9, 0xad, 0xc1, 0x49, 0x39, 0x85, 0x74, 0xa0, 0x89, 0x38, 0x8f, 0xce,
-	0x5d, 0x88, 0x6a, 0x09, 0x32, 0x84, 0x32, 0x11, 0xc6, 0x9b, 0xc1, 0xa3, 0xb0, 0x64, 0xdc, 0x83,
-	0x53, 0xd8, 0xeb, 0x05, 0x8b, 0x49, 0xb0, 0xc8, 0xab, 0x76, 0xcd, 0x0b, 0x31, 0xac, 0x49, 0xec,
-	0x75, 0x03, 0x7e, 0x0b, 0x66, 0x83, 0x0c, 0x70, 0x64, 0x28, 0x35, 0xb0, 0x43, 0x1a, 0x1e, 0x97,
-	0x5d, 0x71, 0xdc, 0x3a, 0xa3, 0x25, 0x54, 0xac, 0x2b, 0xea, 0x06, 0x6e, 0x78, 0xdc, 0x7c, 0x17,
-	0x9e, 0x5b, 0xf3, 0x30, 0xc7, 0xb6, 0xea, 0x1a, 0xf7, 0xa9, 0xed, 0xb1, 0x2a, 0xa2, 0x83, 0x95,
-	0x45, 0x50, 0x73, 0x1d, 0x25, 0x21, 0x6b, 0x4e, 0xd6, 0x43, 0x0e, 0x9e, 0xef, 0x8f, 0xac, 0x42,
-	0x6a, 0xde, 0x85, 0xa9, 0x30, 0x46, 0xdd, 0x48, 0xa0, 0x1b, 0xa9, 0xa3, 0x6c, 0x14, 0xa5, 0x98,
-	0xa4, 0xa4, 0xcb, 0x46, 0xd1, 0xf8, 0x2e, 0x1c, 0xed, 0x88, 0xd1, 0xe1, 0x70, 0x97, 0x60, 0x5a,
-	0x4f, 0x94, 0x98, 0x78, 0x65, 0x44, 0x29, 0xa1, 0xda, 0xf9, 0xc9, 0xf6, 0xfa, 0x2d, 0xb1, 0x6c,
-	0x7e, 0x0f, 0xbe, 0x7e, 0x6b, 0x5b, 0x24, 0xc3, 0xc9, 0x37, 0xc6, 0x05, 0x78, 0xba, 0x17, 0xba,
-	0xdd, 0xac, 0xb7, 0xb8, 0x5b, 0x2f, 0x87, 0xe3, 0x60, 0xca, 0x4a, 0x8a, 0x85, 0x15, 0x9b, 0xdb,
-	0x73, 0x1f, 0xbf, 0x06, 0x53, 0xcb, 0xf2, 0x9d, 0xe2, 0xe6, 0x3b, 0x6b, 0xc6, 0x5f, 0x01, 0x9c,
-	0xe8, 0x9e, 0x29, 0x8d, 0xc8, 0x3b, 0xaa, 0xef, 0xb4, 0x9b, 0x2d, 0x0c, 0x2a, 0xae, 0x4f, 0xed,
-	0x61, 0xeb, 0x59, 0x66, 0xbe, 0x89, 0x58, 0x1e, 0x93, 0x3c, 0xf6, 0xaa, 0xd4, 0x56, 0xaf, 0x16,
-	0x0d, 0x8a, 0xf2, 0x1f, 0x50, 0xcc, 0xd1, 0xcc, 0x74, 0x75, 0x61, 0xdb, 0xc9, 0x57, 0x3c, 0x96,
-	0x67, 0xdc, 0xf6, 0x2a, 0x36, 0xad, 0xe4, 0x1b, 0x0c, 0xd1, 0xc7, 0x7f, 0xfe, 0xf4, 0x17, 0xb1,
-	0x82, 0x79, 0x49, 0xbf, 0x17, 0x15, 0xc3, 0x60, 0xb1, 0xa2, 0x9a, 0x3e, 0xdb, 0x6f, 0x10, 0x58,
-	0x5a, 0x5e, 0x04, 0x97, 0x8d, 0xbf, 0x00, 0x08, 0xdb, 0xb7, 0xb3, 0x71, 0xe9, 0x70, 0x5f, 0x3b,
-	0x06, 0xb5, 0xec, 0xe5, 0x41, 0x44, 0x35, 0x25, 0xff, 0x38, 0x94, 0xe6, 0xcd, 0xc2, 0xc0, 0x94,
-	0xe4, 0x3d, 0x27, 0x78, 0xfd, 0x24, 0x06, 0xa7, 0x0e, 0x5c, 0xd6, 0xc6, 0xec, 0x21, 0x83, 0x76,
-	0xdf, 0xa9, 0x21, 0x7b, 0xe5, 0x08, 0x1a, 0x9a, 0xec, 0xcf, 0x40, 0xeb, 0x59, 0x66, 0xa1, 0x3f,
-	0x5b, 0x8a, 0xec, 0x4a, 0x3f, 0xb2, 0x2e, 0xf1, 0x30, 0x27, 0x8a, 0xef, 0xba, 0x71, 0xa7, 0x0f,
-	0xdf, 0x0f, 0xc3, 0xe7, 0x47, 0x6d, 0xd2, 0x1f, 0x76, 0xd5, 0xc0, 0xa3, 0x22, 0x95, 0x1e, 0x95,
-	0xc3, 0x5b, 0xda, 0xd8, 0x8b, 0xc1, 0x74, 0xef, 0x6c, 0x60, 0x14, 0x0f, 0xe1, 0xd4, 0x6f, 0x46,
-	0xc9, 0xce, 0x0e, 0xae, 0xa0, 0x63, 0xf0, 0xd3, 0x63, 0xc6, 0x60, 0xcd, 0x58, 0xfd, 0x7f, 0x63,
-	0x50, 0x17, 0x0e, 0x75, 0x84, 0xe0, 0xd7, 0xb1, 0xee, 0xe1, 0xab, 0x63, 0x6a, 0x30, 0xbe, 0x31,
-	0x08, 0xb1, 0x83, 0xa3, 0x4c, 0xf6, 0xea, 0x91, 0xf5, 0x74, 0x5c, 0x3e, 0x3a, 0x66, 0x5c, 0xbe,
-	0x63, 0xdc, 0x3b, 0x81, 0xb8, 0x74, 0x4e, 0x48, 0xc6, 0x7f, 0x01, 0x9c, 0xe8, 0x6e, 0x93, 0xd1,
-	0x0d, 0xae, 0x6f, 0xa7, 0x8e, 0x6e, 0x70, 0xfd, 0xbb, 0xaf, 0xf9, 0x73, 0xf0, 0xfc, 0xf7, 0xb1,
-	0x2f, 0xaf, 0x48, 0xc2, 0xd4, 0x28, 0x22, 0xe9, 0x9f, 0xe8, 0x81, 0x86, 0x9c, 0xf6, 0x6e, 0x53,
-	0xe2, 0xae, 0x6c, 0x94, 0x56, 0xe4, 0xab, 0xa2, 0x31, 0x1d, 0x45, 0x2b, 0x98, 0x1e, 0xb3, 0x17,
-	0x5e, 0x21, 0xc1, 0x7c, 0x73, 0xf7, 0x38, 0x9d, 0xef, 0xdb, 0xe6, 0xb5, 0x01, 0x3a, 0x9f, 0x53,
-	0x97, 0x84, 0x28, 0x71, 0xcb, 0x62, 0x4d, 0xbd, 0xe8, 0x8a, 0x1e, 0xd8, 0x3d, 0x68, 0x05, 0x03,
-	0xa7, 0x71, 0xe5, 0xf0, 0xc6, 0xdd, 0x67, 0x38, 0x7d, 0x55, 0xaf, 0xef, 0x9c, 0xe3, 0xcc, 0xed,
-	0xd6, 0xb3, 0xcc, 0xdc, 0x61, 0x8c, 0x0f, 0x21, 0x7c, 0xdd, 0xbc, 0x3a, 0x78, 0xab, 0xdf, 0xc4,
-	0x5e, 0xa5, 0x1c, 0x7c, 0xb8, 0x12, 0x7c, 0xff, 0x0e, 0x60, 0xba, 0x77, 0xe6, 0x8d, 0x6e, 0x76,
-	0x11, 0xd3, 0xf1, 0x91, 0xb8, 0x36, 0x8f, 0xc1, 0x75, 0xd1, 0x5c, 0x38, 0x22, 0x57, 0x35, 0x7a,
-	0x0a, 0xa6, 0xff, 0x06, 0xf0, 0x2b, 0xfd, 0x26, 0x3f, 0x63, 0x3e, 0x7a, 0xbc, 0x8d, 0x9c, 0x40,
-	0xb3, 0x5f, 0x3f, 0x9a, 0x92, 0xe6, 0xbe, 0x7b, 0x0c, 0xee, 0x37, 0xcc, 0x6f, 0x0e, 0xc2, 0x5d,
-	0x9b, 0x57, 0xc5, 0xcb, 0xb5, 0x03, 0x8b, 0xe0, 0x72, 0x76, 0xe6, 0xe9, 0x13, 0x10, 0xff, 0xd3,
-	0x13, 0xf0, 0xd5, 0x08, 0xc7, 0xd5, 0x07, 0xb1, 0xc7, 0x1f, 0x67, 0xe2, 0xbf, 0x01, 0x60, 0xe9,
-	0x31, 0x78, 0xf1, 0x32, 0x37, 0xf4, 0xc9, 0xcb, 0xdc, 0xd0, 0xe7, 0x2f, 0x73, 0x60, 0xaf, 0x95,
-	0x03, 0xbf, 0x6d, 0xe5, 0xc0, 0xf3, 0x56, 0x0e, 0xbc, 0x68, 0xe5, 0xc0, 0xdf, 0x5a, 0x39, 0xf0,
-	0x59, 0x2b, 0x37, 0xf4, 0x79, 0x2b, 0x07, 0x3e, 0xda, 0xcf, 0x0d, 0x3d, 0xdd, 0xcf, 0x81, 0x17,
-	0xfb, 0xb9, 0xa1, 0x4f, 0xf6, 0x73, 0x43, 0xef, 0xdd, 0xa9, 0x11, 0xff, 0x61, 0xad, 0xd0, 0x24,
-	0x75, 0x8e, 0x28, 0xb5, 0x0b, 0x0d, 0x56, 0x94, 0x0f, 0x55, 0x42, 0xdd, 0xbc, 0x4f, 0x49, 0x13,
-	0x57, 0x10, 0xcd, 0x0b, 0xa6, 0x45, 0x7f, 0xb3, 0x46, 0x8a, 0x68, 0x9b, 0xeb, 0xef, 0xa1, 0x3d,
-	0x1f, 0x6d, 0x37, 0x47, 0xe4, 0x3b, 0xf6, 0xfc, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x9a, 0xd8,
-	0x75, 0x9d, 0xcd, 0x16, 0x00, 0x00,
+	// 2161 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x59, 0xcd, 0x6f, 0x1b, 0xc7,
+	0x15, 0xd7, 0x90, 0x94, 0x4c, 0x8e, 0xbe, 0xa8, 0x8d, 0x6d, 0x51, 0xb4, 0xcb, 0xc8, 0x6b, 0xa0,
+	0xb0, 0x53, 0x91, 0x94, 0xa5, 0x2a, 0x76, 0x55, 0xd7, 0x80, 0x25, 0xd9, 0xb2, 0xa4, 0x44, 0x4e,
+	0x96, 0xae, 0x91, 0xa6, 0x45, 0x89, 0xd5, 0xee, 0x90, 0x5a, 0x8b, 0xdc, 0xd9, 0xcc, 0x0c, 0x19,
+	0x51, 0x81, 0x01, 0xc1, 0xed, 0xa1, 0x3d, 0x14, 0x08, 0xd0, 0x4b, 0x51, 0xa0, 0x40, 0x8f, 0x3d,
+	0xf4, 0x0f, 0x28, 0xea, 0x8b, 0x6f, 0x36, 0x7a, 0x28, 0x8c, 0x16, 0x05, 0x72, 0x08, 0x8a, 0x98,
+	0x0e, 0x50, 0xf7, 0x50, 0x20, 0xc8, 0xb9, 0x5f, 0x98, 0xd9, 0xe1, 0x92, 0xbb, 0xe2, 0x4a, 0x54,
+	0xa9, 0xa0, 0x27, 0x91, 0x33, 0xef, 0xfd, 0xde, 0xfb, 0xbd, 0x99, 0xf7, 0xe6, 0x3d, 0x0a, 0x66,
+	0xeb, 0x88, 0xe6, 0x2c, 0x9c, 0xa7, 0xc6, 0x36, 0xaa, 0xea, 0x79, 0xd3, 0xa6, 0xc5, 0x3d, 0x6c,
+	0xa3, 0xbc, 0x53, 0xdb, 0xaa, 0x58, 0x46, 0xd1, 0xa8, 0x51, 0x86, 0xab, 0xba, 0x63, 0xe5, 0x1c,
+	0x82, 0x19, 0x56, 0xce, 0xba, 0xe2, 0x39, 0x57, 0x3c, 0xd7, 0x12, 0x4f, 0x67, 0xcb, 0x16, 0xdb,
+	0xae, 0x6d, 0xe5, 0x0c, 0x5c, 0xcd, 0x97, 0x71, 0x19, 0xe7, 0x85, 0xf8, 0x56, 0xad, 0x24, 0xbe,
+	0x89, 0x2f, 0xe2, 0x93, 0x0b, 0x93, 0x3e, 0x5f, 0xc6, 0xb8, 0x5c, 0x41, 0x79, 0xdd, 0xb1, 0xf2,
+	0xba, 0x6d, 0x63, 0xa6, 0x33, 0x0b, 0xdb, 0x34, 0xb0, 0xeb, 0x61, 0x50, 0x46, 0x6a, 0x06, 0x93,
+	0xbb, 0xaf, 0x07, 0x77, 0x99, 0x55, 0x45, 0x94, 0xe9, 0x55, 0x47, 0x0a, 0x5c, 0x0c, 0xa1, 0x64,
+	0xda, 0x94, 0x22, 0xe3, 0x08, 0x21, 0xbc, 0xf5, 0x00, 0x79, 0xa6, 0xd4, 0x10, 0x21, 0xd6, 0x70,
+	0x50, 0xcb, 0xd9, 0x73, 0x7e, 0x19, 0xec, 0x74, 0x32, 0x99, 0xf2, 0x6f, 0x76, 0xea, 0x9d, 0xf7,
+	0x6f, 0xd5, 0xf5, 0x8a, 0x65, 0xea, 0x0c, 0x75, 0xb7, 0x5c, 0x47, 0x14, 0xd9, 0xf5, 0x00, 0xf8,
+	0x74, 0x40, 0xc6, 0x42, 0x1f, 0x16, 0x7d, 0x12, 0x2a, 0x86, 0x67, 0xd6, 0xaa, 0x0e, 0x26, 0xec,
+	0xf6, 0xc2, 0x72, 0xe1, 0x7d, 0x6c, 0x23, 0x0d, 0x7d, 0x50, 0x43, 0x94, 0x29, 0xf7, 0xe1, 0xa8,
+	0x81, 0xed, 0x92, 0x55, 0xae, 0x11, 0x11, 0xf9, 0x14, 0x98, 0x06, 0x97, 0x86, 0xe7, 0x66, 0x73,
+	0xdd, 0x8f, 0x37, 0xc7, 0xf5, 0x57, 0x36, 0x05, 0xc4, 0x72, 0xa7, 0x9e, 0xe6, 0x87, 0x51, 0xff,
+	0x09, 0xe0, 0xd9, 0xa0, 0x45, 0xea, 0x60, 0x9b, 0x22, 0xe5, 0x3a, 0x8c, 0x57, 0x11, 0xd3, 0x4d,
+	0x9d, 0xe9, 0xd2, 0xda, 0x74, 0xc0, 0xda, 0x5d, 0x11, 0xfa, 0x55, 0xc4, 0xde, 0x46, 0x4c, 0xbf,
+	0xd7, 0x70, 0x90, 0xe6, 0x69, 0x28, 0x77, 0xe1, 0x38, 0x6d, 0x50, 0x86, 0xaa, 0x45, 0x0f, 0x24,
+	0x2a, 0x40, 0xbe, 0x1e, 0x00, 0x29, 0x08, 0xa9, 0x83, 0x50, 0x63, 0xae, 0xfa, 0xdb, 0x2d, 0xc0,
+	0x3b, 0x30, 0x46, 0x1d, 0x64, 0xa4, 0x22, 0x02, 0xe5, 0x62, 0x18, 0xf1, 0x55, 0xc4, 0x0a, 0x0e,
+	0x32, 0x38, 0xc4, 0xd2, 0xf8, 0x2f, 0x1f, 0x8e, 0x70, 0x9d, 0x5c, 0xd9, 0x28, 0xf2, 0xbf, 0x9a,
+	0x40, 0x58, 0x4c, 0xfc, 0xe1, 0xc6, 0x90, 0x6b, 0x4f, 0xfd, 0x2d, 0x80, 0xa9, 0xb0, 0x50, 0x29,
+	0x8b, 0x70, 0x98, 0xc3, 0x52, 0x44, 0xea, 0x96, 0x81, 0xa4, 0xe1, 0xc9, 0x9c, 0x7b, 0x9b, 0x73,
+	0xad, 0xdb, 0x9c, 0x2b, 0x88, 0xbb, 0x7e, 0x67, 0x40, 0x83, 0xa6, 0x4d, 0x0b, 0xae, 0xb0, 0x72,
+	0x1d, 0x8e, 0xe8, 0x9d, 0xca, 0xd1, 0xa3, 0x94, 0x87, 0xf5, 0xb6, 0xf6, 0x52, 0x12, 0xc6, 0xb9,
+	0x32, 0xbf, 0x7d, 0x4a, 0xec, 0xf9, 0x63, 0x00, 0xd6, 0x63, 0x71, 0x90, 0x8c, 0xa8, 0xff, 0x06,
+	0x70, 0xc2, 0x3d, 0xad, 0x9b, 0xef, 0xdd, 0xd6, 0x5a, 0x77, 0x63, 0x16, 0x8e, 0x39, 0xc4, 0xaa,
+	0xea, 0xa4, 0x21, 0xcc, 0x21, 0x22, 0xac, 0x25, 0x96, 0x12, 0xbf, 0xff, 0xfb, 0x93, 0x68, 0x8c,
+	0x44, 0x76, 0x81, 0x36, 0x2a, 0x05, 0x0a, 0x62, 0x5f, 0xc9, 0xc3, 0x61, 0x13, 0x57, 0x75, 0xcb,
+	0x2e, 0xda, 0x7a, 0x15, 0xa5, 0x4e, 0x09, 0xf1, 0x31, 0x2e, 0x9e, 0x20, 0xa7, 0x92, 0x20, 0xb5,
+	0x1f, 0xd9, 0x06, 0x1a, 0x74, 0x45, 0x36, 0xf5, 0x2a, 0x52, 0x7e, 0x08, 0x15, 0x46, 0xad, 0x72,
+	0xd1, 0x7f, 0x07, 0xe3, 0x82, 0xd4, 0xe5, 0xb0, 0xa3, 0xb8, 0x57, 0x58, 0x5b, 0xf5, 0x45, 0x74,
+	0x49, 0x70, 0xd1, 0x26, 0x38, 0x94, 0x6f, 0x63, 0x31, 0xfe, 0xe5, 0x8d, 0xc1, 0xab, 0x33, 0xf3,
+	0x33, 0xd7, 0x5c, 0xa2, 0xeb, 0xb1, 0x78, 0x24, 0x19, 0x5d, 0x8f, 0xc5, 0x63, 0xc9, 0xc1, 0xf5,
+	0x58, 0x7c, 0x30, 0x39, 0xb4, 0x1e, 0x8b, 0x0f, 0x25, 0x4f, 0xa9, 0x9f, 0x03, 0x38, 0x71, 0x00,
+	0x56, 0x99, 0x85, 0xa3, 0xc2, 0xbb, 0x1d, 0xd4, 0x70, 0x09, 0x01, 0x41, 0x68, 0x84, 0x13, 0x3a,
+	0x45, 0x06, 0x5d, 0x3a, 0xc3, 0x5c, 0x64, 0x03, 0x35, 0x04, 0x9f, 0xfb, 0x92, 0x0f, 0xd7, 0xd0,
+	0x2b, 0x65, 0x4c, 0x2c, 0xb6, 0x5d, 0x15, 0x27, 0x3c, 0x36, 0x77, 0xe9, 0x30, 0x3e, 0x1b, 0xa8,
+	0x71, 0xb3, 0x25, 0xaf, 0x25, 0x25, 0xa4, 0xb7, 0xa2, 0xdc, 0x82, 0x63, 0x1e, 0x6e, 0x5d, 0xaf,
+	0xd4, 0x5a, 0x07, 0x3f, 0x15, 0xbc, 0xf4, 0xc8, 0x20, 0x88, 0x89, 0x4b, 0xea, 0xc6, 0x64, 0x44,
+	0x42, 0xdd, 0xe7, 0x4a, 0xaa, 0x05, 0x95, 0xce, 0x63, 0x96, 0x09, 0x59, 0xe8, 0x5e, 0x03, 0xb2,
+	0x61, 0xfe, 0xbe, 0xe3, 0x9e, 0xf9, 0xca, 0x66, 0xa1, 0x23, 0x29, 0x82, 0x05, 0xe0, 0x07, 0x30,
+	0xb5, 0x8a, 0x98, 0x86, 0xaa, 0x98, 0x21, 0x9e, 0x02, 0xb7, 0xad, 0x8a, 0x57, 0x74, 0xce, 0xc3,
+	0x04, 0x0f, 0x27, 0x75, 0x74, 0x43, 0xc6, 0x54, 0x6b, 0x2f, 0x28, 0x2a, 0x1c, 0x6d, 0x99, 0x72,
+	0xa3, 0x1e, 0x11, 0x12, 0x3c, 0x67, 0x38, 0x10, 0x8f, 0xb3, 0x7a, 0x0d, 0x4e, 0x75, 0x41, 0x97,
+	0x7c, 0xce, 0xc1, 0x84, 0x50, 0x2e, 0x59, 0x95, 0x16, 0x7c, 0x7c, 0x4f, 0x0a, 0xa9, 0xdf, 0x87,
+	0x93, 0xab, 0x88, 0xbd, 0x85, 0x0d, 0xbd, 0x72, 0xf2, 0x6e, 0xfd, 0x08, 0x08, 0xd6, 0x01, 0x74,
+	0xe9, 0xd6, 0x3a, 0x7c, 0xad, 0xa2, 0x53, 0x56, 0xd4, 0x77, 0x4b, 0xa4, 0xe8, 0x3d, 0x55, 0xa9,
+	0x84, 0x08, 0x76, 0xfa, 0x40, 0x06, 0xdf, 0x6b, 0x49, 0x68, 0x13, 0x5c, 0xed, 0xe6, 0x6e, 0x89,
+	0x78, 0x4b, 0x7e, 0x8a, 0x91, 0x00, 0xc5, 0x2d, 0x98, 0xe9, 0x74, 0x42, 0x43, 0x06, 0x26, 0x26,
+	0xf7, 0x8f, 0x9e, 0x1c, 0xd3, 0x15, 0xf8, 0x7a, 0xa8, 0x0d, 0xc9, 0xf7, 0x02, 0x1c, 0x21, 0x62,
+	0x59, 0x80, 0xd0, 0x14, 0x98, 0x8e, 0x72, 0x14, 0xd2, 0x16, 0x55, 0x55, 0x18, 0x5f, 0xae, 0xb8,
+	0xaf, 0x91, 0x72, 0x16, 0x0e, 0x31, 0x64, 0xeb, 0x36, 0x93, 0x0e, 0xc9, 0x6f, 0x6a, 0x01, 0x26,
+	0xa4, 0x0c, 0x75, 0x94, 0x8b, 0x70, 0x94, 0xd6, 0x0c, 0x03, 0x51, 0xd7, 0xbd, 0x16, 0xe8, 0x88,
+	0x5c, 0xe4, 0xae, 0x50, 0x6e, 0xb8, 0xa4, 0x5b, 0x15, 0x64, 0x4a, 0x99, 0x88, 0x6b, 0xd8, 0x5d,
+	0x13, 0x22, 0xea, 0x03, 0x38, 0xe5, 0x26, 0xc2, 0xd2, 0xda, 0xe6, 0xca, 0x7d, 0xf9, 0xe2, 0xb6,
+	0xa2, 0x73, 0x11, 0xc6, 0xbc, 0xab, 0x33, 0xb2, 0x34, 0xfe, 0xec, 0x21, 0x10, 0x09, 0xbf, 0x37,
+	0x98, 0xda, 0xdf, 0xdf, 0x07, 0x9a, 0xd8, 0x54, 0xa6, 0xe1, 0xb0, 0x89, 0xa8, 0x41, 0x2c, 0xf1,
+	0xce, 0x7a, 0x21, 0x6a, 0x2f, 0x2d, 0x0e, 0x7d, 0x79, 0x23, 0x3a, 0x37, 0x73, 0x45, 0xfd, 0x05,
+	0x80, 0x93, 0x6d, 0x63, 0xcb, 0x04, 0x9d, 0xb8, 0x29, 0x25, 0x07, 0x93, 0x56, 0xd9, 0xc6, 0x04,
+	0xb9, 0x87, 0x56, 0xb1, 0x28, 0x4b, 0x45, 0x39, 0xeb, 0xa5, 0xd8, 0x2b, 0x5e, 0x05, 0xc6, 0xdc,
+	0x5d, 0xce, 0xfd, 0x2d, 0x8b, 0x32, 0xcf, 0xb5, 0x7f, 0x80, 0x56, 0x41, 0xe0, 0xae, 0x79, 0x27,
+	0xb7, 0x06, 0xc7, 0x45, 0x17, 0xd2, 0x81, 0xc6, 0xe3, 0x3c, 0x3c, 0x77, 0x21, 0xac, 0x24, 0x88,
+	0x10, 0x8a, 0x8b, 0x30, 0x5a, 0x6f, 0x7d, 0xe4, 0x96, 0x94, 0xbb, 0x70, 0xc2, 0xb2, 0x83, 0x60,
+	0x11, 0x01, 0x16, 0xfa, 0xd4, 0xae, 0xd9, 0x1e, 0x86, 0x36, 0x6e, 0xd9, 0x7e, 0xc0, 0x6f, 0xc3,
+	0x74, 0xeb, 0x06, 0x18, 0x22, 0x94, 0x12, 0xd8, 0xc0, 0x35, 0x9b, 0x89, 0xaa, 0x38, 0xaa, 0x4d,
+	0x4a, 0x09, 0x37, 0xd6, 0xa6, 0xfb, 0x02, 0xd7, 0x6c, 0xa6, 0xbe, 0x07, 0xcf, 0xad, 0xd9, 0x16,
+	0xb3, 0x74, 0xb7, 0x6a, 0xdc, 0x23, 0xba, 0x4d, 0x4b, 0x88, 0xf4, 0x96, 0x16, 0xad, 0x9c, 0xeb,
+	0x48, 0x09, 0x91, 0x73, 0x22, 0x1f, 0x32, 0xf0, 0x7c, 0x77, 0x64, 0x37, 0xa4, 0xea, 0xbb, 0xf0,
+	0xf4, 0x2a, 0x62, 0xcb, 0xa4, 0xe1, 0x30, 0xbc, 0x81, 0x1a, 0xf4, 0x04, 0x4c, 0x6e, 0xc2, 0x33,
+	0x01, 0x48, 0x79, 0x7c, 0x0b, 0x30, 0xb6, 0x83, 0x1a, 0xf4, 0xa8, 0x33, 0xf3, 0x34, 0x35, 0x21,
+	0xae, 0xee, 0xc0, 0xd7, 0x6e, 0x9a, 0x66, 0x7b, 0xb5, 0x6f, 0x0f, 0x95, 0x29, 0x18, 0xe7, 0x0f,
+	0x16, 0x6f, 0x37, 0xdc, 0xd6, 0x41, 0x3b, 0xb5, 0x83, 0x1a, 0xfc, 0xb5, 0x50, 0x37, 0xe0, 0x69,
+	0xbf, 0x31, 0xe9, 0xfb, 0x3c, 0x8c, 0xee, 0xa0, 0x86, 0x7c, 0x81, 0x7a, 0x70, 0x9d, 0x4b, 0xab,
+	0xfb, 0x00, 0x9e, 0xbe, 0x65, 0x5a, 0xec, 0x24, 0x7d, 0x3f, 0x03, 0x87, 0xb8, 0xef, 0x96, 0x29,
+	0xef, 0xd4, 0xe0, 0x0e, 0x6a, 0xac, 0x99, 0xbc, 0x4a, 0xe9, 0x06, 0xb3, 0xea, 0x28, 0x15, 0x9b,
+	0x06, 0x97, 0xe2, 0x9a, 0xfc, 0xa6, 0x4e, 0xc2, 0x33, 0x01, 0x0f, 0xe4, 0xc1, 0x3f, 0x80, 0x67,
+	0x57, 0x50, 0x05, 0x31, 0xf4, 0xd5, 0x3b, 0xa7, 0x4e, 0xc1, 0xc9, 0x03, 0xb6, 0xa4, 0x1b, 0x1b,
+	0x30, 0xe1, 0xe5, 0xa8, 0x1f, 0x1b, 0x04, 0xb0, 0xdb, 0x65, 0xdb, 0x4d, 0xa9, 0x88, 0xb0, 0x20,
+	0xcb, 0xb6, 0x9b, 0x46, 0xdf, 0x85, 0xc3, 0x1d, 0x39, 0x7a, 0x38, 0xdc, 0x65, 0x98, 0x94, 0x13,
+	0x8d, 0x85, 0xed, 0x22, 0x22, 0x04, 0x13, 0x49, 0x67, 0xbc, 0xbd, 0x7e, 0x8b, 0x2f, 0xab, 0xdf,
+	0x83, 0x67, 0x6e, 0xed, 0xf2, 0x62, 0x74, 0xf2, 0x0f, 0xf3, 0x02, 0x3c, 0x1b, 0x84, 0x6e, 0x37,
+	0x0b, 0xdb, 0xac, 0x5a, 0x29, 0x7a, 0xe3, 0x48, 0x42, 0x8b, 0xf3, 0x85, 0x15, 0x9d, 0xe9, 0x73,
+	0x7f, 0x4d, 0xc3, 0xc4, 0xb2, 0x18, 0x7c, 0x6f, 0xbe, 0xb3, 0xa6, 0x7c, 0x0a, 0xe0, 0x98, 0x7f,
+	0xa6, 0x51, 0x42, 0x7b, 0xa4, 0xae, 0xd3, 0x56, 0x3a, 0xd7, 0xab, 0xb8, 0x3c, 0xb5, 0x9d, 0xe6,
+	0xd3, 0xd4, 0x7c, 0x1d, 0xd1, 0xac, 0x85, 0xb3, 0x96, 0x5d, 0x22, 0xba, 0x3b, 0xff, 0xd6, 0x08,
+	0xca, 0x7e, 0x48, 0x2c, 0x86, 0x66, 0xa6, 0x4b, 0x0b, 0xbb, 0x46, 0xd6, 0xb4, 0x69, 0x96, 0x32,
+	0xdd, 0x36, 0x75, 0x62, 0x66, 0x6b, 0x14, 0x91, 0x47, 0x7f, 0xfe, 0xfc, 0xe7, 0x91, 0x9c, 0x7a,
+	0x59, 0x0e, 0xef, 0x79, 0x2f, 0x58, 0x34, 0xef, 0x4e, 0x3f, 0xed, 0x09, 0xd6, 0x12, 0x96, 0x17,
+	0xc1, 0x1b, 0xca, 0x5f, 0x00, 0x84, 0xed, 0xee, 0x50, 0xb9, 0x7c, 0xb8, 0xaf, 0x1d, 0x83, 0x42,
+	0xfa, 0x8d, 0x5e, 0x44, 0x25, 0x25, 0xa7, 0x1f, 0x4a, 0xf3, 0x6a, 0xae, 0x67, 0x4a, 0xa2, 0xcf,
+	0xe2, 0xbc, 0x7e, 0x1c, 0x81, 0x13, 0x07, 0x9a, 0x45, 0x65, 0xf6, 0x90, 0x41, 0xaf, 0x6b, 0xd7,
+	0x9a, 0xbe, 0x72, 0x0c, 0x0d, 0x49, 0xf6, 0xa7, 0xa0, 0xf9, 0x34, 0xb5, 0xd0, 0x9d, 0x2d, 0x41,
+	0xba, 0xd9, 0x8d, 0x6c, 0x15, 0xdb, 0x16, 0xc3, 0x2e, 0xdf, 0x75, 0xe5, 0x4e, 0x17, 0xbe, 0x1f,
+	0x79, 0x9f, 0x1f, 0xb6, 0x49, 0x7f, 0xe4, 0xcb, 0x81, 0x87, 0x79, 0x22, 0x3c, 0x2a, 0x7a, 0x5d,
+	0xa2, 0xb2, 0x1f, 0x81, 0xc9, 0x60, 0x6f, 0xaa, 0xe4, 0x0f, 0xe1, 0xd4, 0xad, 0x47, 0x4e, 0xcf,
+	0xf6, 0xae, 0x20, 0x63, 0xf0, 0x93, 0x3e, 0x63, 0xb0, 0xa6, 0xac, 0xfe, 0xaf, 0x31, 0xa8, 0x70,
+	0x87, 0x3a, 0x42, 0xf0, 0xab, 0x88, 0xbf, 0xf9, 0xef, 0xe8, 0x5a, 0x95, 0x37, 0x7b, 0x21, 0x76,
+	0xb0, 0x95, 0x4e, 0x5f, 0x3d, 0xb6, 0x9e, 0x8c, 0xcb, 0xc7, 0x7d, 0xc6, 0xe5, 0x5d, 0xe5, 0xee,
+	0x09, 0xc4, 0xa5, 0xb3, 0x43, 0x57, 0xfe, 0x03, 0xe0, 0x98, 0xbf, 0x4c, 0x86, 0x17, 0xb8, 0xae,
+	0x95, 0x3a, 0xbc, 0xc0, 0x75, 0xaf, 0xbe, 0xea, 0xcf, 0xc0, 0xb3, 0xdf, 0x45, 0xfe, 0x7f, 0x49,
+	0xe2, 0x5d, 0x8d, 0x3c, 0x12, 0xfe, 0xf1, 0x1a, 0xa8, 0x88, 0x69, 0xe3, 0x36, 0xc1, 0xd5, 0x95,
+	0xcd, 0xc2, 0x8a, 0xf8, 0xa9, 0x42, 0x99, 0x0e, 0x6d, 0x44, 0xe4, 0xf4, 0x92, 0xbe, 0x70, 0x84,
+	0x04, 0x75, 0xd4, 0xbd, 0x7e, 0x2a, 0xdf, 0x77, 0xd4, 0x6b, 0x3d, 0x54, 0x3e, 0xa3, 0x22, 0x08,
+	0x11, 0x5c, 0x2d, 0xf2, 0x35, 0xf7, 0x87, 0x16, 0x5e, 0x03, 0xfd, 0x8d, 0x7e, 0x6b, 0xe0, 0x51,
+	0xae, 0x1c, 0x5e, 0xb8, 0xbb, 0x0c, 0x47, 0x47, 0xd5, 0xfa, 0xce, 0x39, 0x42, 0xdd, 0x6d, 0x3e,
+	0x4d, 0xcd, 0x1d, 0xc6, 0xf8, 0x10, 0xc2, 0xd7, 0xd5, 0xab, 0xbd, 0x97, 0xfa, 0x2d, 0xcb, 0x36,
+	0x8b, 0xad, 0x1f, 0x4e, 0x39, 0xdf, 0xbf, 0x01, 0x98, 0x0c, 0xce, 0x5c, 0xe1, 0xc5, 0x2e, 0x64,
+	0x3a, 0x3b, 0x16, 0xd7, 0x7a, 0x1f, 0x5c, 0x17, 0xd5, 0x85, 0x63, 0x72, 0x75, 0x47, 0x1f, 0xce,
+	0xf4, 0x5f, 0x00, 0x9e, 0xee, 0x36, 0x79, 0x28, 0xf3, 0xe1, 0xe3, 0x55, 0xe8, 0x04, 0x94, 0xfe,
+	0xe6, 0xf1, 0x94, 0x24, 0xf7, 0xbd, 0x3e, 0xb8, 0xdf, 0x50, 0xbf, 0xd5, 0x0b, 0x77, 0x69, 0xde,
+	0x4d, 0x5e, 0x26, 0x1d, 0xe0, 0xfc, 0x3f, 0x03, 0x70, 0xd4, 0x37, 0x06, 0x29, 0x33, 0x87, 0x54,
+	0xe4, 0x03, 0x03, 0x58, 0x3a, 0xdb, 0xa3, 0xb4, 0xa4, 0x4a, 0xfa, 0xa0, 0xfa, 0xa6, 0x7a, 0xa5,
+	0x07, 0xaa, 0x65, 0xc4, 0x8a, 0x86, 0x30, 0xcc, 0xa7, 0x32, 0x4e, 0xf1, 0x53, 0x00, 0x47, 0x3a,
+	0x87, 0x25, 0xe5, 0x1b, 0x61, 0x3e, 0x77, 0x99, 0xdf, 0xd2, 0x33, 0xbd, 0x09, 0x4b, 0x7e, 0x1f,
+	0xf4, 0xc1, 0x6f, 0x41, 0x9d, 0xed, 0x81, 0x9f, 0x6e, 0x9a, 0x6d, 0x7e, 0xad, 0x13, 0xf4, 0xcd,
+	0x4e, 0xe1, 0x27, 0xd8, 0x6d, 0xc8, 0x0b, 0x3f, 0xc1, 0xee, 0x03, 0xd9, 0x57, 0x7f, 0x82, 0xc8,
+	0xb4, 0x98, 0x9f, 0xe2, 0x2b, 0x00, 0xc7, 0x03, 0x93, 0x99, 0x12, 0xfa, 0x54, 0x76, 0x1f, 0x17,
+	0xd3, 0xf9, 0x9e, 0xe5, 0x25, 0x51, 0xd6, 0x07, 0xd1, 0x6b, 0xea, 0x7c, 0x0f, 0x44, 0x4d, 0x61,
+	0xd9, 0x47, 0x35, 0x3d, 0xf3, 0xe4, 0x31, 0x88, 0xfe, 0xe9, 0x31, 0xf8, 0x5a, 0x88, 0xb7, 0xee,
+	0x3f, 0x48, 0x1e, 0xfd, 0x31, 0x15, 0xfd, 0x35, 0x00, 0x4b, 0x8f, 0xc0, 0xf3, 0x17, 0x99, 0x81,
+	0x4f, 0x5e, 0x64, 0x06, 0xbe, 0x78, 0x91, 0x01, 0xfb, 0xcd, 0x0c, 0xf8, 0x4d, 0x33, 0x03, 0x9e,
+	0x35, 0x33, 0xe0, 0x79, 0x33, 0x03, 0x3e, 0x6b, 0x66, 0xc0, 0xab, 0x66, 0x66, 0xe0, 0x8b, 0x66,
+	0x06, 0x7c, 0xfc, 0x32, 0x33, 0xf0, 0xe4, 0x65, 0x06, 0x3c, 0x7f, 0x99, 0x19, 0xf8, 0xe4, 0x65,
+	0x66, 0xe0, 0xfd, 0x3b, 0x65, 0xec, 0xec, 0x94, 0x73, 0x75, 0x5c, 0x61, 0x88, 0x10, 0x3d, 0x57,
+	0xa3, 0x79, 0xf1, 0xa1, 0x84, 0x49, 0x35, 0xeb, 0x10, 0x5c, 0xb7, 0x4c, 0x44, 0xb2, 0x9c, 0x63,
+	0xde, 0xd9, 0x2a, 0xe3, 0x3c, 0xda, 0x65, 0xf2, 0xff, 0x63, 0x81, 0x7f, 0xe2, 0x6d, 0x0d, 0x89,
+	0xdf, 0x5c, 0xe7, 0xff, 0x1b, 0x00, 0x00, 0xff, 0xff, 0x7e, 0x60, 0xde, 0xf2, 0x02, 0x1d, 0x00,
+	0x00,
 }
 
 func (this *ImportF5CSZoneRequest) Equal(that interface{}) bool {
@@ -2251,6 +2754,221 @@ func (this *InitiateZoneTransferResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GetCryptoKeysRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetCryptoKeysRequest)
+	if !ok {
+		that2, ok := that.(GetCryptoKeysRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.ZoneName != that1.ZoneName {
+		return false
+	}
+	return true
+}
+func (this *GetCryptoKeysResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetCryptoKeysResponse)
+	if !ok {
+		that2, ok := that.(GetCryptoKeysResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Keys) != len(that1.Keys) {
+		return false
+	}
+	for i := range this.Keys {
+		if !this.Keys[i].Equal(that1.Keys[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *AddCryptoKeyRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AddCryptoKeyRequest)
+	if !ok {
+		that2, ok := that.(AddCryptoKeyRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.ZoneName != that1.ZoneName {
+		return false
+	}
+	if this.KeyType != that1.KeyType {
+		return false
+	}
+	return true
+}
+func (this *AddCryptoKeyResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AddCryptoKeyResponse)
+	if !ok {
+		that2, ok := that.(AddCryptoKeyResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Key.Equal(that1.Key) {
+		return false
+	}
+	return true
+}
+func (this *EditCryptoKeyRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*EditCryptoKeyRequest)
+	if !ok {
+		that2, ok := that.(EditCryptoKeyRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.ZoneName != that1.ZoneName {
+		return false
+	}
+	if this.KeyId != that1.KeyId {
+		return false
+	}
+	if this.Active != that1.Active {
+		return false
+	}
+	return true
+}
+func (this *EditCryptoKeyResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*EditCryptoKeyResponse)
+	if !ok {
+		that2, ok := that.(EditCryptoKeyResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	return true
+}
+func (this *DeleteCryptoKeyRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteCryptoKeyRequest)
+	if !ok {
+		that2, ok := that.(DeleteCryptoKeyRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.ZoneName != that1.ZoneName {
+		return false
+	}
+	if this.KeyId != that1.KeyId {
+		return false
+	}
+	return true
+}
+func (this *DeleteCryptoKeyResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DeleteCryptoKeyResponse)
+	if !ok {
+		that2, ok := that.(DeleteCryptoKeyResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	return true
+}
 func (this *ValidZone) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2600,6 +3318,96 @@ func (this *InitiateZoneTransferResponse) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *GetCryptoKeysRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&dns_zone.GetCryptoKeysRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "ZoneName: "+fmt.Sprintf("%#v", this.ZoneName)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetCryptoKeysResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&dns_zone.GetCryptoKeysResponse{")
+	if this.Keys != nil {
+		s = append(s, "Keys: "+fmt.Sprintf("%#v", this.Keys)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AddCryptoKeyRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&dns_zone.AddCryptoKeyRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "ZoneName: "+fmt.Sprintf("%#v", this.ZoneName)+",\n")
+	s = append(s, "KeyType: "+fmt.Sprintf("%#v", this.KeyType)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AddCryptoKeyResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&dns_zone.AddCryptoKeyResponse{")
+	if this.Key != nil {
+		s = append(s, "Key: "+fmt.Sprintf("%#v", this.Key)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *EditCryptoKeyRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&dns_zone.EditCryptoKeyRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "ZoneName: "+fmt.Sprintf("%#v", this.ZoneName)+",\n")
+	s = append(s, "KeyId: "+fmt.Sprintf("%#v", this.KeyId)+",\n")
+	s = append(s, "Active: "+fmt.Sprintf("%#v", this.Active)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *EditCryptoKeyResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&dns_zone.EditCryptoKeyResponse{")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteCryptoKeyRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&dns_zone.DeleteCryptoKeyRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "ZoneName: "+fmt.Sprintf("%#v", this.ZoneName)+",\n")
+	s = append(s, "KeyId: "+fmt.Sprintf("%#v", this.KeyId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DeleteCryptoKeyResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&dns_zone.DeleteCryptoKeyResponse{")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *ValidZone) GoString() string {
 	if this == nil {
 		return "nil"
@@ -2714,6 +3522,26 @@ type CustomAPIClient interface {
 	// x-displayName: "Initiate Zone Transfer"
 	// Initiate zone transfer for secondary zone
 	InitiateZoneTransfer(ctx context.Context, in *InitiateZoneTransferRequest, opts ...grpc.CallOption) (*InitiateZoneTransferResponse, error)
+	// Get CryptoKeys
+	//
+	// x-displayName: "Get CryptoKeys"
+	// Get all cryptokeys for a zone
+	GetCryptoKeys(ctx context.Context, in *GetCryptoKeysRequest, opts ...grpc.CallOption) (*GetCryptoKeysResponse, error)
+	// Add CryptoKey
+	//
+	// x-displayName: "Add CryptoKey"
+	// Add a CryptoKey (ZSK or KSK) to a zone
+	AddCryptoKey(ctx context.Context, in *AddCryptoKeyRequest, opts ...grpc.CallOption) (*AddCryptoKeyResponse, error)
+	// Update CryptoKey
+	//
+	// x-displayName: "Update CryptoKey"
+	// Update a CryptoKey on a zone
+	EditCryptoKey(ctx context.Context, in *EditCryptoKeyRequest, opts ...grpc.CallOption) (*EditCryptoKeyResponse, error)
+	// Delete CryptoKey
+	//
+	// x-displayName: "Delete CryptoKey"
+	// Delete a CryptoKey from a zone
+	DeleteCryptoKey(ctx context.Context, in *DeleteCryptoKeyRequest, opts ...grpc.CallOption) (*DeleteCryptoKeyResponse, error)
 }
 
 type customAPIClient struct {
@@ -2814,6 +3642,42 @@ func (c *customAPIClient) InitiateZoneTransfer(ctx context.Context, in *Initiate
 	return out, nil
 }
 
+func (c *customAPIClient) GetCryptoKeys(ctx context.Context, in *GetCryptoKeysRequest, opts ...grpc.CallOption) (*GetCryptoKeysResponse, error) {
+	out := new(GetCryptoKeysResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.dns_zone.CustomAPI/GetCryptoKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customAPIClient) AddCryptoKey(ctx context.Context, in *AddCryptoKeyRequest, opts ...grpc.CallOption) (*AddCryptoKeyResponse, error) {
+	out := new(AddCryptoKeyResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.dns_zone.CustomAPI/AddCryptoKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customAPIClient) EditCryptoKey(ctx context.Context, in *EditCryptoKeyRequest, opts ...grpc.CallOption) (*EditCryptoKeyResponse, error) {
+	out := new(EditCryptoKeyResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.dns_zone.CustomAPI/EditCryptoKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customAPIClient) DeleteCryptoKey(ctx context.Context, in *DeleteCryptoKeyRequest, opts ...grpc.CallOption) (*DeleteCryptoKeyResponse, error) {
+	out := new(DeleteCryptoKeyResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.dns_zone.CustomAPI/DeleteCryptoKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CustomAPIServer is the server API for CustomAPI service.
 type CustomAPIServer interface {
 	// Import F5 Cloud Services DNS Zone
@@ -2866,6 +3730,26 @@ type CustomAPIServer interface {
 	// x-displayName: "Initiate Zone Transfer"
 	// Initiate zone transfer for secondary zone
 	InitiateZoneTransfer(context.Context, *InitiateZoneTransferRequest) (*InitiateZoneTransferResponse, error)
+	// Get CryptoKeys
+	//
+	// x-displayName: "Get CryptoKeys"
+	// Get all cryptokeys for a zone
+	GetCryptoKeys(context.Context, *GetCryptoKeysRequest) (*GetCryptoKeysResponse, error)
+	// Add CryptoKey
+	//
+	// x-displayName: "Add CryptoKey"
+	// Add a CryptoKey (ZSK or KSK) to a zone
+	AddCryptoKey(context.Context, *AddCryptoKeyRequest) (*AddCryptoKeyResponse, error)
+	// Update CryptoKey
+	//
+	// x-displayName: "Update CryptoKey"
+	// Update a CryptoKey on a zone
+	EditCryptoKey(context.Context, *EditCryptoKeyRequest) (*EditCryptoKeyResponse, error)
+	// Delete CryptoKey
+	//
+	// x-displayName: "Delete CryptoKey"
+	// Delete a CryptoKey from a zone
+	DeleteCryptoKey(context.Context, *DeleteCryptoKeyRequest) (*DeleteCryptoKeyResponse, error)
 }
 
 // UnimplementedCustomAPIServer can be embedded to have forward compatible implementations.
@@ -2901,6 +3785,18 @@ func (*UnimplementedCustomAPIServer) ImportBINDCreate(ctx context.Context, req *
 }
 func (*UnimplementedCustomAPIServer) InitiateZoneTransfer(ctx context.Context, req *InitiateZoneTransferRequest) (*InitiateZoneTransferResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitiateZoneTransfer not implemented")
+}
+func (*UnimplementedCustomAPIServer) GetCryptoKeys(ctx context.Context, req *GetCryptoKeysRequest) (*GetCryptoKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCryptoKeys not implemented")
+}
+func (*UnimplementedCustomAPIServer) AddCryptoKey(ctx context.Context, req *AddCryptoKeyRequest) (*AddCryptoKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddCryptoKey not implemented")
+}
+func (*UnimplementedCustomAPIServer) EditCryptoKey(ctx context.Context, req *EditCryptoKeyRequest) (*EditCryptoKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditCryptoKey not implemented")
+}
+func (*UnimplementedCustomAPIServer) DeleteCryptoKey(ctx context.Context, req *DeleteCryptoKeyRequest) (*DeleteCryptoKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCryptoKey not implemented")
 }
 
 func RegisterCustomAPIServer(s *grpc.Server, srv CustomAPIServer) {
@@ -3087,6 +3983,78 @@ func _CustomAPI_InitiateZoneTransfer_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CustomAPI_GetCryptoKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCryptoKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).GetCryptoKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.dns_zone.CustomAPI/GetCryptoKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).GetCryptoKeys(ctx, req.(*GetCryptoKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomAPI_AddCryptoKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddCryptoKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).AddCryptoKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.dns_zone.CustomAPI/AddCryptoKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).AddCryptoKey(ctx, req.(*AddCryptoKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomAPI_EditCryptoKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EditCryptoKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).EditCryptoKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.dns_zone.CustomAPI/EditCryptoKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).EditCryptoKey(ctx, req.(*EditCryptoKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomAPI_DeleteCryptoKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCryptoKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).DeleteCryptoKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.dns_zone.CustomAPI/DeleteCryptoKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).DeleteCryptoKey(ctx, req.(*DeleteCryptoKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _CustomAPI_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ves.io.schema.dns_zone.CustomAPI",
 	HandlerType: (*CustomAPIServer)(nil),
@@ -3130,6 +4098,22 @@ var _CustomAPI_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InitiateZoneTransfer",
 			Handler:    _CustomAPI_InitiateZoneTransfer_Handler,
+		},
+		{
+			MethodName: "GetCryptoKeys",
+			Handler:    _CustomAPI_GetCryptoKeys_Handler,
+		},
+		{
+			MethodName: "AddCryptoKey",
+			Handler:    _CustomAPI_AddCryptoKey_Handler,
+		},
+		{
+			MethodName: "EditCryptoKey",
+			Handler:    _CustomAPI_EditCryptoKey_Handler,
+		},
+		{
+			MethodName: "DeleteCryptoKey",
+			Handler:    _CustomAPI_DeleteCryptoKey_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -3920,6 +4904,299 @@ func (m *InitiateZoneTransferResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
+func (m *GetCryptoKeysRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetCryptoKeysRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetCryptoKeysRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ZoneName) > 0 {
+		i -= len(m.ZoneName)
+		copy(dAtA[i:], m.ZoneName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ZoneName)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetCryptoKeysResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetCryptoKeysResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetCryptoKeysResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Keys) > 0 {
+		for iNdEx := len(m.Keys) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Keys[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AddCryptoKeyRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AddCryptoKeyRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AddCryptoKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.KeyType) > 0 {
+		i -= len(m.KeyType)
+		copy(dAtA[i:], m.KeyType)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.KeyType)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ZoneName) > 0 {
+		i -= len(m.ZoneName)
+		copy(dAtA[i:], m.ZoneName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ZoneName)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AddCryptoKeyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AddCryptoKeyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AddCryptoKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Key != nil {
+		{
+			size, err := m.Key.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *EditCryptoKeyRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *EditCryptoKeyRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *EditCryptoKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Active {
+		i--
+		if m.Active {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.KeyId != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.KeyId))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.ZoneName) > 0 {
+		i -= len(m.ZoneName)
+		copy(dAtA[i:], m.ZoneName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ZoneName)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *EditCryptoKeyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *EditCryptoKeyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *EditCryptoKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteCryptoKeyRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteCryptoKeyRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteCryptoKeyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.KeyId != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.KeyId))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.ZoneName) > 0 {
+		i -= len(m.ZoneName)
+		copy(dAtA[i:], m.ZoneName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ZoneName)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DeleteCryptoKeyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DeleteCryptoKeyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DeleteCryptoKeyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func (m *ValidZone) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -4414,6 +5691,133 @@ func (m *InitiateZoneTransferResponse) Size() (n int) {
 	return n
 }
 
+func (m *GetCryptoKeysRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ZoneName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *GetCryptoKeysResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Keys) > 0 {
+		for _, e := range m.Keys {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *AddCryptoKeyRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ZoneName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.KeyType)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *AddCryptoKeyResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Key != nil {
+		l = m.Key.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *EditCryptoKeyRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ZoneName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.KeyId != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.KeyId))
+	}
+	if m.Active {
+		n += 2
+	}
+	return n
+}
+
+func (m *EditCryptoKeyResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *DeleteCryptoKeyRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ZoneName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.KeyId != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.KeyId))
+	}
+	return n
+}
+
+func (m *DeleteCryptoKeyResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
 func (m *ValidZone) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4719,6 +6123,97 @@ func (this *InitiateZoneTransferResponse) String() string {
 	}, "")
 	return s
 }
+func (this *GetCryptoKeysRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetCryptoKeysRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`ZoneName:` + fmt.Sprintf("%v", this.ZoneName) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetCryptoKeysResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForKeys := "[]*CryptoKey{"
+	for _, f := range this.Keys {
+		repeatedStringForKeys += strings.Replace(fmt.Sprintf("%v", f), "CryptoKey", "CryptoKey", 1) + ","
+	}
+	repeatedStringForKeys += "}"
+	s := strings.Join([]string{`&GetCryptoKeysResponse{`,
+		`Keys:` + repeatedStringForKeys + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AddCryptoKeyRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AddCryptoKeyRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`ZoneName:` + fmt.Sprintf("%v", this.ZoneName) + `,`,
+		`KeyType:` + fmt.Sprintf("%v", this.KeyType) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AddCryptoKeyResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AddCryptoKeyResponse{`,
+		`Key:` + strings.Replace(fmt.Sprintf("%v", this.Key), "CryptoKey", "CryptoKey", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *EditCryptoKeyRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&EditCryptoKeyRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`ZoneName:` + fmt.Sprintf("%v", this.ZoneName) + `,`,
+		`KeyId:` + fmt.Sprintf("%v", this.KeyId) + `,`,
+		`Active:` + fmt.Sprintf("%v", this.Active) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *EditCryptoKeyResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&EditCryptoKeyResponse{`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteCryptoKeyRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteCryptoKeyRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`ZoneName:` + fmt.Sprintf("%v", this.ZoneName) + `,`,
+		`KeyId:` + fmt.Sprintf("%v", this.KeyId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DeleteCryptoKeyResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DeleteCryptoKeyResponse{`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *ValidZone) String() string {
 	if this == nil {
 		return "nil"
@@ -4841,10 +6336,7 @@ func (m *ImportF5CSZoneRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5002,10 +6494,7 @@ func (m *ImportF5CSZoneResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5125,10 +6614,7 @@ func (m *F5CSDNSZoneConfiguration) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5278,10 +6764,7 @@ func (m *ImportAXFRRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5418,10 +6901,7 @@ func (m *TSIGConfiguration) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5507,10 +6987,7 @@ func (m *ImportAXFRResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5624,10 +7101,7 @@ func (m *GetRemoteZoneFileRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5709,10 +7183,7 @@ func (m *GetRemoteZoneFileResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5826,10 +7297,7 @@ func (m *GetLocalZoneFileRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -5947,10 +7415,7 @@ func (m *GetLocalZoneFileResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6064,10 +7529,7 @@ func (m *GetLocalZoneRecordNamesRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6149,10 +7611,7 @@ func (m *GetLocalZoneRecordNamesResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6234,10 +7693,7 @@ func (m *CloneReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6351,10 +7807,7 @@ func (m *CloneResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6470,10 +7923,7 @@ func (m *ImportBINDValidateRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6621,10 +8071,7 @@ func (m *ImportBINDCreateRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6761,10 +8208,7 @@ func (m *ImportBINDResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6878,10 +8322,7 @@ func (m *InitiateZoneTransferRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -6931,10 +8372,823 @@ func (m *InitiateZoneTransferResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
-			if (iNdEx + skippy) < 0 {
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetCryptoKeysRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetCryptoKeysRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetCryptoKeysRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ZoneName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ZoneName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetCryptoKeysResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetCryptoKeysResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetCryptoKeysResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Keys", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Keys = append(m.Keys, &CryptoKey{})
+			if err := m.Keys[len(m.Keys)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AddCryptoKeyRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AddCryptoKeyRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AddCryptoKeyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ZoneName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ZoneName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field KeyType", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.KeyType = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AddCryptoKeyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AddCryptoKeyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AddCryptoKeyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Key", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Key == nil {
+				m.Key = &CryptoKey{}
+			}
+			if err := m.Key.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *EditCryptoKeyRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: EditCryptoKeyRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: EditCryptoKeyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ZoneName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ZoneName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field KeyId", wireType)
+			}
+			m.KeyId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.KeyId |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Active", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Active = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *EditCryptoKeyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: EditCryptoKeyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: EditCryptoKeyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteCryptoKeyRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteCryptoKeyRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteCryptoKeyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ZoneName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ZoneName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field KeyId", wireType)
+			}
+			m.KeyId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.KeyId |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DeleteCryptoKeyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeleteCryptoKeyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeleteCryptoKeyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7035,10 +9289,7 @@ func (m *ValidZone) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7152,10 +9403,7 @@ func (m *InvalidZone) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7269,10 +9517,7 @@ func (m *ExportZoneFileRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -7354,10 +9599,7 @@ func (m *ExportZoneFileResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapi
 			}
 			if (iNdEx + skippy) > l {

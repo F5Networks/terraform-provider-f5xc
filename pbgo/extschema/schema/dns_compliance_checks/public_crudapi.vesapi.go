@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "DNS Compliance Checks view defines the required parameters that can be used in CRUD, to create and manage DNS Compliance Checks.\nIt can be used to create DNS Compliance Checks.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2294,7 +2321,7 @@ var APISwaggerJSON string = `{
                 },
                 "domain_denylist": {
                     "type": "array",
-                    "description": " List of domains to be denied by configuration object\n\nExample: - \"www.f5.com\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 30\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.etld_plus_one: true\n",
+                    "description": " List of domains to be denied by configuration object\n\nExample: - \"www.f5.com\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.etld_plus_one: true\n  ves.io.schema.rules.repeated.max_items: 30\n  ves.io.schema.rules.repeated.unique: true\n",
                     "maxItems": 30,
                     "items": {
                         "type": "string"
@@ -2304,9 +2331,9 @@ var APISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.items.string.etld_plus_one": "true",
                         "ves.io.schema.rules.repeated.max_items": "30",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.etld_plus_one": "true"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -2351,7 +2378,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2603,7 +2629,7 @@ var APISwaggerJSON string = `{
                 },
                 "domain_denylist": {
                     "type": "array",
-                    "description": " List of domains to be denied by configuration object\n\nExample: - \"www.f5.com\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 30\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.etld_plus_one: true\n",
+                    "description": " List of domains to be denied by configuration object\n\nExample: - \"www.f5.com\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.etld_plus_one: true\n  ves.io.schema.rules.repeated.max_items: 30\n  ves.io.schema.rules.repeated.unique: true\n",
                     "maxItems": 30,
                     "items": {
                         "type": "string"
@@ -2613,9 +2639,9 @@ var APISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.items.string.etld_plus_one": "true",
                         "ves.io.schema.rules.repeated.max_items": "30",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.etld_plus_one": "true"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 },
                 "protocol_inspection": {
@@ -2678,7 +2704,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates dns_compliance_checks is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2810,7 +2835,7 @@ var APISwaggerJSON string = `{
                 },
                 "domain_denylist": {
                     "type": "array",
-                    "description": " List of domains to be denied by configuration object\n\nExample: - \"www.f5.com\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 30\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.etld_plus_one: true\n",
+                    "description": " List of domains to be denied by configuration object\n\nExample: - \"www.f5.com\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.etld_plus_one: true\n  ves.io.schema.rules.repeated.max_items: 30\n  ves.io.schema.rules.repeated.unique: true\n",
                     "maxItems": 30,
                     "items": {
                         "type": "string"
@@ -2820,9 +2845,9 @@ var APISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.items.string.etld_plus_one": "true",
                         "ves.io.schema.rules.repeated.max_items": "30",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.etld_plus_one": "true"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -2922,6 +2947,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3100,7 +3146,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3164,7 +3209,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3230,7 +3274,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3316,7 +3359,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

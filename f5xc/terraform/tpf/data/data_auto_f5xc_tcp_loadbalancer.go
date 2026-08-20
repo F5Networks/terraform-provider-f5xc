@@ -34,33 +34,11 @@ type DataSourceF5XCTcpLoadbalancer struct {
 	client *client.APIClient
 }
 
-type TcpLoadbalancerViewsOriginPoolWithWeight struct {
-	PoolChoice      types.Object `tfsdk:"pool_choice"`
-	Weight          types.Int64  `tfsdk:"weight"`
-	Priority        types.Int64  `tfsdk:"priority"`
-	EndpointSubsets types.Map    `tfsdk:"endpoint_subsets"`
-}
-
-type TcpLoadbalancerOriginPoolWithWeightPoolChoice struct {
-	Pool    types.Object `tfsdk:"pool"`
-	Cluster types.Object `tfsdk:"cluster"`
-}
-
-type TcpLoadbalancerGlobalSpecTypeServicePolicyChoice struct {
-	NoServicePolicies            types.Bool   `tfsdk:"no_service_policies"`
-	ActiveServicePolicies        types.Object `tfsdk:"active_service_policies"`
-	ServicePoliciesFromNamespace types.Bool   `tfsdk:"service_policies_from_namespace"`
-}
-
-type TcpLoadbalancerGlobalSpecTypeActiveServicePolicies struct {
-	Policies types.List `tfsdk:"policies"`
-}
-
 type TcpLoadbalancerGlobalSpecTypeAdvertiseChoice struct {
 	AdvertiseCustom             types.Object `tfsdk:"advertise_custom"`
-	DoNotAdvertise              types.Bool   `tfsdk:"do_not_advertise"`
-	AdvertiseOnPublicDefaultVip types.Bool   `tfsdk:"advertise_on_public_default_vip"`
 	AdvertiseOnPublic           types.Object `tfsdk:"advertise_on_public"`
+	AdvertiseOnPublicDefaultVip types.Bool   `tfsdk:"advertise_on_public_default_vip"`
+	DoNotAdvertise              types.Bool   `tfsdk:"do_not_advertise"`
 }
 
 type TcpLoadbalancerGlobalSpecTypeAdvertiseCustom struct {
@@ -73,25 +51,92 @@ type TcpLoadbalancerViewsWhereType struct {
 }
 
 type TcpLoadbalancerWhereTypeChoice struct {
-	AdvertiseOnPublic  types.Object `tfsdk:"advertise_on_public"`
-	VirtualSite        types.Object `tfsdk:"virtual_site"`
-	Vk8SService        types.Object `tfsdk:"vk8s_service"`
-	VirtualSiteSegment types.Object `tfsdk:"virtual_site_segment"`
-	VirtualSiteWithVip types.Object `tfsdk:"virtual_site_with_vip"`
-	SiteSegment        types.Object `tfsdk:"site_segment"`
-	Site               types.Object `tfsdk:"site"`
-	VirtualNetwork     types.Object `tfsdk:"virtual_network"`
-	CloudEdgeSegment   types.Object `tfsdk:"cloud_edge_segment"`
-	Segment            types.Object `tfsdk:"segment"`
+	AdvertiseDualstackOnPublic types.Object `tfsdk:"advertise_dualstack_on_public"`
+	AdvertiseOnPublic          types.Object `tfsdk:"advertise_on_public"`
+	AdvertiseV6OnPublic        types.Object `tfsdk:"advertise_v6_on_public"`
+	CloudEdgeSegment           types.Object `tfsdk:"cloud_edge_segment"`
+	Segment                    types.Object `tfsdk:"segment"`
+	Site                       types.Object `tfsdk:"site"`
+	SiteSegment                types.Object `tfsdk:"site_segment"`
+	VirtualNetwork             types.Object `tfsdk:"virtual_network"`
+	VirtualSite                types.Object `tfsdk:"virtual_site"`
+	VirtualSiteSegment         types.Object `tfsdk:"virtual_site_segment"`
+	VirtualSiteWithVip         types.Object `tfsdk:"virtual_site_with_vip"`
+	Vk8SService                types.Object `tfsdk:"vk8s_service"`
+}
+
+type TcpLoadbalancerWhereTypeAdvertiseDualstackOnPublic struct {
+	PublicIp types.Object `tfsdk:"public_ip"`
 }
 
 type TcpLoadbalancerWhereTypeAdvertiseOnPublic struct {
 	PublicIp types.Object `tfsdk:"public_ip"`
 }
 
+type TcpLoadbalancerWhereTypeAdvertiseV6OnPublic struct {
+	PublicIp types.Object `tfsdk:"public_ip"`
+}
+
+type TcpLoadbalancerWhereTypeCloudEdgeSegment struct {
+	CloudEdge types.Object `tfsdk:"cloud_edge"`
+	Ip        types.String `tfsdk:"ip"`
+	Ipv6      types.String `tfsdk:"ipv6"`
+	Segment   types.Object `tfsdk:"segment"`
+}
+
+type TcpLoadbalancerWhereTypeSegment struct {
+	Ipv4Vip types.String `tfsdk:"ipv4_vip"`
+	Ipv6Vip types.String `tfsdk:"ipv6_vip"`
+	Segment types.Object `tfsdk:"segment"`
+}
+
+type TcpLoadbalancerWhereTypeSite struct {
+	Ip      types.String `tfsdk:"ip"`
+	Ipv6    types.String `tfsdk:"ipv6"`
+	Network types.List   `tfsdk:"network"`
+	Site    types.Object `tfsdk:"site"`
+}
+
+type TcpLoadbalancerWhereTypeSiteSegment struct {
+	Ip      types.String `tfsdk:"ip"`
+	Ipv6    types.String `tfsdk:"ipv6"`
+	Segment types.Object `tfsdk:"segment"`
+	Site    types.Object `tfsdk:"site"`
+}
+
+type TcpLoadbalancerWhereTypeVirtualNetwork struct {
+	V6VipChoice    types.Object `tfsdk:"v6_vip_choice"`
+	VipChoice      types.Object `tfsdk:"vip_choice"`
+	VirtualNetwork types.Object `tfsdk:"virtual_network"`
+}
+
+type TcpLoadbalancerWhereVirtualNetworkV6VipChoice struct {
+	DefaultV6Vip  types.Bool   `tfsdk:"default_v6_vip"`
+	SpecificV6Vip types.String `tfsdk:"specific_v6_vip"`
+}
+
+type TcpLoadbalancerWhereVirtualNetworkVipChoice struct {
+	DefaultVip  types.Bool   `tfsdk:"default_vip"`
+	SpecificVip types.String `tfsdk:"specific_vip"`
+}
+
 type TcpLoadbalancerWhereTypeVirtualSite struct {
-	VirtualSite types.Object `tfsdk:"virtual_site"`
 	Network     types.List   `tfsdk:"network"`
+	VirtualSite types.Object `tfsdk:"virtual_site"`
+}
+
+type TcpLoadbalancerWhereTypeVirtualSiteSegment struct {
+	Ip          types.String `tfsdk:"ip"`
+	Ipv6        types.String `tfsdk:"ipv6"`
+	Segment     types.Object `tfsdk:"segment"`
+	VirtualSite types.Object `tfsdk:"virtual_site"`
+}
+
+type TcpLoadbalancerWhereTypeVirtualSiteWithVip struct {
+	Ip          types.String `tfsdk:"ip"`
+	Ipv6        types.String `tfsdk:"ipv6"`
+	Network     types.List   `tfsdk:"network"`
+	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
 type TcpLoadbalancerWhereTypeVk8SService struct {
@@ -103,83 +148,21 @@ type TcpLoadbalancerWhereVK8SServiceChoice struct {
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type TcpLoadbalancerWhereTypeVirtualSiteSegment struct {
-	Segment     types.Object `tfsdk:"segment"`
-	VirtualSite types.Object `tfsdk:"virtual_site"`
-	Ip          types.String `tfsdk:"ip"`
-	Ipv6        types.String `tfsdk:"ipv6"`
-}
-
-type TcpLoadbalancerWhereTypeVirtualSiteWithVip struct {
-	VirtualSite types.Object `tfsdk:"virtual_site"`
-	Ip          types.String `tfsdk:"ip"`
-	Ipv6        types.String `tfsdk:"ipv6"`
-	Network     types.List   `tfsdk:"network"`
-}
-
-type TcpLoadbalancerWhereTypeSiteSegment struct {
-	Segment types.Object `tfsdk:"segment"`
-	Site    types.Object `tfsdk:"site"`
-	Ip      types.String `tfsdk:"ip"`
-	Ipv6    types.String `tfsdk:"ipv6"`
-}
-
-type TcpLoadbalancerWhereTypeSite struct {
-	Ip      types.String `tfsdk:"ip"`
-	Ipv6    types.String `tfsdk:"ipv6"`
-	Network types.List   `tfsdk:"network"`
-	Site    types.Object `tfsdk:"site"`
-}
-
-type TcpLoadbalancerWhereTypeVirtualNetwork struct {
-	VirtualNetwork types.Object `tfsdk:"virtual_network"`
-	VipChoice      types.Object `tfsdk:"vip_choice"`
-	V6VipChoice    types.Object `tfsdk:"v6_vip_choice"`
-}
-
-type TcpLoadbalancerWhereVirtualNetworkVipChoice struct {
-	DefaultVip  types.Bool   `tfsdk:"default_vip"`
-	SpecificVip types.String `tfsdk:"specific_vip"`
-}
-
-type TcpLoadbalancerWhereVirtualNetworkV6VipChoice struct {
-	DefaultV6Vip  types.Bool   `tfsdk:"default_v6_vip"`
-	SpecificV6Vip types.String `tfsdk:"specific_v6_vip"`
-}
-
-type TcpLoadbalancerWhereTypeCloudEdgeSegment struct {
-	Segment   types.Object `tfsdk:"segment"`
-	CloudEdge types.Object `tfsdk:"cloud_edge"`
-	Ip        types.String `tfsdk:"ip"`
-	Ipv6      types.String `tfsdk:"ipv6"`
-}
-
-type TcpLoadbalancerWhereTypeSegment struct {
-	Segment types.Object `tfsdk:"segment"`
-	Ipv4Vip types.String `tfsdk:"ipv4_vip"`
-	Ipv6Vip types.String `tfsdk:"ipv6_vip"`
-}
-
 type TcpLoadbalancerWhereTypePortChoice struct {
-	UseDefaultPort types.Bool   `tfsdk:"use_default_port"`
 	Port           types.Int64  `tfsdk:"port"`
 	PortRanges     types.String `tfsdk:"port_ranges"`
+	UseDefaultPort types.Bool   `tfsdk:"use_default_port"`
 }
 
 type TcpLoadbalancerGlobalSpecTypeAdvertiseOnPublic struct {
 	PublicIp types.Object `tfsdk:"public_ip"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeClusterRetractChoice struct {
-	RetractCluster      types.Bool `tfsdk:"retract_cluster"`
-	DoNotRetractCluster types.Bool `tfsdk:"do_not_retract_cluster"`
-}
-
 type TcpLoadbalancerVirtualHostAutoCertInfoType struct {
-	AutoCertState   types.List        `tfsdk:"auto_cert_state"`
 	AutoCertExpiry  timetypes.RFC3339 `tfsdk:"auto_cert_expiry"`
-	AutoCertSubject types.String      `tfsdk:"auto_cert_subject"`
 	AutoCertIssuer  types.String      `tfsdk:"auto_cert_issuer"`
+	AutoCertState   types.List        `tfsdk:"auto_cert_state"`
+	AutoCertSubject types.String      `tfsdk:"auto_cert_subject"`
 	DnsRecords      types.List        `tfsdk:"dns_records"`
 }
 
@@ -189,81 +172,59 @@ type TcpLoadbalancerVirtualHostDNSRecord struct {
 	Value types.String `tfsdk:"value"`
 }
 
-type TcpLoadbalancerGlobalSpecTypePortChoice struct {
-	PortRanges types.String `tfsdk:"port_ranges"`
-	ListenPort types.Int64  `tfsdk:"listen_port"`
+type TcpLoadbalancerGlobalSpecTypeClusterRetractChoice struct {
+	DoNotRetractCluster types.Bool `tfsdk:"do_not_retract_cluster"`
+	RetractCluster      types.Bool `tfsdk:"retract_cluster"`
 }
 
-type TcpLoadbalancerGlobalSpecTypeSniDefaultLbChoice struct {
-	NoSni            types.Bool `tfsdk:"no_sni"`
-	Sni              types.Bool `tfsdk:"sni"`
-	DefaultLbWithSni types.Bool `tfsdk:"default_lb_with_sni"`
+type TcpLoadbalancerVirtualHostDnsInfoDnsInfo struct {
+	IpAddress   types.String `tfsdk:"ip_address"`
+	Ipv6Address types.String `tfsdk:"ipv6_address"`
 }
 
 type TcpLoadbalancerGlobalSpecTypeHashPolicyChoice struct {
-	HashPolicyChoiceRoundRobin         types.Bool `tfsdk:"hash_policy_choice_round_robin"`
 	HashPolicyChoiceLeastActive        types.Bool `tfsdk:"hash_policy_choice_least_active"`
 	HashPolicyChoiceRandom             types.Bool `tfsdk:"hash_policy_choice_random"`
+	HashPolicyChoiceRoundRobin         types.Bool `tfsdk:"hash_policy_choice_round_robin"`
 	HashPolicyChoiceSourceIpStickiness types.Bool `tfsdk:"hash_policy_choice_source_ip_stickiness"`
 }
 
+type TcpLoadbalancerViewsInternetVIPInfo struct {
+	SiteName        types.String `tfsdk:"site_name"`
+	SiteNetworkType types.List   `tfsdk:"site_network_type"`
+	Status          types.Object `tfsdk:"status"`
+}
+
+type TcpLoadbalancerViewsInternetVIPStatus struct {
+	Arn               types.String `tfsdk:"arn"`
+	Name              types.String `tfsdk:"name"`
+	NlbCname          types.String `tfsdk:"nlb_cname"`
+	NlbStatus         types.String `tfsdk:"nlb_status"`
+	Reason            types.String `tfsdk:"reason"`
+	TargetGroupStatus types.List   `tfsdk:"target_group_status"`
+}
+
+type TcpLoadbalancerViewsInternetVIPTargetGroupStatusType struct {
+	Arn            types.String `tfsdk:"arn"`
+	ListenerStatus types.List   `tfsdk:"listener_status"`
+	Name           types.String `tfsdk:"name"`
+	Protocol       types.String `tfsdk:"protocol"`
+	Reason         types.String `tfsdk:"reason"`
+	Status         types.String `tfsdk:"status"`
+}
+
+type TcpLoadbalancerViewsInternetVIPListenerStatusType struct {
+	Arn      types.String `tfsdk:"arn"`
+	Port     types.Int64  `tfsdk:"port"`
+	Protocol types.String `tfsdk:"protocol"`
+	Reason   types.String `tfsdk:"reason"`
+	Status   types.String `tfsdk:"status"`
+}
+
 type TcpLoadbalancerGlobalSpecTypeLoadbalancerTypeChoice struct {
-	TlsTcpAutoCert types.Object `tfsdk:"tls_tcp_auto_cert"`
-	TlsTcp         types.Object `tfsdk:"tls_tcp"`
 	Tcp            types.Bool   `tfsdk:"tcp"`
-}
-
-type TcpLoadbalancerGlobalSpecTypeTlsTcpAutoCert struct {
-	TlsConfig  types.Object `tfsdk:"tls_config"`
-	MtlsChoice types.Object `tfsdk:"mtls_choice"`
-}
-
-type TcpLoadbalancerViewsTlsConfig struct {
-	Choice types.Object `tfsdk:"choice"`
-}
-
-type TcpLoadbalancerTlsConfigChoice struct {
-	DefaultSecurity types.Bool   `tfsdk:"default_security"`
-	MediumSecurity  types.Bool   `tfsdk:"medium_security"`
-	LowSecurity     types.Bool   `tfsdk:"low_security"`
-	CustomSecurity  types.Object `tfsdk:"custom_security"`
-}
-
-type TcpLoadbalancerTlsConfigCustomSecurity struct {
-	MinVersion   types.List `tfsdk:"min_version"`
-	MaxVersion   types.List `tfsdk:"max_version"`
-	CipherSuites types.List `tfsdk:"cipher_suites"`
-}
-
-type TcpLoadbalancerProxyTypeTLSTCPAutoCertsMtlsChoice struct {
-	NoMtls  types.Bool   `tfsdk:"no_mtls"`
-	UseMtls types.Object `tfsdk:"use_mtls"`
-}
-
-type TcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtls struct {
-	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
-	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
-	CrlChoice                 types.Object `tfsdk:"crl_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
-}
-
-type TcpLoadbalancerDownstreamTlsValidationContextTrustedCaChoice struct {
-	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
-	TrustedCa    types.Object `tfsdk:"trusted_ca"`
-}
-
-type TcpLoadbalancerDownstreamTlsValidationContextCrlChoice struct {
-	Crl   types.Object `tfsdk:"crl"`
-	NoCrl types.Bool   `tfsdk:"no_crl"`
-}
-
-type TcpLoadbalancerDownstreamTlsValidationContextXfccHeaderChoice struct {
-	XfccDisabled types.Bool   `tfsdk:"xfcc_disabled"`
-	XfccOptions  types.Object `tfsdk:"xfcc_options"`
-}
-
-type TcpLoadbalancerDownstreamTlsValidationContextXfccOptions struct {
-	XfccHeaderElements types.List `tfsdk:"xfcc_header_elements"`
+	TlsTcp         types.Object `tfsdk:"tls_tcp"`
+	TlsTcpAutoCert types.Object `tfsdk:"tls_tcp_auto_cert"`
 }
 
 type TcpLoadbalancerGlobalSpecTypeTlsTcp struct {
@@ -287,23 +248,81 @@ type TcpLoadbalancerDownstreamTLSCertsParamsMtlsChoice struct {
 }
 
 type TcpLoadbalancerDownstreamTLSCertsParamsUseMtls struct {
-	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
 	CrlChoice                 types.Object `tfsdk:"crl_choice"`
+	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
 	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
+type TcpLoadbalancerDownstreamTlsValidationContextCrlChoice struct {
+	Crl   types.Object `tfsdk:"crl"`
+	NoCrl types.Bool   `tfsdk:"no_crl"`
+}
+
+type TcpLoadbalancerDownstreamTlsValidationContextTrustedCaChoice struct {
+	TrustedCa    types.Object `tfsdk:"trusted_ca"`
+	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
+}
+
+type TcpLoadbalancerDownstreamTlsValidationContextXfccHeaderChoice struct {
+	XfccDisabled types.Bool   `tfsdk:"xfcc_disabled"`
+	XfccOptions  types.Object `tfsdk:"xfcc_options"`
+}
+
+type TcpLoadbalancerDownstreamTlsValidationContextXfccOptions struct {
+	XfccHeaderElements types.List `tfsdk:"xfcc_header_elements"`
+}
+
+type TcpLoadbalancerViewsTlsConfig struct {
+	Choice types.Object `tfsdk:"choice"`
+}
+
+type TcpLoadbalancerTlsConfigChoice struct {
+	CustomSecurity  types.Object `tfsdk:"custom_security"`
+	DefaultSecurity types.Bool   `tfsdk:"default_security"`
+	LowSecurity     types.Bool   `tfsdk:"low_security"`
+	MediumSecurity  types.Bool   `tfsdk:"medium_security"`
+}
+
+type TcpLoadbalancerTlsConfigCustomSecurity struct {
+	CipherSuites types.List `tfsdk:"cipher_suites"`
+	MaxVersion   types.List `tfsdk:"max_version"`
+	MinVersion   types.List `tfsdk:"min_version"`
+}
+
 type TcpLoadbalancerProxyTypeTLSTCPTlsParameters struct {
-	TlsConfig       types.Object `tfsdk:"tls_config"`
-	TlsCertificates types.List   `tfsdk:"tls_certificates"`
 	MtlsChoice      types.Object `tfsdk:"mtls_choice"`
+	TlsCertificates types.List   `tfsdk:"tls_certificates"`
+	TlsConfig       types.Object `tfsdk:"tls_config"`
+}
+
+type TcpLoadbalancerDownstreamTlsParamsTypeMtlsChoice struct {
+	NoMtls  types.Bool   `tfsdk:"no_mtls"`
+	UseMtls types.Object `tfsdk:"use_mtls"`
+}
+
+type TcpLoadbalancerDownstreamTlsParamsTypeUseMtls struct {
+	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
+	CrlChoice                 types.Object `tfsdk:"crl_choice"`
+	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
+	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
 type TcpLoadbalancerTlsCertificateType struct {
 	CertificateUrl     types.String `tfsdk:"certificate_url"`
-	PrivateKey         types.Object `tfsdk:"private_key"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
+	PrivateKey         types.Object `tfsdk:"private_key"`
+}
+
+type TcpLoadbalancerTlsCertificateTypeOcspStaplingChoice struct {
+	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
+	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
+	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
+}
+
+type TcpLoadbalancerTlsCertificateTypeCustomHashAlgorithms struct {
+	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
 type TcpLoadbalancerSecretType struct {
@@ -317,8 +336,8 @@ type TcpLoadbalancerSecretTypeSecretInfoChoice struct {
 
 type TcpLoadbalancerSecretTypeBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
-	StoreProvider      types.String `tfsdk:"store_provider"`
 	Location           types.String `tfsdk:"location"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
 type TcpLoadbalancerSecretTypeClearSecretInfo struct {
@@ -326,171 +345,95 @@ type TcpLoadbalancerSecretTypeClearSecretInfo struct {
 	Url      types.String `tfsdk:"url"`
 }
 
-type TcpLoadbalancerTlsCertificateTypeOcspStaplingChoice struct {
-	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
-	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
-	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
+type TcpLoadbalancerGlobalSpecTypeTlsTcpAutoCert struct {
+	MtlsChoice types.Object `tfsdk:"mtls_choice"`
+	TlsConfig  types.Object `tfsdk:"tls_config"`
 }
 
-type TcpLoadbalancerTlsCertificateTypeCustomHashAlgorithms struct {
-	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
-}
-
-type TcpLoadbalancerDownstreamTlsParamsTypeMtlsChoice struct {
-	UseMtls types.Object `tfsdk:"use_mtls"`
+type TcpLoadbalancerProxyTypeTLSTCPAutoCertsMtlsChoice struct {
 	NoMtls  types.Bool   `tfsdk:"no_mtls"`
+	UseMtls types.Object `tfsdk:"use_mtls"`
 }
 
-type TcpLoadbalancerDownstreamTlsParamsTypeUseMtls struct {
-	CrlChoice                 types.Object `tfsdk:"crl_choice"`
-	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
-	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
+type TcpLoadbalancerProxyTypeTLSTCPAutoCertsUseMtls struct {
 	ClientCertificateOptional types.Bool   `tfsdk:"client_certificate_optional"`
+	CrlChoice                 types.Object `tfsdk:"crl_choice"`
+	TrustedCaChoice           types.Object `tfsdk:"trusted_ca_choice"`
+	XfccHeaderChoice          types.Object `tfsdk:"xfcc_header_choice"`
 }
 
-type TcpLoadbalancerViewsInternetVIPInfo struct {
-	SiteName        types.String `tfsdk:"site_name"`
-	SiteNetworkType types.List   `tfsdk:"site_network_type"`
-	Status          types.Object `tfsdk:"status"`
+type TcpLoadbalancerViewsOriginPoolWithWeight struct {
+	EndpointSubsets types.Map    `tfsdk:"endpoint_subsets"`
+	PoolChoice      types.Object `tfsdk:"pool_choice"`
+	Priority        types.Int64  `tfsdk:"priority"`
+	Weight          types.Int64  `tfsdk:"weight"`
 }
 
-type TcpLoadbalancerViewsInternetVIPStatus struct {
-	NlbCname          types.String `tfsdk:"nlb_cname"`
-	NlbStatus         types.String `tfsdk:"nlb_status"`
-	Name              types.String `tfsdk:"name"`
-	Arn               types.String `tfsdk:"arn"`
-	TargetGroupStatus types.List   `tfsdk:"target_group_status"`
-	Reason            types.String `tfsdk:"reason"`
+type TcpLoadbalancerOriginPoolWithWeightPoolChoice struct {
+	Cluster types.Object `tfsdk:"cluster"`
+	Pool    types.Object `tfsdk:"pool"`
 }
 
-type TcpLoadbalancerViewsInternetVIPTargetGroupStatusType struct {
-	Name           types.String `tfsdk:"name"`
-	Arn            types.String `tfsdk:"arn"`
-	Status         types.String `tfsdk:"status"`
-	Protocol       types.String `tfsdk:"protocol"`
-	ListenerStatus types.List   `tfsdk:"listener_status"`
-	Reason         types.String `tfsdk:"reason"`
+type TcpLoadbalancerGlobalSpecTypePortChoice struct {
+	ListenPort types.Int64  `tfsdk:"listen_port"`
+	PortRanges types.String `tfsdk:"port_ranges"`
 }
 
-type TcpLoadbalancerViewsInternetVIPListenerStatusType struct {
-	Port     types.Int64  `tfsdk:"port"`
-	Protocol types.String `tfsdk:"protocol"`
-	Reason   types.String `tfsdk:"reason"`
-	Arn      types.String `tfsdk:"arn"`
-	Status   types.String `tfsdk:"status"`
+type TcpLoadbalancerGlobalSpecTypeServicePolicyChoice struct {
+	ActiveServicePolicies        types.Object `tfsdk:"active_service_policies"`
+	NoServicePolicies            types.Bool   `tfsdk:"no_service_policies"`
+	ServicePoliciesFromNamespace types.Bool   `tfsdk:"service_policies_from_namespace"`
+}
+
+type TcpLoadbalancerGlobalSpecTypeActiveServicePolicies struct {
+	Policies types.List `tfsdk:"policies"`
+}
+
+type TcpLoadbalancerGlobalSpecTypeSniDefaultLbChoice struct {
+	DefaultLbWithSni types.Bool `tfsdk:"default_lb_with_sni"`
+	NoSni            types.Bool `tfsdk:"no_sni"`
+	Sni              types.Bool `tfsdk:"sni"`
 }
 
 // DataSourceF5XCTcpLoadbalancerModel describes the resource data model.
 type DataSourceF5XCTcpLoadbalancerModel struct {
+	Annotations            types.Map      `tfsdk:"annotations"`
 	Description            types.String   `tfsdk:"description"`
+	Labels                 types.Map      `tfsdk:"labels"`
 	Name                   types.String   `tfsdk:"name"`
 	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
-	Labels                 types.Map      `tfsdk:"labels"`
-	Annotations            types.Map      `tfsdk:"annotations"`
-	OriginPoolsWeights     types.List     `tfsdk:"origin_pools_weights"`
-	ServicePolicyChoice    types.Object   `tfsdk:"service_policy_choice"`
-	HostName               types.String   `tfsdk:"host_name"`
-	DnsVolterraManaged     types.Bool     `tfsdk:"dns_volterra_managed"`
 	AdvertiseChoice        types.Object   `tfsdk:"advertise_choice"`
-	IdleTimeout            types.Int64    `tfsdk:"idle_timeout"`
-	ClusterRetractChoice   types.Object   `tfsdk:"cluster_retract_choice"`
 	AutoCertInfo           types.Object   `tfsdk:"auto_cert_info"`
 	CertState              types.List     `tfsdk:"cert_state"`
-	PortChoice             types.Object   `tfsdk:"port_choice"`
-	SniDefaultLbChoice     types.Object   `tfsdk:"sni_default_lb_choice"`
-	HashPolicyChoice       types.Object   `tfsdk:"hash_policy_choice"`
-	LoadbalancerTypeChoice types.Object   `tfsdk:"loadbalancer_type_choice"`
-	InternetVipInfo        types.List     `tfsdk:"internet_vip_info"`
+	ClusterRetractChoice   types.Object   `tfsdk:"cluster_retract_choice"`
+	DnsInfo                types.List     `tfsdk:"dns_info"`
+	DnsVolterraManaged     types.Bool     `tfsdk:"dns_volterra_managed"`
 	Domains                types.List     `tfsdk:"domains"`
+	HashPolicyChoice       types.Object   `tfsdk:"hash_policy_choice"`
+	HostName               types.String   `tfsdk:"host_name"`
+	IdleTimeout            types.Int64    `tfsdk:"idle_timeout"`
+	InternetVipInfo        types.List     `tfsdk:"internet_vip_info"`
+	LoadbalancerTypeChoice types.Object   `tfsdk:"loadbalancer_type_choice"`
+	OriginPoolsWeights     types.List     `tfsdk:"origin_pools_weights"`
+	PortChoice             types.Object   `tfsdk:"port_choice"`
+	ServicePolicyChoice    types.Object   `tfsdk:"service_policy_choice"`
+	SniDefaultLbChoice     types.Object   `tfsdk:"sni_default_lb_choice"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> OriginPoolsWeights
-var TcpLoadbalancerOriginPoolsWeightsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"pool_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap,
-	},
-	"weight":   types.Int64Type,
-	"priority": types.Int64Type,
-	"endpoint_subsets": types.MapType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PoolChoice
-var TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap = map[string]attr.Type{
-
-	"pool": types.ObjectType{
-		AttrTypes: TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap,
-	},
-	"cluster": types.ObjectType{
-		AttrTypes: TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Pool
-var TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Cluster
-var TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> ServicePolicyChoice
-var TcpLoadbalancerServicePolicyChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_service_policies": types.BoolType,
-	"active_service_policies": types.ObjectType{
-		AttrTypes: TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap,
-	},
-	"service_policies_from_namespace": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> ActiveServicePolicies
-var TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap = map[string]attr.Type{
-
-	"policies": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"namespace": types.StringType,
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Policies
-var TcpLoadbalancerPoliciesObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"namespace": types.StringType,
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-}
-
 // Attribute map for RequiredOneOfField --> AdvertiseChoice
 var TcpLoadbalancerAdvertiseChoiceModelAttributeMap = map[string]attr.Type{
 
 	"advertise_custom": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomModelAttributeMap,
 	},
-	"do_not_advertise":                types.BoolType,
-	"advertise_on_public_default_vip": types.BoolType,
 	"advertise_on_public": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicModelAttributeMap,
 	},
+	"advertise_on_public_default_vip": types.BoolType,
+	"do_not_advertise":                types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> AdvertiseCustom
@@ -512,7 +455,7 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomModelAttributeMap = map[string]
 }
 
 // Attribute map for RequiredArrayOfPointerField --> AdvertiseWhere
-var TcpLoadbalancerAdvertiseWhereObjectRefModelAttributeMap = map[string]attr.Type{
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereModelAttributeMap = map[string]attr.Type{
 
 	"choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap,
@@ -525,29 +468,14 @@ var TcpLoadbalancerAdvertiseWhereObjectRefModelAttributeMap = map[string]attr.Ty
 // Attribute map for RequiredOneOfField --> Choice
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap = map[string]attr.Type{
 
+	"advertise_dualstack_on_public": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap,
+	},
 	"advertise_on_public": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap,
 	},
-	"virtual_site": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteModelAttributeMap,
-	},
-	"vk8s_service": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceModelAttributeMap,
-	},
-	"virtual_site_segment": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap,
-	},
-	"virtual_site_with_vip": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap,
-	},
-	"site_segment": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentModelAttributeMap,
-	},
-	"site": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap,
-	},
-	"virtual_network": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkModelAttributeMap,
+	"advertise_v6_on_public": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap,
 	},
 	"cloud_edge_segment": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap,
@@ -555,45 +483,305 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttrib
 	"segment": types.ObjectType{
 		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap,
 	},
+	"site": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap,
+	},
+	"site_segment": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentModelAttributeMap,
+	},
+	"virtual_network": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkModelAttributeMap,
+	},
+	"virtual_site": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteModelAttributeMap,
+	},
+	"virtual_site_segment": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap,
+	},
+	"virtual_site_with_vip": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap,
+	},
+	"vk8s_service": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> AdvertiseDualstackOnPublic
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap = map[string]attr.Type{
+	"public_ip": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> PublicIp
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> AdvertiseOnPublic
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap = map[string]attr.Type{
 	"public_ip": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"tenant":    types.StringType,
+			"name":      types.StringType,
 			"namespace": types.StringType,
-			"name":      types.StringType},
+			"tenant":    types.StringType},
 	},
 }
 
 // Attribute map for RequiredPointerField --> PublicIp
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> AdvertiseV6OnPublic
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap = map[string]attr.Type{
+	"public_ip": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> PublicIp
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> CloudEdgeSegment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap = map[string]attr.Type{
+	"cloud_edge": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+	"ip":   types.StringType,
+	"ipv6": types.StringType, "segment": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> CloudEdge
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> Segment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Segment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap = map[string]attr.Type{
+
+	"ipv4_vip": types.StringType,
+	"ipv6_vip": types.StringType, "segment": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> Segment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Site
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap = map[string]attr.Type{
+
+	"ip":   types.StringType,
+	"ipv6": types.StringType,
+	"network": types.ListType{
+		ElemType: types.StringType,
+	}, "site": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> Site
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSiteModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> SiteSegment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentModelAttributeMap = map[string]attr.Type{
+
+	"ip":   types.StringType,
+	"ipv6": types.StringType, "segment": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	}, "site": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> Segment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSegmentModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> Site
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSiteModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> VirtualNetwork
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkModelAttributeMap = map[string]attr.Type{
+
+	"v6_vip_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkV6VipChoiceModelAttributeMap,
+	},
+	"vip_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap,
+	}, "virtual_network": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for OneOfField --> V6VipChoice
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkV6VipChoiceModelAttributeMap = map[string]attr.Type{
+
+	"default_v6_vip":  types.BoolType,
+	"specific_v6_vip": types.StringType,
+}
+
+// Attribute map for OneOfField --> VipChoice
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap = map[string]attr.Type{
+
+	"default_vip":  types.BoolType,
+	"specific_vip": types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> VirtualNetwork
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVirtualNetworkModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> VirtualSite
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
-	"virtual_site": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"tenant":    types.StringType,
-			"namespace": types.StringType,
-			"name":      types.StringType},
-	},
+
 	"network": types.ListType{
 		ElemType: types.StringType,
+	}, "virtual_site": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
 	},
 }
 
 // Attribute map for RequiredPointerField --> VirtualSite
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteVirtualSiteModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> VirtualSiteSegment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap = map[string]attr.Type{
+
+	"ip":   types.StringType,
+	"ipv6": types.StringType, "segment": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	}, "virtual_site": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> Segment
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentSegmentModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> VirtualSite
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentVirtualSiteModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> VirtualSiteWithVip
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap = map[string]attr.Type{
+
+	"ip":   types.StringType,
+	"ipv6": types.StringType,
+	"network": types.ListType{
+		ElemType: types.StringType,
+	}, "virtual_site": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> VirtualSite
+var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipVirtualSiteModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> Vk8SService
@@ -618,228 +806,25 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SService
 // Attribute map for PointerOfOneOfField --> Site
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceSiteModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> VirtualSite
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> VirtualSiteSegment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap = map[string]attr.Type{
-	"segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
-	}, "virtual_site": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
-	},
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentSegmentModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> VirtualSite
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentVirtualSiteModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
 	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> VirtualSiteWithVip
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap = map[string]attr.Type{
-	"virtual_site": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"namespace": types.StringType,
-			"name":      types.StringType,
-			"tenant":    types.StringType},
-	},
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
-	"network": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredPointerField --> VirtualSite
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipVirtualSiteModelAttributeMap = map[string]attr.Type{
-
-	"namespace": types.StringType,
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> SiteSegment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentModelAttributeMap = map[string]attr.Type{
-	"segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
-	}, "site": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
-	},
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSegmentModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Site
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSiteModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Site
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap = map[string]attr.Type{
-
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
-	"network": types.ListType{
-		ElemType: types.StringType,
-	}, "site": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"tenant":    types.StringType,
-			"namespace": types.StringType,
-			"name":      types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Site
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSiteModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> VirtualNetwork
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkModelAttributeMap = map[string]attr.Type{
-	"virtual_network": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"tenant":    types.StringType,
-			"namespace": types.StringType,
-			"name":      types.StringType},
-	},
-	"vip_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap,
-	},
-	"v6_vip_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkV6VipChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredPointerField --> VirtualNetwork
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVirtualNetworkModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for OneOfField --> VipChoice
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"default_vip":  types.BoolType,
-	"specific_vip": types.StringType,
-}
-
-// Attribute map for OneOfField --> V6VipChoice
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkV6VipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"default_v6_vip":  types.BoolType,
-	"specific_v6_vip": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> CloudEdgeSegment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap = map[string]attr.Type{
-	"segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"namespace": types.StringType,
-			"name":      types.StringType,
-			"tenant":    types.StringType},
-	}, "cloud_edge": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"tenant":    types.StringType,
-			"namespace": types.StringType,
-			"name":      types.StringType},
-	},
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap = map[string]attr.Type{
-
-	"namespace": types.StringType,
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> CloudEdge
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap = map[string]attr.Type{
-	"segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
-	},
-	"ipv4_vip": types.StringType,
-	"ipv6_vip": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> PortChoice
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap = map[string]attr.Type{
 
-	"use_default_port": types.BoolType,
 	"port":             types.Int64Type,
 	"port_ranges":      types.StringType,
+	"use_default_port": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> AdvertiseOnPublic
@@ -847,8 +832,8 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicModelAttributeMap = map[strin
 	"public_ip": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
 	},
 }
 
@@ -856,26 +841,19 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicModelAttributeMap = map[strin
 var TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> ClusterRetractChoice
-var TcpLoadbalancerClusterRetractChoiceModelAttributeMap = map[string]attr.Type{
-
-	"retract_cluster":        types.BoolType,
-	"do_not_retract_cluster": types.BoolType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerField --> AutoCertInfo
 var TcpLoadbalancerAutoCertInfoModelAttributeMap = map[string]attr.Type{
 
+	"auto_cert_expiry": timetypes.RFC3339Type{},
+	"auto_cert_issuer": types.StringType,
 	"auto_cert_state": types.ListType{
 		ElemType: types.StringType,
 	},
-	"auto_cert_expiry":  timetypes.RFC3339Type{},
 	"auto_cert_subject": types.StringType,
-	"auto_cert_issuer":  types.StringType,
 	"dns_records": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -896,160 +874,144 @@ var TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap = map[string]attr.Typ
 	"value": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PortChoice
-var TcpLoadbalancerPortChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> ClusterRetractChoice
+var TcpLoadbalancerClusterRetractChoiceModelAttributeMap = map[string]attr.Type{
 
-	"port_ranges": types.StringType,
-	"listen_port": types.Int64Type,
+	"do_not_retract_cluster": types.BoolType,
+	"retract_cluster":        types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> SniDefaultLbChoice
-var TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> DnsInfo
+var TcpLoadbalancerDnsInfoModelAttributeMap = map[string]attr.Type{
 
-	"no_sni":              types.BoolType,
-	"sni":                 types.BoolType,
-	"default_lb_with_sni": types.BoolType,
+	"ip_address":   types.StringType,
+	"ipv6_address": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> HashPolicyChoice
 var TcpLoadbalancerHashPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
-	"hash_policy_choice_round_robin":          types.BoolType,
 	"hash_policy_choice_least_active":         types.BoolType,
 	"hash_policy_choice_random":               types.BoolType,
+	"hash_policy_choice_round_robin":          types.BoolType,
 	"hash_policy_choice_source_ip_stickiness": types.BoolType,
+}
+
+// Attribute map for ArrayOfPointerField --> InternetVipInfo
+var TcpLoadbalancerInternetVipInfoModelAttributeMap = map[string]attr.Type{
+
+	"site_name": types.StringType,
+	"site_network_type": types.ListType{
+		ElemType: types.StringType,
+	}, "status": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"arn":        types.StringType,
+			"name":       types.StringType,
+			"nlb_cname":  types.StringType,
+			"nlb_status": types.StringType,
+			"reason":     types.StringType,
+			"target_group_status": types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+
+						"arn": types.StringType,
+						"listener_status": types.ListType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+
+									"arn":      types.StringType,
+									"port":     types.Int64Type,
+									"protocol": types.StringType,
+									"reason":   types.StringType,
+									"status":   types.StringType,
+								},
+							},
+						},
+						"name":     types.StringType,
+						"protocol": types.StringType,
+						"reason":   types.StringType,
+						"status":   types.StringType,
+					},
+				},
+			}},
+	},
+}
+
+// Attribute map for PointerField --> Status
+var TcpLoadbalancerInternetVipInfoStatusModelAttributeMap = map[string]attr.Type{
+
+	"arn":        types.StringType,
+	"name":       types.StringType,
+	"nlb_cname":  types.StringType,
+	"nlb_status": types.StringType,
+	"reason":     types.StringType,
+	"target_group_status": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"arn": types.StringType,
+				"listener_status": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+
+							"arn":      types.StringType,
+							"port":     types.Int64Type,
+							"protocol": types.StringType,
+							"reason":   types.StringType,
+							"status":   types.StringType,
+						},
+					},
+				},
+				"name":     types.StringType,
+				"protocol": types.StringType,
+				"reason":   types.StringType,
+				"status":   types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> TargetGroupStatus
+var TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusModelAttributeMap = map[string]attr.Type{
+
+	"arn": types.StringType,
+	"listener_status": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"arn":      types.StringType,
+				"port":     types.Int64Type,
+				"protocol": types.StringType,
+				"reason":   types.StringType,
+				"status":   types.StringType,
+			},
+		},
+	},
+	"name":     types.StringType,
+	"protocol": types.StringType,
+	"reason":   types.StringType,
+	"status":   types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> ListenerStatus
+var TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttributeMap = map[string]attr.Type{
+
+	"arn":      types.StringType,
+	"port":     types.Int64Type,
+	"protocol": types.StringType,
+	"reason":   types.StringType,
+	"status":   types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> LoadbalancerType
 var TcpLoadbalancerLoadbalancerTypeModelAttributeMap = map[string]attr.Type{
 
-	"tls_tcp_auto_cert": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap,
-	},
+	"tcp": types.BoolType,
 	"tls_tcp": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpModelAttributeMap,
 	},
-	"tcp": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> TlsTcpAutoCert
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap = map[string]attr.Type{
-	"tls_config": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"choice": types.ObjectType{
-				AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap,
-			}},
-	},
-	"mtls_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerField --> TlsConfig
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap = map[string]attr.Type{
-
-	"choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> Choice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
-
-	"default_security": types.BoolType,
-	"medium_security":  types.BoolType,
-	"low_security":     types.BoolType,
-	"custom_security": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> CustomSecurity
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap = map[string]attr.Type{
-
-	"min_version": types.ListType{
-		ElemType: types.StringType,
-	},
-	"max_version": types.ListType{
-		ElemType: types.StringType,
-	},
-	"cipher_suites": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> MtlsChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_mtls": types.BoolType,
-	"use_mtls": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> UseMtls
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
-	},
-	"client_certificate_optional": types.BoolType,
-	"crl_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap,
-	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> TrustedCaChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca_url": types.StringType,
-	"trusted_ca": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> TrustedCa
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for OneOfField --> CrlChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap = map[string]attr.Type{
-
-	"crl": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap,
-	},
-	"no_crl": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Crl
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_disabled": types.BoolType,
-	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
-
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
+	"tls_tcp_auto_cert": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap,
 	},
 }
 
@@ -1080,8 +1042,8 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsModel
 			AttrTypes: map[string]attr.Type{
 
 				"name":      types.StringType,
-				"tenant":    types.StringType,
 				"namespace": types.StringType,
+				"tenant":    types.StringType,
 			},
 		},
 	},
@@ -1099,8 +1061,8 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsModel
 var TcpLoadbalancerCertificatesObjectRefModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> MtlsChoice
@@ -1115,33 +1077,16 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsC
 // Attribute map for PointerOfOneOfField --> UseMtls
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
 
-	"trusted_ca_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
-	},
 	"client_certificate_optional": types.BoolType,
 	"crl_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap,
 	},
+	"trusted_ca_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
+	},
 	"xfcc_header_choice": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
 	},
-}
-
-// Attribute map for RequiredOneOfField --> TrustedCaChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca_url": types.StringType,
-	"trusted_ca": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> TrustedCa
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
 }
 
 // Attribute map for OneOfField --> CrlChoice
@@ -1157,17 +1102,34 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsC
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> TrustedCaChoice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
+
+	"trusted_ca": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
+	},
+	"trusted_ca_url": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> TrustedCa
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> XfccHeader
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
 
+	"xfcc_disabled": types.BoolType,
 	"xfcc_options": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
 	},
-	"xfcc_disabled": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> XfccOptions
@@ -1189,12 +1151,12 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsCo
 // Attribute map for RequiredOneOfField --> Choice
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
-	"default_security": types.BoolType,
-	"medium_security":  types.BoolType,
-	"low_security":     types.BoolType,
 	"custom_security": types.ObjectType{
 		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceCustomSecurityModelAttributeMap,
 	},
+	"default_security": types.BoolType,
+	"low_security":     types.BoolType,
+	"medium_security":  types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> CustomSecurity
@@ -1203,89 +1165,149 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsCo
 	"cipher_suites": types.ListType{
 		ElemType: types.StringType,
 	},
-	"min_version": types.ListType{
+	"max_version": types.ListType{
 		ElemType: types.StringType,
 	},
-	"max_version": types.ListType{
+	"min_version": types.ListType{
 		ElemType: types.StringType,
 	},
 }
 
 // Attribute map for PointerOfOneOfField --> TlsParameters
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersModelAttributeMap = map[string]attr.Type{
-	"tls_config": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"choice": types.ObjectType{
-				AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap,
-			}},
+
+	"mtls_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap,
 	},
 	"tls_certificates": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"certificate_url": types.StringType, "private_key": types.ObjectType{
+				"certificate_url": types.StringType,
+				"description":     types.StringType,
+				"ocsp_stapling_choice": types.ObjectType{
+					AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap,
+				}, "private_key": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"secret_info_choice": types.ObjectType{
 							AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
 						}},
 				},
-				"description": types.StringType,
-				"ocsp_stapling_choice": types.ObjectType{
-					AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap,
-				},
 			},
 		},
-	},
-	"mtls_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerField --> TlsConfig
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap = map[string]attr.Type{
-
-	"choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap,
+	}, "tls_config": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"choice": types.ObjectType{
+				AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap,
+			}},
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> MtlsChoice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap = map[string]attr.Type{
 
-	"custom_security": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap,
+	"no_mtls": types.BoolType,
+	"use_mtls": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap,
 	},
-	"default_security": types.BoolType,
-	"medium_security":  types.BoolType,
-	"low_security":     types.BoolType,
 }
 
-// Attribute map for PointerOfOneOfField --> CustomSecurity
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> UseMtls
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
 
-	"max_version": types.ListType{
-		ElemType: types.StringType,
+	"client_certificate_optional": types.BoolType,
+	"crl_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap,
 	},
-	"cipher_suites": types.ListType{
-		ElemType: types.StringType,
+	"trusted_ca_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"min_version": types.ListType{
+	"xfcc_header_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> CrlChoice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap = map[string]attr.Type{
+
+	"crl": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap,
+	},
+	"no_crl": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> Crl
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> TrustedCaChoice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
+
+	"trusted_ca": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
+	},
+	"trusted_ca_url": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> TrustedCa
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for OneOfField --> XfccHeader
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
+
+	"xfcc_disabled": types.BoolType,
+	"xfcc_options": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> XfccOptions
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
+
+	"xfcc_header_elements": types.ListType{
 		ElemType: types.StringType,
 	},
 }
 
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
-var TcpLoadbalancerTlsCertificatesObjectRefModelAttributeMap = map[string]attr.Type{
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesModelAttributeMap = map[string]attr.Type{
 
-	"certificate_url": types.StringType, "private_key": types.ObjectType{
+	"certificate_url": types.StringType,
+	"description":     types.StringType,
+	"ocsp_stapling_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap,
+	}, "private_key": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"secret_info_choice": types.ObjectType{
 				AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
 			}},
 	},
-	"description": types.StringType,
-	"ocsp_stapling_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap,
+}
+
+// Attribute map for OneOfField --> OcspStaplingChoice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap = map[string]attr.Type{
+
+	"custom_hash_algorithms": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap,
+	},
+	"disable_ocsp_stapling": types.BoolType,
+	"use_system_defaults":   types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> CustomHashAlgorithms
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap = map[string]attr.Type{
+
+	"hash_algorithms": types.ListType{
+		ElemType: types.StringType,
 	},
 }
 
@@ -1312,8 +1334,8 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCe
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
 
 	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
 	"location":            types.StringType,
+	"store_provider":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
@@ -1323,203 +1345,246 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCe
 	"url":      types.StringType,
 }
 
-// Attribute map for OneOfField --> OcspStaplingChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> TlsConfig
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap = map[string]attr.Type{
 
-	"use_system_defaults":   types.BoolType,
-	"disable_ocsp_stapling": types.BoolType,
-	"custom_hash_algorithms": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap,
+	"choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap,
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> CustomHashAlgorithms
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> Choice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
-	"hash_algorithms": types.ListType{
+	"custom_security": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap,
+	},
+	"default_security": types.BoolType,
+	"low_security":     types.BoolType,
+	"medium_security":  types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> CustomSecurity
+var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap = map[string]attr.Type{
+
+	"cipher_suites": types.ListType{
+		ElemType: types.StringType,
+	},
+	"max_version": types.ListType{
+		ElemType: types.StringType,
+	},
+	"min_version": types.ListType{
 		ElemType: types.StringType,
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MtlsChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> TlsTcpAutoCert
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap = map[string]attr.Type{
 
-	"use_mtls": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap,
+	"mtls_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap,
+	}, "tls_config": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"choice": types.ObjectType{
+				AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap,
+			}},
 	},
+}
+
+// Attribute map for RequiredOneOfField --> MtlsChoice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap = map[string]attr.Type{
+
 	"no_mtls": types.BoolType,
+	"use_mtls": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> UseMtls
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap = map[string]attr.Type{
 
+	"client_certificate_optional": types.BoolType,
 	"crl_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap,
-	},
-	"xfcc_header_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap,
 	},
 	"trusted_ca_choice": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap,
 	},
-	"client_certificate_optional": types.BoolType,
+	"xfcc_header_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap,
+	},
 }
 
 // Attribute map for OneOfField --> CrlChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap = map[string]attr.Type{
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap = map[string]attr.Type{
 
-	"no_crl": types.BoolType,
 	"crl": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap,
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap,
 	},
+	"no_crl": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> Crl
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap = map[string]attr.Type{
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> TrustedCaChoice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
+
+	"trusted_ca": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
+	},
+	"trusted_ca_url": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> TrustedCa
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> XfccHeader
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap = map[string]attr.Type{
 
 	"xfcc_disabled": types.BoolType,
 	"xfcc_options": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap,
 	},
 }
 
 // Attribute map for PointerOfOneOfField --> XfccOptions
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap = map[string]attr.Type{
 
 	"xfcc_header_elements": types.ListType{
 		ElemType: types.StringType,
 	},
 }
 
-// Attribute map for RequiredOneOfField --> TrustedCaChoice
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> TlsConfig
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap = map[string]attr.Type{
 
-	"trusted_ca_url": types.StringType,
-	"trusted_ca": types.ObjectType{
-		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap,
+	"choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap,
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> TrustedCa
-var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> Choice
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
+	"custom_security": types.ObjectType{
+		AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap,
+	},
+	"default_security": types.BoolType,
+	"low_security":     types.BoolType,
+	"medium_security":  types.BoolType,
 }
 
-// Attribute map for ArrayOfPointerField --> InternetVipInfo
-var TcpLoadbalancerInternetVipInfoObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> CustomSecurity
+var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap = map[string]attr.Type{
 
-	"site_name": types.StringType,
-	"site_network_type": types.ListType{
+	"cipher_suites": types.ListType{
 		ElemType: types.StringType,
-	}, "status": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"nlb_cname":  types.StringType,
-			"nlb_status": types.StringType,
-			"name":       types.StringType,
-			"arn":        types.StringType,
-			"target_group_status": types.ListType{
-				ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-
-						"name":     types.StringType,
-						"arn":      types.StringType,
-						"status":   types.StringType,
-						"protocol": types.StringType,
-						"listener_status": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-
-									"port":     types.Int64Type,
-									"protocol": types.StringType,
-									"reason":   types.StringType,
-									"arn":      types.StringType,
-									"status":   types.StringType,
-								},
-							},
-						},
-						"reason": types.StringType,
-					},
-				},
-			},
-			"reason": types.StringType},
+	},
+	"max_version": types.ListType{
+		ElemType: types.StringType,
+	},
+	"min_version": types.ListType{
+		ElemType: types.StringType,
 	},
 }
 
-// Attribute map for PointerField --> Status
-var TcpLoadbalancerInternetVipInfoStatusModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> OriginPoolsWeights
+var TcpLoadbalancerOriginPoolsWeightsModelAttributeMap = map[string]attr.Type{
 
-	"nlb_cname":  types.StringType,
-	"nlb_status": types.StringType,
-	"name":       types.StringType,
-	"arn":        types.StringType,
-	"target_group_status": types.ListType{
+	"endpoint_subsets": types.MapType{
+		ElemType: types.StringType,
+	},
+	"pool_choice": types.ObjectType{
+		AttrTypes: TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap,
+	},
+	"priority": types.Int64Type,
+	"weight":   types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> PoolChoice
+var TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap = map[string]attr.Type{
+
+	"cluster": types.ObjectType{
+		AttrTypes: TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap,
+	},
+	"pool": types.ObjectType{
+		AttrTypes: TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Cluster
+var TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Pool
+var TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> PortChoice
+var TcpLoadbalancerPortChoiceModelAttributeMap = map[string]attr.Type{
+
+	"listen_port": types.Int64Type,
+	"port_ranges": types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> ServicePolicyChoice
+var TcpLoadbalancerServicePolicyChoiceModelAttributeMap = map[string]attr.Type{
+
+	"active_service_policies": types.ObjectType{
+		AttrTypes: TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap,
+	},
+	"no_service_policies":             types.BoolType,
+	"service_policies_from_namespace": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> ActiveServicePolicies
+var TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap = map[string]attr.Type{
+
+	"policies": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"name":     types.StringType,
-				"arn":      types.StringType,
-				"status":   types.StringType,
-				"protocol": types.StringType,
-				"listener_status": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-
-							"port":     types.Int64Type,
-							"protocol": types.StringType,
-							"reason":   types.StringType,
-							"arn":      types.StringType,
-							"status":   types.StringType,
-						},
-					},
-				},
-				"reason": types.StringType,
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
 			},
 		},
 	},
-	"reason": types.StringType,
 }
 
-// Attribute map for ArrayOfPointerField --> TargetGroupStatus
-var TcpLoadbalancerTargetGroupStatusObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredArrayOfPointerField --> Policies
+var TcpLoadbalancerPoliciesObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"name":     types.StringType,
-	"arn":      types.StringType,
-	"status":   types.StringType,
-	"protocol": types.StringType,
-	"listener_status": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"port":     types.Int64Type,
-				"protocol": types.StringType,
-				"reason":   types.StringType,
-				"arn":      types.StringType,
-				"status":   types.StringType,
-			},
-		},
-	},
-	"reason": types.StringType,
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
-// Attribute map for ArrayOfPointerField --> ListenerStatus
-var TcpLoadbalancerListenerStatusObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> SniDefaultLbChoice
+var TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap = map[string]attr.Type{
 
-	"port":     types.Int64Type,
-	"protocol": types.StringType,
-	"reason":   types.StringType,
-	"arn":      types.StringType,
-	"status":   types.StringType,
+	"default_lb_with_sni": types.BoolType,
+	"no_sni":              types.BoolType,
+	"sni":                 types.BoolType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -1536,15 +1601,29 @@ func (d *DataSourceF5XCTcpLoadbalancer) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "TcpLoadbalancer data source",
-		Description:         "TcpLoadbalancer data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a tcp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of tcp_loadbalancer) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a tcp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of tcp_loadbalancer) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -1560,177 +1639,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 			},
 			"uid": schema.StringAttribute{
 				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"origin_pools_weights": schema.ListNestedAttribute{
-				Description: "Origin Pools with Weights Origin pools and weights used for this load balancer.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"pool_choice": schema.SingleNestedAttribute{
-							Description: "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-							Attributes: map[string]schema.Attribute{
-								"pool": schema.SingleNestedAttribute{
-									Description: "Pool Simple, commonly used pool parameters with origin pool",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"name": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"tenant": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"namespace": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"cluster": schema.SingleNestedAttribute{
-									Description: "Cluster More flexible, advanced feature control with cluster",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"name": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"tenant": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"namespace": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-							},
-						},
-						"weight": schema.Int64Attribute{
-							Description: "Weight Weight of this origin pool, valid only with multiple origin pool. Value of 0 will disable the pool",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"priority": schema.Int64Attribute{
-							Description: "Priority Priority of this origin pool, valid only with multiple origin pools. Value of 0 will make the pool as lowest priority origin pool Priority of 1 means highest priority and is considered active. When active origin pool is not available, lower priority origin pools are made active as per the increasing priority.",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"endpoint_subsets": schema.MapAttribute{
-							Description: "Origin Servers Subset Upstream origin pool may be configured to divide its origin servers into subsets based on metadata attached to the origin servers. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer For origin servers which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those origin servers of upstream origin pool which match this metadata will be selected for load balancing",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"service_policy_choice": schema.SingleNestedAttribute{
-				Description: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"no_service_policies": schema.BoolAttribute{
-						Description: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"active_service_policies": schema.SingleNestedAttribute{
-						Description: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"policies": schema.ListNestedAttribute{
-								Description: "policies Service Policies is a sequential engine where policies (and rules within the policy) are evaluated one after the other. It's important to define the correct order (policies evaluated from top to bottom in the list) for service policies, to get the intended result. For each request, its characteristics are evaluated based on the match criteria in each service policy starting at the top. If there is a match in the current policy, then the policy takes effect, and no more policies are evaluated. Otherwise, the next policy is evaluated. If all policies are evaluated and none match, then the request will be denied by default.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"namespace": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"name": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"tenant": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-							},
-						},
-					},
-					"service_policies_from_namespace": schema.BoolAttribute{
-						Description: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-				},
-			},
-			"host_name": schema.StringAttribute{
-				Description: "host name Internally generated host name to be used for the virtual host",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"dns_volterra_managed": schema.BoolAttribute{
-				Description: "Manage DNS Domain DNS records for domains will be managed automatically by Volterra. This requires the domain to be delegated to F5XC using the Delegated Domain feature.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -1760,6 +1668,40 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
+												"advertise_dualstack_on_public": schema.SingleNestedAttribute{
+													Description: "Advertise DualStack On Public Advertise this load balancer with Dualstack VIP on public network",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"public_ip": schema.SingleNestedAttribute{
+															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
 												"advertise_on_public": schema.SingleNestedAttribute{
 													Description: "Advertise On Public Advertise this load balancer on public network",
 													Required:    false,
@@ -1772,7 +1714,7 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"tenant": schema.StringAttribute{
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -1784,7 +1726,7 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"name": schema.StringAttribute{
+																"tenant": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -1794,19 +1736,19 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 														},
 													},
 												},
-												"virtual_site": schema.SingleNestedAttribute{
-													Description: "Virtual Site Advertise on a customer virtual site and a given network.",
+												"advertise_v6_on_public": schema.SingleNestedAttribute{
+													Description: "Advertise IPv6 On Public Advertise this load balancer with IPv6 VIP on public network",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"virtual_site": schema.SingleNestedAttribute{
-															Description: "Virtual Site Reference to virtual site object",
+														"public_ip": schema.SingleNestedAttribute{
+															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"tenant": schema.StringAttribute{
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -1818,249 +1760,23 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"name": schema.StringAttribute{
+																"tenant": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
-																},
-															},
-														},
-														"network": schema.ListAttribute{
-															Description: "Network Select network types to be used on site. IP address of primary network interface in the network",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"vk8s_service": schema.SingleNestedAttribute{
-													Description: "vK8s services network Advertise on vK8s Service Network on RE.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"choice": schema.SingleNestedAttribute{
-															Description: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"site": schema.SingleNestedAttribute{
-																	Description: "RE Site Reference to site object",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"tenant": schema.StringAttribute{
-																			Description: "",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"namespace": schema.StringAttribute{
-																			Description: "",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"name": schema.StringAttribute{
-																			Description: "",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																	},
-																},
-																"virtual_site": schema.SingleNestedAttribute{
-																	Description: "Virtual Site Reference to virtual site object",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"tenant": schema.StringAttribute{
-																			Description: "",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"namespace": schema.StringAttribute{
-																			Description: "",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"name": schema.StringAttribute{
-																			Description: "",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																	},
 																},
 															},
 														},
 													},
 												},
-												"virtual_site_segment": schema.SingleNestedAttribute{
-													Description: "Segment on Virtual Site Advertise on a segment on a virtual site",
+												"cloud_edge_segment": schema.SingleNestedAttribute{
+													Description: "Segment on Cloud Edge Advertise on a segment on a Cloud Edge",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"segment": schema.SingleNestedAttribute{
-															Description: "Segment",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"virtual_site": schema.SingleNestedAttribute{
-															Description: "Virtual Site Reference to virtual site object",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"ip": schema.StringAttribute{
-															Description: "IP address on the site Use given IP address as VIP on the site",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPv6 address on the site Use given IPv6 address as VIP on the site",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"virtual_site_with_vip": schema.SingleNestedAttribute{
-													Description: "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"virtual_site": schema.SingleNestedAttribute{
-															Description: "Virtual Site Reference to virtual site object",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"ip": schema.StringAttribute{
-															Description: "IP address on the site Use given IP address as VIP on the site",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPv6 address on the site Use given IPv6 address as VIP on the site",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"network": schema.ListAttribute{
-															Description: "Network Select network types to be used on site. IP address of primary network interface in the network",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"site_segment": schema.SingleNestedAttribute{
-													Description: "Segment on Site Advertise on a segment on a site",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"segment": schema.SingleNestedAttribute{
-															Description: "Segment",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"site": schema.SingleNestedAttribute{
+														"cloud_edge": schema.SingleNestedAttribute{
 															Description: "Site",
 															Required:    false,
 															Optional:    false,
@@ -2072,7 +1788,39 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
 																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+														"ip": schema.StringAttribute{
+															Description: "IP address on the Cloud Edge Use given IP address as VIP on the Cloud Edge",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"ipv6": schema.StringAttribute{
+															Description: "IPv6 address on the Cloud Edge Use given IPv6 address as VIP on the Cloud Edge",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"segment": schema.SingleNestedAttribute{
+															Description: "Segment",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -2084,19 +1832,59 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
 															},
 														},
-														"ip": schema.StringAttribute{
-															Description: "IP address on the site Use given IP address as VIP on the site",
+													},
+												},
+												"segment": schema.SingleNestedAttribute{
+													Description: "Segment Advertise on a segment",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"ipv4_vip": schema.StringAttribute{
+															Description: "IPv4 VIP Configure IPV4 VIP address",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPv6 address on the site Use given IPv6 address as VIP on the site",
+														"ipv6_vip": schema.StringAttribute{
+															Description: "IPv6 VIP Configure IPV6 VIP address",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
+														},
+														"segment": schema.SingleNestedAttribute{
+															Description: "Segment",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
 														},
 													},
 												},
@@ -2131,7 +1919,7 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"tenant": schema.StringAttribute{
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -2143,7 +1931,79 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
+												"site_segment": schema.SingleNestedAttribute{
+													Description: "Segment on Site Advertise on a segment on a site",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"ip": schema.StringAttribute{
+															Description: "IP address on the site Use given IP address as VIP on the site",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"ipv6": schema.StringAttribute{
+															Description: "IPv6 address on the site Use given IPv6 address as VIP on the site",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"segment": schema.SingleNestedAttribute{
+															Description: "Segment",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
 																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+														"site": schema.SingleNestedAttribute{
+															Description: "Site",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -2159,26 +2019,20 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"virtual_network": schema.SingleNestedAttribute{
-															Description: "Network Select network reference",
+														"v6_vip_choice": schema.SingleNestedAttribute{
+															Description: "Select V6 VIP Select default V6 VIP or specify IPv6 address",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"tenant": schema.StringAttribute{
-																	Description: "",
+																"default_v6_vip": schema.BoolAttribute{
+																	Description: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"name": schema.StringAttribute{
-																	Description: "",
+																"specific_v6_vip": schema.StringAttribute{
+																	Description: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
@@ -2205,20 +2059,26 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																},
 															},
 														},
-														"v6_vip_choice": schema.SingleNestedAttribute{
-															Description: "Select V6 VIP Select default V6 VIP or specify ipv6 address",
+														"virtual_network": schema.SingleNestedAttribute{
+															Description: "Network Select network reference",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"default_v6_vip": schema.BoolAttribute{
-																	Description: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
+																"name": schema.StringAttribute{
+																	Description: "",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"specific_v6_vip": schema.StringAttribute{
-																	Description: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
@@ -2227,25 +2087,32 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 														},
 													},
 												},
-												"cloud_edge_segment": schema.SingleNestedAttribute{
-													Description: "Segment on Cloud Edge Advertise on a segment on a Cloud Edge",
+												"virtual_site": schema.SingleNestedAttribute{
+													Description: "Virtual Site Advertise on a customer virtual site and a given network.",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"segment": schema.SingleNestedAttribute{
-															Description: "Segment",
+														"network": schema.ListAttribute{
+															Description: "Network Select network types to be used on site. IP address of primary network interface in the network",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"virtual_site": schema.SingleNestedAttribute{
+															Description: "Virtual Site Reference to virtual site object",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"namespace": schema.StringAttribute{
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"name": schema.StringAttribute{
+																"namespace": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -2259,52 +2126,26 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																},
 															},
 														},
-														"cloud_edge": schema.SingleNestedAttribute{
-															Description: "Site",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
+													},
+												},
+												"virtual_site_segment": schema.SingleNestedAttribute{
+													Description: "Segment on Virtual Site Advertise on a segment on a virtual site",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
 														"ip": schema.StringAttribute{
-															Description: "IP address on the Cloud Edge Use given IP address as VIP on the Cloud Edge",
+															Description: "IP address on the site Use given IP address as VIP on the site",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 														},
 														"ipv6": schema.StringAttribute{
-															Description: "IPv6 address on the Cloud Edge Use given IPv6 address as VIP on the Cloud Edge",
+															Description: "IPv6 address on the site Use given IPv6 address as VIP on the site",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 														},
-													},
-												},
-												"segment": schema.SingleNestedAttribute{
-													Description: "Segment Advertise on a segment",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
 														"segment": schema.SingleNestedAttribute{
 															Description: "Segment",
 															Required:    false,
@@ -2317,7 +2158,27 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
 																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+														"virtual_site": schema.SingleNestedAttribute{
+															Description: "Virtual Site Reference to virtual site object",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -2329,19 +2190,134 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																	Optional:    false,
 																	Computed:    true,
 																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
 															},
 														},
-														"ipv4_vip": schema.StringAttribute{
-															Description: "IPv4 VIP Configure IPV4 VIP address",
+													},
+												},
+												"virtual_site_with_vip": schema.SingleNestedAttribute{
+													Description: "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"ip": schema.StringAttribute{
+															Description: "IP address on the site Use given IP address as VIP on the site",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 														},
-														"ipv6_vip": schema.StringAttribute{
-															Description: "IPv6 VIP Configure IPV6 VIP address",
+														"ipv6": schema.StringAttribute{
+															Description: "IPv6 address on the site Use given IPv6 address as VIP on the site",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
+														},
+														"network": schema.ListAttribute{
+															Description: "Network Select network types to be used on site. IP address of primary network interface in the network",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"virtual_site": schema.SingleNestedAttribute{
+															Description: "Virtual Site Reference to virtual site object",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
+												"vk8s_service": schema.SingleNestedAttribute{
+													Description: "vK8s services network Advertise on vK8s Service Network on RE.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"choice": schema.SingleNestedAttribute{
+															Description: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"site": schema.SingleNestedAttribute{
+																	Description: "RE Site Reference to site object",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																	Attributes: map[string]schema.Attribute{
+																		"name": schema.StringAttribute{
+																			Description: "",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"namespace": schema.StringAttribute{
+																			Description: "",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"tenant": schema.StringAttribute{
+																			Description: "",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																	},
+																},
+																"virtual_site": schema.SingleNestedAttribute{
+																	Description: "Virtual Site Reference to virtual site object",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																	Attributes: map[string]schema.Attribute{
+																		"name": schema.StringAttribute{
+																			Description: "",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"namespace": schema.StringAttribute{
+																			Description: "",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"tenant": schema.StringAttribute{
+																			Description: "",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																	},
+																},
+															},
 														},
 													},
 												},
@@ -2353,12 +2329,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"use_default_port": schema.BoolAttribute{
-													Description: "Use Default port Inherit the Load Balancer's Listen Port.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 												"port": schema.Int64Attribute{
 													Description: "Port to listen Port to Listen.",
 													Required:    false,
@@ -2371,6 +2341,12 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 													Optional:    false,
 													Computed:    true,
 												},
+												"use_default_port": schema.BoolAttribute{
+													Description: "Use Default port Inherit the Load Balancer's Listen Port.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
 											},
 										},
 									},
@@ -2378,20 +2354,8 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 							},
 						},
 					},
-					"do_not_advertise": schema.BoolAttribute{
-						Description: "Do Not Advertise Do not advertise this load balancer",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"advertise_on_public_default_vip": schema.BoolAttribute{
-						Description: "Advertise On Public Default VIP Advertise this load balancer on public network with default VIP",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"advertise_on_public": schema.SingleNestedAttribute{
-						Description: "Advertise On Public Advertise this load balancer on public network",
+						Description: "Advertise On Public (Specified IPv4) Advertise this load balancer on specified IPv4 on public network",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -2408,13 +2372,13 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 										Optional:    false,
 										Computed:    true,
 									},
-									"tenant": schema.StringAttribute{
+									"namespace": schema.StringAttribute{
 										Description: "",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
-									"namespace": schema.StringAttribute{
+									"tenant": schema.StringAttribute{
 										Description: "",
 										Required:    false,
 										Optional:    false,
@@ -2424,28 +2388,14 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 							},
 						},
 					},
-				},
-			},
-			"idle_timeout": schema.Int64Attribute{
-				Description: "Idle timeout The amount of time that a stream can exist without upstream or downstream activity, in milliseconds.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"cluster_retract_choice": schema.SingleNestedAttribute{
-				Description: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"retract_cluster": schema.BoolAttribute{
-						Description: "retract_cluster When this option is enabled, weighted cluster will not be considered for load balancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
+					"advertise_on_public_default_vip": schema.BoolAttribute{
+						Description: "Advertise On Public Default VIP (IPv4) Advertise this load balancer on public network with default IPv4 VIP",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"do_not_retract_cluster": schema.BoolAttribute{
-						Description: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
+					"do_not_advertise": schema.BoolAttribute{
+						Description: "Do Not Advertise Do not advertise this load balancer",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -2458,13 +2408,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"auto_cert_state": schema.ListAttribute{
-						Description: "Auto Cert State State of auto certificate generation.",
-						ElementType: types.StringType,
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"auto_cert_expiry": schema.StringAttribute{
 						Description: "Auto Cert Expiry Timestamp Auto certificate expiry timestamp",
 						CustomType:  timetypes.RFC3339Type{},
@@ -2472,14 +2415,21 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 						Optional:    false,
 						Computed:    true,
 					},
-					"auto_cert_subject": schema.StringAttribute{
-						Description: "Auto Cert Subject Subject of the auto certificate",
+					"auto_cert_issuer": schema.StringAttribute{
+						Description: "Auto Cert Issuer Issuer of the auto certificate",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"auto_cert_issuer": schema.StringAttribute{
-						Description: "Auto Cert Issuer Issuer of the auto certificate",
+					"auto_cert_state": schema.ListAttribute{
+						Description: "Auto Cert State State of auto certificate generation.",
+						ElementType: types.StringType,
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"auto_cert_subject": schema.StringAttribute{
+						Description: "Auto Cert Subject Subject of the auto certificate",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -2521,51 +2471,60 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"port_choice": schema.SingleNestedAttribute{
-				Description: "Listen Port Listen Port for this load balancer",
+			"cluster_retract_choice": schema.SingleNestedAttribute{
+				Description: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"port_ranges": schema.StringAttribute{
-						Description: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
+					"do_not_retract_cluster": schema.BoolAttribute{
+						Description: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"listen_port": schema.Int64Attribute{
-						Description: "Port Listen Port for this load balancer",
+					"retract_cluster": schema.BoolAttribute{
+						Description: "retract_cluster When this option is enabled, weighted cluster will not be considered for load balancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
 				},
 			},
-			"sni_default_lb_choice": schema.SingleNestedAttribute{
-				Description: "SNI and Default LB choice This is a choice to enable SNI and default LB options",
+			"dns_info": schema.ListNestedAttribute{
+				Description: "DNS information DNS information for this virtual host",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"no_sni": schema.BoolAttribute{
-						Description: "No SNI Loadbalancer without Server Name Indication support",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"sni": schema.BoolAttribute{
-						Description: "With SNI Enables Server Name Indication for Loadbalancer",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"default_lb_with_sni": schema.BoolAttribute{
-						Description: "SNI and Default LB Enables Server Name Indication for Loadbalancer Also enables usage as Default LB for Non SNI Clients",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"ip_address": schema.StringAttribute{
+							Description: "IP address IP address associated with virtual host",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"ipv6_address": schema.StringAttribute{
+							Description: "IPv6 address IPv6 address associated with virtual host",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 					},
 				},
+			},
+			"dns_volterra_managed": schema.BoolAttribute{
+				Description: "Manage DNS Domain DNS records for domains will be managed automatically by Volterra. This requires the domain to be delegated to F5XC using the Delegated Domain feature.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"domains": schema.ListAttribute{
+				Description: "Domains A list of Domains (host/authority header) that will be matched to this Load Balancer. Supported Domains and search order: 1. Exact Domain names: www.foo.com. 2. Domains starting with a Wildcard: *.foo.com. Not supported Domains: - Just a Wildcard: * - A Wildcard and TLD with no root Domain: *.com. - A Wildcard not matching a whole DNS label. e.g. *.foo.com and *.bar.foo.com are valid Wildcards however *bar.foo.com, *-bar.foo.com, and bar*.foo.com are all invalid. Additional notes: A Wildcard will not match empty string. e.g. *.foo.com will match bar.foo.com and baz-bar.foo.com but not .foo.com. The longest Wildcards match first. Only a single virtual host in the entire route configuration can match on *. Also a Domain must be unique across all virtual hosts within an advertise policy. Domains are also used for SNI matching if SNI is activated on the given TCP Load Balancer. Domains also indicate the list of names for which DNS resolution will be automatically resolved to IP addresses by the system.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"hash_policy_choice": schema.SingleNestedAttribute{
 				Description: "Load Balancing Control Select how the connections are load-balanced",
@@ -2573,12 +2532,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"hash_policy_choice_round_robin": schema.BoolAttribute{
-						Description: "Round Robin Connections are sent to all eligible origin servers in round robin fashion",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"hash_policy_choice_least_active": schema.BoolAttribute{
 						Description: "Least Active Connections Connections are sent to origin server that has least active connections",
 						Required:    false,
@@ -2591,11 +2544,170 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 						Optional:    false,
 						Computed:    true,
 					},
+					"hash_policy_choice_round_robin": schema.BoolAttribute{
+						Description: "Round Robin Connections are sent to all eligible origin servers in round robin fashion",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 					"hash_policy_choice_source_ip_stickiness": schema.BoolAttribute{
 						Description: "Source IP Stickiness Connections are sent to all eligible origin servers using hash of source ip. Consistent hashing algorithm, ring hash, is used to select origin server",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
+					},
+				},
+			},
+			"host_name": schema.StringAttribute{
+				Description: "host name Internally generated host name to be used for the virtual host",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"idle_timeout": schema.Int64Attribute{
+				Description: "Idle timeout The amount of time that a stream can exist without upstream or downstream activity, in milliseconds.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"internet_vip_info": schema.ListNestedAttribute{
+				Description: "Internet VIP Info Internet VIP Info",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"site_name": schema.StringAttribute{
+							Description: "Site Name Site Name where Internet VIP is installed",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"site_network_type": schema.ListAttribute{
+							Description: "Site Network Type Network Type of the site where Internet VIP is installed",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"status": schema.SingleNestedAttribute{
+							Description: "Internet VIP Status Detailed status for internet VIP",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+							Attributes: map[string]schema.Attribute{
+								"arn": schema.StringAttribute{
+									Description: "ARN ARN",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"name": schema.StringAttribute{
+									Description: "Name Name",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"nlb_cname": schema.StringAttribute{
+									Description: "NLB CNAME NLB CNAME",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"nlb_status": schema.StringAttribute{
+									Description: "NLB Status NLB Status",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"reason": schema.StringAttribute{
+									Description: "Reason Reason",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"target_group_status": schema.ListNestedAttribute{
+									Description: "Target Group Status Target Group Status",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"arn": schema.StringAttribute{
+												Description: "ARN ARN",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"listener_status": schema.ListNestedAttribute{
+												Description: "Listener status Listener status",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"arn": schema.StringAttribute{
+															Description: "Name Name",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"port": schema.Int64Attribute{
+															Description: "Port Port",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"protocol": schema.StringAttribute{
+															Description: "Protocol Protocol",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"reason": schema.StringAttribute{
+															Description: "Reason Reason",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"status": schema.StringAttribute{
+															Description: "Status Status",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
+											"name": schema.StringAttribute{
+												Description: "Name Name",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"protocol": schema.StringAttribute{
+												Description: "Protocol Protocol",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"reason": schema.StringAttribute{
+												Description: "Reason Reason",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"status": schema.StringAttribute{
+												Description: "Status Status",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2605,68 +2717,582 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"tls_tcp_auto_cert": schema.SingleNestedAttribute{
-						Description: "TLS over TCP with automatic certificate TLS over TCP load balancer with automatic public certificate provisioning. DNS records for the domains will be automatically managed by F5 Distributed Cloud. As a prerequisite, the domain must be delegated to F5 Distributed Cloud (see the DNS Management section) or a DNS CNAME record should be created in your DNS provider's portal(only for Domains not managed by F5 Distributed Cloud).",
+					"tcp": schema.BoolAttribute{
+						Description: "TCP TCP Load Balancer.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"tls_tcp": schema.SingleNestedAttribute{
+						Description: "TLS over TCP TLS over TCP load balancer with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS to this load balancer.",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"tls_config": schema.SingleNestedAttribute{
-								Description: "TLS Config Configuration of TLS settings such as min/max TLS version and ciphersuites",
+							"tls_certificates_choice": schema.SingleNestedAttribute{
+								Description: "TLS Configuration TLS Certificate Configuration for downstream connections",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"choice": schema.SingleNestedAttribute{
-										Description: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
+									"tls_cert_params": schema.SingleNestedAttribute{
+										Description: "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"default_security": schema.BoolAttribute{
-												Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+											"certificates": schema.ListNestedAttribute{
+												Description: "certificates Select one or more certificates with any domain names.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"namespace": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"tenant": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
 											},
-											"medium_security": schema.BoolAttribute{
-												Description: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"low_security": schema.BoolAttribute{
-												Description: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"custom_security": schema.SingleNestedAttribute{
-												Description: "Custom Security Custom selection of TLS versions and cipher suites",
+											"mtls_choice": schema.SingleNestedAttribute{
+												Description: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
 												Attributes: map[string]schema.Attribute{
-													"min_version": schema.ListAttribute{
-														Description: "minimum_protocol_version Minimum TLS protocol version.",
-														ElementType: types.StringType,
+													"no_mtls": schema.BoolAttribute{
+														Description: "No mTLS",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"max_version": schema.ListAttribute{
-														Description: "maximum_protocol_version Maximum TLS protocol version.",
-														ElementType: types.StringType,
+													"use_mtls": schema.SingleNestedAttribute{
+														Description: "Use mTLS",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"client_certificate_optional": schema.BoolAttribute{
+																Description: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"crl_choice": schema.SingleNestedAttribute{
+																Description: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"crl": schema.SingleNestedAttribute{
+																		Description: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"name": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"namespace": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"tenant": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"no_crl": schema.BoolAttribute{
+																		Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"trusted_ca_choice": schema.SingleNestedAttribute{
+																Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"trusted_ca": schema.SingleNestedAttribute{
+																		Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"name": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"namespace": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"tenant": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"trusted_ca_url": schema.StringAttribute{
+																		Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"xfcc_header_choice": schema.SingleNestedAttribute{
+																Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"xfcc_disabled": schema.BoolAttribute{
+																		Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"xfcc_options": schema.SingleNestedAttribute{
+																		Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"xfcc_header_elements": schema.ListAttribute{
+																				Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
+																				ElementType: types.StringType,
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											"tls_config": schema.SingleNestedAttribute{
+												Description: "TLS Config Configuration of TLS settings such as min/max TLS version and ciphersuites",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"choice": schema.SingleNestedAttribute{
+														Description: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"custom_security": schema.SingleNestedAttribute{
+																Description: "Custom Security Custom selection of TLS versions and cipher suites",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"cipher_suites": schema.ListAttribute{
+																		Description: "cipher_suites The TLS listener will only support the specified cipher list.",
+																		ElementType: types.StringType,
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"max_version": schema.ListAttribute{
+																		Description: "maximum_protocol_version Maximum TLS protocol version.",
+																		ElementType: types.StringType,
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"min_version": schema.ListAttribute{
+																		Description: "minimum_protocol_version Minimum TLS protocol version.",
+																		ElementType: types.StringType,
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"default_security": schema.BoolAttribute{
+																Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"low_security": schema.BoolAttribute{
+																Description: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"medium_security": schema.BoolAttribute{
+																Description: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"tls_parameters": schema.SingleNestedAttribute{
+										Description: "Inline TLS Parameters (legacy) Upload a TLS certificate specifically for this Load Balancer (certificate must cover all Load Balancer domain names)",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"mtls_choice": schema.SingleNestedAttribute{
+												Description: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"no_mtls": schema.BoolAttribute{
+														Description: "No mTLS",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"cipher_suites": schema.ListAttribute{
-														Description: "cipher_suites The TLS listener will only support the specified cipher list.",
-														ElementType: types.StringType,
+													"use_mtls": schema.SingleNestedAttribute{
+														Description: "Use mTLS",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"client_certificate_optional": schema.BoolAttribute{
+																Description: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"crl_choice": schema.SingleNestedAttribute{
+																Description: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"crl": schema.SingleNestedAttribute{
+																		Description: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"name": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"namespace": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"tenant": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"no_crl": schema.BoolAttribute{
+																		Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"trusted_ca_choice": schema.SingleNestedAttribute{
+																Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"trusted_ca": schema.SingleNestedAttribute{
+																		Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"name": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"namespace": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"tenant": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"trusted_ca_url": schema.StringAttribute{
+																		Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"xfcc_header_choice": schema.SingleNestedAttribute{
+																Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"xfcc_disabled": schema.BoolAttribute{
+																		Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"xfcc_options": schema.SingleNestedAttribute{
+																		Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"xfcc_header_elements": schema.ListAttribute{
+																				Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
+																				ElementType: types.StringType,
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											"tls_certificates": schema.ListNestedAttribute{
+												Description: "tls_certificates Users can add one or more certificates that share the same set of domains. for example, domain.com and *.domain.com - but use different signature algorithms",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"certificate_url": schema.StringAttribute{
+															Description: "certificate_url TLS certificate. Certificate or certificate chain in PEM format including the PEM headers.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"description": schema.StringAttribute{
+															Description: "description Description for the certificate",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"ocsp_stapling_choice": schema.SingleNestedAttribute{
+															Description: "OCSP Response choice OCSP Stapling choice",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"custom_hash_algorithms": schema.SingleNestedAttribute{
+																	Description: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																	Attributes: map[string]schema.Attribute{
+																		"hash_algorithms": schema.ListAttribute{
+																			Description: "Hash Algorithms Ordered list of hash algorithms to be used.",
+																			ElementType: types.StringType,
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																	},
+																},
+																"disable_ocsp_stapling": schema.BoolAttribute{
+																	Description: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"use_system_defaults": schema.BoolAttribute{
+																	Description: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+														"private_key": schema.SingleNestedAttribute{
+															Description: "private_key TLS Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. TLS key has to match the accompanying certificate.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"secret_info_choice": schema.SingleNestedAttribute{
+																	Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																	Attributes: map[string]schema.Attribute{
+																		"blindfold_secret_info": schema.SingleNestedAttribute{
+																			Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																			Attributes: map[string]schema.Attribute{
+																				"decryption_provider": schema.StringAttribute{
+																					Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																				"location": schema.StringAttribute{
+																					Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																				"store_provider": schema.StringAttribute{
+																					Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																			},
+																		},
+																		"clear_secret_info": schema.SingleNestedAttribute{
+																			Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																			Attributes: map[string]schema.Attribute{
+																				"provider": schema.StringAttribute{
+																					Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																				"url": schema.StringAttribute{
+																					Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											"tls_config": schema.SingleNestedAttribute{
+												Description: "TLS Config Configuration of TLS settings such as min/max TLS version and ciphersuites",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"choice": schema.SingleNestedAttribute{
+														Description: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"custom_security": schema.SingleNestedAttribute{
+																Description: "Custom Security Custom selection of TLS versions and cipher suites",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"cipher_suites": schema.ListAttribute{
+																		Description: "cipher_suites The TLS listener will only support the specified cipher list.",
+																		ElementType: types.StringType,
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"max_version": schema.ListAttribute{
+																		Description: "maximum_protocol_version Maximum TLS protocol version.",
+																		ElementType: types.StringType,
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"min_version": schema.ListAttribute{
+																		Description: "minimum_protocol_version Minimum TLS protocol version.",
+																		ElementType: types.StringType,
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"default_security": schema.BoolAttribute{
+																Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"low_security": schema.BoolAttribute{
+																Description: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"medium_security": schema.BoolAttribute{
+																Description: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
 													},
 												},
 											},
@@ -2674,6 +3300,14 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 									},
 								},
 							},
+						},
+					},
+					"tls_tcp_auto_cert": schema.SingleNestedAttribute{
+						Description: "TLS over TCP with automatic certificate TLS over TCP load balancer with automatic public certificate provisioning. DNS records for the domains will be automatically managed by F5 Distributed Cloud. As a prerequisite, the domain must be delegated to F5 Distributed Cloud (see the DNS Management section) or a DNS CNAME record should be created in your DNS provider's portal(only for Domains not managed by F5 Distributed Cloud).",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
 							"mtls_choice": schema.SingleNestedAttribute{
 								Description: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
 								Required:    false,
@@ -2692,46 +3326,6 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"trusted_ca_choice": schema.SingleNestedAttribute{
-												Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"trusted_ca_url": schema.StringAttribute{
-														Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"trusted_ca": schema.SingleNestedAttribute{
-														Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"name": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"tenant": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"namespace": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
-											},
 											"client_certificate_optional": schema.BoolAttribute{
 												Description: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
 												Required:    false,
@@ -2756,7 +3350,41 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																Optional:    false,
 																Computed:    true,
 															},
+															"namespace": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
 															"tenant": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+													"no_crl": schema.BoolAttribute{
+														Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+											"trusted_ca_choice": schema.SingleNestedAttribute{
+												Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"trusted_ca": schema.SingleNestedAttribute{
+														Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"name": schema.StringAttribute{
 																Description: "",
 																Required:    false,
 																Optional:    false,
@@ -2768,10 +3396,16 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 																Optional:    false,
 																Computed:    true,
 															},
+															"tenant": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
 														},
 													},
-													"no_crl": schema.BoolAttribute{
-														Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
+													"trusted_ca_url": schema.StringAttribute{
+														Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -2811,580 +3445,64 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 									},
 								},
 							},
-						},
-					},
-					"tls_tcp": schema.SingleNestedAttribute{
-						Description: "TLS over TCP TLS over TCP load balancer with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS to this load balancer.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"tls_certificates_choice": schema.SingleNestedAttribute{
-								Description: "TLS Configuration TLS Certificate Configuration for downstream connections",
+							"tls_config": schema.SingleNestedAttribute{
+								Description: "TLS Config Configuration of TLS settings such as min/max TLS version and ciphersuites",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"tls_cert_params": schema.SingleNestedAttribute{
-										Description: "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer",
+									"choice": schema.SingleNestedAttribute{
+										Description: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"certificates": schema.ListNestedAttribute{
-												Description: "certificates Select one or more certificates with any domain names.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												NestedObject: schema.NestedAttributeObject{
-													Attributes: map[string]schema.Attribute{
-														"name": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"tenant": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"namespace": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-											"mtls_choice": schema.SingleNestedAttribute{
-												Description: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
+											"custom_security": schema.SingleNestedAttribute{
+												Description: "Custom Security Custom selection of TLS versions and cipher suites",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
 												Attributes: map[string]schema.Attribute{
-													"no_mtls": schema.BoolAttribute{
-														Description: "No mTLS",
+													"cipher_suites": schema.ListAttribute{
+														Description: "cipher_suites The TLS listener will only support the specified cipher list.",
+														ElementType: types.StringType,
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"use_mtls": schema.SingleNestedAttribute{
-														Description: "Use mTLS",
+													"max_version": schema.ListAttribute{
+														Description: "maximum_protocol_version Maximum TLS protocol version.",
+														ElementType: types.StringType,
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"trusted_ca_choice": schema.SingleNestedAttribute{
-																Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"trusted_ca_url": schema.StringAttribute{
-																		Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"trusted_ca": schema.SingleNestedAttribute{
-																		Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"tenant": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"namespace": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"name": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
-															"client_certificate_optional": schema.BoolAttribute{
-																Description: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"crl_choice": schema.SingleNestedAttribute{
-																Description: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"crl": schema.SingleNestedAttribute{
-																		Description: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"name": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"tenant": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"namespace": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"no_crl": schema.BoolAttribute{
-																		Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-															"xfcc_header_choice": schema.SingleNestedAttribute{
-																Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"xfcc_options": schema.SingleNestedAttribute{
-																		Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_header_elements": schema.ListAttribute{
-																				Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"xfcc_disabled": schema.BoolAttribute{
-																		Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
+													},
+													"min_version": schema.ListAttribute{
+														Description: "minimum_protocol_version Minimum TLS protocol version.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
 													},
 												},
 											},
-											"tls_config": schema.SingleNestedAttribute{
-												Description: "TLS Config Configuration of TLS settings such as min/max TLS version and ciphersuites",
+											"default_security": schema.BoolAttribute{
+												Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"choice": schema.SingleNestedAttribute{
-														Description: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"default_security": schema.BoolAttribute{
-																Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"medium_security": schema.BoolAttribute{
-																Description: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"low_security": schema.BoolAttribute{
-																Description: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"custom_security": schema.SingleNestedAttribute{
-																Description: "Custom Security Custom selection of TLS versions and cipher suites",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"cipher_suites": schema.ListAttribute{
-																		Description: "cipher_suites The TLS listener will only support the specified cipher list.",
-																		ElementType: types.StringType,
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"min_version": schema.ListAttribute{
-																		Description: "minimum_protocol_version Minimum TLS protocol version.",
-																		ElementType: types.StringType,
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"max_version": schema.ListAttribute{
-																		Description: "maximum_protocol_version Maximum TLS protocol version.",
-																		ElementType: types.StringType,
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
-													},
-												},
 											},
-										},
-									},
-									"tls_parameters": schema.SingleNestedAttribute{
-										Description: "Inline TLS Parameters (legacy) Upload a TLS certificate specifically for this Load Balancer (certificate must cover all Load Balancer domain names)",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"tls_config": schema.SingleNestedAttribute{
-												Description: "TLS Config Configuration of TLS settings such as min/max TLS version and ciphersuites",
+											"low_security": schema.BoolAttribute{
+												Description: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"choice": schema.SingleNestedAttribute{
-														Description: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"custom_security": schema.SingleNestedAttribute{
-																Description: "Custom Security Custom selection of TLS versions and cipher suites",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"max_version": schema.ListAttribute{
-																		Description: "maximum_protocol_version Maximum TLS protocol version.",
-																		ElementType: types.StringType,
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"cipher_suites": schema.ListAttribute{
-																		Description: "cipher_suites The TLS listener will only support the specified cipher list.",
-																		ElementType: types.StringType,
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"min_version": schema.ListAttribute{
-																		Description: "minimum_protocol_version Minimum TLS protocol version.",
-																		ElementType: types.StringType,
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-															"default_security": schema.BoolAttribute{
-																Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"medium_security": schema.BoolAttribute{
-																Description: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"low_security": schema.BoolAttribute{
-																Description: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
-											"tls_certificates": schema.ListNestedAttribute{
-												Description: "tls_certificates Users can add one or more certificates that share the same set of domains. for example, domain.com and *.domain.com - but use different signature algorithms",
+											"medium_security": schema.BoolAttribute{
+												Description: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												NestedObject: schema.NestedAttributeObject{
-													Attributes: map[string]schema.Attribute{
-														"certificate_url": schema.StringAttribute{
-															Description: "certificate_url TLS certificate. Certificate or certificate chain in PEM format including the PEM headers.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"private_key": schema.SingleNestedAttribute{
-															Description: "private_key TLS Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. TLS key has to match the accompanying certificate.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"secret_info_choice": schema.SingleNestedAttribute{
-																	Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"blindfold_secret_info": schema.SingleNestedAttribute{
-																			Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																			Attributes: map[string]schema.Attribute{
-																				"decryption_provider": schema.StringAttribute{
-																					Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																				"store_provider": schema.StringAttribute{
-																					Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																				"location": schema.StringAttribute{
-																					Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																			},
-																		},
-																		"clear_secret_info": schema.SingleNestedAttribute{
-																			Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																			Attributes: map[string]schema.Attribute{
-																				"provider": schema.StringAttribute{
-																					Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																				"url": schema.StringAttribute{
-																					Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-														},
-														"description": schema.StringAttribute{
-															Description: "description Description for the certificate",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ocsp_stapling_choice": schema.SingleNestedAttribute{
-															Description: "OCSP Response choice OCSP Stapling choice",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"use_system_defaults": schema.BoolAttribute{
-																	Description: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"disable_ocsp_stapling": schema.BoolAttribute{
-																	Description: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"custom_hash_algorithms": schema.SingleNestedAttribute{
-																	Description: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"hash_algorithms": schema.ListAttribute{
-																			Description: "Hash Algorithms Ordered list of hash algorithms to be used.",
-																			ElementType: types.StringType,
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											"mtls_choice": schema.SingleNestedAttribute{
-												Description: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"use_mtls": schema.SingleNestedAttribute{
-														Description: "Use mTLS",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"crl_choice": schema.SingleNestedAttribute{
-																Description: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"no_crl": schema.BoolAttribute{
-																		Description: "No client certificate verification with CRL Client certificate revocation status is not verified",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"crl": schema.SingleNestedAttribute{
-																		Description: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"tenant": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"namespace": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"name": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
-															"xfcc_header_choice": schema.SingleNestedAttribute{
-																Description: "xfcc header Whether to add the XFCC header with information about the client certificate",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"xfcc_disabled": schema.BoolAttribute{
-																		Description: "No XFCC header No X-Forwarded-Client-Cert header will be added",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"xfcc_options": schema.SingleNestedAttribute{
-																		Description: "Add XFCC header X-Forwarded-Client-Cert header will be added with the configured fields",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"xfcc_header_elements": schema.ListAttribute{
-																				Description: "XFCC Header X-Forwarded-Client-Cert header elements to be added to requests",
-																				ElementType: types.StringType,
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
-															"trusted_ca_choice": schema.SingleNestedAttribute{
-																Description: "trusted_ca_choice Root CA configuration for downstream TLS connections",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"trusted_ca_url": schema.StringAttribute{
-																		Description: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"trusted_ca": schema.SingleNestedAttribute{
-																		Description: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"tenant": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"namespace": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"name": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
-															"client_certificate_optional": schema.BoolAttribute{
-																Description: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-													"no_mtls": schema.BoolAttribute{
-														Description: "No mTLS",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
 											},
 										},
 									},
@@ -3392,161 +3510,198 @@ func (r *DataSourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request data
 							},
 						},
 					},
-					"tcp": schema.BoolAttribute{
-						Description: "TCP TCP Load Balancer.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 				},
 			},
-			"internet_vip_info": schema.ListNestedAttribute{
-				Description: "Internet VIP Info Internet VIP Info",
+			"origin_pools_weights": schema.ListNestedAttribute{
+				Description: "Origin Pools with Weights Origin pools and weights used for this load balancer.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"site_name": schema.StringAttribute{
-							Description: "Site Name Site Name where Internet VIP is installed",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"site_network_type": schema.ListAttribute{
-							Description: "Site Network Type Network Type of the site where Internet VIP is installed",
+						"endpoint_subsets": schema.MapAttribute{
+							Description: "Origin Servers Subset Upstream origin pool may be configured to divide its origin servers into subsets based on metadata attached to the origin servers. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer For origin servers which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those origin servers of upstream origin pool which match this metadata will be selected for load balancing",
 							ElementType: types.StringType,
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
 						},
-						"status": schema.SingleNestedAttribute{
-							Description: "Internet VIP Status Detailed status for internet VIP",
+						"pool_choice": schema.SingleNestedAttribute{
+							Description: "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"nlb_cname": schema.StringAttribute{
-									Description: "NLB CNAME NLB CNAME",
+								"cluster": schema.SingleNestedAttribute{
+									Description: "Cluster More flexible, advanced feature control with cluster",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
-								},
-								"nlb_status": schema.StringAttribute{
-									Description: "NLB Status NLB Status",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"name": schema.StringAttribute{
-									Description: "Name Name",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"arn": schema.StringAttribute{
-									Description: "ARN ARN",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"target_group_status": schema.ListNestedAttribute{
-									Description: "Target Group Status Target Group Status",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											"name": schema.StringAttribute{
-												Description: "Name Name",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"arn": schema.StringAttribute{
-												Description: "ARN ARN",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"status": schema.StringAttribute{
-												Description: "Status Status",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"protocol": schema.StringAttribute{
-												Description: "Protocol Protocol",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"listener_status": schema.ListNestedAttribute{
-												Description: "Listener status Listener status",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												NestedObject: schema.NestedAttributeObject{
-													Attributes: map[string]schema.Attribute{
-														"port": schema.Int64Attribute{
-															Description: "Port Port",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"protocol": schema.StringAttribute{
-															Description: "Protocol Protocol",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"reason": schema.StringAttribute{
-															Description: "Reason Reason",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"arn": schema.StringAttribute{
-															Description: "Name Name",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"status": schema.StringAttribute{
-															Description: "Status Status",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-											"reason": schema.StringAttribute{
-												Description: "Reason Reason",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"namespace": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"tenant": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
 										},
 									},
 								},
-								"reason": schema.StringAttribute{
-									Description: "Reason Reason",
+								"pool": schema.SingleNestedAttribute{
+									Description: "Pool Simple, commonly used pool parameters with origin pool",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"namespace": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"tenant": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
 								},
 							},
+						},
+						"priority": schema.Int64Attribute{
+							Description: "Priority Priority of this origin pool, valid only with multiple origin pools. Value of 0 will make the pool as lowest priority origin pool Priority of 1 means highest priority and is considered active. When active origin pool is not available, lower priority origin pools are made active as per the increasing priority.",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"weight": schema.Int64Attribute{
+							Description: "Weight Weight of this origin pool, valid only with multiple origin pool. Value of 0 will disable the pool",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
 						},
 					},
 				},
 			},
-			"domains": schema.ListAttribute{
-				Description: "Domains A list of Domains (host/authority header) that will be matched to this Load Balancer. Supported Domains and search order: 1. Exact Domain names: www.foo.com. 2. Domains starting with a Wildcard: *.foo.com. Not supported Domains: - Just a Wildcard: * - A Wildcard and TLD with no root Domain: *.com. - A Wildcard not matching a whole DNS label. e.g. *.foo.com and *.bar.foo.com are valid Wildcards however *bar.foo.com, *-bar.foo.com, and bar*.foo.com are all invalid. Additional notes: A Wildcard will not match empty string. e.g. *.foo.com will match bar.foo.com and baz-bar.foo.com but not .foo.com. The longest Wildcards match first. Only a single virtual host in the entire route configuration can match on *. Also a Domain must be unique across all virtual hosts within an advertise policy. Domains are also used for SNI matching if SNI is activated on the given TCP Load Balancer. Domains also indicate the list of names for which DNS resolution will be automatically resolved to IP addresses by the system.",
+			"port_choice": schema.SingleNestedAttribute{
+				Description: "Listen Port Listen Port for this load balancer",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				ElementType: types.StringType,
+				Attributes: map[string]schema.Attribute{
+					"listen_port": schema.Int64Attribute{
+						Description: "Port Listen Port for this load balancer",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"port_ranges": schema.StringAttribute{
+						Description: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
+			"service_policy_choice": schema.SingleNestedAttribute{
+				Description: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"active_service_policies": schema.SingleNestedAttribute{
+						Description: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"policies": schema.ListNestedAttribute{
+								Description: "policies Service Policies is a sequential engine where policies (and rules within the policy) are evaluated one after the other. It's important to define the correct order (policies evaluated from top to bottom in the list) for service policies, to get the intended result. For each request, its characteristics are evaluated based on the match criteria in each service policy starting at the top. If there is a match in the current policy, then the policy takes effect, and no more policies are evaluated. Otherwise, the next policy is evaluated. If all policies are evaluated and none match, then the request will be denied by default.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"namespace": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"tenant": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+							},
+						},
+					},
+					"no_service_policies": schema.BoolAttribute{
+						Description: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"service_policies_from_namespace": schema.BoolAttribute{
+						Description: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
+			"sni_default_lb_choice": schema.SingleNestedAttribute{
+				Description: "SNI and Default LB choice This is a choice to enable SNI and default LB options",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"default_lb_with_sni": schema.BoolAttribute{
+						Description: "SNI and Default LB Enables Server Name Indication for Loadbalancer Also enables usage as Default LB for Non SNI Clients",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"no_sni": schema.BoolAttribute{
+						Description: "No SNI Loadbalancer without Server Name Indication support",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"sni": schema.BoolAttribute{
+						Description: "With SNI Enables Server Name Indication for Loadbalancer",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Read: false, // activate timeouts.read
@@ -3595,15 +3750,14 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -3618,36 +3772,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -3667,306 +3791,35 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> OriginPoolsWeights
-	if len(specData.OriginPoolsWeights) > 0 {
-		originPoolsWeightsElements := make([]TcpLoadbalancerViewsOriginPoolWithWeight, 0, len(specData.OriginPoolsWeights))
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
 
-		for _, originPoolsWeightsElement := range specData.OriginPoolsWeights {
-			tcpLoadbalancerViewsOriginPoolWithWeightModel := TcpLoadbalancerViewsOriginPoolWithWeight{}
-
-			// data specToModelNested RequiredOneOfField --> PoolChoice
-			// <no value>
-			if originPoolsWeightsElement.GetPoolChoice() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				originPoolsWeightspoolChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates.
-				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-				originPoolsWeightspoolChoiceChoices := originPoolsWeightsElement.GetPoolChoice()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested PointerOfOneOfField --> Pool
-				// <no value>
-				// false
-				{
-					poolOptions, isPool := originPoolsWeightspoolChoiceChoices.(*ves_io_schema_views.OriginPoolWithWeight_Pool)
-					poolAttributeMap := make(map[string]attr.Value)
-
-					if isPool && poolOptions != nil {
-
-						// data specToModelNested RequiredStringField --> Name
-						if poolOptions.Pool.GetName() != "" {
-							poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
-						} else {
-							// Empty string, set to null
-							poolAttributeMap["name"] = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> Tenant
-						if poolOptions.Pool.GetTenant() != "" {
-							poolAttributeMap["tenant"] = types.StringValue(poolOptions.Pool.GetTenant())
-						} else {
-							// Empty string, set to null
-							poolAttributeMap["tenant"] = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Namespace
-						if poolOptions.Pool.GetNamespace() != "" {
-							poolAttributeMap["namespace"] = types.StringValue(poolOptions.Pool.GetNamespace())
-						} else {
-							// Empty string, set to null
-							poolAttributeMap["namespace"] = types.StringNull()
-						}
-
-						poolObj, diags := types.ObjectValue(TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap, poolAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						originPoolsWeightspoolChoiceChoicesAttributeMap["pool"] = poolObj
-					} else {
-						originPoolsWeightspoolChoiceChoicesAttributeMap["pool"] = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap)
-					}
-				}
-
-				// data specToModelNested PointerOfOneOfField --> Cluster
-				// <no value>
-				// false
-				{
-					clusterOptions, isCluster := originPoolsWeightspoolChoiceChoices.(*ves_io_schema_views.OriginPoolWithWeight_Cluster)
-					clusterAttributeMap := make(map[string]attr.Value)
-
-					if isCluster && clusterOptions != nil {
-
-						// data specToModelNested RequiredStringField --> Name
-						if clusterOptions.Cluster.GetName() != "" {
-							clusterAttributeMap["name"] = types.StringValue(clusterOptions.Cluster.GetName())
-						} else {
-							// Empty string, set to null
-							clusterAttributeMap["name"] = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> Tenant
-						if clusterOptions.Cluster.GetTenant() != "" {
-							clusterAttributeMap["tenant"] = types.StringValue(clusterOptions.Cluster.GetTenant())
-						} else {
-							// Empty string, set to null
-							clusterAttributeMap["tenant"] = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Namespace
-						if clusterOptions.Cluster.GetNamespace() != "" {
-							clusterAttributeMap["namespace"] = types.StringValue(clusterOptions.Cluster.GetNamespace())
-						} else {
-							// Empty string, set to null
-							clusterAttributeMap["namespace"] = types.StringNull()
-						}
-
-						clusterObj, diags := types.ObjectValue(TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap, clusterAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						originPoolsWeightspoolChoiceChoicesAttributeMap["cluster"] = clusterObj
-					} else {
-						originPoolsWeightspoolChoiceChoicesAttributeMap["cluster"] = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap)
-					}
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, originPoolsWeightspoolChoiceChoicesObjDiags := types.ObjectValue(
-					TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-					originPoolsWeightspoolChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(originPoolsWeightspoolChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap)
-			}
-
-			// data specToModelNested UintField --> Weight
-			tcpLoadbalancerViewsOriginPoolWithWeightModel.Weight = types.Int64Value(int64(originPoolsWeightsElement.GetWeight()))
-
-			// data specToModelNested UintField --> Priority
-			tcpLoadbalancerViewsOriginPoolWithWeightModel.Priority = types.Int64Value(int64(originPoolsWeightsElement.GetPriority()))
-
-			// data specToModelNested MapOfStringField --> EndpointSubsets
-			if originPoolsWeightsElement.GetEndpointSubsets() != nil {
-				// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-				endpointSubsetsMap, endpointSubsetsDiags := utils.StringMapToTerraformMap(originPoolsWeightsElement.GetEndpointSubsets())
-				response.Diagnostics.Append(endpointSubsetsDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				// Assign the typed map to the model
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = endpointSubsetsMap
-			} else {
-				// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-				tcpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = types.MapNull(types.StringType)
-			}
-
-			originPoolsWeightsElements = append(originPoolsWeightsElements, tcpLoadbalancerViewsOriginPoolWithWeightModel)
-		}
-
-		originPoolsWeightsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			TcpLoadbalancerOriginPoolsWeightsObjectRefModelAttributeMap,
-			originPoolsWeightsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.OriginPoolsWeights = originPoolsWeightsList
-	} else {
-		var originPoolsWeightsObjectType = basetypes.ObjectType{
-			AttrTypes: TcpLoadbalancerOriginPoolsWeightsObjectRefModelAttributeMap,
-		}
-		nullOriginPoolsWeightsList := basetypes.NewListNull(originPoolsWeightsObjectType)
-		data.OriginPoolsWeights = nullOriginPoolsWeightsList
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetServicePolicyChoice() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		servicePolicyChoiceChoices := specData.GetServicePolicyChoice()
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-		// The model struct that will be populated by the nested template.
-		var servicePolicyChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeServicePolicyChoice{}
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested BoolOfOneOfPointerField --> NoServicePolicies
-		_, isNoServicePolicies := servicePolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_NoServicePolicies)
-
-		if isNoServicePolicies {
-			servicePolicyChoiceChoicesModel.NoServicePolicies = types.BoolValue(true)
-		} else {
-			servicePolicyChoiceChoicesModel.NoServicePolicies = types.BoolNull()
-		}
-
-		// data specToModelNested PointerOfOneOfField --> ActiveServicePolicies
-		// <no value>
-		// false
-		{
-			activeServicePoliciesOptions, isActiveServicePolicies := servicePolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_ActiveServicePolicies)
-			activeServicePoliciesAttributeMap := make(map[string]attr.Value)
-
-			if isActiveServicePolicies && activeServicePoliciesOptions != nil {
-
-				// data specToModelNested RequiredArrayOfPointerField --> Policies
-				if len(activeServicePoliciesOptions.ActiveServicePolicies.GetPolicies()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					policiesElements := make([]ObjectRefTypeModel, 0, len(activeServicePoliciesOptions.ActiveServicePolicies.GetPolicies()))
-					for _, policiesElement := range activeServicePoliciesOptions.ActiveServicePolicies.GetPolicies() {
-						objectRefTypeModelModel := ObjectRefTypeModel{}
-
-						// data specToModelNested RequiredStringField --> Namespace
-						if policiesElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(policiesElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Name
-						if policiesElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(policiesElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> Tenant
-						if policiesElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(policiesElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						policiesElements = append(policiesElements, objectRefTypeModelModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					policiesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerPoliciesObjectRefModelAttributeMap}, policiesElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					activeServicePoliciesAttributeMap["policies"] = policiesListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					activeServicePoliciesAttributeMap["policies"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerPoliciesObjectRefModelAttributeMap})
-				}
-
-				activeServicePoliciesObj, diags := types.ObjectValue(TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap, activeServicePoliciesAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				servicePolicyChoiceChoicesModel.ActiveServicePolicies = activeServicePoliciesObj
-			} else {
-				servicePolicyChoiceChoicesModel.ActiveServicePolicies = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> ServicePoliciesFromNamespace
-		_, isServicePoliciesFromNamespace := servicePolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_ServicePoliciesFromNamespace)
-
-		if isServicePoliciesFromNamespace {
-			servicePolicyChoiceChoicesModel.ServicePoliciesFromNamespace = types.BoolValue(true)
-		} else {
-			servicePolicyChoiceChoicesModel.ServicePoliciesFromNamespace = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		servicePolicyChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			TcpLoadbalancerServicePolicyChoiceModelAttributeMap,
-			servicePolicyChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ServicePolicyChoice = servicePolicyChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
-	}
-
-	// data SpecToModelRoot StringField --> HostName
-	if specData.GetHostName() != "" {
-		data.HostName = types.StringValue(specData.GetHostName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.HostName = types.StringNull()
-	}
-
-	// data SpecToModelRoot BoolField --> DnsVolterraManaged
-	data.DnsVolterraManaged = types.BoolValue(specData.GetDnsVolterraManaged())
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredOneOfField --> AdvertiseChoice
 	// false
@@ -3986,17 +3839,18 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		// <no value>
 		// false
 		{
-			advertiseCustomOptions, isAdvertiseCustom := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_AdvertiseCustom)
+			advertiseCustomOptionsWrapper, isAdvertiseCustom := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_AdvertiseCustom)
 			advertiseCustomAttributeMap := make(map[string]attr.Value)
 
-			if isAdvertiseCustom && advertiseCustomOptions != nil {
+			if isAdvertiseCustom && advertiseCustomOptionsWrapper != nil && advertiseCustomOptionsWrapper.AdvertiseCustom != nil {
+				advertiseCustomElement := advertiseCustomOptionsWrapper.AdvertiseCustom
 
 				// data specToModelNested RequiredArrayOfPointerField --> AdvertiseWhere
-				if len(advertiseCustomOptions.AdvertiseCustom.GetAdvertiseWhere()) > 0 {
+				if len(advertiseCustomElement.GetAdvertiseWhere()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					advertiseWhereElements := make([]TcpLoadbalancerViewsWhereType, 0, len(advertiseCustomOptions.AdvertiseCustom.GetAdvertiseWhere()))
-					for _, advertiseWhereElement := range advertiseCustomOptions.AdvertiseCustom.GetAdvertiseWhere() {
+					advertiseWhereElements := make([]TcpLoadbalancerViewsWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
+					for _, advertiseWhereElement := range advertiseCustomElement.GetAdvertiseWhere() {
 						tcpLoadbalancerViewsWhereTypeModel := TcpLoadbalancerViewsWhereType{}
 
 						// data specToModelNested RequiredOneOfField --> Choice
@@ -4011,29 +3865,30 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 							// Process nested choices, populating the temporary attribute map
 
-							// data specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
+							// data specToModelNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
 							// <no value>
 							// false
 							{
-								advertiseOnPublicOptions, isAdvertiseOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseOnPublic)
-								advertiseOnPublicAttributeMap := make(map[string]attr.Value)
+								advertiseDualstackOnPublicOptionsWrapper, isAdvertiseDualstackOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic)
+								advertiseDualstackOnPublicAttributeMap := make(map[string]attr.Value)
 
-								if isAdvertiseOnPublic && advertiseOnPublicOptions != nil {
+								if isAdvertiseDualstackOnPublic && advertiseDualstackOnPublicOptionsWrapper != nil && advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic != nil {
+									advertiseDualstackOnPublicElement := advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic
 
 									// data specToModelNested RequiredPointerField --> PublicIp
-									if advertiseOnPublicOptions.AdvertiseOnPublic.GetPublicIp() != nil {
+									if advertiseDualstackOnPublicElement.GetPublicIp() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseOnPublicOptions.AdvertiseOnPublic.GetPublicIp()
+										publicIpElement := advertiseDualstackOnPublicElement.GetPublicIp()
 
 										// Recursively populate the nested struct
 
-										// data specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
+										// data specToModelNested RequiredStringField --> Name
+										if publicIpElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
 										} else {
 											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
+											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
 										// data specToModelNested RequiredStringField --> Namespace
@@ -4044,6 +3899,61 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
+										// data specToModelNested StringField --> Tenant
+										if publicIpElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										// This field needs to be converted to a types.ObjectValue before assignment.
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										advertiseDualstackOnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
+
+									} else {
+										// The source field is nil (e.g. redacted by the API).
+										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+										// here because the API may always return a non-nil struct (with REDACTED values) for this
+										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+										// The target is a types.Object, so we use types.ObjectNull.
+										advertiseDualstackOnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap)
+									}
+
+									advertiseDualstackOnPublicObj, advertiseDualstackOnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap, advertiseDualstackOnPublicAttributeMap)
+									response.Diagnostics.Append(advertiseDualstackOnPublicObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = advertiseDualstackOnPublicObj
+								} else {
+									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
+							// <no value>
+							// false
+							{
+								advertiseOnPublicOptionsWrapper, isAdvertiseOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseOnPublic)
+								advertiseOnPublicAttributeMap := make(map[string]attr.Value)
+
+								if isAdvertiseOnPublic && advertiseOnPublicOptionsWrapper != nil && advertiseOnPublicOptionsWrapper.AdvertiseOnPublic != nil {
+									advertiseOnPublicElement := advertiseOnPublicOptionsWrapper.AdvertiseOnPublic
+
+									// data specToModelNested RequiredPointerField --> PublicIp
+									if advertiseOnPublicElement.GetPublicIp() != nil {
+										// Create the nested Go struct
+										objectRefTypeModelModel := &ObjectRefTypeModel{}
+										publicIpElement := advertiseOnPublicElement.GetPublicIp()
+
+										// Recursively populate the nested struct
+
 										// data specToModelNested RequiredStringField --> Name
 										if publicIpElement.GetName() != "" {
 											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
@@ -4052,9 +3962,25 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
+										// data specToModelNested RequiredStringField --> Namespace
+										if publicIpElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if publicIpElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -4070,8 +3996,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										advertiseOnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicPublicIpModelAttributeMap)
 									}
 
-									advertiseOnPublicObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap, advertiseOnPublicAttributeMap)
-									response.Diagnostics.Append(diags...)
+									advertiseOnPublicObj, advertiseOnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap, advertiseOnPublicAttributeMap)
+									response.Diagnostics.Append(advertiseOnPublicObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -4081,54 +4007,55 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> VirtualSite
+							// data specToModelNested PointerOfOneOfField --> AdvertiseV6OnPublic
 							// <no value>
 							// false
 							{
-								virtualSiteOptions, isVirtualSite := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualSite)
-								virtualSiteAttributeMap := make(map[string]attr.Value)
+								advertiseV6OnPublicOptionsWrapper, isAdvertiseV6OnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseV6OnPublic)
+								advertiseV6OnPublicAttributeMap := make(map[string]attr.Value)
 
-								if isVirtualSite && virtualSiteOptions != nil {
+								if isAdvertiseV6OnPublic && advertiseV6OnPublicOptionsWrapper != nil && advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic != nil {
+									advertiseV6OnPublicElement := advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic
 
-									// data specToModelNested RequiredPointerField --> VirtualSite
-									if virtualSiteOptions.VirtualSite.GetVirtualSite() != nil {
+									// data specToModelNested RequiredPointerField --> PublicIp
+									if advertiseV6OnPublicElement.GetPublicIp() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										virtualSiteElement := virtualSiteOptions.VirtualSite.GetVirtualSite()
+										publicIpElement := advertiseV6OnPublicElement.GetPublicIp()
 
 										// Recursively populate the nested struct
 
-										// data specToModelNested StringField --> Tenant
-										if virtualSiteElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if virtualSiteElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
 										// data specToModelNested RequiredStringField --> Name
-										if virtualSiteElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
+										if publicIpElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
+										// data specToModelNested RequiredStringField --> Namespace
+										if publicIpElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if publicIpElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteVirtualSiteModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										virtualSiteAttributeMap["virtual_site"] = objectRefTypeModelModelObj
+										advertiseV6OnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -4137,187 +4064,101 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										virtualSiteAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteVirtualSiteModelAttributeMap)
+										advertiseV6OnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap)
 									}
 
-									// data specToModelNested RequiredEnumField --> Network
-									if virtualSiteOptions.VirtualSite.GetNetwork().String() != "" {
-										stringValue := types.StringValue(virtualSiteOptions.VirtualSite.GetNetwork().String())
-										stringSlice := []types.String{stringValue}
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										virtualSiteAttributeMap["network"] = listValue
-									} else {
-										virtualSiteAttributeMap["network"] = types.ListNull(types.StringType)
-									}
-
-									virtualSiteObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
-									response.Diagnostics.Append(diags...)
+									advertiseV6OnPublicObj, advertiseV6OnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap, advertiseV6OnPublicAttributeMap)
+									response.Diagnostics.Append(advertiseV6OnPublicObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									advertiseWherechoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
+									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = advertiseV6OnPublicObj
 								} else {
-									advertiseWherechoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteModelAttributeMap)
+									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap)
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> Vk8SService
+							// data specToModelNested PointerOfOneOfField --> CloudEdgeSegment
 							// <no value>
 							// false
 							{
-								vk8sServiceOptions, isVk8SService := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Vk8SService)
-								vk8sServiceAttributeMap := make(map[string]attr.Value)
+								cloudEdgeSegmentOptionsWrapper, isCloudEdgeSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_CloudEdgeSegment)
+								cloudEdgeSegmentAttributeMap := make(map[string]attr.Value)
 
-								if isVk8SService && vk8sServiceOptions != nil {
+								if isCloudEdgeSegment && cloudEdgeSegmentOptionsWrapper != nil && cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment != nil {
+									cloudEdgeSegmentElement := cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment
 
-									// data specToModelNested RequiredOneOfField --> Choice
-									// <no value>
-									if vk8sServiceOptions.Vk8SService.GetChoice() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										vk8sServicechoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates.
-										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-										vk8sServicechoiceChoices := vk8sServiceOptions.Vk8SService.GetChoice()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// data specToModelNested PointerOfOneOfField --> Site
-										// <no value>
-										// false
-										{
-											siteOptions, isSite := vk8sServicechoiceChoices.(*ves_io_schema_views.WhereVK8SService_Site)
-											siteAttributeMap := make(map[string]attr.Value)
-
-											if isSite && siteOptions != nil {
-
-												// data specToModelNested StringField --> Tenant
-												if siteOptions.Site.GetTenant() != "" {
-													siteAttributeMap["tenant"] = types.StringValue(siteOptions.Site.GetTenant())
-												} else {
-													// Empty string, set to null
-													siteAttributeMap["tenant"] = types.StringNull()
-												}
-
-												// data specToModelNested RequiredStringField --> Namespace
-												if siteOptions.Site.GetNamespace() != "" {
-													siteAttributeMap["namespace"] = types.StringValue(siteOptions.Site.GetNamespace())
-												} else {
-													// Empty string, set to null
-													siteAttributeMap["namespace"] = types.StringNull()
-												}
-
-												// data specToModelNested RequiredStringField --> Name
-												if siteOptions.Site.GetName() != "" {
-													siteAttributeMap["name"] = types.StringValue(siteOptions.Site.GetName())
-												} else {
-													// Empty string, set to null
-													siteAttributeMap["name"] = types.StringNull()
-												}
-
-												siteObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceSiteModelAttributeMap, siteAttributeMap)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												vk8sServicechoiceChoicesAttributeMap["site"] = siteObj
-											} else {
-												vk8sServicechoiceChoicesAttributeMap["site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceSiteModelAttributeMap)
-											}
-										}
-
-										// data specToModelNested PointerOfOneOfField --> VirtualSite
-										// <no value>
-										// false
-										{
-											virtualSiteOptions, isVirtualSite := vk8sServicechoiceChoices.(*ves_io_schema_views.WhereVK8SService_VirtualSite)
-											virtualSiteAttributeMap := make(map[string]attr.Value)
-
-											if isVirtualSite && virtualSiteOptions != nil {
-
-												// data specToModelNested StringField --> Tenant
-												if virtualSiteOptions.VirtualSite.GetTenant() != "" {
-													virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteOptions.VirtualSite.GetTenant())
-												} else {
-													// Empty string, set to null
-													virtualSiteAttributeMap["tenant"] = types.StringNull()
-												}
-
-												// data specToModelNested RequiredStringField --> Namespace
-												if virtualSiteOptions.VirtualSite.GetNamespace() != "" {
-													virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteOptions.VirtualSite.GetNamespace())
-												} else {
-													// Empty string, set to null
-													virtualSiteAttributeMap["namespace"] = types.StringNull()
-												}
-
-												// data specToModelNested RequiredStringField --> Name
-												if virtualSiteOptions.VirtualSite.GetName() != "" {
-													virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteOptions.VirtualSite.GetName())
-												} else {
-													// Empty string, set to null
-													virtualSiteAttributeMap["name"] = types.StringNull()
-												}
-
-												virtualSiteObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												vk8sServicechoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
-											} else {
-												vk8sServicechoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceVirtualSiteModelAttributeMap)
-											}
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, vk8sServicechoiceChoicesObjDiags := types.ObjectValue(
-											TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-											vk8sServicechoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(vk8sServicechoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										vk8sServiceAttributeMap["choice"] = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										vk8sServiceAttributeMap["choice"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceModelAttributeMap)
-									}
-
-									vk8sServiceObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceModelAttributeMap, vk8sServiceAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["vk8s_service"] = vk8sServiceObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["vk8s_service"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> VirtualSiteSegment
-							// <no value>
-							// false
-							{
-								virtualSiteSegmentOptions, isVirtualSiteSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualSiteSegment)
-								virtualSiteSegmentAttributeMap := make(map[string]attr.Value)
-
-								if isVirtualSiteSegment && virtualSiteSegmentOptions != nil {
-
-									// data specToModelNested RequiredPointerField --> Segment
-									if virtualSiteSegmentOptions.VirtualSiteSegment.GetSegment() != nil {
+									// data specToModelNested RequiredPointerField --> CloudEdge
+									if cloudEdgeSegmentElement.GetCloudEdge() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := virtualSiteSegmentOptions.VirtualSiteSegment.GetSegment()
+										cloudEdgeElement := cloudEdgeSegmentElement.GetCloudEdge()
+
+										// Recursively populate the nested struct
+
+										// data specToModelNested RequiredStringField --> Name
+										if cloudEdgeElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(cloudEdgeElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if cloudEdgeElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(cloudEdgeElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if cloudEdgeElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(cloudEdgeElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										// This field needs to be converted to a types.ObjectValue before assignment.
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										cloudEdgeSegmentAttributeMap["cloud_edge"] = objectRefTypeModelModelObj
+
+									} else {
+										// The source field is nil (e.g. redacted by the API).
+										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+										// here because the API may always return a non-nil struct (with REDACTED values) for this
+										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+										// The target is a types.Object, so we use types.ObjectNull.
+										cloudEdgeSegmentAttributeMap["cloud_edge"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap)
+									}
+
+									// data specToModelNested RequiredStringField --> Ip
+									if cloudEdgeSegmentElement.GetIp() != "" {
+										cloudEdgeSegmentAttributeMap["ip"] = types.StringValue(cloudEdgeSegmentElement.GetIp())
+									} else {
+										// Empty string, set to null
+										cloudEdgeSegmentAttributeMap["ip"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Ipv6
+									if cloudEdgeSegmentElement.GetIpv6() != "" {
+										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringValue(cloudEdgeSegmentElement.GetIpv6())
+									} else {
+										// Empty string, set to null
+										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredPointerField --> Segment
+									if cloudEdgeSegmentElement.GetSegment() != nil {
+										// Create the nested Go struct
+										objectRefTypeModelModel := &ObjectRefTypeModel{}
+										segmentElement := cloudEdgeSegmentElement.GetSegment()
 
 										// Recursively populate the nested struct
 
@@ -4329,12 +4170,91 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
+										// data specToModelNested RequiredStringField --> Namespace
+										if segmentElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
 										// data specToModelNested StringField --> Tenant
 										if segmentElement.GetTenant() != "" {
 											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										// This field needs to be converted to a types.ObjectValue before assignment.
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										cloudEdgeSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
+
+									} else {
+										// The source field is nil (e.g. redacted by the API).
+										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+										// here because the API may always return a non-nil struct (with REDACTED values) for this
+										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+										// The target is a types.Object, so we use types.ObjectNull.
+										cloudEdgeSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap)
+									}
+
+									cloudEdgeSegmentObj, cloudEdgeSegmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap, cloudEdgeSegmentAttributeMap)
+									response.Diagnostics.Append(cloudEdgeSegmentObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = cloudEdgeSegmentObj
+								} else {
+									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> Segment
+							// <no value>
+							// false
+							{
+								segmentOptionsWrapper, isSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Segment)
+								segmentAttributeMap := make(map[string]attr.Value)
+
+								if isSegment && segmentOptionsWrapper != nil && segmentOptionsWrapper.Segment != nil {
+									segmentElement := segmentOptionsWrapper.Segment
+
+									// data specToModelNested RequiredStringField --> Ipv4Vip
+									if segmentElement.GetIpv4Vip() != "" {
+										segmentAttributeMap["ipv4_vip"] = types.StringValue(segmentElement.GetIpv4Vip())
+									} else {
+										// Empty string, set to null
+										segmentAttributeMap["ipv4_vip"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Ipv6Vip
+									if segmentElement.GetIpv6Vip() != "" {
+										segmentAttributeMap["ipv6_vip"] = types.StringValue(segmentElement.GetIpv6Vip())
+									} else {
+										// Empty string, set to null
+										segmentAttributeMap["ipv6_vip"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredPointerField --> Segment
+									if segmentElement.GetSegment() != nil {
+										// Create the nested Go struct
+										objectRefTypeModelModel := &ObjectRefTypeModel{}
+										segmentElement := segmentElement.GetSegment()
+
+										// Recursively populate the nested struct
+
+										// data specToModelNested RequiredStringField --> Name
+										if segmentElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
 										// data specToModelNested RequiredStringField --> Namespace
@@ -4345,63 +4265,21 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										virtualSiteSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										virtualSiteSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentSegmentModelAttributeMap)
-									}
-
-									// data specToModelNested RequiredPointerField --> VirtualSite
-									if virtualSiteSegmentOptions.VirtualSiteSegment.GetVirtualSite() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										virtualSiteElement := virtualSiteSegmentOptions.VirtualSiteSegment.GetVirtualSite()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if virtualSiteElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
 										// data specToModelNested StringField --> Tenant
-										if virtualSiteElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+										if segmentElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Tenant = types.StringNull()
 										}
 
-										// data specToModelNested RequiredStringField --> Namespace
-										if virtualSiteElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentVirtualSiteModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										virtualSiteSegmentAttributeMap["virtual_site"] = objectRefTypeModelModelObj
+										segmentAttributeMap["segment"] = objectRefTypeModelModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -4410,84 +4288,99 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										virtualSiteSegmentAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentVirtualSiteModelAttributeMap)
+										segmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap)
 									}
 
-									// data specToModelNested RequiredStringField --> Ip
-									if virtualSiteSegmentOptions.VirtualSiteSegment.GetIp() != "" {
-										virtualSiteSegmentAttributeMap["ip"] = types.StringValue(virtualSiteSegmentOptions.VirtualSiteSegment.GetIp())
-									} else {
-										// Empty string, set to null
-										virtualSiteSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6
-									if virtualSiteSegmentOptions.VirtualSiteSegment.GetIpv6() != "" {
-										virtualSiteSegmentAttributeMap["ipv6"] = types.StringValue(virtualSiteSegmentOptions.VirtualSiteSegment.GetIpv6())
-									} else {
-										// Empty string, set to null
-										virtualSiteSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									virtualSiteSegmentObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap, virtualSiteSegmentAttributeMap)
-									response.Diagnostics.Append(diags...)
+									segmentObj, segmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap, segmentAttributeMap)
+									response.Diagnostics.Append(segmentObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									advertiseWherechoiceChoicesAttributeMap["virtual_site_segment"] = virtualSiteSegmentObj
+									advertiseWherechoiceChoicesAttributeMap["segment"] = segmentObj
 								} else {
-									advertiseWherechoiceChoicesAttributeMap["virtual_site_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap)
+									advertiseWherechoiceChoicesAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap)
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> VirtualSiteWithVip
+							// data specToModelNested PointerOfOneOfField --> Site
 							// <no value>
 							// false
 							{
-								virtualSiteWithVipOptions, isVirtualSiteWithVip := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualSiteWithVip)
-								virtualSiteWithVipAttributeMap := make(map[string]attr.Value)
+								siteOptionsWrapper, isSite := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Site)
+								siteAttributeMap := make(map[string]attr.Value)
 
-								if isVirtualSiteWithVip && virtualSiteWithVipOptions != nil {
+								if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
+									siteElement := siteOptionsWrapper.Site
 
-									// data specToModelNested RequiredPointerField --> VirtualSite
-									if virtualSiteWithVipOptions.VirtualSiteWithVip.GetVirtualSite() != nil {
+									// data specToModelNested StringField --> Ip
+									if siteElement.GetIp() != "" {
+										siteAttributeMap["ip"] = types.StringValue(siteElement.GetIp())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["ip"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Ipv6
+									if siteElement.GetIpv6() != "" {
+										siteAttributeMap["ipv6"] = types.StringValue(siteElement.GetIpv6())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["ipv6"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredEnumField --> Network
+									if siteElement.GetNetwork().String() != "" {
+										stringValue := types.StringValue(siteElement.GetNetwork().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										siteAttributeMap["network"] = listValue
+									} else {
+										siteAttributeMap["network"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested RequiredPointerField --> Site
+									if siteElement.GetSite() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										virtualSiteElement := virtualSiteWithVipOptions.VirtualSiteWithVip.GetVirtualSite()
+										siteElement := siteElement.GetSite()
 
 										// Recursively populate the nested struct
 
-										// data specToModelNested RequiredStringField --> Namespace
-										if virtualSiteElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
 										// data specToModelNested RequiredStringField --> Name
-										if virtualSiteElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
+										if siteElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
+										// data specToModelNested RequiredStringField --> Namespace
+										if siteElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
 										// data specToModelNested StringField --> Tenant
-										if virtualSiteElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+										if siteElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Tenant = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipVirtualSiteModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSiteModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										virtualSiteWithVipAttributeMap["virtual_site"] = objectRefTypeModelModelObj
+										siteAttributeMap["site"] = objectRefTypeModelModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -4496,47 +4389,17 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										virtualSiteWithVipAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipVirtualSiteModelAttributeMap)
+										siteAttributeMap["site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSiteModelAttributeMap)
 									}
 
-									// data specToModelNested StringField --> Ip
-									if virtualSiteWithVipOptions.VirtualSiteWithVip.GetIp() != "" {
-										virtualSiteWithVipAttributeMap["ip"] = types.StringValue(virtualSiteWithVipOptions.VirtualSiteWithVip.GetIp())
-									} else {
-										// Empty string, set to null
-										virtualSiteWithVipAttributeMap["ip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6
-									if virtualSiteWithVipOptions.VirtualSiteWithVip.GetIpv6() != "" {
-										virtualSiteWithVipAttributeMap["ipv6"] = types.StringValue(virtualSiteWithVipOptions.VirtualSiteWithVip.GetIpv6())
-									} else {
-										// Empty string, set to null
-										virtualSiteWithVipAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredEnumField --> Network
-									if virtualSiteWithVipOptions.VirtualSiteWithVip.GetNetwork().String() != "" {
-										stringValue := types.StringValue(virtualSiteWithVipOptions.VirtualSiteWithVip.GetNetwork().String())
-										stringSlice := []types.String{stringValue}
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										virtualSiteWithVipAttributeMap["network"] = listValue
-									} else {
-										virtualSiteWithVipAttributeMap["network"] = types.ListNull(types.StringType)
-									}
-
-									virtualSiteWithVipObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap, virtualSiteWithVipAttributeMap)
-									response.Diagnostics.Append(diags...)
+									siteObj, siteObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap, siteAttributeMap)
+									response.Diagnostics.Append(siteObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									advertiseWherechoiceChoicesAttributeMap["virtual_site_with_vip"] = virtualSiteWithVipObj
+									advertiseWherechoiceChoicesAttributeMap["site"] = siteObj
 								} else {
-									advertiseWherechoiceChoicesAttributeMap["virtual_site_with_vip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap)
+									advertiseWherechoiceChoicesAttributeMap["site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap)
 								}
 							}
 
@@ -4544,16 +4407,33 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							// <no value>
 							// false
 							{
-								siteSegmentOptions, isSiteSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_SiteSegment)
+								siteSegmentOptionsWrapper, isSiteSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_SiteSegment)
 								siteSegmentAttributeMap := make(map[string]attr.Value)
 
-								if isSiteSegment && siteSegmentOptions != nil {
+								if isSiteSegment && siteSegmentOptionsWrapper != nil && siteSegmentOptionsWrapper.SiteSegment != nil {
+									siteSegmentElement := siteSegmentOptionsWrapper.SiteSegment
+
+									// data specToModelNested RequiredStringField --> Ip
+									if siteSegmentElement.GetIp() != "" {
+										siteSegmentAttributeMap["ip"] = types.StringValue(siteSegmentElement.GetIp())
+									} else {
+										// Empty string, set to null
+										siteSegmentAttributeMap["ip"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Ipv6
+									if siteSegmentElement.GetIpv6() != "" {
+										siteSegmentAttributeMap["ipv6"] = types.StringValue(siteSegmentElement.GetIpv6())
+									} else {
+										// Empty string, set to null
+										siteSegmentAttributeMap["ipv6"] = types.StringNull()
+									}
 
 									// data specToModelNested RequiredPointerField --> Segment
-									if siteSegmentOptions.SiteSegment.GetSegment() != nil {
+									if siteSegmentElement.GetSegment() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := siteSegmentOptions.SiteSegment.GetSegment()
+										segmentElement := siteSegmentElement.GetSegment()
 
 										// Recursively populate the nested struct
 
@@ -4565,14 +4445,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
-										// data specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
 										// data specToModelNested RequiredStringField --> Namespace
 										if segmentElement.GetNamespace() != "" {
 											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
@@ -4581,9 +4453,17 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
+										// data specToModelNested StringField --> Tenant
+										if segmentElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -4600,10 +4480,10 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 									}
 
 									// data specToModelNested RequiredPointerField --> Site
-									if siteSegmentOptions.SiteSegment.GetSite() != nil {
+									if siteSegmentElement.GetSite() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										siteElement := siteSegmentOptions.SiteSegment.GetSite()
+										siteElement := siteSegmentElement.GetSite()
 
 										// Recursively populate the nested struct
 
@@ -4615,14 +4495,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
-										// data specToModelNested StringField --> Tenant
-										if siteElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
 										// data specToModelNested RequiredStringField --> Namespace
 										if siteElement.GetNamespace() != "" {
 											objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
@@ -4631,9 +4503,17 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
+										// data specToModelNested StringField --> Tenant
+										if siteElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSiteModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSiteModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -4649,24 +4529,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										siteSegmentAttributeMap["site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentSiteModelAttributeMap)
 									}
 
-									// data specToModelNested RequiredStringField --> Ip
-									if siteSegmentOptions.SiteSegment.GetIp() != "" {
-										siteSegmentAttributeMap["ip"] = types.StringValue(siteSegmentOptions.SiteSegment.GetIp())
-									} else {
-										// Empty string, set to null
-										siteSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6
-									if siteSegmentOptions.SiteSegment.GetIpv6() != "" {
-										siteSegmentAttributeMap["ipv6"] = types.StringValue(siteSegmentOptions.SiteSegment.GetIpv6())
-									} else {
-										// Empty string, set to null
-										siteSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									siteSegmentObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentModelAttributeMap, siteSegmentAttributeMap)
-									response.Diagnostics.Append(diags...)
+									siteSegmentObj, siteSegmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSegmentModelAttributeMap, siteSegmentAttributeMap)
+									response.Diagnostics.Append(siteSegmentObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -4676,222 +4540,24 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> Site
-							// <no value>
-							// false
-							{
-								siteOptions, isSite := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Site)
-								siteAttributeMap := make(map[string]attr.Value)
-
-								if isSite && siteOptions != nil {
-
-									// data specToModelNested StringField --> Ip
-									if siteOptions.Site.GetIp() != "" {
-										siteAttributeMap["ip"] = types.StringValue(siteOptions.Site.GetIp())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["ip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6
-									if siteOptions.Site.GetIpv6() != "" {
-										siteAttributeMap["ipv6"] = types.StringValue(siteOptions.Site.GetIpv6())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredEnumField --> Network
-									if siteOptions.Site.GetNetwork().String() != "" {
-										stringValue := types.StringValue(siteOptions.Site.GetNetwork().String())
-										stringSlice := []types.String{stringValue}
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										siteAttributeMap["network"] = listValue
-									} else {
-										siteAttributeMap["network"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested RequiredPointerField --> Site
-									if siteOptions.Site.GetSite() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										siteElement := siteOptions.Site.GetSite()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested StringField --> Tenant
-										if siteElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if siteElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Name
-										if siteElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSiteModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										siteAttributeMap["site"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										siteAttributeMap["site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteSiteModelAttributeMap)
-									}
-
-									siteObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap, siteAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["site"] = siteObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap)
-								}
-							}
-
 							// data specToModelNested PointerOfOneOfField --> VirtualNetwork
 							// <no value>
 							// false
 							{
-								virtualNetworkOptions, isVirtualNetwork := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualNetwork)
+								virtualNetworkOptionsWrapper, isVirtualNetwork := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualNetwork)
 								virtualNetworkAttributeMap := make(map[string]attr.Value)
 
-								if isVirtualNetwork && virtualNetworkOptions != nil {
-
-									// data specToModelNested RequiredPointerField --> VirtualNetwork
-									if virtualNetworkOptions.VirtualNetwork.GetVirtualNetwork() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										virtualNetworkElement := virtualNetworkOptions.VirtualNetwork.GetVirtualNetwork()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested StringField --> Tenant
-										if virtualNetworkElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(virtualNetworkElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if virtualNetworkElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(virtualNetworkElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Name
-										if virtualNetworkElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(virtualNetworkElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVirtualNetworkModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										virtualNetworkAttributeMap["virtual_network"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										virtualNetworkAttributeMap["virtual_network"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVirtualNetworkModelAttributeMap)
-									}
-
-									// data specToModelNested OneOfField --> VipChoice
-									if virtualNetworkOptions.VirtualNetwork.GetVipChoice() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										virtualNetworkvipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates.
-										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-										virtualNetworkvipChoiceChoices := virtualNetworkOptions.VirtualNetwork.GetVipChoice()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// data specToModelNested BoolOfOneOfPointerField --> DefaultVip
-										_, isDefaultVip := virtualNetworkvipChoiceChoices.(*ves_io_schema_views.WhereVirtualNetwork_DefaultVip)
-
-										if isDefaultVip {
-											virtualNetworkvipChoiceChoicesAttributeMap["default_vip"] = types.BoolValue(true)
-										} else {
-											virtualNetworkvipChoiceChoicesAttributeMap["default_vip"] = types.BoolNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> SpecificVip
-										specificVipItem, isSpecificVip := virtualNetworkvipChoiceChoices.(*ves_io_schema_views.WhereVirtualNetwork_SpecificVip)
-
-										if isSpecificVip {
-											virtualNetworkvipChoiceChoicesAttributeMap["specific_vip"] = types.StringValue(string(specificVipItem.SpecificVip))
-										} else {
-											// Empty string, set to null
-											virtualNetworkvipChoiceChoicesAttributeMap["specific_vip"] = types.StringNull()
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, virtualNetworkvipChoiceChoicesObjDiags := types.ObjectValue(
-											TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-											virtualNetworkvipChoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(virtualNetworkvipChoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										virtualNetworkAttributeMap["vip_choice"] = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										virtualNetworkAttributeMap["vip_choice"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap)
-									}
+								if isVirtualNetwork && virtualNetworkOptionsWrapper != nil && virtualNetworkOptionsWrapper.VirtualNetwork != nil {
+									virtualNetworkElement := virtualNetworkOptionsWrapper.VirtualNetwork
 
 									// data specToModelNested OneOfField --> V6VipChoice
-									if virtualNetworkOptions.VirtualNetwork.GetV6VipChoice() != nil {
+									if virtualNetworkElement.GetV6VipChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										virtualNetworkv6VipChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 										// Define a variable for the spec choices to be passed down to nested templates.
 										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-										virtualNetworkv6VipChoiceChoices := virtualNetworkOptions.VirtualNetwork.GetV6VipChoice()
+										virtualNetworkv6VipChoiceChoices := virtualNetworkElement.GetV6VipChoice()
 
 										// Process nested choices, populating the temporary attribute map
 
@@ -4933,8 +4599,107 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										virtualNetworkAttributeMap["v6_vip_choice"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkV6VipChoiceModelAttributeMap)
 									}
 
-									virtualNetworkObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkModelAttributeMap, virtualNetworkAttributeMap)
-									response.Diagnostics.Append(diags...)
+									// data specToModelNested OneOfField --> VipChoice
+									if virtualNetworkElement.GetVipChoice() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										virtualNetworkvipChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates.
+										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+										virtualNetworkvipChoiceChoices := virtualNetworkElement.GetVipChoice()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// data specToModelNested BoolOfOneOfPointerField --> DefaultVip
+										_, isDefaultVip := virtualNetworkvipChoiceChoices.(*ves_io_schema_views.WhereVirtualNetwork_DefaultVip)
+
+										if isDefaultVip {
+											virtualNetworkvipChoiceChoicesAttributeMap["default_vip"] = types.BoolValue(true)
+										} else {
+											virtualNetworkvipChoiceChoicesAttributeMap["default_vip"] = types.BoolNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> SpecificVip
+										specificVipItem, isSpecificVip := virtualNetworkvipChoiceChoices.(*ves_io_schema_views.WhereVirtualNetwork_SpecificVip)
+
+										if isSpecificVip {
+											virtualNetworkvipChoiceChoicesAttributeMap["specific_vip"] = types.StringValue(string(specificVipItem.SpecificVip))
+										} else {
+											// Empty string, set to null
+											virtualNetworkvipChoiceChoicesAttributeMap["specific_vip"] = types.StringNull()
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, virtualNetworkvipChoiceChoicesObjDiags := types.ObjectValue(
+											TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+											virtualNetworkvipChoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(virtualNetworkvipChoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										virtualNetworkAttributeMap["vip_choice"] = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										virtualNetworkAttributeMap["vip_choice"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVipChoiceModelAttributeMap)
+									}
+
+									// data specToModelNested RequiredPointerField --> VirtualNetwork
+									if virtualNetworkElement.GetVirtualNetwork() != nil {
+										// Create the nested Go struct
+										objectRefTypeModelModel := &ObjectRefTypeModel{}
+										virtualNetworkElement := virtualNetworkElement.GetVirtualNetwork()
+
+										// Recursively populate the nested struct
+
+										// data specToModelNested RequiredStringField --> Name
+										if virtualNetworkElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(virtualNetworkElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if virtualNetworkElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(virtualNetworkElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if virtualNetworkElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(virtualNetworkElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										// This field needs to be converted to a types.ObjectValue before assignment.
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVirtualNetworkModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										virtualNetworkAttributeMap["virtual_network"] = objectRefTypeModelModelObj
+
+									} else {
+										// The source field is nil (e.g. redacted by the API).
+										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+										// here because the API may always return a non-nil struct (with REDACTED values) for this
+										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+										// The target is a types.Object, so we use types.ObjectNull.
+										virtualNetworkAttributeMap["virtual_network"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkVirtualNetworkModelAttributeMap)
+									}
+
+									virtualNetworkObj, virtualNetworkObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualNetworkModelAttributeMap, virtualNetworkAttributeMap)
+									response.Diagnostics.Append(virtualNetworkObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -4944,54 +4709,69 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> CloudEdgeSegment
+							// data specToModelNested PointerOfOneOfField --> VirtualSite
 							// <no value>
 							// false
 							{
-								cloudEdgeSegmentOptions, isCloudEdgeSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_CloudEdgeSegment)
-								cloudEdgeSegmentAttributeMap := make(map[string]attr.Value)
+								virtualSiteOptionsWrapper, isVirtualSite := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualSite)
+								virtualSiteAttributeMap := make(map[string]attr.Value)
 
-								if isCloudEdgeSegment && cloudEdgeSegmentOptions != nil {
+								if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
+									virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-									// data specToModelNested RequiredPointerField --> Segment
-									if cloudEdgeSegmentOptions.CloudEdgeSegment.GetSegment() != nil {
+									// data specToModelNested RequiredEnumField --> Network
+									if virtualSiteElement.GetNetwork().String() != "" {
+										stringValue := types.StringValue(virtualSiteElement.GetNetwork().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										virtualSiteAttributeMap["network"] = listValue
+									} else {
+										virtualSiteAttributeMap["network"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested RequiredPointerField --> VirtualSite
+									if virtualSiteElement.GetVirtualSite() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := cloudEdgeSegmentOptions.CloudEdgeSegment.GetSegment()
+										virtualSiteElement := virtualSiteElement.GetVirtualSite()
 
 										// Recursively populate the nested struct
 
-										// data specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
 										// data specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
+										if virtualSiteElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
+										// data specToModelNested RequiredStringField --> Namespace
+										if virtualSiteElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
 										// data specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
+										if virtualSiteElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Tenant = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteVirtualSiteModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cloudEdgeSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
+										virtualSiteAttributeMap["virtual_site"] = objectRefTypeModelModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -5000,100 +4780,51 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap)
+										virtualSiteAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteVirtualSiteModelAttributeMap)
 									}
 
-									// data specToModelNested RequiredPointerField --> CloudEdge
-									if cloudEdgeSegmentOptions.CloudEdgeSegment.GetCloudEdge() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										cloudEdgeElement := cloudEdgeSegmentOptions.CloudEdgeSegment.GetCloudEdge()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested StringField --> Tenant
-										if cloudEdgeElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(cloudEdgeElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if cloudEdgeElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(cloudEdgeElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Name
-										if cloudEdgeElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(cloudEdgeElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap)
-									}
-
-									// data specToModelNested RequiredStringField --> Ip
-									if cloudEdgeSegmentOptions.CloudEdgeSegment.GetIp() != "" {
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringValue(cloudEdgeSegmentOptions.CloudEdgeSegment.GetIp())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6
-									if cloudEdgeSegmentOptions.CloudEdgeSegment.GetIpv6() != "" {
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringValue(cloudEdgeSegmentOptions.CloudEdgeSegment.GetIpv6())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									cloudEdgeSegmentObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap, cloudEdgeSegmentAttributeMap)
-									response.Diagnostics.Append(diags...)
+									virtualSiteObj, virtualSiteObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
+									response.Diagnostics.Append(virtualSiteObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = cloudEdgeSegmentObj
+									advertiseWherechoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
 								} else {
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap)
+									advertiseWherechoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteModelAttributeMap)
 								}
 							}
 
-							// data specToModelNested PointerOfOneOfField --> Segment
+							// data specToModelNested PointerOfOneOfField --> VirtualSiteSegment
 							// <no value>
 							// false
 							{
-								segmentOptions, isSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Segment)
-								segmentAttributeMap := make(map[string]attr.Value)
+								virtualSiteSegmentOptionsWrapper, isVirtualSiteSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualSiteSegment)
+								virtualSiteSegmentAttributeMap := make(map[string]attr.Value)
 
-								if isSegment && segmentOptions != nil {
+								if isVirtualSiteSegment && virtualSiteSegmentOptionsWrapper != nil && virtualSiteSegmentOptionsWrapper.VirtualSiteSegment != nil {
+									virtualSiteSegmentElement := virtualSiteSegmentOptionsWrapper.VirtualSiteSegment
+
+									// data specToModelNested RequiredStringField --> Ip
+									if virtualSiteSegmentElement.GetIp() != "" {
+										virtualSiteSegmentAttributeMap["ip"] = types.StringValue(virtualSiteSegmentElement.GetIp())
+									} else {
+										// Empty string, set to null
+										virtualSiteSegmentAttributeMap["ip"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Ipv6
+									if virtualSiteSegmentElement.GetIpv6() != "" {
+										virtualSiteSegmentAttributeMap["ipv6"] = types.StringValue(virtualSiteSegmentElement.GetIpv6())
+									} else {
+										// Empty string, set to null
+										virtualSiteSegmentAttributeMap["ipv6"] = types.StringNull()
+									}
 
 									// data specToModelNested RequiredPointerField --> Segment
-									if segmentOptions.Segment.GetSegment() != nil {
+									if virtualSiteSegmentElement.GetSegment() != nil {
 										// Create the nested Go struct
 										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := segmentOptions.Segment.GetSegment()
+										segmentElement := virtualSiteSegmentElement.GetSegment()
 
 										// Recursively populate the nested struct
 
@@ -5105,14 +4836,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
-										// data specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
 										// data specToModelNested RequiredStringField --> Namespace
 										if segmentElement.GetNamespace() != "" {
 											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
@@ -5121,13 +4844,21 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
+										// data specToModelNested StringField --> Tenant
+										if segmentElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(diags...)
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										segmentAttributeMap["segment"] = objectRefTypeModelModelObj
+										virtualSiteSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -5136,33 +4867,310 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										segmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap)
+										virtualSiteSegmentAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentSegmentModelAttributeMap)
 									}
 
-									// data specToModelNested RequiredStringField --> Ipv4Vip
-									if segmentOptions.Segment.GetIpv4Vip() != "" {
-										segmentAttributeMap["ipv4_vip"] = types.StringValue(segmentOptions.Segment.GetIpv4Vip())
+									// data specToModelNested RequiredPointerField --> VirtualSite
+									if virtualSiteSegmentElement.GetVirtualSite() != nil {
+										// Create the nested Go struct
+										objectRefTypeModelModel := &ObjectRefTypeModel{}
+										virtualSiteElement := virtualSiteSegmentElement.GetVirtualSite()
+
+										// Recursively populate the nested struct
+
+										// data specToModelNested RequiredStringField --> Name
+										if virtualSiteElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if virtualSiteElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if virtualSiteElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										// This field needs to be converted to a types.ObjectValue before assignment.
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentVirtualSiteModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										virtualSiteSegmentAttributeMap["virtual_site"] = objectRefTypeModelModelObj
+
 									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv4_vip"] = types.StringNull()
+										// The source field is nil (e.g. redacted by the API).
+										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+										// here because the API may always return a non-nil struct (with REDACTED values) for this
+										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+										// The target is a types.Object, so we use types.ObjectNull.
+										virtualSiteSegmentAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentVirtualSiteModelAttributeMap)
 									}
 
-									// data specToModelNested StringField --> Ipv6Vip
-									if segmentOptions.Segment.GetIpv6Vip() != "" {
-										segmentAttributeMap["ipv6_vip"] = types.StringValue(segmentOptions.Segment.GetIpv6Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv6_vip"] = types.StringNull()
-									}
-
-									segmentObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap, segmentAttributeMap)
-									response.Diagnostics.Append(diags...)
+									virtualSiteSegmentObj, virtualSiteSegmentObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap, virtualSiteSegmentAttributeMap)
+									response.Diagnostics.Append(virtualSiteSegmentObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									advertiseWherechoiceChoicesAttributeMap["segment"] = segmentObj
+									advertiseWherechoiceChoicesAttributeMap["virtual_site_segment"] = virtualSiteSegmentObj
 								} else {
-									advertiseWherechoiceChoicesAttributeMap["segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap)
+									advertiseWherechoiceChoicesAttributeMap["virtual_site_segment"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteSegmentModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> VirtualSiteWithVip
+							// <no value>
+							// false
+							{
+								virtualSiteWithVipOptionsWrapper, isVirtualSiteWithVip := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_VirtualSiteWithVip)
+								virtualSiteWithVipAttributeMap := make(map[string]attr.Value)
+
+								if isVirtualSiteWithVip && virtualSiteWithVipOptionsWrapper != nil && virtualSiteWithVipOptionsWrapper.VirtualSiteWithVip != nil {
+									virtualSiteWithVipElement := virtualSiteWithVipOptionsWrapper.VirtualSiteWithVip
+
+									// data specToModelNested StringField --> Ip
+									if virtualSiteWithVipElement.GetIp() != "" {
+										virtualSiteWithVipAttributeMap["ip"] = types.StringValue(virtualSiteWithVipElement.GetIp())
+									} else {
+										// Empty string, set to null
+										virtualSiteWithVipAttributeMap["ip"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Ipv6
+									if virtualSiteWithVipElement.GetIpv6() != "" {
+										virtualSiteWithVipAttributeMap["ipv6"] = types.StringValue(virtualSiteWithVipElement.GetIpv6())
+									} else {
+										// Empty string, set to null
+										virtualSiteWithVipAttributeMap["ipv6"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredEnumField --> Network
+									if virtualSiteWithVipElement.GetNetwork().String() != "" {
+										stringValue := types.StringValue(virtualSiteWithVipElement.GetNetwork().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										virtualSiteWithVipAttributeMap["network"] = listValue
+									} else {
+										virtualSiteWithVipAttributeMap["network"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested RequiredPointerField --> VirtualSite
+									if virtualSiteWithVipElement.GetVirtualSite() != nil {
+										// Create the nested Go struct
+										objectRefTypeModelModel := &ObjectRefTypeModel{}
+										virtualSiteElement := virtualSiteWithVipElement.GetVirtualSite()
+
+										// Recursively populate the nested struct
+
+										// data specToModelNested RequiredStringField --> Name
+										if virtualSiteElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if virtualSiteElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if virtualSiteElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										// This field needs to be converted to a types.ObjectValue before assignment.
+										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipVirtualSiteModelAttributeMap, objectRefTypeModelModel)
+										response.Diagnostics.Append(objDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										virtualSiteWithVipAttributeMap["virtual_site"] = objectRefTypeModelModelObj
+
+									} else {
+										// The source field is nil (e.g. redacted by the API).
+										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+										// here because the API may always return a non-nil struct (with REDACTED values) for this
+										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+										// The target is a types.Object, so we use types.ObjectNull.
+										virtualSiteWithVipAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipVirtualSiteModelAttributeMap)
+									}
+
+									virtualSiteWithVipObj, virtualSiteWithVipObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap, virtualSiteWithVipAttributeMap)
+									response.Diagnostics.Append(virtualSiteWithVipObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									advertiseWherechoiceChoicesAttributeMap["virtual_site_with_vip"] = virtualSiteWithVipObj
+								} else {
+									advertiseWherechoiceChoicesAttributeMap["virtual_site_with_vip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVirtualSiteWithVipModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> Vk8SService
+							// <no value>
+							// false
+							{
+								vk8sServiceOptionsWrapper, isVk8SService := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Vk8SService)
+								vk8sServiceAttributeMap := make(map[string]attr.Value)
+
+								if isVk8SService && vk8sServiceOptionsWrapper != nil && vk8sServiceOptionsWrapper.Vk8SService != nil {
+									vk8sServiceElement := vk8sServiceOptionsWrapper.Vk8SService
+
+									// data specToModelNested RequiredOneOfField --> Choice
+									// <no value>
+									if vk8sServiceElement.GetChoice() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										vk8sServicechoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates.
+										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+										vk8sServicechoiceChoices := vk8sServiceElement.GetChoice()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// data specToModelNested PointerOfOneOfField --> Site
+										// <no value>
+										// false
+										{
+											siteOptionsWrapper, isSite := vk8sServicechoiceChoices.(*ves_io_schema_views.WhereVK8SService_Site)
+											siteAttributeMap := make(map[string]attr.Value)
+
+											if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
+												siteElement := siteOptionsWrapper.Site
+
+												// data specToModelNested RequiredStringField --> Name
+												if siteElement.GetName() != "" {
+													siteAttributeMap["name"] = types.StringValue(siteElement.GetName())
+												} else {
+													// Empty string, set to null
+													siteAttributeMap["name"] = types.StringNull()
+												}
+
+												// data specToModelNested RequiredStringField --> Namespace
+												if siteElement.GetNamespace() != "" {
+													siteAttributeMap["namespace"] = types.StringValue(siteElement.GetNamespace())
+												} else {
+													// Empty string, set to null
+													siteAttributeMap["namespace"] = types.StringNull()
+												}
+
+												// data specToModelNested StringField --> Tenant
+												if siteElement.GetTenant() != "" {
+													siteAttributeMap["tenant"] = types.StringValue(siteElement.GetTenant())
+												} else {
+													// Empty string, set to null
+													siteAttributeMap["tenant"] = types.StringNull()
+												}
+
+												siteObj, siteObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceSiteModelAttributeMap, siteAttributeMap)
+												response.Diagnostics.Append(siteObjDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												vk8sServicechoiceChoicesAttributeMap["site"] = siteObj
+											} else {
+												vk8sServicechoiceChoicesAttributeMap["site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceSiteModelAttributeMap)
+											}
+										}
+
+										// data specToModelNested PointerOfOneOfField --> VirtualSite
+										// <no value>
+										// false
+										{
+											virtualSiteOptionsWrapper, isVirtualSite := vk8sServicechoiceChoices.(*ves_io_schema_views.WhereVK8SService_VirtualSite)
+											virtualSiteAttributeMap := make(map[string]attr.Value)
+
+											if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
+												virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
+
+												// data specToModelNested RequiredStringField --> Name
+												if virtualSiteElement.GetName() != "" {
+													virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteElement.GetName())
+												} else {
+													// Empty string, set to null
+													virtualSiteAttributeMap["name"] = types.StringNull()
+												}
+
+												// data specToModelNested RequiredStringField --> Namespace
+												if virtualSiteElement.GetNamespace() != "" {
+													virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteElement.GetNamespace())
+												} else {
+													// Empty string, set to null
+													virtualSiteAttributeMap["namespace"] = types.StringNull()
+												}
+
+												// data specToModelNested StringField --> Tenant
+												if virtualSiteElement.GetTenant() != "" {
+													virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteElement.GetTenant())
+												} else {
+													// Empty string, set to null
+													virtualSiteAttributeMap["tenant"] = types.StringNull()
+												}
+
+												virtualSiteObj, virtualSiteObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
+												response.Diagnostics.Append(virtualSiteObjDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												vk8sServicechoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
+											} else {
+												vk8sServicechoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceVirtualSiteModelAttributeMap)
+											}
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, vk8sServicechoiceChoicesObjDiags := types.ObjectValue(
+											TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+											vk8sServicechoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(vk8sServicechoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										vk8sServiceAttributeMap["choice"] = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										vk8sServiceAttributeMap["choice"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceChoiceModelAttributeMap)
+									}
+
+									vk8sServiceObj, vk8sServiceObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceModelAttributeMap, vk8sServiceAttributeMap)
+									response.Diagnostics.Append(vk8sServiceObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									advertiseWherechoiceChoicesAttributeMap["vk8s_service"] = vk8sServiceObj
+								} else {
+									advertiseWherechoiceChoicesAttributeMap["vk8s_service"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SServiceModelAttributeMap)
 								}
 							}
 
@@ -5197,15 +5205,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 							// Process nested choices, populating the temporary attribute map
 
-							// data specToModelNested BoolOfOneOfPointerField --> UseDefaultPort
-							_, isUseDefaultPort := advertiseWhereportChoiceChoices.(*ves_io_schema_views.WhereType_UseDefaultPort)
-
-							if isUseDefaultPort {
-								advertiseWhereportChoiceChoicesAttributeMap["use_default_port"] = types.BoolValue(true)
-							} else {
-								advertiseWhereportChoiceChoicesAttributeMap["use_default_port"] = types.BoolNull()
-							}
-
 							// data specToModelNested UintOfOneOfField --> Port
 							portItem, isPort := advertiseWhereportChoiceChoices.(*ves_io_schema_views.WhereType_Port)
 
@@ -5224,6 +5223,15 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							} else {
 								// Empty string, set to null
 								advertiseWhereportChoiceChoicesAttributeMap["port_ranges"] = types.StringNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> UseDefaultPort
+							_, isUseDefaultPort := advertiseWhereportChoiceChoices.(*ves_io_schema_views.WhereType_UseDefaultPort)
+
+							if isUseDefaultPort {
+								advertiseWhereportChoiceChoicesAttributeMap["use_default_port"] = types.BoolValue(true)
+							} else {
+								advertiseWhereportChoiceChoicesAttributeMap["use_default_port"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -5249,8 +5257,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					advertiseWhereListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerAdvertiseWhereObjectRefModelAttributeMap}, advertiseWhereElements)
-					response.Diagnostics.Append(diags...)
+					advertiseWhereListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereModelAttributeMap}, advertiseWhereElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -5260,11 +5268,11 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					advertiseCustomAttributeMap["advertise_where"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerAdvertiseWhereObjectRefModelAttributeMap})
+					advertiseCustomAttributeMap["advertise_where"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereModelAttributeMap})
 				}
 
-				advertiseCustomObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomModelAttributeMap, advertiseCustomAttributeMap)
-				response.Diagnostics.Append(diags...)
+				advertiseCustomObj, advertiseCustomObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomModelAttributeMap, advertiseCustomAttributeMap)
+				response.Diagnostics.Append(advertiseCustomObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -5274,38 +5282,21 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			}
 		}
 
-		// data specToModelNested BoolOfOneOfPointerField --> DoNotAdvertise
-		_, isDoNotAdvertise := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_DoNotAdvertise)
-
-		if isDoNotAdvertise {
-			advertiseChoiceChoicesModel.DoNotAdvertise = types.BoolValue(true)
-		} else {
-			advertiseChoiceChoicesModel.DoNotAdvertise = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> AdvertiseOnPublicDefaultVip
-		_, isAdvertiseOnPublicDefaultVip := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_AdvertiseOnPublicDefaultVip)
-
-		if isAdvertiseOnPublicDefaultVip {
-			advertiseChoiceChoicesModel.AdvertiseOnPublicDefaultVip = types.BoolValue(true)
-		} else {
-			advertiseChoiceChoicesModel.AdvertiseOnPublicDefaultVip = types.BoolNull()
-		}
-
 		// data specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
 		// <no value>
 		// false
 		{
-			advertiseOnPublicOptions, isAdvertiseOnPublic := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_AdvertiseOnPublic)
+			advertiseOnPublicOptionsWrapper, isAdvertiseOnPublic := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_AdvertiseOnPublic)
 			advertiseOnPublicAttributeMap := make(map[string]attr.Value)
 
-			if isAdvertiseOnPublic && advertiseOnPublicOptions != nil {
+			if isAdvertiseOnPublic && advertiseOnPublicOptionsWrapper != nil && advertiseOnPublicOptionsWrapper.AdvertiseOnPublic != nil {
+				advertiseOnPublicElement := advertiseOnPublicOptionsWrapper.AdvertiseOnPublic
 
 				// data specToModelNested RequiredPointerField --> PublicIp
-				if advertiseOnPublicOptions.AdvertiseOnPublic.GetPublicIp() != nil {
+				if advertiseOnPublicElement.GetPublicIp() != nil {
 					// Create the nested Go struct
 					objectRefTypeModelModel := &ObjectRefTypeModel{}
-					publicIpElement := advertiseOnPublicOptions.AdvertiseOnPublic.GetPublicIp()
+					publicIpElement := advertiseOnPublicElement.GetPublicIp()
 
 					// Recursively populate the nested struct
 
@@ -5317,14 +5308,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
-					// data specToModelNested StringField --> Tenant
-					if publicIpElement.GetTenant() != "" {
-						objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Tenant = types.StringNull()
-					}
-
 					// data specToModelNested RequiredStringField --> Namespace
 					if publicIpElement.GetNamespace() != "" {
 						objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
@@ -5333,9 +5316,17 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 						objectRefTypeModelModel.Namespace = types.StringNull()
 					}
 
+					// data specToModelNested StringField --> Tenant
+					if publicIpElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-					response.Diagnostics.Append(diags...)
+					objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -5351,8 +5342,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					advertiseOnPublicAttributeMap["public_ip"] = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicPublicIpModelAttributeMap)
 				}
 
-				advertiseOnPublicObj, diags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicModelAttributeMap, advertiseOnPublicAttributeMap)
-				response.Diagnostics.Append(diags...)
+				advertiseOnPublicObj, advertiseOnPublicObjDiags := types.ObjectValue(TcpLoadbalancerAdvertiseChoiceAdvertiseOnPublicModelAttributeMap, advertiseOnPublicAttributeMap)
+				response.Diagnostics.Append(advertiseOnPublicObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -5362,100 +5353,48 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		advertiseChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			TcpLoadbalancerAdvertiseChoiceModelAttributeMap,
-			advertiseChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// data specToModelNested BoolOfOneOfPointerField --> AdvertiseOnPublicDefaultVip
+		_, isAdvertiseOnPublicDefaultVip := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_AdvertiseOnPublicDefaultVip)
+
+		if isAdvertiseOnPublicDefaultVip {
+			advertiseChoiceChoicesModel.AdvertiseOnPublicDefaultVip = types.BoolValue(true)
+		} else {
+			advertiseChoiceChoicesModel.AdvertiseOnPublicDefaultVip = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.AdvertiseChoice = advertiseChoiceObj
+		// data specToModelNested BoolOfOneOfPointerField --> DoNotAdvertise
+		_, isDoNotAdvertise := advertiseChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_DoNotAdvertise)
+
+		if isDoNotAdvertise {
+			advertiseChoiceChoicesModel.DoNotAdvertise = types.BoolValue(true)
+		} else {
+			advertiseChoiceChoicesModel.DoNotAdvertise = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			advertiseChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				TcpLoadbalancerAdvertiseChoiceModelAttributeMap,
+				advertiseChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.AdvertiseChoice = advertiseChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.AdvertiseChoice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceModelAttributeMap)
-	}
-
-	// data SpecToModelRoot UintField --> IdleTimeout
-	idleTimeoutValue := specData.GetIdleTimeout()
-	if idleTimeoutValue > 0 {
-		data.IdleTimeout = types.Int64Value(int64(idleTimeoutValue))
-	} else {
-		data.IdleTimeout = types.Int64Null()
-	}
-
-	// data SpecToModelRoot RequiredOneOfField --> ClusterRetractChoice
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetClusterRetractChoice() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		clusterRetractChoiceChoices := specData.GetClusterRetractChoice()
-
-		// The model struct that will be populated by the nested template.
-		var clusterRetractChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeClusterRetractChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested BoolOfOneOfPointerField --> RetractCluster
-		_, isRetractCluster := clusterRetractChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_RetractCluster)
-
-		if isRetractCluster {
-			clusterRetractChoiceChoicesModel.RetractCluster = types.BoolValue(true)
-		} else {
-			clusterRetractChoiceChoicesModel.RetractCluster = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> DoNotRetractCluster
-		_, isDoNotRetractCluster := clusterRetractChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_DoNotRetractCluster)
-
-		if isDoNotRetractCluster {
-			clusterRetractChoiceChoicesModel.DoNotRetractCluster = types.BoolValue(true)
-		} else {
-			clusterRetractChoiceChoicesModel.DoNotRetractCluster = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		clusterRetractChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			TcpLoadbalancerClusterRetractChoiceModelAttributeMap,
-			clusterRetractChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ClusterRetractChoice = clusterRetractChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ClusterRetractChoice = types.ObjectNull(TcpLoadbalancerClusterRetractChoiceModelAttributeMap)
 	}
 
 	// data SpecToModelRoot PointerField --> AutoCertInfo
 	if specData.GetAutoCertInfo() != nil {
 		var tcpLoadbalancerVirtualHostAutoCertInfoTypeModel = &TcpLoadbalancerVirtualHostAutoCertInfoType{}
 		autoCertInfoElement := specData.GetAutoCertInfo()
-
-		// data specToModelNested EnumField --> AutoCertState
-		if autoCertInfoElement.GetAutoCertState().String() != "" {
-			stringValue := types.StringValue(autoCertInfoElement.GetAutoCertState().String())
-			stringSlice := []types.String{stringValue}
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = listValue
-		} else {
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = types.ListNull(types.StringType)
-		}
 
 		// data specToModelNested TimeStampField --> AutoCertExpiry
 		if autoCertInfoElement.GetAutoCertExpiry() != nil {
@@ -5464,20 +5403,34 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertExpiry = timetypes.NewRFC3339Null()
 		}
 
-		// data specToModelNested StringField --> AutoCertSubject
-		if autoCertInfoElement.GetAutoCertSubject() != "" {
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringValue(autoCertInfoElement.GetAutoCertSubject())
-		} else {
-			// Empty string, set to null
-			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringNull()
-		}
-
 		// data specToModelNested StringField --> AutoCertIssuer
 		if autoCertInfoElement.GetAutoCertIssuer() != "" {
 			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertIssuer = types.StringValue(autoCertInfoElement.GetAutoCertIssuer())
 		} else {
 			// Empty string, set to null
 			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertIssuer = types.StringNull()
+		}
+
+		// data specToModelNested EnumField --> AutoCertState
+		if autoCertInfoElement.GetAutoCertState().String() != "" {
+			stringValue := types.StringValue(autoCertInfoElement.GetAutoCertState().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = listValue
+		} else {
+			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertState = types.ListNull(types.StringType)
+		}
+
+		// data specToModelNested StringField --> AutoCertSubject
+		if autoCertInfoElement.GetAutoCertSubject() != "" {
+			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringValue(autoCertInfoElement.GetAutoCertSubject())
+		} else {
+			// Empty string, set to null
+			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel.AutoCertSubject = types.StringNull()
 		}
 
 		// data specToModelNested ArrayOfPointerField --> DnsRecords
@@ -5516,8 +5469,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			dnsRecordsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap}, dnsRecordsElements)
-			response.Diagnostics.Append(diags...)
+			dnsRecordsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerAutoCertInfoDnsRecordsModelAttributeMap}, dnsRecordsElements)
+			response.Diagnostics.Append(listDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -5536,138 +5489,143 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			tcpLoadbalancerVirtualHostAutoCertInfoTypeModel,
 		)
 		response.Diagnostics.Append(autoCertInfoDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
 		data.AutoCertInfo = autoCertInfoObj
 	} else {
 		data.AutoCertInfo = types.ObjectNull(TcpLoadbalancerAutoCertInfoModelAttributeMap)
 	}
 
 	// data SpecToModelRoot EnumField --> CertState
-	if specData.GetCertState().String() != "" {
-		stringValue := types.StringValue(specData.GetCertState().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.CertState = listValue
-	} else {
-		// Empty string, set to null
-		data.CertState = types.ListNull(types.StringType)
-	}
-
-	// data SpecToModelRoot RequiredOneOfField --> PortChoice
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetPortChoice() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		portChoiceChoices := specData.GetPortChoice()
-
-		// The model struct that will be populated by the nested template.
-		var portChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypePortChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested StringOfOneOfField --> PortRanges
-		portRangesItem, isPortRanges := portChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_PortRanges)
-
-		if isPortRanges {
-			portChoiceChoicesModel.PortRanges = types.StringValue(string(portRangesItem.PortRanges))
+	{
+		if specData.GetCertState().String() != "" {
+			stringValue := types.StringValue(specData.GetCertState().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.CertState = listValue
 		} else {
 			// Empty string, set to null
-			portChoiceChoicesModel.PortRanges = types.StringNull()
+			data.CertState = types.ListNull(types.StringType)
 		}
-
-		// data specToModelNested UintOfOneOfField --> ListenPort
-		listenPortItem, isListenPort := portChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_ListenPort)
-
-		if isListenPort {
-			portChoiceChoicesModel.ListenPort = types.Int64Value(int64(listenPortItem.ListenPort))
-		} else {
-			// Empty uint, set to null
-			portChoiceChoicesModel.ListenPort = types.Int64Null()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		portChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			TcpLoadbalancerPortChoiceModelAttributeMap,
-			portChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.PortChoice = portChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.PortChoice = types.ObjectNull(TcpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// data SpecToModelRoot RequiredOneOfField --> SniDefaultLbChoice
+	// data SpecToModelRoot RequiredOneOfField --> ClusterRetractChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
-	if specData.GetSniDefaultLbChoice() != nil {
+	if specData.GetClusterRetractChoice() != nil {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		sniDefaultLbChoiceChoices := specData.GetSniDefaultLbChoice()
+		clusterRetractChoiceChoices := specData.GetClusterRetractChoice()
 
 		// The model struct that will be populated by the nested template.
-		var sniDefaultLbChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeSniDefaultLbChoice{}
+		var clusterRetractChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeClusterRetractChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> NoSni
-		_, isNoSni := sniDefaultLbChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_NoSni)
+		// data specToModelNested BoolOfOneOfPointerField --> DoNotRetractCluster
+		_, isDoNotRetractCluster := clusterRetractChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_DoNotRetractCluster)
 
-		if isNoSni {
-			sniDefaultLbChoiceChoicesModel.NoSni = types.BoolValue(true)
+		if isDoNotRetractCluster {
+			clusterRetractChoiceChoicesModel.DoNotRetractCluster = types.BoolValue(true)
 		} else {
-			sniDefaultLbChoiceChoicesModel.NoSni = types.BoolNull()
+			clusterRetractChoiceChoicesModel.DoNotRetractCluster = types.BoolNull()
 		}
 
-		// data specToModelNested BoolOfOneOfPointerField --> Sni
-		_, isSni := sniDefaultLbChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_Sni)
+		// data specToModelNested BoolOfOneOfPointerField --> RetractCluster
+		_, isRetractCluster := clusterRetractChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_RetractCluster)
 
-		if isSni {
-			sniDefaultLbChoiceChoicesModel.Sni = types.BoolValue(true)
+		if isRetractCluster {
+			clusterRetractChoiceChoicesModel.RetractCluster = types.BoolValue(true)
 		} else {
-			sniDefaultLbChoiceChoicesModel.Sni = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> DefaultLbWithSni
-		_, isDefaultLbWithSni := sniDefaultLbChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_DefaultLbWithSni)
-
-		if isDefaultLbWithSni {
-			sniDefaultLbChoiceChoicesModel.DefaultLbWithSni = types.BoolValue(true)
-		} else {
-			sniDefaultLbChoiceChoicesModel.DefaultLbWithSni = types.BoolNull()
+			clusterRetractChoiceChoicesModel.RetractCluster = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		sniDefaultLbChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap,
-			sniDefaultLbChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			clusterRetractChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				TcpLoadbalancerClusterRetractChoiceModelAttributeMap,
+				clusterRetractChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.SniDefaultLbChoice = sniDefaultLbChoiceObj
+			// Assign the final object to the root data model.
+			data.ClusterRetractChoice = clusterRetractChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.SniDefaultLbChoice = types.ObjectNull(TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap)
+		data.ClusterRetractChoice = types.ObjectNull(TcpLoadbalancerClusterRetractChoiceModelAttributeMap)
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> DnsInfo
+	if len(specData.GetDnsInfo()) > 0 {
+		dnsInfoElements := make([]TcpLoadbalancerVirtualHostDnsInfoDnsInfo, 0, len(specData.GetDnsInfo()))
+
+		for _, dnsInfoElement := range specData.GetDnsInfo() {
+			tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel := TcpLoadbalancerVirtualHostDnsInfoDnsInfo{}
+
+			// data specToModelNested StringField --> IpAddress
+			if dnsInfoElement.GetIpAddress() != "" {
+				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringValue(dnsInfoElement.GetIpAddress())
+			} else {
+				// Empty string, set to null
+				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Ipv6Address
+			if dnsInfoElement.GetIpv6Address() != "" {
+				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringValue(dnsInfoElement.GetIpv6Address())
+			} else {
+				// Empty string, set to null
+				tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringNull()
+			}
+
+			dnsInfoElements = append(dnsInfoElements, tcpLoadbalancerVirtualHostDnsInfoDnsInfoModel)
+		}
+
+		{
+			dnsInfoList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				TcpLoadbalancerDnsInfoModelAttributeMap,
+				dnsInfoElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsInfo = dnsInfoList
+		}
+	} else {
+		var dnsInfoObjectType = basetypes.ObjectType{
+			AttrTypes: TcpLoadbalancerDnsInfoModelAttributeMap,
+		}
+		nullDnsInfoList := basetypes.NewListNull(dnsInfoObjectType)
+		data.DnsInfo = nullDnsInfoList
+	}
+
+	// data SpecToModelRoot BoolField --> DnsVolterraManaged
+	data.DnsVolterraManaged = types.BoolValue(specData.GetDnsVolterraManaged())
+
+	// data specToModelRootOld ArrayOfStringField --> Domains
+	{
+		if len(specData.GetDomains()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetDomains())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Domains = listValue
+		} else {
+			data.Domains = types.ListNull(types.StringType)
+		}
 	}
 
 	// data SpecToModelRoot RequiredOneOfField --> HashPolicyChoice
@@ -5683,15 +5641,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		var hashPolicyChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeHashPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested BoolOfOneOfPointerField --> HashPolicyChoiceRoundRobin
-		_, isHashPolicyChoiceRoundRobin := hashPolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_HashPolicyChoiceRoundRobin)
-
-		if isHashPolicyChoiceRoundRobin {
-			hashPolicyChoiceChoicesModel.HashPolicyChoiceRoundRobin = types.BoolValue(true)
-		} else {
-			hashPolicyChoiceChoicesModel.HashPolicyChoiceRoundRobin = types.BoolNull()
-		}
 
 		// data specToModelNested BoolOfOneOfPointerField --> HashPolicyChoiceLeastActive
 		_, isHashPolicyChoiceLeastActive := hashPolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_HashPolicyChoiceLeastActive)
@@ -5711,6 +5660,15 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			hashPolicyChoiceChoicesModel.HashPolicyChoiceRandom = types.BoolNull()
 		}
 
+		// data specToModelNested BoolOfOneOfPointerField --> HashPolicyChoiceRoundRobin
+		_, isHashPolicyChoiceRoundRobin := hashPolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_HashPolicyChoiceRoundRobin)
+
+		if isHashPolicyChoiceRoundRobin {
+			hashPolicyChoiceChoicesModel.HashPolicyChoiceRoundRobin = types.BoolValue(true)
+		} else {
+			hashPolicyChoiceChoicesModel.HashPolicyChoiceRoundRobin = types.BoolNull()
+		}
+
 		// data specToModelNested BoolOfOneOfPointerField --> HashPolicyChoiceSourceIpStickiness
 		_, isHashPolicyChoiceSourceIpStickiness := hashPolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_HashPolicyChoiceSourceIpStickiness)
 
@@ -5721,21 +5679,286 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		hashPolicyChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			TcpLoadbalancerHashPolicyChoiceModelAttributeMap,
-			hashPolicyChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			hashPolicyChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				TcpLoadbalancerHashPolicyChoiceModelAttributeMap,
+				hashPolicyChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.HashPolicyChoice = hashPolicyChoiceObj
+			// Assign the final object to the root data model.
+			data.HashPolicyChoice = hashPolicyChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.HashPolicyChoice = types.ObjectNull(TcpLoadbalancerHashPolicyChoiceModelAttributeMap)
+	}
+
+	// data SpecToModelRoot StringField --> HostName
+	if specData.GetHostName() != "" {
+		data.HostName = types.StringValue(specData.GetHostName())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.HostName = types.StringNull()
+	}
+
+	// data SpecToModelRoot UintField --> IdleTimeout
+	idleTimeoutValue := specData.GetIdleTimeout()
+	if idleTimeoutValue > 0 {
+		data.IdleTimeout = types.Int64Value(int64(idleTimeoutValue))
+	} else {
+		data.IdleTimeout = types.Int64Null()
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> InternetVipInfo
+	if len(specData.GetInternetVipInfo()) > 0 {
+		internetVipInfoElements := make([]TcpLoadbalancerViewsInternetVIPInfo, 0, len(specData.GetInternetVipInfo()))
+
+		for _, internetVipInfoElement := range specData.GetInternetVipInfo() {
+			tcpLoadbalancerViewsInternetVIPInfoModel := TcpLoadbalancerViewsInternetVIPInfo{}
+
+			// data specToModelNested StringField --> SiteName
+			if internetVipInfoElement.GetSiteName() != "" {
+				tcpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringValue(internetVipInfoElement.GetSiteName())
+			} else {
+				// Empty string, set to null
+				tcpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringNull()
+			}
+
+			// data specToModelNested EnumField --> SiteNetworkType
+			if internetVipInfoElement.GetSiteNetworkType().String() != "" {
+				stringValue := types.StringValue(internetVipInfoElement.GetSiteNetworkType().String())
+				stringSlice := []types.String{stringValue}
+				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+				response.Diagnostics.Append(listDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				tcpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = listValue
+			} else {
+				tcpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = types.ListNull(types.StringType)
+			}
+
+			// data specToModelNested PointerField --> Status
+			if internetVipInfoElement.GetStatus() != nil {
+				// Create the nested Go struct
+				tcpLoadbalancerViewsInternetVIPStatusModel := &TcpLoadbalancerViewsInternetVIPStatus{}
+				statusElement := internetVipInfoElement.GetStatus()
+
+				// Recursively populate the nested struct
+
+				// data specToModelNested StringField --> Arn
+				if statusElement.GetArn() != "" {
+					tcpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringValue(statusElement.GetArn())
+				} else {
+					// Empty string, set to null
+					tcpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Name
+				if statusElement.GetName() != "" {
+					tcpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringValue(statusElement.GetName())
+				} else {
+					// Empty string, set to null
+					tcpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> NlbCname
+				if statusElement.GetNlbCname() != "" {
+					tcpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringValue(statusElement.GetNlbCname())
+				} else {
+					// Empty string, set to null
+					tcpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> NlbStatus
+				if statusElement.GetNlbStatus() != "" {
+					tcpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringValue(statusElement.GetNlbStatus())
+				} else {
+					// Empty string, set to null
+					tcpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Reason
+				if statusElement.GetReason() != "" {
+					tcpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringValue(statusElement.GetReason())
+				} else {
+					// Empty string, set to null
+					tcpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringNull()
+				}
+
+				// data specToModelNested ArrayOfPointerField --> TargetGroupStatus
+				if len(statusElement.GetTargetGroupStatus()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					targetGroupStatusElements := make([]TcpLoadbalancerViewsInternetVIPTargetGroupStatusType, 0, len(statusElement.GetTargetGroupStatus()))
+					for _, targetGroupStatusElement := range statusElement.GetTargetGroupStatus() {
+						tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel := TcpLoadbalancerViewsInternetVIPTargetGroupStatusType{}
+
+						// data specToModelNested StringField --> Arn
+						if targetGroupStatusElement.GetArn() != "" {
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringValue(targetGroupStatusElement.GetArn())
+						} else {
+							// Empty string, set to null
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringNull()
+						}
+
+						// data specToModelNested ArrayOfPointerField --> ListenerStatus
+						if len(targetGroupStatusElement.GetListenerStatus()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							listenerStatusElements := make([]TcpLoadbalancerViewsInternetVIPListenerStatusType, 0, len(targetGroupStatusElement.GetListenerStatus()))
+							for _, listenerStatusElement := range targetGroupStatusElement.GetListenerStatus() {
+								tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel := TcpLoadbalancerViewsInternetVIPListenerStatusType{}
+
+								// data specToModelNested StringField --> Arn
+								if listenerStatusElement.GetArn() != "" {
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringValue(listenerStatusElement.GetArn())
+								} else {
+									// Empty string, set to null
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringNull()
+								}
+
+								// data specToModelNested UintField --> Port
+								tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Port = types.Int64Value(int64(listenerStatusElement.GetPort()))
+
+								// data specToModelNested StringField --> Protocol
+								if listenerStatusElement.GetProtocol() != "" {
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringValue(listenerStatusElement.GetProtocol())
+								} else {
+									// Empty string, set to null
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringNull()
+								}
+
+								// data specToModelNested StringField --> Reason
+								if listenerStatusElement.GetReason() != "" {
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringValue(listenerStatusElement.GetReason())
+								} else {
+									// Empty string, set to null
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringNull()
+								}
+
+								// data specToModelNested StringField --> Status
+								if listenerStatusElement.GetStatus() != "" {
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringValue(listenerStatusElement.GetStatus())
+								} else {
+									// Empty string, set to null
+									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringNull()
+								}
+
+								listenerStatusElements = append(listenerStatusElements, tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							listenerStatusListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttributeMap}, listenerStatusElements)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = listenerStatusListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttributeMap})
+						}
+
+						// data specToModelNested StringField --> Name
+						if targetGroupStatusElement.GetName() != "" {
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringValue(targetGroupStatusElement.GetName())
+						} else {
+							// Empty string, set to null
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Protocol
+						if targetGroupStatusElement.GetProtocol() != "" {
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringValue(targetGroupStatusElement.GetProtocol())
+						} else {
+							// Empty string, set to null
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Reason
+						if targetGroupStatusElement.GetReason() != "" {
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringValue(targetGroupStatusElement.GetReason())
+						} else {
+							// Empty string, set to null
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Status
+						if targetGroupStatusElement.GetStatus() != "" {
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringValue(targetGroupStatusElement.GetStatus())
+						} else {
+							// Empty string, set to null
+							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringNull()
+						}
+
+						targetGroupStatusElements = append(targetGroupStatusElements, tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					targetGroupStatusListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusModelAttributeMap}, targetGroupStatusElements)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tcpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = targetGroupStatusListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					tcpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerInternetVipInfoStatusTargetGroupStatusModelAttributeMap})
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				tcpLoadbalancerViewsInternetVIPStatusModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerInternetVipInfoStatusModelAttributeMap, tcpLoadbalancerViewsInternetVIPStatusModel)
+				response.Diagnostics.Append(objDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				tcpLoadbalancerViewsInternetVIPInfoModel.Status = tcpLoadbalancerViewsInternetVIPStatusModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+				// because the API may always return a non-nil struct (with REDACTED values) for this field,
+				// making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				tcpLoadbalancerViewsInternetVIPInfoModel.Status = types.ObjectNull(TcpLoadbalancerInternetVipInfoStatusModelAttributeMap)
+			}
+
+			internetVipInfoElements = append(internetVipInfoElements, tcpLoadbalancerViewsInternetVIPInfoModel)
+		}
+
+		{
+			internetVipInfoList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				TcpLoadbalancerInternetVipInfoModelAttributeMap,
+				internetVipInfoElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.InternetVipInfo = internetVipInfoList
+		}
+	} else {
+		var internetVipInfoObjectType = basetypes.ObjectType{
+			AttrTypes: TcpLoadbalancerInternetVipInfoModelAttributeMap,
+		}
+		nullInternetVipInfoList := basetypes.NewListNull(internetVipInfoObjectType)
+		data.InternetVipInfo = nullInternetVipInfoList
 	}
 
 	// data SpecToModelRoot RequiredOneOfField --> LoadbalancerType
@@ -5752,496 +5975,34 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested PointerOfOneOfField --> TlsTcpAutoCert
-		// <no value>
-		// false
-		{
-			tlsTcpAutoCertOptions, isTlsTcpAutoCert := loadbalancerTypeChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_TlsTcpAutoCert)
-			tlsTcpAutoCertAttributeMap := make(map[string]attr.Value)
-
-			if isTlsTcpAutoCert && tlsTcpAutoCertOptions != nil {
-
-				// data specToModelNested PointerField --> TlsConfig
-				if tlsTcpAutoCertOptions.TlsTcpAutoCert.GetTlsConfig() != nil {
-					// Create the nested Go struct
-					tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
-					tlsConfigElement := tlsTcpAutoCertOptions.TlsTcpAutoCert.GetTlsConfig()
-
-					// Recursively populate the nested struct
-
-					// data specToModelNested RequiredOneOfField --> Choice
-					// <no value>
-					if tlsConfigElement.GetChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						tlsConfigchoiceChoices := tlsConfigElement.GetChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
-						_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
-
-						if isDefaultSecurity {
-							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
-						} else {
-							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
-						_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
-
-						if isMediumSecurity {
-							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
-						} else {
-							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
-						_, isLowSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_LowSecurity)
-
-						if isLowSecurity {
-							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolValue(true)
-						} else {
-							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> CustomSecurity
-						// <no value>
-						// false
-						{
-							customSecurityOptions, isCustomSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_CustomSecurity)
-							customSecurityAttributeMap := make(map[string]attr.Value)
-
-							if isCustomSecurity && customSecurityOptions != nil {
-
-								// data specToModelNested EnumField --> MinVersion
-								if customSecurityOptions.CustomSecurity.GetMinVersion().String() != "" {
-									stringValue := types.StringValue(customSecurityOptions.CustomSecurity.GetMinVersion().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									customSecurityAttributeMap["min_version"] = listValue
-								} else {
-									customSecurityAttributeMap["min_version"] = types.ListNull(types.StringType)
-								}
-
-								// data specToModelNested EnumField --> MaxVersion
-								if customSecurityOptions.CustomSecurity.GetMaxVersion().String() != "" {
-									stringValue := types.StringValue(customSecurityOptions.CustomSecurity.GetMaxVersion().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									customSecurityAttributeMap["max_version"] = listValue
-								} else {
-									customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
-								}
-
-								// data specToModelNested RequiredArrayOfStringField --> CipherSuites
-								if len(customSecurityOptions.CustomSecurity.GetCipherSuites()) > 0 {
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, customSecurityOptions.CustomSecurity.GetCipherSuites())
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									customSecurityAttributeMap["cipher_suites"] = listValue
-								} else {
-									customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
-								}
-
-								customSecurityObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								tlsConfigchoiceChoicesAttributeMap["custom_security"] = customSecurityObj
-							} else {
-								tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, tlsConfigchoiceChoicesObjDiags := types.ObjectValue(
-							TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							tlsConfigchoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(tlsConfigchoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						tcpLoadbalancerViewsTlsConfigModel.Choice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						tcpLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap)
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					tcpLoadbalancerViewsTlsConfigModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					tlsTcpAutoCertAttributeMap["tls_config"] = tcpLoadbalancerViewsTlsConfigModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-					// because the API may always return a non-nil struct (with REDACTED values) for this field,
-					// making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					tlsTcpAutoCertAttributeMap["tls_config"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap)
-				}
-
-				// data specToModelNested RequiredOneOfField --> MtlsChoice
-				// <no value>
-				if tlsTcpAutoCertOptions.TlsTcpAutoCert.GetMtlsChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					tlsTcpAutoCertmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					tlsTcpAutoCertmtlsChoiceChoices := tlsTcpAutoCertOptions.TlsTcpAutoCert.GetMtlsChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> NoMtls
-					_, isNoMtls := tlsTcpAutoCertmtlsChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_NoMtls)
-
-					if isNoMtls {
-						tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolValue(true)
-					} else {
-						tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolNull()
-					}
-
-					// data specToModelNested PointerOfOneOfField --> UseMtls
-					// <no value>
-					// false
-					{
-						useMtlsOptions, isUseMtls := tlsTcpAutoCertmtlsChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_UseMtls)
-						useMtlsAttributeMap := make(map[string]attr.Value)
-
-						if isUseMtls && useMtlsOptions != nil {
-
-							// data specToModelNested RequiredOneOfField --> TrustedCaChoice
-							// <no value>
-							if useMtlsOptions.UseMtls.GetTrustedCaChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								useMtlstrustedCaChoiceChoices := useMtlsOptions.UseMtls.GetTrustedCaChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested StringOfOneOfField --> TrustedCaUrl
-								trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
-
-								if isTrustedCaUrl {
-									useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-								} else {
-									// Empty string, set to null
-									useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-								}
-
-								// data specToModelNested PointerOfOneOfField --> TrustedCa
-								// <no value>
-								// false
-								{
-									trustedCaOptions, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
-									trustedCaAttributeMap := make(map[string]attr.Value)
-
-									if isTrustedCa && trustedCaOptions != nil {
-
-										// data specToModelNested RequiredStringField --> Name
-										if trustedCaOptions.TrustedCa.GetName() != "" {
-											trustedCaAttributeMap["name"] = types.StringValue(trustedCaOptions.TrustedCa.GetName())
-										} else {
-											// Empty string, set to null
-											trustedCaAttributeMap["name"] = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if trustedCaOptions.TrustedCa.GetTenant() != "" {
-											trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaOptions.TrustedCa.GetTenant())
-										} else {
-											// Empty string, set to null
-											trustedCaAttributeMap["tenant"] = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if trustedCaOptions.TrustedCa.GetNamespace() != "" {
-											trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaOptions.TrustedCa.GetNamespace())
-										} else {
-											// Empty string, set to null
-											trustedCaAttributeMap["namespace"] = types.StringNull()
-										}
-
-										trustedCaObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
-									} else {
-										useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									useMtlstrustedCaChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								useMtlsAttributeMap["trusted_ca_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
-							}
-
-							// data specToModelNested BoolField --> ClientCertificateOptional
-							useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsOptions.UseMtls.GetClientCertificateOptional()))
-
-							// data specToModelNested OneOfField --> CrlChoice
-							if useMtlsOptions.UseMtls.GetCrlChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								useMtlscrlChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								useMtlscrlChoiceChoices := useMtlsOptions.UseMtls.GetCrlChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested PointerOfOneOfField --> Crl
-								// <no value>
-								// false
-								{
-									crlOptions, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
-									crlAttributeMap := make(map[string]attr.Value)
-
-									if isCrl && crlOptions != nil {
-
-										// data specToModelNested RequiredStringField --> Name
-										if crlOptions.Crl.GetName() != "" {
-											crlAttributeMap["name"] = types.StringValue(crlOptions.Crl.GetName())
-										} else {
-											// Empty string, set to null
-											crlAttributeMap["name"] = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if crlOptions.Crl.GetTenant() != "" {
-											crlAttributeMap["tenant"] = types.StringValue(crlOptions.Crl.GetTenant())
-										} else {
-											// Empty string, set to null
-											crlAttributeMap["tenant"] = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if crlOptions.Crl.GetNamespace() != "" {
-											crlAttributeMap["namespace"] = types.StringValue(crlOptions.Crl.GetNamespace())
-										} else {
-											// Empty string, set to null
-											crlAttributeMap["namespace"] = types.StringNull()
-										}
-
-										crlObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										useMtlscrlChoiceChoicesAttributeMap["crl"] = crlObj
-									} else {
-										useMtlscrlChoiceChoicesAttributeMap["crl"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap)
-									}
-								}
-
-								// data specToModelNested BoolOfOneOfPointerField --> NoCrl
-								_, isNoCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_NoCrl)
-
-								if isNoCrl {
-									useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolValue(true)
-								} else {
-									useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, useMtlscrlChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									useMtlscrlChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(useMtlscrlChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								useMtlsAttributeMap["crl_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useMtlsAttributeMap["crl_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap)
-							}
-
-							// data specToModelNested OneOfField --> XfccHeader
-							if useMtlsOptions.UseMtls.GetXfccHeader() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								useMtlsxfccHeaderChoiceChoices := useMtlsOptions.UseMtls.GetXfccHeader()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-								if isXfccDisabled {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-								} else {
-									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-								}
-
-								// data specToModelNested PointerOfOneOfField --> XfccOptions
-								// <no value>
-								// false
-								{
-									xfccOptionsOptions, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-									xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-									if isXfccOptions && xfccOptionsOptions != nil {
-
-										// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-										if len(xfccOptionsOptions.XfccOptions.GetXfccHeaderElements()) > 0 {
-											xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsOptions.XfccOptions.GetXfccHeaderElements()))
-											for _, v := range xfccOptionsOptions.XfccOptions.GetXfccHeaderElements() {
-												if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-													xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-												}
-											}
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-										} else {
-											xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-										}
-
-										xfccOptionsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-									} else {
-										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-									useMtlsxfccHeaderChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-							}
-
-							useMtlsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["use_mtls"] = useMtlsObj
-						} else {
-							tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["use_mtls"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, tlsTcpAutoCertmtlsChoiceChoicesObjDiags := types.ObjectValue(
-						TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						tlsTcpAutoCertmtlsChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(tlsTcpAutoCertmtlsChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					tlsTcpAutoCertAttributeMap["mtls_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					tlsTcpAutoCertAttributeMap["mtls_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap)
-				}
-
-				tlsTcpAutoCertObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap, tlsTcpAutoCertAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				loadbalancerTypeChoiceChoicesModel.TlsTcpAutoCert = tlsTcpAutoCertObj
-			} else {
-				loadbalancerTypeChoiceChoicesModel.TlsTcpAutoCert = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap)
-			}
+		// data specToModelNested BoolOfOneOfPointerField --> Tcp
+		_, isTcp := loadbalancerTypeChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_Tcp)
+
+		if isTcp {
+			loadbalancerTypeChoiceChoicesModel.Tcp = types.BoolValue(true)
+		} else {
+			loadbalancerTypeChoiceChoicesModel.Tcp = types.BoolNull()
 		}
 
 		// data specToModelNested PointerOfOneOfField --> TlsTcp
 		// <no value>
 		// false
 		{
-			tlsTcpOptions, isTlsTcp := loadbalancerTypeChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_TlsTcp)
+			tlsTcpOptionsWrapper, isTlsTcp := loadbalancerTypeChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_TlsTcp)
 			tlsTcpAttributeMap := make(map[string]attr.Value)
 
-			if isTlsTcp && tlsTcpOptions != nil {
+			if isTlsTcp && tlsTcpOptionsWrapper != nil && tlsTcpOptionsWrapper.TlsTcp != nil {
+				tlsTcpElement := tlsTcpOptionsWrapper.TlsTcp
 
 				// data specToModelNested RequiredOneOfField --> TlsCertificatesChoice
 				// <no value>
-				if tlsTcpOptions.TlsTcp.GetTlsCertificatesChoice() != nil {
+				if tlsTcpElement.GetTlsCertificatesChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsTcptlsCertificatesChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					tlsTcptlsCertificatesChoiceChoices := tlsTcpOptions.TlsTcp.GetTlsCertificatesChoice()
+					tlsTcptlsCertificatesChoiceChoices := tlsTcpElement.GetTlsCertificatesChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -6249,17 +6010,18 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					// <no value>
 					// false
 					{
-						tlsCertParamsOptions, isTlsCertParams := tlsTcptlsCertificatesChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsCertParams)
+						tlsCertParamsOptionsWrapper, isTlsCertParams := tlsTcptlsCertificatesChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsCertParams)
 						tlsCertParamsAttributeMap := make(map[string]attr.Value)
 
-						if isTlsCertParams && tlsCertParamsOptions != nil {
+						if isTlsCertParams && tlsCertParamsOptionsWrapper != nil && tlsCertParamsOptionsWrapper.TlsCertParams != nil {
+							tlsCertParamsElement := tlsCertParamsOptionsWrapper.TlsCertParams
 
 							// data specToModelNested RequiredArrayOfPointerField --> Certificates
-							if len(tlsCertParamsOptions.TlsCertParams.GetCertificates()) > 0 {
+							if len(tlsCertParamsElement.GetCertificates()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								certificatesElements := make([]ObjectRefTypeModel, 0, len(tlsCertParamsOptions.TlsCertParams.GetCertificates()))
-								for _, certificatesElement := range tlsCertParamsOptions.TlsCertParams.GetCertificates() {
+								certificatesElements := make([]ObjectRefTypeModel, 0, len(tlsCertParamsElement.GetCertificates()))
+								for _, certificatesElement := range tlsCertParamsElement.GetCertificates() {
 									objectRefTypeModelModel := ObjectRefTypeModel{}
 
 									// data specToModelNested RequiredStringField --> Name
@@ -6270,14 +6032,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										objectRefTypeModelModel.Name = types.StringNull()
 									}
 
-									// data specToModelNested StringField --> Tenant
-									if certificatesElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(certificatesElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
 									// data specToModelNested RequiredStringField --> Namespace
 									if certificatesElement.GetNamespace() != "" {
 										objectRefTypeModelModel.Namespace = types.StringValue(certificatesElement.GetNamespace())
@@ -6286,12 +6040,20 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										objectRefTypeModelModel.Namespace = types.StringNull()
 									}
 
+									// data specToModelNested StringField --> Tenant
+									if certificatesElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(certificatesElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
 									certificatesElements = append(certificatesElements, objectRefTypeModelModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								certificatesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerCertificatesObjectRefModelAttributeMap}, certificatesElements)
-								response.Diagnostics.Append(diags...)
+								certificatesListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerCertificatesObjectRefModelAttributeMap}, certificatesElements)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -6306,13 +6068,13 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 							// data specToModelNested RequiredOneOfField --> MtlsChoice
 							// <no value>
-							if tlsCertParamsOptions.TlsCertParams.GetMtlsChoice() != nil {
+							if tlsCertParamsElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsCertParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 								// Define a variable for the spec choices to be passed down to nested templates.
 								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								tlsCertParamsmtlsChoiceChoices := tlsCertParamsOptions.TlsCertParams.GetMtlsChoice()
+								tlsCertParamsmtlsChoiceChoices := tlsCertParamsElement.GetMtlsChoice()
 
 								// Process nested choices, populating the temporary attribute map
 
@@ -6329,107 +6091,23 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								// <no value>
 								// false
 								{
-									useMtlsOptions, isUseMtls := tlsCertParamsmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTLSCertsParams_UseMtls)
+									useMtlsOptionsWrapper, isUseMtls := tlsCertParamsmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTLSCertsParams_UseMtls)
 									useMtlsAttributeMap := make(map[string]attr.Value)
 
-									if isUseMtls && useMtlsOptions != nil {
-
-										// data specToModelNested RequiredOneOfField --> TrustedCaChoice
-										// <no value>
-										if useMtlsOptions.UseMtls.GetTrustedCaChoice() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlstrustedCaChoiceChoices := useMtlsOptions.UseMtls.GetTrustedCaChoice()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested StringOfOneOfField --> TrustedCaUrl
-											trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
-
-											if isTrustedCaUrl {
-												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-											} else {
-												// Empty string, set to null
-												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-											}
-
-											// data specToModelNested PointerOfOneOfField --> TrustedCa
-											// <no value>
-											// false
-											{
-												trustedCaOptions, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
-												trustedCaAttributeMap := make(map[string]attr.Value)
-
-												if isTrustedCa && trustedCaOptions != nil {
-
-													// data specToModelNested StringField --> Tenant
-													if trustedCaOptions.TrustedCa.GetTenant() != "" {
-														trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaOptions.TrustedCa.GetTenant())
-													} else {
-														// Empty string, set to null
-														trustedCaAttributeMap["tenant"] = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Namespace
-													if trustedCaOptions.TrustedCa.GetNamespace() != "" {
-														trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaOptions.TrustedCa.GetNamespace())
-													} else {
-														// Empty string, set to null
-														trustedCaAttributeMap["namespace"] = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Name
-													if trustedCaOptions.TrustedCa.GetName() != "" {
-														trustedCaAttributeMap["name"] = types.StringValue(trustedCaOptions.TrustedCa.GetName())
-													} else {
-														// Empty string, set to null
-														trustedCaAttributeMap["name"] = types.StringNull()
-													}
-
-													trustedCaObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
-												} else {
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlstrustedCaChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["trusted_ca_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
-										}
+									if isUseMtls && useMtlsOptionsWrapper != nil && useMtlsOptionsWrapper.UseMtls != nil {
+										useMtlsElement := useMtlsOptionsWrapper.UseMtls
 
 										// data specToModelNested BoolField --> ClientCertificateOptional
-										useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsOptions.UseMtls.GetClientCertificateOptional()))
+										useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsElement.GetClientCertificateOptional()))
 
 										// data specToModelNested OneOfField --> CrlChoice
-										if useMtlsOptions.UseMtls.GetCrlChoice() != nil {
+										if useMtlsElement.GetCrlChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											useMtlscrlChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 											// Define a variable for the spec choices to be passed down to nested templates.
 											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlscrlChoiceChoices := useMtlsOptions.UseMtls.GetCrlChoice()
+											useMtlscrlChoiceChoices := useMtlsElement.GetCrlChoice()
 
 											// Process nested choices, populating the temporary attribute map
 
@@ -6437,37 +6115,38 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											// <no value>
 											// false
 											{
-												crlOptions, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
+												crlOptionsWrapper, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
 												crlAttributeMap := make(map[string]attr.Value)
 
-												if isCrl && crlOptions != nil {
+												if isCrl && crlOptionsWrapper != nil && crlOptionsWrapper.Crl != nil {
+													crlElement := crlOptionsWrapper.Crl
 
 													// data specToModelNested RequiredStringField --> Name
-													if crlOptions.Crl.GetName() != "" {
-														crlAttributeMap["name"] = types.StringValue(crlOptions.Crl.GetName())
+													if crlElement.GetName() != "" {
+														crlAttributeMap["name"] = types.StringValue(crlElement.GetName())
 													} else {
 														// Empty string, set to null
 														crlAttributeMap["name"] = types.StringNull()
 													}
 
-													// data specToModelNested StringField --> Tenant
-													if crlOptions.Crl.GetTenant() != "" {
-														crlAttributeMap["tenant"] = types.StringValue(crlOptions.Crl.GetTenant())
-													} else {
-														// Empty string, set to null
-														crlAttributeMap["tenant"] = types.StringNull()
-													}
-
 													// data specToModelNested RequiredStringField --> Namespace
-													if crlOptions.Crl.GetNamespace() != "" {
-														crlAttributeMap["namespace"] = types.StringValue(crlOptions.Crl.GetNamespace())
+													if crlElement.GetNamespace() != "" {
+														crlAttributeMap["namespace"] = types.StringValue(crlElement.GetNamespace())
 													} else {
 														// Empty string, set to null
 														crlAttributeMap["namespace"] = types.StringNull()
 													}
 
-													crlObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
-													response.Diagnostics.Append(diags...)
+													// data specToModelNested StringField --> Tenant
+													if crlElement.GetTenant() != "" {
+														crlAttributeMap["tenant"] = types.StringValue(crlElement.GetTenant())
+													} else {
+														// Empty string, set to null
+														crlAttributeMap["tenant"] = types.StringNull()
+													}
+
+													crlObj, crlObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
+													response.Diagnostics.Append(crlObjDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
@@ -6505,54 +6184,102 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											useMtlsAttributeMap["crl_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsCrlChoiceModelAttributeMap)
 										}
 
+										// data specToModelNested RequiredOneOfField --> TrustedCaChoice
+										// <no value>
+										if useMtlsElement.GetTrustedCaChoice() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											useMtlstrustedCaChoiceChoices := useMtlsElement.GetTrustedCaChoice()
+
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested PointerOfOneOfField --> TrustedCa
+											// <no value>
+											// false
+											{
+												trustedCaOptionsWrapper, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
+												trustedCaAttributeMap := make(map[string]attr.Value)
+
+												if isTrustedCa && trustedCaOptionsWrapper != nil && trustedCaOptionsWrapper.TrustedCa != nil {
+													trustedCaElement := trustedCaOptionsWrapper.TrustedCa
+
+													// data specToModelNested RequiredStringField --> Name
+													if trustedCaElement.GetName() != "" {
+														trustedCaAttributeMap["name"] = types.StringValue(trustedCaElement.GetName())
+													} else {
+														// Empty string, set to null
+														trustedCaAttributeMap["name"] = types.StringNull()
+													}
+
+													// data specToModelNested RequiredStringField --> Namespace
+													if trustedCaElement.GetNamespace() != "" {
+														trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaElement.GetNamespace())
+													} else {
+														// Empty string, set to null
+														trustedCaAttributeMap["namespace"] = types.StringNull()
+													}
+
+													// data specToModelNested StringField --> Tenant
+													if trustedCaElement.GetTenant() != "" {
+														trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaElement.GetTenant())
+													} else {
+														// Empty string, set to null
+														trustedCaAttributeMap["tenant"] = types.StringNull()
+													}
+
+													trustedCaObj, trustedCaObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
+													response.Diagnostics.Append(trustedCaObjDiags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
+												} else {
+													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
+												}
+											}
+
+											// data specToModelNested StringOfOneOfField --> TrustedCaUrl
+											trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
+
+											if isTrustedCaUrl {
+												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
+											} else {
+												// Empty string, set to null
+												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
+											}
+
+											// --- End of Choices ---
+
+											// Create the final ObjectValue for this OneOf field
+											finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
+												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+												useMtlstrustedCaChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											useMtlsAttributeMap["trusted_ca_choice"] = finalObj
+										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
+										}
+
 										// data specToModelNested OneOfField --> XfccHeader
-										if useMtlsOptions.UseMtls.GetXfccHeader() != nil {
+										if useMtlsElement.GetXfccHeader() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 											// Define a variable for the spec choices to be passed down to nested templates.
 											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlsxfccHeaderChoiceChoices := useMtlsOptions.UseMtls.GetXfccHeader()
+											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
 
 											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested PointerOfOneOfField --> XfccOptions
-											// <no value>
-											// false
-											{
-												xfccOptionsOptions, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptions != nil {
-
-													// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													if len(xfccOptionsOptions.XfccOptions.GetXfccHeaderElements()) > 0 {
-														xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsOptions.XfccOptions.GetXfccHeaderElements()))
-														for _, v := range xfccOptionsOptions.XfccOptions.GetXfccHeaderElements() {
-															if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-															}
-														}
-														listValue, diags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-													} else {
-														xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-													}
-
-													xfccOptionsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
 
 											// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
 											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
@@ -6561,6 +6288,45 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
 											} else {
 												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
+											}
+
+											// data specToModelNested PointerOfOneOfField --> XfccOptions
+											// <no value>
+											// false
+											{
+												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
+												xfccOptionsAttributeMap := make(map[string]attr.Value)
+
+												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
+													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
+
+													// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
+													if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
+														xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
+														for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
+															if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
+																xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
+															}
+														}
+														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
+														response.Diagnostics.Append(listDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
+													} else {
+														xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
+													}
+
+													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
+													response.Diagnostics.Append(xfccOptionsObjDiags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
+												} else {
+													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
+												}
 											}
 
 											// --- End of Choices ---
@@ -6582,8 +6348,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
 										}
 
-										useMtlsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
-										response.Diagnostics.Append(diags...)
+										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
+										response.Diagnostics.Append(useMtlsObjDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -6613,10 +6379,10 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// data specToModelNested PointerField --> TlsConfig
-							if tlsCertParamsOptions.TlsCertParams.GetTlsConfig() != nil {
+							if tlsCertParamsElement.GetTlsConfig() != nil {
 								// Create the nested Go struct
 								tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
-								tlsConfigElement := tlsCertParamsOptions.TlsCertParams.GetTlsConfig()
+								tlsConfigElement := tlsCertParamsElement.GetTlsConfig()
 
 								// Recursively populate the nested struct
 
@@ -6632,6 +6398,67 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 
 									// Process nested choices, populating the temporary attribute map
 
+									// data specToModelNested PointerOfOneOfField --> CustomSecurity
+									// <no value>
+									// false
+									{
+										customSecurityOptionsWrapper, isCustomSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_CustomSecurity)
+										customSecurityAttributeMap := make(map[string]attr.Value)
+
+										if isCustomSecurity && customSecurityOptionsWrapper != nil && customSecurityOptionsWrapper.CustomSecurity != nil {
+											customSecurityElement := customSecurityOptionsWrapper.CustomSecurity
+
+											// data specToModelNested RequiredArrayOfStringField --> CipherSuites
+											if len(customSecurityElement.GetCipherSuites()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, customSecurityElement.GetCipherSuites())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												customSecurityAttributeMap["cipher_suites"] = listValue
+											} else {
+												customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
+											}
+
+											// data specToModelNested EnumField --> MaxVersion
+											if customSecurityElement.GetMaxVersion().String() != "" {
+												stringValue := types.StringValue(customSecurityElement.GetMaxVersion().String())
+												stringSlice := []types.String{stringValue}
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												customSecurityAttributeMap["max_version"] = listValue
+											} else {
+												customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
+											}
+
+											// data specToModelNested EnumField --> MinVersion
+											if customSecurityElement.GetMinVersion().String() != "" {
+												stringValue := types.StringValue(customSecurityElement.GetMinVersion().String())
+												stringSlice := []types.String{stringValue}
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												customSecurityAttributeMap["min_version"] = listValue
+											} else {
+												customSecurityAttributeMap["min_version"] = types.ListNull(types.StringType)
+											}
+
+											customSecurityObj, customSecurityObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
+											response.Diagnostics.Append(customSecurityObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											tlsConfigchoiceChoicesAttributeMap["custom_security"] = customSecurityObj
+										} else {
+											tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceCustomSecurityModelAttributeMap)
+										}
+									}
+
 									// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
 									_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
 
@@ -6639,15 +6466,6 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
 									} else {
 										tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
-									_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
-
-									if isMediumSecurity {
-										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
-									} else {
-										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
 									}
 
 									// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
@@ -6659,64 +6477,13 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
 									}
 
-									// data specToModelNested PointerOfOneOfField --> CustomSecurity
-									// <no value>
-									// false
-									{
-										customSecurityOptions, isCustomSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_CustomSecurity)
-										customSecurityAttributeMap := make(map[string]attr.Value)
+									// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
+									_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
 
-										if isCustomSecurity && customSecurityOptions != nil {
-
-											// data specToModelNested RequiredArrayOfStringField --> CipherSuites
-											if len(customSecurityOptions.CustomSecurity.GetCipherSuites()) > 0 {
-												listValue, diags := types.ListValueFrom(ctx, types.StringType, customSecurityOptions.CustomSecurity.GetCipherSuites())
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												customSecurityAttributeMap["cipher_suites"] = listValue
-											} else {
-												customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
-											}
-
-											// data specToModelNested EnumField --> MinVersion
-											if customSecurityOptions.CustomSecurity.GetMinVersion().String() != "" {
-												stringValue := types.StringValue(customSecurityOptions.CustomSecurity.GetMinVersion().String())
-												stringSlice := []types.String{stringValue}
-												listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												customSecurityAttributeMap["min_version"] = listValue
-											} else {
-												customSecurityAttributeMap["min_version"] = types.ListNull(types.StringType)
-											}
-
-											// data specToModelNested EnumField --> MaxVersion
-											if customSecurityOptions.CustomSecurity.GetMaxVersion().String() != "" {
-												stringValue := types.StringValue(customSecurityOptions.CustomSecurity.GetMaxVersion().String())
-												stringSlice := []types.String{stringValue}
-												listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												customSecurityAttributeMap["max_version"] = listValue
-											} else {
-												customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
-											}
-
-											customSecurityObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											tlsConfigchoiceChoicesAttributeMap["custom_security"] = customSecurityObj
-										} else {
-											tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceCustomSecurityModelAttributeMap)
-										}
+									if isMediumSecurity {
+										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
+									} else {
+										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -6739,8 +6506,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								tcpLoadbalancerViewsTlsConfigModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
-								response.Diagnostics.Append(diags...)
+								tcpLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
+								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -6756,8 +6523,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								tlsCertParamsAttributeMap["tls_config"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigModelAttributeMap)
 							}
 
-							tlsCertParamsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsModelAttributeMap, tlsCertParamsAttributeMap)
-							response.Diagnostics.Append(diags...)
+							tlsCertParamsObj, tlsCertParamsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsModelAttributeMap, tlsCertParamsAttributeMap)
+							response.Diagnostics.Append(tlsCertParamsObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -6771,161 +6538,330 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					// <no value>
 					// false
 					{
-						tlsParametersOptions, isTlsParameters := tlsTcptlsCertificatesChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsParameters)
+						tlsParametersOptionsWrapper, isTlsParameters := tlsTcptlsCertificatesChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsParameters)
 						tlsParametersAttributeMap := make(map[string]attr.Value)
 
-						if isTlsParameters && tlsParametersOptions != nil {
+						if isTlsParameters && tlsParametersOptionsWrapper != nil && tlsParametersOptionsWrapper.TlsParameters != nil {
+							tlsParametersElement := tlsParametersOptionsWrapper.TlsParameters
 
-							// data specToModelNested PointerField --> TlsConfig
-							if tlsParametersOptions.TlsParameters.GetTlsConfig() != nil {
-								// Create the nested Go struct
-								tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
-								tlsConfigElement := tlsParametersOptions.TlsParameters.GetTlsConfig()
+							// data specToModelNested RequiredOneOfField --> MtlsChoice
+							// <no value>
+							if tlsParametersElement.GetMtlsChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsParametersmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-								// Recursively populate the nested struct
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								tlsParametersmtlsChoiceChoices := tlsParametersElement.GetMtlsChoice()
 
-								// data specToModelNested RequiredOneOfField --> Choice
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested BoolOfOneOfPointerField --> NoMtls
+								_, isNoMtls := tlsParametersmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTlsParamsType_NoMtls)
+
+								if isNoMtls {
+									tlsParametersmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolValue(true)
+								} else {
+									tlsParametersmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolNull()
+								}
+
+								// data specToModelNested PointerOfOneOfField --> UseMtls
 								// <no value>
-								if tlsConfigElement.GetChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
+								// false
+								{
+									useMtlsOptionsWrapper, isUseMtls := tlsParametersmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTlsParamsType_UseMtls)
+									useMtlsAttributeMap := make(map[string]attr.Value)
 
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									tlsConfigchoiceChoices := tlsConfigElement.GetChoice()
+									if isUseMtls && useMtlsOptionsWrapper != nil && useMtlsOptionsWrapper.UseMtls != nil {
+										useMtlsElement := useMtlsOptionsWrapper.UseMtls
 
-									// Process nested choices, populating the temporary attribute map
+										// data specToModelNested BoolField --> ClientCertificateOptional
+										useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsElement.GetClientCertificateOptional()))
 
-									// data specToModelNested PointerOfOneOfField --> CustomSecurity
-									// <no value>
-									// false
-									{
-										customSecurityOptions, isCustomSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_CustomSecurity)
-										customSecurityAttributeMap := make(map[string]attr.Value)
+										// data specToModelNested OneOfField --> CrlChoice
+										if useMtlsElement.GetCrlChoice() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											useMtlscrlChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-										if isCustomSecurity && customSecurityOptions != nil {
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											useMtlscrlChoiceChoices := useMtlsElement.GetCrlChoice()
 
-											// data specToModelNested EnumField --> MaxVersion
-											if customSecurityOptions.CustomSecurity.GetMaxVersion().String() != "" {
-												stringValue := types.StringValue(customSecurityOptions.CustomSecurity.GetMaxVersion().String())
-												stringSlice := []types.String{stringValue}
-												listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested PointerOfOneOfField --> Crl
+											// <no value>
+											// false
+											{
+												crlOptionsWrapper, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
+												crlAttributeMap := make(map[string]attr.Value)
+
+												if isCrl && crlOptionsWrapper != nil && crlOptionsWrapper.Crl != nil {
+													crlElement := crlOptionsWrapper.Crl
+
+													// data specToModelNested RequiredStringField --> Name
+													if crlElement.GetName() != "" {
+														crlAttributeMap["name"] = types.StringValue(crlElement.GetName())
+													} else {
+														// Empty string, set to null
+														crlAttributeMap["name"] = types.StringNull()
+													}
+
+													// data specToModelNested RequiredStringField --> Namespace
+													if crlElement.GetNamespace() != "" {
+														crlAttributeMap["namespace"] = types.StringValue(crlElement.GetNamespace())
+													} else {
+														// Empty string, set to null
+														crlAttributeMap["namespace"] = types.StringNull()
+													}
+
+													// data specToModelNested StringField --> Tenant
+													if crlElement.GetTenant() != "" {
+														crlAttributeMap["tenant"] = types.StringValue(crlElement.GetTenant())
+													} else {
+														// Empty string, set to null
+														crlAttributeMap["tenant"] = types.StringNull()
+													}
+
+													crlObj, crlObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
+													response.Diagnostics.Append(crlObjDiags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													useMtlscrlChoiceChoicesAttributeMap["crl"] = crlObj
+												} else {
+													useMtlscrlChoiceChoicesAttributeMap["crl"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap)
 												}
-												customSecurityAttributeMap["max_version"] = listValue
-											} else {
-												customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
 											}
 
-											// data specToModelNested RequiredArrayOfStringField --> CipherSuites
-											if len(customSecurityOptions.CustomSecurity.GetCipherSuites()) > 0 {
-												listValue, diags := types.ListValueFrom(ctx, types.StringType, customSecurityOptions.CustomSecurity.GetCipherSuites())
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												customSecurityAttributeMap["cipher_suites"] = listValue
+											// data specToModelNested BoolOfOneOfPointerField --> NoCrl
+											_, isNoCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_NoCrl)
+
+											if isNoCrl {
+												useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolValue(true)
 											} else {
-												customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
+												useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolNull()
 											}
 
-											// data specToModelNested EnumField --> MinVersion
-											if customSecurityOptions.CustomSecurity.GetMinVersion().String() != "" {
-												stringValue := types.StringValue(customSecurityOptions.CustomSecurity.GetMinVersion().String())
-												stringSlice := []types.String{stringValue}
-												listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												customSecurityAttributeMap["min_version"] = listValue
-											} else {
-												customSecurityAttributeMap["min_version"] = types.ListNull(types.StringType)
-											}
+											// --- End of Choices ---
 
-											customSecurityObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
-											response.Diagnostics.Append(diags...)
+											// Create the final ObjectValue for this OneOf field
+											finalObj, useMtlscrlChoiceChoicesObjDiags := types.ObjectValue(
+												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+												useMtlscrlChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(useMtlscrlChoiceChoicesObjDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											tlsConfigchoiceChoicesAttributeMap["custom_security"] = customSecurityObj
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											useMtlsAttributeMap["crl_choice"] = finalObj
 										} else {
-											tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap)
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											useMtlsAttributeMap["crl_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap)
 										}
-									}
 
-									// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
-									_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
+										// data specToModelNested RequiredOneOfField --> TrustedCaChoice
+										// <no value>
+										if useMtlsElement.GetTrustedCaChoice() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-									if isDefaultSecurity {
-										tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											useMtlstrustedCaChoiceChoices := useMtlsElement.GetTrustedCaChoice()
+
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested PointerOfOneOfField --> TrustedCa
+											// <no value>
+											// false
+											{
+												trustedCaOptionsWrapper, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
+												trustedCaAttributeMap := make(map[string]attr.Value)
+
+												if isTrustedCa && trustedCaOptionsWrapper != nil && trustedCaOptionsWrapper.TrustedCa != nil {
+													trustedCaElement := trustedCaOptionsWrapper.TrustedCa
+
+													// data specToModelNested RequiredStringField --> Name
+													if trustedCaElement.GetName() != "" {
+														trustedCaAttributeMap["name"] = types.StringValue(trustedCaElement.GetName())
+													} else {
+														// Empty string, set to null
+														trustedCaAttributeMap["name"] = types.StringNull()
+													}
+
+													// data specToModelNested RequiredStringField --> Namespace
+													if trustedCaElement.GetNamespace() != "" {
+														trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaElement.GetNamespace())
+													} else {
+														// Empty string, set to null
+														trustedCaAttributeMap["namespace"] = types.StringNull()
+													}
+
+													// data specToModelNested StringField --> Tenant
+													if trustedCaElement.GetTenant() != "" {
+														trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaElement.GetTenant())
+													} else {
+														// Empty string, set to null
+														trustedCaAttributeMap["tenant"] = types.StringNull()
+													}
+
+													trustedCaObj, trustedCaObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
+													response.Diagnostics.Append(trustedCaObjDiags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
+												} else {
+													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
+												}
+											}
+
+											// data specToModelNested StringOfOneOfField --> TrustedCaUrl
+											trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
+
+											if isTrustedCaUrl {
+												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
+											} else {
+												// Empty string, set to null
+												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
+											}
+
+											// --- End of Choices ---
+
+											// Create the final ObjectValue for this OneOf field
+											finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
+												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+												useMtlstrustedCaChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											useMtlsAttributeMap["trusted_ca_choice"] = finalObj
+										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
+										}
+
+										// data specToModelNested OneOfField --> XfccHeader
+										if useMtlsElement.GetXfccHeader() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
+
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
+											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
+
+											if isXfccDisabled {
+												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
+											} else {
+												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
+											}
+
+											// data specToModelNested PointerOfOneOfField --> XfccOptions
+											// <no value>
+											// false
+											{
+												xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
+												xfccOptionsAttributeMap := make(map[string]attr.Value)
+
+												if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
+													xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
+
+													// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
+													if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
+														xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
+														for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
+															if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
+																xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
+															}
+														}
+														listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
+														response.Diagnostics.Append(listDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
+													} else {
+														xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
+													}
+
+													xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
+													response.Diagnostics.Append(xfccOptionsObjDiags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
+												} else {
+													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
+												}
+											}
+
+											// --- End of Choices ---
+
+											// Create the final ObjectValue for this OneOf field
+											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
+												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
+												useMtlsxfccHeaderChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
+										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
+										}
+
+										useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
+										response.Diagnostics.Append(useMtlsObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										tlsParametersmtlsChoiceChoicesAttributeMap["use_mtls"] = useMtlsObj
 									} else {
-										tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
+										tlsParametersmtlsChoiceChoicesAttributeMap["use_mtls"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap)
 									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
-									_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
-
-									if isMediumSecurity {
-										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
-									} else {
-										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
-									_, isLowSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_LowSecurity)
-
-									if isLowSecurity {
-										tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolValue(true)
-									} else {
-										tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, tlsConfigchoiceChoicesObjDiags := types.ObjectValue(
-										TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										tlsConfigchoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(tlsConfigchoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									tcpLoadbalancerViewsTlsConfigModel.Choice = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									tcpLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 								}
 
-								// This field needs to be converted to a types.ObjectValue before assignment.
-								tcpLoadbalancerViewsTlsConfigModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
-								response.Diagnostics.Append(diags...)
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsParametersmtlsChoiceChoicesObjDiags := types.ObjectValue(
+									TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsParametersmtlsChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsParametersmtlsChoiceChoicesObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								tlsParametersAttributeMap["tls_config"] = tcpLoadbalancerViewsTlsConfigModelObj
 
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsParametersAttributeMap["mtls_choice"] = finalObj
 							} else {
-								// The source field is nil (e.g. redacted by the API).
-								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-								// because the API may always return a non-nil struct (with REDACTED values) for this field,
-								// making this else-branch unreachable. The child OneOf handles the actual healing.
-								// The target is a types.Object, so we use types.ObjectNull.
-								tlsParametersAttributeMap["tls_config"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap)
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsParametersAttributeMap["mtls_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredArrayOfPointerField --> TlsCertificates
-							if len(tlsParametersOptions.TlsParameters.GetTlsCertificates()) > 0 {
+							if len(tlsParametersElement.GetTlsCertificates()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								tlsCertificatesElements := make([]TcpLoadbalancerTlsCertificateType, 0, len(tlsParametersOptions.TlsParameters.GetTlsCertificates()))
-								for _, tlsCertificatesElement := range tlsParametersOptions.TlsParameters.GetTlsCertificates() {
+								tlsCertificatesElements := make([]TcpLoadbalancerTlsCertificateType, 0, len(tlsParametersElement.GetTlsCertificates()))
+								for _, tlsCertificatesElement := range tlsParametersElement.GetTlsCertificates() {
 									tcpLoadbalancerTlsCertificateTypeModel := TcpLoadbalancerTlsCertificateType{}
 
 									// data specToModelNested RequiredStringField --> CertificateUrl
@@ -6934,6 +6870,101 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 									} else {
 										// Empty string, set to null
 										tcpLoadbalancerTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Description
+									if tlsCertificatesElement.GetDescription() != "" {
+										tcpLoadbalancerTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+									} else {
+										// Empty string, set to null
+										tcpLoadbalancerTlsCertificateTypeModel.Description = types.StringNull()
+									}
+
+									// data specToModelNested OneOfField --> OcspStaplingChoice
+									if tlsCertificatesElement.GetOcspStaplingChoice() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										tlsCertificatesocspStaplingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates.
+										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+										tlsCertificatesocspStaplingChoiceChoices := tlsCertificatesElement.GetOcspStaplingChoice()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// data specToModelNested PointerOfOneOfField --> CustomHashAlgorithms
+										// <no value>
+										// false
+										{
+											customHashAlgorithmsOptionsWrapper, isCustomHashAlgorithms := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_CustomHashAlgorithms)
+											customHashAlgorithmsAttributeMap := make(map[string]attr.Value)
+
+											if isCustomHashAlgorithms && customHashAlgorithmsOptionsWrapper != nil && customHashAlgorithmsOptionsWrapper.CustomHashAlgorithms != nil {
+												customHashAlgorithmsElement := customHashAlgorithmsOptionsWrapper.CustomHashAlgorithms
+
+												// data SpecToModelNested RequiredArrayOfEnumField --> HashAlgorithms
+												if len(customHashAlgorithmsElement.GetHashAlgorithms()) > 0 {
+													hashAlgorithmsStrings := make([]string, 0, len(customHashAlgorithmsElement.GetHashAlgorithms()))
+													for _, v := range customHashAlgorithmsElement.GetHashAlgorithms() {
+														if strVal, exists := ves_io_schema.HashAlgorithm_name[int32(v)]; exists {
+															hashAlgorithmsStrings = append(hashAlgorithmsStrings, strVal)
+														}
+													}
+													listValue, listDiags := types.ListValueFrom(ctx, types.StringType, hashAlgorithmsStrings)
+													response.Diagnostics.Append(listDiags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													customHashAlgorithmsAttributeMap["hash_algorithms"] = listValue
+												} else {
+													customHashAlgorithmsAttributeMap["hash_algorithms"] = types.ListNull(types.StringType)
+												}
+
+												customHashAlgorithmsObj, customHashAlgorithmsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap, customHashAlgorithmsAttributeMap)
+												response.Diagnostics.Append(customHashAlgorithmsObjDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["custom_hash_algorithms"] = customHashAlgorithmsObj
+											} else {
+												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["custom_hash_algorithms"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap)
+											}
+										}
+
+										// data specToModelNested BoolOfOneOfPointerField --> DisableOcspStapling
+										_, isDisableOcspStapling := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_DisableOcspStapling)
+
+										if isDisableOcspStapling {
+											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["disable_ocsp_stapling"] = types.BoolValue(true)
+										} else {
+											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["disable_ocsp_stapling"] = types.BoolNull()
+										}
+
+										// data specToModelNested BoolOfOneOfPointerField --> UseSystemDefaults
+										_, isUseSystemDefaults := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_UseSystemDefaults)
+
+										if isUseSystemDefaults {
+											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["use_system_defaults"] = types.BoolValue(true)
+										} else {
+											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["use_system_defaults"] = types.BoolNull()
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, tlsCertificatesocspStaplingChoiceChoicesObjDiags := types.ObjectValue(
+											TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+											tlsCertificatesocspStaplingChoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(tlsCertificatesocspStaplingChoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										tcpLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										tcpLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> PrivateKey
@@ -6960,37 +6991,38 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											// <no value>
 											// false
 											{
-												blindfoldSecretInfoOptions, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+												blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
 												blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
 
-												if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+												if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+													blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
 
 													// data specToModelNested StringField --> DecryptionProvider
-													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-														blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+													if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+														blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
 													} else {
 														// Empty string, set to null
 														blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
 													}
 
-													// data specToModelNested StringField --> StoreProvider
-													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-													} else {
-														// Empty string, set to null
-														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-													}
-
 													// data specToModelNested RequiredStringField --> Location
-													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-														blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+													if blindfoldSecretInfoElement.GetLocation() != "" {
+														blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
 													} else {
 														// Empty string, set to null
 														blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 													}
 
-													blindfoldSecretInfoObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-													response.Diagnostics.Append(diags...)
+													// data specToModelNested StringField --> StoreProvider
+													if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+													} else {
+														// Empty string, set to null
+														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+													}
+
+													blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+													response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
@@ -7004,29 +7036,30 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 											// <no value>
 											// false
 											{
-												clearSecretInfoOptions, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+												clearSecretInfoOptionsWrapper, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
 												clearSecretInfoAttributeMap := make(map[string]attr.Value)
 
-												if isClearSecretInfo && clearSecretInfoOptions != nil {
+												if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+													clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
 
 													// data specToModelNested StringField --> Provider
-													if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-														clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+													if clearSecretInfoElement.GetProvider() != "" {
+														clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
 													} else {
 														// Empty string, set to null
 														clearSecretInfoAttributeMap["provider"] = types.StringNull()
 													}
 
 													// data specToModelNested RequiredStringField --> Url
-													if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-														clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+													if clearSecretInfoElement.GetUrl() != "" {
+														clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
 													} else {
 														// Empty string, set to null
 														clearSecretInfoAttributeMap["url"] = types.StringNull()
 													}
 
-													clearSecretInfoObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-													response.Diagnostics.Append(diags...)
+													clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+													response.Diagnostics.Append(clearSecretInfoObjDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
@@ -7068,8 +7101,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										tcpLoadbalancerSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap, tcpLoadbalancerSecretTypeModel)
-										response.Diagnostics.Append(diags...)
+										tcpLoadbalancerSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap, tcpLoadbalancerSecretTypeModel)
+										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -7085,106 +7118,12 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 										tcpLoadbalancerTlsCertificateTypeModel.PrivateKey = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesPrivateKeyModelAttributeMap)
 									}
 
-									// data specToModelNested StringField --> Description
-									if tlsCertificatesElement.GetDescription() != "" {
-										tcpLoadbalancerTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
-									} else {
-										// Empty string, set to null
-										tcpLoadbalancerTlsCertificateTypeModel.Description = types.StringNull()
-									}
-
-									// data specToModelNested OneOfField --> OcspStaplingChoice
-									if tlsCertificatesElement.GetOcspStaplingChoice() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										tlsCertificatesocspStaplingChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates.
-										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-										tlsCertificatesocspStaplingChoiceChoices := tlsCertificatesElement.GetOcspStaplingChoice()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// data specToModelNested BoolOfOneOfPointerField --> UseSystemDefaults
-										_, isUseSystemDefaults := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_UseSystemDefaults)
-
-										if isUseSystemDefaults {
-											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["use_system_defaults"] = types.BoolValue(true)
-										} else {
-											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["use_system_defaults"] = types.BoolNull()
-										}
-
-										// data specToModelNested BoolOfOneOfPointerField --> DisableOcspStapling
-										_, isDisableOcspStapling := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_DisableOcspStapling)
-
-										if isDisableOcspStapling {
-											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["disable_ocsp_stapling"] = types.BoolValue(true)
-										} else {
-											tlsCertificatesocspStaplingChoiceChoicesAttributeMap["disable_ocsp_stapling"] = types.BoolNull()
-										}
-
-										// data specToModelNested PointerOfOneOfField --> CustomHashAlgorithms
-										// <no value>
-										// false
-										{
-											customHashAlgorithmsOptions, isCustomHashAlgorithms := tlsCertificatesocspStaplingChoiceChoices.(*ves_io_schema.TlsCertificateType_CustomHashAlgorithms)
-											customHashAlgorithmsAttributeMap := make(map[string]attr.Value)
-
-											if isCustomHashAlgorithms && customHashAlgorithmsOptions != nil {
-
-												// data SpecToModelNested RequiredArrayOfEnumField --> HashAlgorithms
-												if len(customHashAlgorithmsOptions.CustomHashAlgorithms.GetHashAlgorithms()) > 0 {
-													hashAlgorithmsStrings := make([]string, 0, len(customHashAlgorithmsOptions.CustomHashAlgorithms.GetHashAlgorithms()))
-													for _, v := range customHashAlgorithmsOptions.CustomHashAlgorithms.GetHashAlgorithms() {
-														if strVal, exists := ves_io_schema.HashAlgorithm_name[int32(v)]; exists {
-															hashAlgorithmsStrings = append(hashAlgorithmsStrings, strVal)
-														}
-													}
-													listValue, diags := types.ListValueFrom(ctx, types.StringType, hashAlgorithmsStrings)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													customHashAlgorithmsAttributeMap["hash_algorithms"] = listValue
-												} else {
-													customHashAlgorithmsAttributeMap["hash_algorithms"] = types.ListNull(types.StringType)
-												}
-
-												customHashAlgorithmsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap, customHashAlgorithmsAttributeMap)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["custom_hash_algorithms"] = customHashAlgorithmsObj
-											} else {
-												tlsCertificatesocspStaplingChoiceChoicesAttributeMap["custom_hash_algorithms"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap)
-											}
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, tlsCertificatesocspStaplingChoiceChoicesObjDiags := types.ObjectValue(
-											TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-											tlsCertificatesocspStaplingChoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(tlsCertificatesocspStaplingChoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										tcpLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										tcpLoadbalancerTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesOcspStaplingChoiceModelAttributeMap)
-									}
-
 									tlsCertificatesElements = append(tlsCertificatesElements, tcpLoadbalancerTlsCertificateTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								tlsCertificatesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerTlsCertificatesObjectRefModelAttributeMap}, tlsCertificatesElements)
-								response.Diagnostics.Append(diags...)
+								tlsCertificatesListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesModelAttributeMap}, tlsCertificatesElements)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -7194,319 +7133,156 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								tlsParametersAttributeMap["tls_certificates"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerTlsCertificatesObjectRefModelAttributeMap})
+								tlsParametersAttributeMap["tls_certificates"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCertificatesModelAttributeMap})
 							}
 
-							// data specToModelNested RequiredOneOfField --> MtlsChoice
-							// <no value>
-							if tlsParametersOptions.TlsParameters.GetMtlsChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsParametersmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+							// data specToModelNested PointerField --> TlsConfig
+							if tlsParametersElement.GetTlsConfig() != nil {
+								// Create the nested Go struct
+								tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
+								tlsConfigElement := tlsParametersElement.GetTlsConfig()
 
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								tlsParametersmtlsChoiceChoices := tlsParametersOptions.TlsParameters.GetMtlsChoice()
+								// Recursively populate the nested struct
 
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested PointerOfOneOfField --> UseMtls
+								// data specToModelNested RequiredOneOfField --> Choice
 								// <no value>
-								// false
-								{
-									useMtlsOptions, isUseMtls := tlsParametersmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTlsParamsType_UseMtls)
-									useMtlsAttributeMap := make(map[string]attr.Value)
+								if tlsConfigElement.GetChoice() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-									if isUseMtls && useMtlsOptions != nil {
+									// Define a variable for the spec choices to be passed down to nested templates.
+									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+									tlsConfigchoiceChoices := tlsConfigElement.GetChoice()
 
-										// data specToModelNested OneOfField --> CrlChoice
-										if useMtlsOptions.UseMtls.GetCrlChoice() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlscrlChoiceChoicesAttributeMap := make(map[string]attr.Value)
+									// Process nested choices, populating the temporary attribute map
 
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlscrlChoiceChoices := useMtlsOptions.UseMtls.GetCrlChoice()
+									// data specToModelNested PointerOfOneOfField --> CustomSecurity
+									// <no value>
+									// false
+									{
+										customSecurityOptionsWrapper, isCustomSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_CustomSecurity)
+										customSecurityAttributeMap := make(map[string]attr.Value)
 
-											// Process nested choices, populating the temporary attribute map
+										if isCustomSecurity && customSecurityOptionsWrapper != nil && customSecurityOptionsWrapper.CustomSecurity != nil {
+											customSecurityElement := customSecurityOptionsWrapper.CustomSecurity
 
-											// data specToModelNested BoolOfOneOfPointerField --> NoCrl
-											_, isNoCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_NoCrl)
-
-											if isNoCrl {
-												useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolValue(true)
-											} else {
-												useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolNull()
-											}
-
-											// data specToModelNested PointerOfOneOfField --> Crl
-											// <no value>
-											// false
-											{
-												crlOptions, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
-												crlAttributeMap := make(map[string]attr.Value)
-
-												if isCrl && crlOptions != nil {
-
-													// data specToModelNested StringField --> Tenant
-													if crlOptions.Crl.GetTenant() != "" {
-														crlAttributeMap["tenant"] = types.StringValue(crlOptions.Crl.GetTenant())
-													} else {
-														// Empty string, set to null
-														crlAttributeMap["tenant"] = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Namespace
-													if crlOptions.Crl.GetNamespace() != "" {
-														crlAttributeMap["namespace"] = types.StringValue(crlOptions.Crl.GetNamespace())
-													} else {
-														// Empty string, set to null
-														crlAttributeMap["namespace"] = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Name
-													if crlOptions.Crl.GetName() != "" {
-														crlAttributeMap["name"] = types.StringValue(crlOptions.Crl.GetName())
-													} else {
-														// Empty string, set to null
-														crlAttributeMap["name"] = types.StringNull()
-													}
-
-													crlObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlscrlChoiceChoicesAttributeMap["crl"] = crlObj
-												} else {
-													useMtlscrlChoiceChoicesAttributeMap["crl"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap)
+											// data specToModelNested RequiredArrayOfStringField --> CipherSuites
+											if len(customSecurityElement.GetCipherSuites()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, customSecurityElement.GetCipherSuites())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
 												}
+												customSecurityAttributeMap["cipher_suites"] = listValue
+											} else {
+												customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
 											}
 
-											// --- End of Choices ---
+											// data specToModelNested EnumField --> MaxVersion
+											if customSecurityElement.GetMaxVersion().String() != "" {
+												stringValue := types.StringValue(customSecurityElement.GetMaxVersion().String())
+												stringSlice := []types.String{stringValue}
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												customSecurityAttributeMap["max_version"] = listValue
+											} else {
+												customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
+											}
 
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlscrlChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlscrlChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlscrlChoiceChoicesObjDiags...)
+											// data specToModelNested EnumField --> MinVersion
+											if customSecurityElement.GetMinVersion().String() != "" {
+												stringValue := types.StringValue(customSecurityElement.GetMinVersion().String())
+												stringSlice := []types.String{stringValue}
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												customSecurityAttributeMap["min_version"] = listValue
+											} else {
+												customSecurityAttributeMap["min_version"] = types.ListNull(types.StringType)
+											}
+
+											customSecurityObj, customSecurityObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
+											response.Diagnostics.Append(customSecurityObjDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["crl_choice"] = finalObj
+											tlsConfigchoiceChoicesAttributeMap["custom_security"] = customSecurityObj
 										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["crl_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsCrlChoiceModelAttributeMap)
+											tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceCustomSecurityModelAttributeMap)
 										}
-
-										// data specToModelNested OneOfField --> XfccHeader
-										if useMtlsOptions.UseMtls.GetXfccHeader() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlsxfccHeaderChoiceChoices := useMtlsOptions.UseMtls.GetXfccHeader()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
-											_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
-
-											if isXfccDisabled {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
-											} else {
-												useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
-											}
-
-											// data specToModelNested PointerOfOneOfField --> XfccOptions
-											// <no value>
-											// false
-											{
-												xfccOptionsOptions, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
-												xfccOptionsAttributeMap := make(map[string]attr.Value)
-
-												if isXfccOptions && xfccOptionsOptions != nil {
-
-													// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
-													if len(xfccOptionsOptions.XfccOptions.GetXfccHeaderElements()) > 0 {
-														xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsOptions.XfccOptions.GetXfccHeaderElements()))
-														for _, v := range xfccOptionsOptions.XfccOptions.GetXfccHeaderElements() {
-															if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-																xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-															}
-														}
-														listValue, diags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
-													} else {
-														xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
-													}
-
-													xfccOptionsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
-												} else {
-													useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlsxfccHeaderChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["xfcc_header_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
-										}
-
-										// data specToModelNested RequiredOneOfField --> TrustedCaChoice
-										// <no value>
-										if useMtlsOptions.UseMtls.GetTrustedCaChoice() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											useMtlstrustedCaChoiceChoices := useMtlsOptions.UseMtls.GetTrustedCaChoice()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested StringOfOneOfField --> TrustedCaUrl
-											trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
-
-											if isTrustedCaUrl {
-												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-											} else {
-												// Empty string, set to null
-												useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-											}
-
-											// data specToModelNested PointerOfOneOfField --> TrustedCa
-											// <no value>
-											// false
-											{
-												trustedCaOptions, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
-												trustedCaAttributeMap := make(map[string]attr.Value)
-
-												if isTrustedCa && trustedCaOptions != nil {
-
-													// data specToModelNested StringField --> Tenant
-													if trustedCaOptions.TrustedCa.GetTenant() != "" {
-														trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaOptions.TrustedCa.GetTenant())
-													} else {
-														// Empty string, set to null
-														trustedCaAttributeMap["tenant"] = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Namespace
-													if trustedCaOptions.TrustedCa.GetNamespace() != "" {
-														trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaOptions.TrustedCa.GetNamespace())
-													} else {
-														// Empty string, set to null
-														trustedCaAttributeMap["namespace"] = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Name
-													if trustedCaOptions.TrustedCa.GetName() != "" {
-														trustedCaAttributeMap["name"] = types.StringValue(trustedCaOptions.TrustedCa.GetName())
-													} else {
-														// Empty string, set to null
-														trustedCaAttributeMap["name"] = types.StringNull()
-													}
-
-													trustedCaObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
-												} else {
-													useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
-												TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-												useMtlstrustedCaChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											useMtlsAttributeMap["trusted_ca_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
-										}
-
-										// data specToModelNested BoolField --> ClientCertificateOptional
-										useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsOptions.UseMtls.GetClientCertificateOptional()))
-
-										useMtlsObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										tlsParametersmtlsChoiceChoicesAttributeMap["use_mtls"] = useMtlsObj
-									} else {
-										tlsParametersmtlsChoiceChoicesAttributeMap["use_mtls"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceUseMtlsModelAttributeMap)
 									}
-								}
 
-								// data specToModelNested BoolOfOneOfPointerField --> NoMtls
-								_, isNoMtls := tlsParametersmtlsChoiceChoices.(*ves_io_schema_views.DownstreamTlsParamsType_NoMtls)
+									// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
+									_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
 
-								if isNoMtls {
-									tlsParametersmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolValue(true)
+									if isDefaultSecurity {
+										tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
+									} else {
+										tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
+									}
+
+									// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
+									_, isLowSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_LowSecurity)
+
+									if isLowSecurity {
+										tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolValue(true)
+									} else {
+										tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
+									}
+
+									// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
+									_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
+
+									if isMediumSecurity {
+										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
+									} else {
+										tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, tlsConfigchoiceChoicesObjDiags := types.ObjectValue(
+										TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+										tlsConfigchoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(tlsConfigchoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									tcpLoadbalancerViewsTlsConfigModel.Choice = finalObj
 								} else {
-									tlsParametersmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolNull()
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									tcpLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap)
 								}
 
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsParametersmtlsChoiceChoicesObjDiags := types.ObjectValue(
-									TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsParametersmtlsChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsParametersmtlsChoiceChoicesObjDiags...)
+								// This field needs to be converted to a types.ObjectValue before assignment.
+								tcpLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
+								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
+								tlsParametersAttributeMap["tls_config"] = tcpLoadbalancerViewsTlsConfigModelObj
 
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsParametersAttributeMap["mtls_choice"] = finalObj
 							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsParametersAttributeMap["mtls_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap)
+								// The source field is nil (e.g. redacted by the API).
+								// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+								// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+								// because the API may always return a non-nil struct (with REDACTED values) for this field,
+								// making this else-branch unreachable. The child OneOf handles the actual healing.
+								// The target is a types.Object, so we use types.ObjectNull.
+								tlsParametersAttributeMap["tls_config"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigModelAttributeMap)
 							}
 
-							tlsParametersObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersModelAttributeMap, tlsParametersAttributeMap)
-							response.Diagnostics.Append(diags...)
+							tlsParametersObj, tlsParametersObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersModelAttributeMap, tlsParametersAttributeMap)
+							response.Diagnostics.Append(tlsParametersObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -7535,8 +7311,8 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 					tlsTcpAttributeMap["tls_certificates_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceModelAttributeMap)
 				}
 
-				tlsTcpObj, diags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpModelAttributeMap, tlsTcpAttributeMap)
-				response.Diagnostics.Append(diags...)
+				tlsTcpObj, tlsTcpObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpModelAttributeMap, tlsTcpAttributeMap)
+				response.Diagnostics.Append(tlsTcpObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -7546,292 +7322,921 @@ func (d *DataSourceF5XCTcpLoadbalancer) Read(ctx context.Context, request dataso
 			}
 		}
 
-		// data specToModelNested BoolOfOneOfPointerField --> Tcp
-		_, isTcp := loadbalancerTypeChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_Tcp)
+		// data specToModelNested PointerOfOneOfField --> TlsTcpAutoCert
+		// <no value>
+		// false
+		{
+			tlsTcpAutoCertOptionsWrapper, isTlsTcpAutoCert := loadbalancerTypeChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_TlsTcpAutoCert)
+			tlsTcpAutoCertAttributeMap := make(map[string]attr.Value)
 
-		if isTcp {
-			loadbalancerTypeChoiceChoicesModel.Tcp = types.BoolValue(true)
-		} else {
-			loadbalancerTypeChoiceChoicesModel.Tcp = types.BoolNull()
+			if isTlsTcpAutoCert && tlsTcpAutoCertOptionsWrapper != nil && tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert != nil {
+				tlsTcpAutoCertElement := tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert
+
+				// data specToModelNested RequiredOneOfField --> MtlsChoice
+				// <no value>
+				if tlsTcpAutoCertElement.GetMtlsChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					tlsTcpAutoCertmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					tlsTcpAutoCertmtlsChoiceChoices := tlsTcpAutoCertElement.GetMtlsChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> NoMtls
+					_, isNoMtls := tlsTcpAutoCertmtlsChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_NoMtls)
+
+					if isNoMtls {
+						tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolValue(true)
+					} else {
+						tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["no_mtls"] = types.BoolNull()
+					}
+
+					// data specToModelNested PointerOfOneOfField --> UseMtls
+					// <no value>
+					// false
+					{
+						useMtlsOptionsWrapper, isUseMtls := tlsTcpAutoCertmtlsChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_UseMtls)
+						useMtlsAttributeMap := make(map[string]attr.Value)
+
+						if isUseMtls && useMtlsOptionsWrapper != nil && useMtlsOptionsWrapper.UseMtls != nil {
+							useMtlsElement := useMtlsOptionsWrapper.UseMtls
+
+							// data specToModelNested BoolField --> ClientCertificateOptional
+							useMtlsAttributeMap["client_certificate_optional"] = types.BoolValue(bool(useMtlsElement.GetClientCertificateOptional()))
+
+							// data specToModelNested OneOfField --> CrlChoice
+							if useMtlsElement.GetCrlChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								useMtlscrlChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								useMtlscrlChoiceChoices := useMtlsElement.GetCrlChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested PointerOfOneOfField --> Crl
+								// <no value>
+								// false
+								{
+									crlOptionsWrapper, isCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_Crl)
+									crlAttributeMap := make(map[string]attr.Value)
+
+									if isCrl && crlOptionsWrapper != nil && crlOptionsWrapper.Crl != nil {
+										crlElement := crlOptionsWrapper.Crl
+
+										// data specToModelNested RequiredStringField --> Name
+										if crlElement.GetName() != "" {
+											crlAttributeMap["name"] = types.StringValue(crlElement.GetName())
+										} else {
+											// Empty string, set to null
+											crlAttributeMap["name"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if crlElement.GetNamespace() != "" {
+											crlAttributeMap["namespace"] = types.StringValue(crlElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											crlAttributeMap["namespace"] = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if crlElement.GetTenant() != "" {
+											crlAttributeMap["tenant"] = types.StringValue(crlElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											crlAttributeMap["tenant"] = types.StringNull()
+										}
+
+										crlObj, crlObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap, crlAttributeMap)
+										response.Diagnostics.Append(crlObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										useMtlscrlChoiceChoicesAttributeMap["crl"] = crlObj
+									} else {
+										useMtlscrlChoiceChoicesAttributeMap["crl"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceCrlModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested BoolOfOneOfPointerField --> NoCrl
+								_, isNoCrl := useMtlscrlChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_NoCrl)
+
+								if isNoCrl {
+									useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolValue(true)
+								} else {
+									useMtlscrlChoiceChoicesAttributeMap["no_crl"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, useMtlscrlChoiceChoicesObjDiags := types.ObjectValue(
+									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									useMtlscrlChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(useMtlscrlChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								useMtlsAttributeMap["crl_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								useMtlsAttributeMap["crl_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsCrlChoiceModelAttributeMap)
+							}
+
+							// data specToModelNested RequiredOneOfField --> TrustedCaChoice
+							// <no value>
+							if useMtlsElement.GetTrustedCaChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								useMtlstrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								useMtlstrustedCaChoiceChoices := useMtlsElement.GetTrustedCaChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested PointerOfOneOfField --> TrustedCa
+								// <no value>
+								// false
+								{
+									trustedCaOptionsWrapper, isTrustedCa := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCa)
+									trustedCaAttributeMap := make(map[string]attr.Value)
+
+									if isTrustedCa && trustedCaOptionsWrapper != nil && trustedCaOptionsWrapper.TrustedCa != nil {
+										trustedCaElement := trustedCaOptionsWrapper.TrustedCa
+
+										// data specToModelNested RequiredStringField --> Name
+										if trustedCaElement.GetName() != "" {
+											trustedCaAttributeMap["name"] = types.StringValue(trustedCaElement.GetName())
+										} else {
+											// Empty string, set to null
+											trustedCaAttributeMap["name"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if trustedCaElement.GetNamespace() != "" {
+											trustedCaAttributeMap["namespace"] = types.StringValue(trustedCaElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											trustedCaAttributeMap["namespace"] = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if trustedCaElement.GetTenant() != "" {
+											trustedCaAttributeMap["tenant"] = types.StringValue(trustedCaElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											trustedCaAttributeMap["tenant"] = types.StringNull()
+										}
+
+										trustedCaObj, trustedCaObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap, trustedCaAttributeMap)
+										response.Diagnostics.Append(trustedCaObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = trustedCaObj
+									} else {
+										useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceTrustedCaModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested StringOfOneOfField --> TrustedCaUrl
+								trustedCaUrlItem, isTrustedCaUrl := useMtlstrustedCaChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_TrustedCaUrl)
+
+								if isTrustedCaUrl {
+									useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
+								} else {
+									// Empty string, set to null
+									useMtlstrustedCaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, useMtlstrustedCaChoiceChoicesObjDiags := types.ObjectValue(
+									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									useMtlstrustedCaChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(useMtlstrustedCaChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								useMtlsAttributeMap["trusted_ca_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								useMtlsAttributeMap["trusted_ca_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsTrustedCaChoiceModelAttributeMap)
+							}
+
+							// data specToModelNested OneOfField --> XfccHeader
+							if useMtlsElement.GetXfccHeader() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								useMtlsxfccHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								useMtlsxfccHeaderChoiceChoices := useMtlsElement.GetXfccHeader()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested BoolOfOneOfPointerField --> XfccDisabled
+								_, isXfccDisabled := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccDisabled)
+
+								if isXfccDisabled {
+									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolValue(true)
+								} else {
+									useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_disabled"] = types.BoolNull()
+								}
+
+								// data specToModelNested PointerOfOneOfField --> XfccOptions
+								// <no value>
+								// false
+								{
+									xfccOptionsOptionsWrapper, isXfccOptions := useMtlsxfccHeaderChoiceChoices.(*ves_io_schema_views.DownstreamTlsValidationContext_XfccOptions)
+									xfccOptionsAttributeMap := make(map[string]attr.Value)
+
+									if isXfccOptions && xfccOptionsOptionsWrapper != nil && xfccOptionsOptionsWrapper.XfccOptions != nil {
+										xfccOptionsElement := xfccOptionsOptionsWrapper.XfccOptions
+
+										// data SpecToModelNested RequiredArrayOfEnumField --> XfccHeaderElements
+										if len(xfccOptionsElement.GetXfccHeaderElements()) > 0 {
+											xfccHeaderElementsStrings := make([]string, 0, len(xfccOptionsElement.GetXfccHeaderElements()))
+											for _, v := range xfccOptionsElement.GetXfccHeaderElements() {
+												if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
+													xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
+												}
+											}
+											listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
+											response.Diagnostics.Append(listDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											xfccOptionsAttributeMap["xfcc_header_elements"] = listValue
+										} else {
+											xfccOptionsAttributeMap["xfcc_header_elements"] = types.ListNull(types.StringType)
+										}
+
+										xfccOptionsObj, xfccOptionsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap, xfccOptionsAttributeMap)
+										response.Diagnostics.Append(xfccOptionsObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = xfccOptionsObj
+									} else {
+										useMtlsxfccHeaderChoiceChoicesAttributeMap["xfcc_options"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderXfccOptionsModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, useMtlsxfccHeaderChoiceChoicesObjDiags := types.ObjectValue(
+									TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap, // The attribute schema for the OneOf choices
+									useMtlsxfccHeaderChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(useMtlsxfccHeaderChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								useMtlsAttributeMap["xfcc_header_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								useMtlsAttributeMap["xfcc_header_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsXfccHeaderModelAttributeMap)
+							}
+
+							useMtlsObj, useMtlsObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap, useMtlsAttributeMap)
+							response.Diagnostics.Append(useMtlsObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["use_mtls"] = useMtlsObj
+						} else {
+							tlsTcpAutoCertmtlsChoiceChoicesAttributeMap["use_mtls"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceUseMtlsModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, tlsTcpAutoCertmtlsChoiceChoicesObjDiags := types.ObjectValue(
+						TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						tlsTcpAutoCertmtlsChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(tlsTcpAutoCertmtlsChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					tlsTcpAutoCertAttributeMap["mtls_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					tlsTcpAutoCertAttributeMap["mtls_choice"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested PointerField --> TlsConfig
+				if tlsTcpAutoCertElement.GetTlsConfig() != nil {
+					// Create the nested Go struct
+					tcpLoadbalancerViewsTlsConfigModel := &TcpLoadbalancerViewsTlsConfig{}
+					tlsConfigElement := tlsTcpAutoCertElement.GetTlsConfig()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested RequiredOneOfField --> Choice
+					// <no value>
+					if tlsConfigElement.GetChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						tlsConfigchoiceChoices := tlsConfigElement.GetChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested PointerOfOneOfField --> CustomSecurity
+						// <no value>
+						// false
+						{
+							customSecurityOptionsWrapper, isCustomSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_CustomSecurity)
+							customSecurityAttributeMap := make(map[string]attr.Value)
+
+							if isCustomSecurity && customSecurityOptionsWrapper != nil && customSecurityOptionsWrapper.CustomSecurity != nil {
+								customSecurityElement := customSecurityOptionsWrapper.CustomSecurity
+
+								// data specToModelNested RequiredArrayOfStringField --> CipherSuites
+								if len(customSecurityElement.GetCipherSuites()) > 0 {
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, customSecurityElement.GetCipherSuites())
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									customSecurityAttributeMap["cipher_suites"] = listValue
+								} else {
+									customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
+								}
+
+								// data specToModelNested EnumField --> MaxVersion
+								if customSecurityElement.GetMaxVersion().String() != "" {
+									stringValue := types.StringValue(customSecurityElement.GetMaxVersion().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									customSecurityAttributeMap["max_version"] = listValue
+								} else {
+									customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
+								}
+
+								// data specToModelNested EnumField --> MinVersion
+								if customSecurityElement.GetMinVersion().String() != "" {
+									stringValue := types.StringValue(customSecurityElement.GetMinVersion().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									customSecurityAttributeMap["min_version"] = listValue
+								} else {
+									customSecurityAttributeMap["min_version"] = types.ListNull(types.StringType)
+								}
+
+								customSecurityObj, customSecurityObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
+								response.Diagnostics.Append(customSecurityObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								tlsConfigchoiceChoicesAttributeMap["custom_security"] = customSecurityObj
+							} else {
+								tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceCustomSecurityModelAttributeMap)
+							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
+						_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
+
+						if isDefaultSecurity {
+							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
+						} else {
+							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
+						_, isLowSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_LowSecurity)
+
+						if isLowSecurity {
+							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolValue(true)
+						} else {
+							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
+						_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
+
+						if isMediumSecurity {
+							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
+						} else {
+							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, tlsConfigchoiceChoicesObjDiags := types.ObjectValue(
+							TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							tlsConfigchoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(tlsConfigchoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						tcpLoadbalancerViewsTlsConfigModel.Choice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						tcpLoadbalancerViewsTlsConfigModel.Choice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					tcpLoadbalancerViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap, tcpLoadbalancerViewsTlsConfigModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tlsTcpAutoCertAttributeMap["tls_config"] = tcpLoadbalancerViewsTlsConfigModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+					// because the API may always return a non-nil struct (with REDACTED values) for this field,
+					// making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					tlsTcpAutoCertAttributeMap["tls_config"] = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap)
+				}
+
+				tlsTcpAutoCertObj, tlsTcpAutoCertObjDiags := types.ObjectValue(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap, tlsTcpAutoCertAttributeMap)
+				response.Diagnostics.Append(tlsTcpAutoCertObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				loadbalancerTypeChoiceChoicesModel.TlsTcpAutoCert = tlsTcpAutoCertObj
+			} else {
+				loadbalancerTypeChoiceChoicesModel.TlsTcpAutoCert = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap)
+			}
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		loadbalancerTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			TcpLoadbalancerLoadbalancerTypeModelAttributeMap,
-			loadbalancerTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			loadbalancerTypeChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				TcpLoadbalancerLoadbalancerTypeModelAttributeMap,
+				loadbalancerTypeChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.LoadbalancerTypeChoice = loadbalancerTypeChoiceObj
+			// Assign the final object to the root data model.
+			data.LoadbalancerTypeChoice = loadbalancerTypeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.LoadbalancerTypeChoice = types.ObjectNull(TcpLoadbalancerLoadbalancerTypeModelAttributeMap)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> InternetVipInfo
-	if len(specData.InternetVipInfo) > 0 {
-		internetVipInfoElements := make([]TcpLoadbalancerViewsInternetVIPInfo, 0, len(specData.InternetVipInfo))
+	// data SpecToModelRoot ArrayOfPointerField --> OriginPoolsWeights
+	if len(specData.GetOriginPoolsWeights()) > 0 {
+		originPoolsWeightsElements := make([]TcpLoadbalancerViewsOriginPoolWithWeight, 0, len(specData.GetOriginPoolsWeights()))
 
-		for _, internetVipInfoElement := range specData.InternetVipInfo {
-			tcpLoadbalancerViewsInternetVIPInfoModel := TcpLoadbalancerViewsInternetVIPInfo{}
+		for _, originPoolsWeightsElement := range specData.GetOriginPoolsWeights() {
+			tcpLoadbalancerViewsOriginPoolWithWeightModel := TcpLoadbalancerViewsOriginPoolWithWeight{}
 
-			// data specToModelNested StringField --> SiteName
-			if internetVipInfoElement.GetSiteName() != "" {
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringValue(internetVipInfoElement.GetSiteName())
-			} else {
-				// Empty string, set to null
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringNull()
-			}
-
-			// data specToModelNested EnumField --> SiteNetworkType
-			if internetVipInfoElement.GetSiteNetworkType().String() != "" {
-				stringValue := types.StringValue(internetVipInfoElement.GetSiteNetworkType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
+			// data specToModelNested MapOfStringField --> EndpointSubsets
+			if originPoolsWeightsElement.GetEndpointSubsets() != nil {
+				// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+				endpointSubsetsMap, endpointSubsetsDiags := utils.StringMapToTerraformMap(originPoolsWeightsElement.GetEndpointSubsets())
+				response.Diagnostics.Append(endpointSubsetsDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = listValue
+				// Assign the typed map to the model
+				tcpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = endpointSubsetsMap
 			} else {
-				tcpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = types.ListNull(types.StringType)
+				// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
+				// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
+				// API returned nil (Protobuf omits empty maps). Set to null.
+				// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
+				tcpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = types.MapNull(types.StringType)
 			}
 
-			// data specToModelNested PointerField --> Status
-			if internetVipInfoElement.GetStatus() != nil {
-				// Create the nested Go struct
-				tcpLoadbalancerViewsInternetVIPStatusModel := &TcpLoadbalancerViewsInternetVIPStatus{}
-				statusElement := internetVipInfoElement.GetStatus()
+			// data specToModelNested RequiredOneOfField --> PoolChoice
+			// <no value>
+			if originPoolsWeightsElement.GetPoolChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				originPoolsWeightspoolChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-				// Recursively populate the nested struct
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				originPoolsWeightspoolChoiceChoices := originPoolsWeightsElement.GetPoolChoice()
 
-				// data specToModelNested StringField --> NlbCname
-				if statusElement.GetNlbCname() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringValue(statusElement.GetNlbCname())
-				} else {
-					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringNull()
+				// Process nested choices, populating the temporary attribute map
+
+				// data specToModelNested PointerOfOneOfField --> Cluster
+				// <no value>
+				// false
+				{
+					clusterOptionsWrapper, isCluster := originPoolsWeightspoolChoiceChoices.(*ves_io_schema_views.OriginPoolWithWeight_Cluster)
+					clusterAttributeMap := make(map[string]attr.Value)
+
+					if isCluster && clusterOptionsWrapper != nil && clusterOptionsWrapper.Cluster != nil {
+						clusterElement := clusterOptionsWrapper.Cluster
+
+						// data specToModelNested RequiredStringField --> Name
+						if clusterElement.GetName() != "" {
+							clusterAttributeMap["name"] = types.StringValue(clusterElement.GetName())
+						} else {
+							// Empty string, set to null
+							clusterAttributeMap["name"] = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if clusterElement.GetNamespace() != "" {
+							clusterAttributeMap["namespace"] = types.StringValue(clusterElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							clusterAttributeMap["namespace"] = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Tenant
+						if clusterElement.GetTenant() != "" {
+							clusterAttributeMap["tenant"] = types.StringValue(clusterElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							clusterAttributeMap["tenant"] = types.StringNull()
+						}
+
+						clusterObj, clusterObjDiags := types.ObjectValue(TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap, clusterAttributeMap)
+						response.Diagnostics.Append(clusterObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						originPoolsWeightspoolChoiceChoicesAttributeMap["cluster"] = clusterObj
+					} else {
+						originPoolsWeightspoolChoiceChoicesAttributeMap["cluster"] = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoiceClusterModelAttributeMap)
+					}
 				}
 
-				// data specToModelNested StringField --> NlbStatus
-				if statusElement.GetNlbStatus() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringValue(statusElement.GetNlbStatus())
-				} else {
-					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringNull()
+				// data specToModelNested PointerOfOneOfField --> Pool
+				// <no value>
+				// false
+				{
+					poolOptionsWrapper, isPool := originPoolsWeightspoolChoiceChoices.(*ves_io_schema_views.OriginPoolWithWeight_Pool)
+					poolAttributeMap := make(map[string]attr.Value)
+
+					if isPool && poolOptionsWrapper != nil && poolOptionsWrapper.Pool != nil {
+						poolElement := poolOptionsWrapper.Pool
+
+						// data specToModelNested RequiredStringField --> Name
+						if poolElement.GetName() != "" {
+							poolAttributeMap["name"] = types.StringValue(poolElement.GetName())
+						} else {
+							// Empty string, set to null
+							poolAttributeMap["name"] = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if poolElement.GetNamespace() != "" {
+							poolAttributeMap["namespace"] = types.StringValue(poolElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							poolAttributeMap["namespace"] = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Tenant
+						if poolElement.GetTenant() != "" {
+							poolAttributeMap["tenant"] = types.StringValue(poolElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							poolAttributeMap["tenant"] = types.StringNull()
+						}
+
+						poolObj, poolObjDiags := types.ObjectValue(TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap, poolAttributeMap)
+						response.Diagnostics.Append(poolObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						originPoolsWeightspoolChoiceChoicesAttributeMap["pool"] = poolObj
+					} else {
+						originPoolsWeightspoolChoiceChoicesAttributeMap["pool"] = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoicePoolModelAttributeMap)
+					}
 				}
 
-				// data specToModelNested StringField --> Name
-				if statusElement.GetName() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringValue(statusElement.GetName())
-				} else {
-					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringNull()
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, originPoolsWeightspoolChoiceChoicesObjDiags := types.ObjectValue(
+					TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					originPoolsWeightspoolChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(originPoolsWeightspoolChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
 				}
 
-				// data specToModelNested StringField --> Arn
-				if statusElement.GetArn() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringValue(statusElement.GetArn())
-				} else {
-					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringNull()
-				}
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				tcpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = finalObj
+			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
+				tcpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = types.ObjectNull(TcpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap)
+			}
 
-				// data specToModelNested ArrayOfPointerField --> TargetGroupStatus
-				if len(statusElement.GetTargetGroupStatus()) > 0 {
+			// data specToModelNested UintField --> Priority
+			tcpLoadbalancerViewsOriginPoolWithWeightModel.Priority = types.Int64Value(int64(originPoolsWeightsElement.GetPriority()))
+
+			// data specToModelNested UintField --> Weight
+			tcpLoadbalancerViewsOriginPoolWithWeightModel.Weight = types.Int64Value(int64(originPoolsWeightsElement.GetWeight()))
+
+			originPoolsWeightsElements = append(originPoolsWeightsElements, tcpLoadbalancerViewsOriginPoolWithWeightModel)
+		}
+
+		{
+			originPoolsWeightsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				TcpLoadbalancerOriginPoolsWeightsModelAttributeMap,
+				originPoolsWeightsElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.OriginPoolsWeights = originPoolsWeightsList
+		}
+	} else {
+		var originPoolsWeightsObjectType = basetypes.ObjectType{
+			AttrTypes: TcpLoadbalancerOriginPoolsWeightsModelAttributeMap,
+		}
+		nullOriginPoolsWeightsList := basetypes.NewListNull(originPoolsWeightsObjectType)
+		data.OriginPoolsWeights = nullOriginPoolsWeightsList
+	}
+
+	// data SpecToModelRoot RequiredOneOfField --> PortChoice
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetPortChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		portChoiceChoices := specData.GetPortChoice()
+
+		// The model struct that will be populated by the nested template.
+		var portChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypePortChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested UintOfOneOfField --> ListenPort
+		listenPortItem, isListenPort := portChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_ListenPort)
+
+		if isListenPort {
+			portChoiceChoicesModel.ListenPort = types.Int64Value(int64(listenPortItem.ListenPort))
+		} else {
+			// Empty uint, set to null
+			portChoiceChoicesModel.ListenPort = types.Int64Null()
+		}
+
+		// data specToModelNested StringOfOneOfField --> PortRanges
+		portRangesItem, isPortRanges := portChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_PortRanges)
+
+		if isPortRanges {
+			portChoiceChoicesModel.PortRanges = types.StringValue(string(portRangesItem.PortRanges))
+		} else {
+			// Empty string, set to null
+			portChoiceChoicesModel.PortRanges = types.StringNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			portChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				TcpLoadbalancerPortChoiceModelAttributeMap,
+				portChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.PortChoice = portChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.PortChoice = types.ObjectNull(TcpLoadbalancerPortChoiceModelAttributeMap)
+	}
+
+	// data SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetServicePolicyChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		servicePolicyChoiceChoices := specData.GetServicePolicyChoice()
+
+		// The model struct that will be populated by the nested template.
+		var servicePolicyChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeServicePolicyChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested PointerOfOneOfField --> ActiveServicePolicies
+		// <no value>
+		// false
+		{
+			activeServicePoliciesOptionsWrapper, isActiveServicePolicies := servicePolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_ActiveServicePolicies)
+			activeServicePoliciesAttributeMap := make(map[string]attr.Value)
+
+			if isActiveServicePolicies && activeServicePoliciesOptionsWrapper != nil && activeServicePoliciesOptionsWrapper.ActiveServicePolicies != nil {
+				activeServicePoliciesElement := activeServicePoliciesOptionsWrapper.ActiveServicePolicies
+
+				// data specToModelNested RequiredArrayOfPointerField --> Policies
+				if len(activeServicePoliciesElement.GetPolicies()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					targetGroupStatusElements := make([]TcpLoadbalancerViewsInternetVIPTargetGroupStatusType, 0, len(statusElement.GetTargetGroupStatus()))
-					for _, targetGroupStatusElement := range statusElement.GetTargetGroupStatus() {
-						tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel := TcpLoadbalancerViewsInternetVIPTargetGroupStatusType{}
+					policiesElements := make([]ObjectRefTypeModel, 0, len(activeServicePoliciesElement.GetPolicies()))
+					for _, policiesElement := range activeServicePoliciesElement.GetPolicies() {
+						objectRefTypeModelModel := ObjectRefTypeModel{}
 
-						// data specToModelNested StringField --> Name
-						if targetGroupStatusElement.GetName() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringValue(targetGroupStatusElement.GetName())
+						// data specToModelNested RequiredStringField --> Name
+						if policiesElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(policiesElement.GetName())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringNull()
+							objectRefTypeModelModel.Name = types.StringNull()
 						}
 
-						// data specToModelNested StringField --> Arn
-						if targetGroupStatusElement.GetArn() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringValue(targetGroupStatusElement.GetArn())
+						// data specToModelNested RequiredStringField --> Namespace
+						if policiesElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(policiesElement.GetNamespace())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringNull()
+							objectRefTypeModelModel.Namespace = types.StringNull()
 						}
 
-						// data specToModelNested StringField --> Status
-						if targetGroupStatusElement.GetStatus() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringValue(targetGroupStatusElement.GetStatus())
+						// data specToModelNested StringField --> Tenant
+						if policiesElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(policiesElement.GetTenant())
 						} else {
 							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringNull()
+							objectRefTypeModelModel.Tenant = types.StringNull()
 						}
 
-						// data specToModelNested StringField --> Protocol
-						if targetGroupStatusElement.GetProtocol() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringValue(targetGroupStatusElement.GetProtocol())
-						} else {
-							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringNull()
-						}
-
-						// data specToModelNested ArrayOfPointerField --> ListenerStatus
-						if len(targetGroupStatusElement.GetListenerStatus()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							listenerStatusElements := make([]TcpLoadbalancerViewsInternetVIPListenerStatusType, 0, len(targetGroupStatusElement.GetListenerStatus()))
-							for _, listenerStatusElement := range targetGroupStatusElement.GetListenerStatus() {
-								tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel := TcpLoadbalancerViewsInternetVIPListenerStatusType{}
-
-								// data specToModelNested UintField --> Port
-								tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Port = types.Int64Value(int64(listenerStatusElement.GetPort()))
-
-								// data specToModelNested StringField --> Protocol
-								if listenerStatusElement.GetProtocol() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringValue(listenerStatusElement.GetProtocol())
-								} else {
-									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringNull()
-								}
-
-								// data specToModelNested StringField --> Reason
-								if listenerStatusElement.GetReason() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringValue(listenerStatusElement.GetReason())
-								} else {
-									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringNull()
-								}
-
-								// data specToModelNested StringField --> Arn
-								if listenerStatusElement.GetArn() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringValue(listenerStatusElement.GetArn())
-								} else {
-									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringNull()
-								}
-
-								// data specToModelNested StringField --> Status
-								if listenerStatusElement.GetStatus() != "" {
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringValue(listenerStatusElement.GetStatus())
-								} else {
-									// Empty string, set to null
-									tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringNull()
-								}
-
-								listenerStatusElements = append(listenerStatusElements, tcpLoadbalancerViewsInternetVIPListenerStatusTypeModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							listenerStatusListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerListenerStatusObjectRefModelAttributeMap}, listenerStatusElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = listenerStatusListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerListenerStatusObjectRefModelAttributeMap})
-						}
-
-						// data specToModelNested StringField --> Reason
-						if targetGroupStatusElement.GetReason() != "" {
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringValue(targetGroupStatusElement.GetReason())
-						} else {
-							// Empty string, set to null
-							tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringNull()
-						}
-
-						targetGroupStatusElements = append(targetGroupStatusElements, tcpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel)
+						policiesElements = append(policiesElements, objectRefTypeModelModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					targetGroupStatusListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerTargetGroupStatusObjectRefModelAttributeMap}, targetGroupStatusElements)
-					response.Diagnostics.Append(diags...)
+					policiesListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: TcpLoadbalancerPoliciesObjectRefModelAttributeMap}, policiesElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					tcpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = targetGroupStatusListValue
+					activeServicePoliciesAttributeMap["policies"] = policiesListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					tcpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerTargetGroupStatusObjectRefModelAttributeMap})
+					activeServicePoliciesAttributeMap["policies"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerPoliciesObjectRefModelAttributeMap})
 				}
 
-				// data specToModelNested StringField --> Reason
-				if statusElement.GetReason() != "" {
-					tcpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringValue(statusElement.GetReason())
-				} else {
-					// Empty string, set to null
-					tcpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringNull()
-				}
-
-				// This field needs to be converted to a types.ObjectValue before assignment.
-				tcpLoadbalancerViewsInternetVIPStatusModelObj, diags := types.ObjectValueFrom(ctx, TcpLoadbalancerInternetVipInfoStatusModelAttributeMap, tcpLoadbalancerViewsInternetVIPStatusModel)
-				response.Diagnostics.Append(diags...)
+				activeServicePoliciesObj, activeServicePoliciesObjDiags := types.ObjectValue(TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap, activeServicePoliciesAttributeMap)
+				response.Diagnostics.Append(activeServicePoliciesObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				tcpLoadbalancerViewsInternetVIPInfoModel.Status = tcpLoadbalancerViewsInternetVIPStatusModelObj
-
+				servicePolicyChoiceChoicesModel.ActiveServicePolicies = activeServicePoliciesObj
 			} else {
-				// The source field is nil (e.g. redacted by the API).
-				// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-				// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-				// because the API may always return a non-nil struct (with REDACTED values) for this field,
-				// making this else-branch unreachable. The child OneOf handles the actual healing.
-				// The target is a types.Object, so we use types.ObjectNull.
-				tcpLoadbalancerViewsInternetVIPInfoModel.Status = types.ObjectNull(TcpLoadbalancerInternetVipInfoStatusModelAttributeMap)
+				servicePolicyChoiceChoicesModel.ActiveServicePolicies = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> NoServicePolicies
+		_, isNoServicePolicies := servicePolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_NoServicePolicies)
+
+		if isNoServicePolicies {
+			servicePolicyChoiceChoicesModel.NoServicePolicies = types.BoolValue(true)
+		} else {
+			servicePolicyChoiceChoicesModel.NoServicePolicies = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> ServicePoliciesFromNamespace
+		_, isServicePoliciesFromNamespace := servicePolicyChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_ServicePoliciesFromNamespace)
+
+		if isServicePoliciesFromNamespace {
+			servicePolicyChoiceChoicesModel.ServicePoliciesFromNamespace = types.BoolValue(true)
+		} else {
+			servicePolicyChoiceChoicesModel.ServicePoliciesFromNamespace = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			servicePolicyChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				TcpLoadbalancerServicePolicyChoiceModelAttributeMap,
+				servicePolicyChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
 			}
 
-			internetVipInfoElements = append(internetVipInfoElements, tcpLoadbalancerViewsInternetVIPInfoModel)
+			// Assign the final object to the root data model.
+			data.ServicePolicyChoice = servicePolicyChoiceObj
 		}
-
-		internetVipInfoList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			TcpLoadbalancerInternetVipInfoObjectRefModelAttributeMap,
-			internetVipInfoElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.InternetVipInfo = internetVipInfoList
 	} else {
-		var internetVipInfoObjectType = basetypes.ObjectType{
-			AttrTypes: TcpLoadbalancerInternetVipInfoObjectRefModelAttributeMap,
-		}
-		nullInternetVipInfoList := basetypes.NewListNull(internetVipInfoObjectType)
-		data.InternetVipInfo = nullInternetVipInfoList
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
-	// data specToModelRoot ArrayOfStringField --> Domains
-	if len(specData.GetDomains()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetDomains())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	// data SpecToModelRoot RequiredOneOfField --> SniDefaultLbChoice
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetSniDefaultLbChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		sniDefaultLbChoiceChoices := specData.GetSniDefaultLbChoice()
+
+		// The model struct that will be populated by the nested template.
+		var sniDefaultLbChoiceChoicesModel = &TcpLoadbalancerGlobalSpecTypeSniDefaultLbChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> DefaultLbWithSni
+		_, isDefaultLbWithSni := sniDefaultLbChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_DefaultLbWithSni)
+
+		if isDefaultLbWithSni {
+			sniDefaultLbChoiceChoicesModel.DefaultLbWithSni = types.BoolValue(true)
+		} else {
+			sniDefaultLbChoiceChoicesModel.DefaultLbWithSni = types.BoolNull()
 		}
-		data.Domains = listValue
+
+		// data specToModelNested BoolOfOneOfPointerField --> NoSni
+		_, isNoSni := sniDefaultLbChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_NoSni)
+
+		if isNoSni {
+			sniDefaultLbChoiceChoicesModel.NoSni = types.BoolValue(true)
+		} else {
+			sniDefaultLbChoiceChoicesModel.NoSni = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> Sni
+		_, isSni := sniDefaultLbChoiceChoices.(*ves_io_schema_views_tcp_loadbalancer.GlobalSpecType_Sni)
+
+		if isSni {
+			sniDefaultLbChoiceChoicesModel.Sni = types.BoolValue(true)
+		} else {
+			sniDefaultLbChoiceChoicesModel.Sni = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			sniDefaultLbChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap,
+				sniDefaultLbChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.SniDefaultLbChoice = sniDefaultLbChoiceObj
+		}
 	} else {
-		data.Domains = types.ListNull(types.StringType)
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.SniDefaultLbChoice = types.ObjectNull(TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap)
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

@@ -11,14 +11,18 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
+	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_namespace "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/namespace"
 )
 
@@ -27,20 +31,94 @@ type DataSourceF5XCNamespace struct {
 	client *client.APIClient
 }
 
+type NamespaceNamespaceSubCA struct {
+	Name       types.String `tfsdk:"name"`
+	Pem        types.String `tfsdk:"pem"`
+	PrivateKey types.Object `tfsdk:"private_key"`
+	Version    types.Int64  `tfsdk:"version"`
+}
+
+type NamespaceSecretType struct {
+	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
+}
+
+type NamespaceSecretTypeSecretInfoChoice struct {
+	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
+	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+}
+
+type NamespaceSecretTypeBlindfoldSecretInfo struct {
+	DecryptionProvider types.String `tfsdk:"decryption_provider"`
+	Location           types.String `tfsdk:"location"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
+}
+
+type NamespaceSecretTypeClearSecretInfo struct {
+	Provider types.String `tfsdk:"provider"`
+	Url      types.String `tfsdk:"url"`
+}
+
 // DataSourceF5XCNamespaceModel describes the resource data model.
 type DataSourceF5XCNamespaceModel struct {
+	Annotations             types.Map      `tfsdk:"annotations"`
+	Description             types.String   `tfsdk:"description"`
+	Labels                  types.Map      `tfsdk:"labels"`
 	Name                    types.String   `tfsdk:"name"`
 	Namespace               types.String   `tfsdk:"namespace"`
 	Uid                     types.String   `tfsdk:"uid"`
-	Labels                  types.Map      `tfsdk:"labels"`
-	Annotations             types.Map      `tfsdk:"annotations"`
-	Description             types.String   `tfsdk:"description"`
-	ProxySubCaLatestVersion types.Int64    `tfsdk:"proxy_sub_ca_latest_version"`
 	AllowAdvertiseOnPublic  types.List     `tfsdk:"allow_advertise_on_public"`
+	ProxySubCaLatestVersion types.Int64    `tfsdk:"proxy_sub_ca_latest_version"`
+	ProxySubCas             types.List     `tfsdk:"proxy_sub_cas"`
 	Timeouts                timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for ArrayOfPointerField --> ProxySubCas
+var NamespaceProxySubCasModelAttributeMap = map[string]attr.Type{
+
+	"name": types.StringType,
+	"pem":  types.StringType, "private_key": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap,
+			}},
+	},
+	"version": types.Int64Type,
+}
+
+// Attribute map for RequiredPointerField --> PrivateKey
+var NamespaceProxySubCasPrivateKeyModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"location":            types.StringType,
+	"store_provider":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DataSourceF5XCNamespace{}
@@ -56,10 +134,30 @@ func (d *DataSourceF5XCNamespace) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCNamespace) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Namespace data source",
-		Description:         "Namespace data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -78,25 +176,12 @@ func (r *DataSourceF5XCNamespace) Schema(ctx context.Context, request datasource
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+			"allow_advertise_on_public": schema.ListAttribute{
+				Description: "Allow advertisement on public. Config choice to allow advertisement on the public.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
 			},
 			"proxy_sub_ca_latest_version": schema.Int64Attribute{
 				Description: "Proxy Sub CA Version SubCA version which is the latest and will be used for proxy feature.",
@@ -104,12 +189,95 @@ func (r *DataSourceF5XCNamespace) Schema(ctx context.Context, request datasource
 				Optional:    false,
 				Computed:    true,
 			},
-			"allow_advertise_on_public": schema.ListAttribute{
-				Description: "Allow advertisement on public. Config choice to allow advertisement on the public.",
+			"proxy_sub_cas": schema.ListNestedAttribute{
+				Description: "Proxy Sub CAs Array of SubCAs, the latest one will be used for proxy feature.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				ElementType: types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "Name Name for this CA",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"pem": schema.StringAttribute{
+							Description: "CA PEM PEM encoded certificate",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"private_key": schema.SingleNestedAttribute{
+							Description: "Private Key Private Key for CA",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+							Attributes: map[string]schema.Attribute{
+								"secret_info_choice": schema.SingleNestedAttribute{
+									Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"blindfold_secret_info": schema.SingleNestedAttribute{
+											Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"decryption_provider": schema.StringAttribute{
+													Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"location": schema.StringAttribute{
+													Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"store_provider": schema.StringAttribute{
+													Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"clear_secret_info": schema.SingleNestedAttribute{
+											Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"provider": schema.StringAttribute{
+													Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"url": schema.StringAttribute{
+													Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"version": schema.Int64Attribute{
+							Description: "Version Certificate version",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+					},
+				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Read: false, // activate timeouts.read
@@ -158,15 +326,14 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_namespace.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -181,33 +348,6 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -230,6 +370,50 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
+	{
+		if specData.GetAllowAdvertiseOnPublic().String() != "" {
+			stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.AllowAdvertiseOnPublic = listValue
+		} else {
+			// Empty string, set to null
+			data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
+		}
+	}
+
 	// data SpecToModelRoot UintField --> ProxySubCaLatestVersion
 	proxySubCaLatestVersionValue := specData.GetProxySubCaLatestVersion()
 	if proxySubCaLatestVersionValue > 0 {
@@ -238,23 +422,210 @@ func (d *DataSourceF5XCNamespace) Read(ctx context.Context, request datasource.R
 		data.ProxySubCaLatestVersion = types.Int64Null()
 	}
 
-	// data SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
-	if specData.GetAllowAdvertiseOnPublic().String() != "" {
-		stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	// data SpecToModelRoot ArrayOfPointerField --> ProxySubCas
+	if len(specData.GetProxySubCas()) > 0 {
+		proxySubCasElements := make([]NamespaceNamespaceSubCA, 0, len(specData.GetProxySubCas()))
+
+		for _, proxySubCasElement := range specData.GetProxySubCas() {
+			namespaceNamespaceSubCAModel := NamespaceNamespaceSubCA{}
+
+			// data specToModelNested RequiredStringField --> Name
+			if proxySubCasElement.GetName() != "" {
+				namespaceNamespaceSubCAModel.Name = types.StringValue(proxySubCasElement.GetName())
+			} else {
+				// Empty string, set to null
+				namespaceNamespaceSubCAModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Pem
+			if proxySubCasElement.GetPem() != "" {
+				namespaceNamespaceSubCAModel.Pem = types.StringValue(proxySubCasElement.GetPem())
+			} else {
+				// Empty string, set to null
+				namespaceNamespaceSubCAModel.Pem = types.StringNull()
+			}
+
+			// data specToModelNested RequiredPointerField --> PrivateKey
+			if proxySubCasElement.GetPrivateKey() != nil {
+				// Create the nested Go struct
+				namespaceSecretTypeModel := &NamespaceSecretType{}
+				privateKeyElement := proxySubCasElement.GetPrivateKey()
+
+				// Recursively populate the nested struct
+
+				// data specToModelNested RequiredOneOfField --> SecretInfoOneof
+				// <no value>
+				if privateKeyElement.GetSecretInfoOneof() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					privateKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					privateKeysecretInfoChoiceChoices := privateKeyElement.GetSecretInfoOneof()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+					// <no value>
+					// false
+					{
+						blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+						blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+							blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+							// data specToModelNested StringField --> DecryptionProvider
+							if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+							}
+
+							// data specToModelNested RequiredStringField --> Location
+							if blindfoldSecretInfoElement.GetLocation() != "" {
+								blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+							}
+
+							// data specToModelNested StringField --> StoreProvider
+							if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+							}
+
+							blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+							response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+						}
+					}
+
+					// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
+					// <no value>
+					// false
+					{
+						clearSecretInfoOptionsWrapper, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+						clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+							clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+							// data specToModelNested StringField --> Provider
+							if clearSecretInfoElement.GetProvider() != "" {
+								clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["provider"] = types.StringNull()
+							}
+
+							// data specToModelNested RequiredStringField --> Url
+							if clearSecretInfoElement.GetUrl() != "" {
+								clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["url"] = types.StringNull()
+							}
+
+							clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+							response.Diagnostics.Append(clearSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, privateKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+						NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+						privateKeysecretInfoChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(privateKeysecretInfoChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					namespaceSecretTypeModel.SecretInfoChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+					// secret_info_choice object from prior Terraform state so that the model reflects what the
+					// user originally configured and Terraform does not detect a false drift.
+					{
+						savedSecretInfoChoicePath := path.Root("proxy_sub_cas").AtListIndex(0).AtName("private_key").AtName("secret_info_choice")
+						var savedSecretInfoChoice types.Object
+						stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+						if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+							namespaceSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+						} else {
+							namespaceSecretTypeModel.SecretInfoChoice = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap)
+						}
+					}
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				namespaceSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, NamespaceProxySubCasPrivateKeyModelAttributeMap, namespaceSecretTypeModel)
+				response.Diagnostics.Append(objDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				namespaceNamespaceSubCAModel.PrivateKey = namespaceSecretTypeModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+				// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+				// here because the API may always return a non-nil struct (with REDACTED values) for this
+				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				namespaceNamespaceSubCAModel.PrivateKey = types.ObjectNull(NamespaceProxySubCasPrivateKeyModelAttributeMap)
+			}
+
+			// data specToModelNested UintField --> Version
+			namespaceNamespaceSubCAModel.Version = types.Int64Value(int64(proxySubCasElement.GetVersion()))
+
+			proxySubCasElements = append(proxySubCasElements, namespaceNamespaceSubCAModel)
 		}
-		data.AllowAdvertiseOnPublic = listValue
+
+		{
+			proxySubCasList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				NamespaceProxySubCasModelAttributeMap,
+				proxySubCasElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ProxySubCas = proxySubCasList
+		}
 	} else {
-		// Empty string, set to null
-		data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
+		var proxySubCasObjectType = basetypes.ObjectType{
+			AttrTypes: NamespaceProxySubCasModelAttributeMap,
+		}
+		nullProxySubCasList := basetypes.NewListNull(proxySubCasObjectType)
+		data.ProxySubCas = nullProxySubCasList
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

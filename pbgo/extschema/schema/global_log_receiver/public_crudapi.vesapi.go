@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Global Log Receiver is used to specify a receiver (s3 bucket, etc.) for periodic streaming of access logs",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2729,7 +2756,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -3290,7 +3316,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates global_log_receiver is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3606,13 +3631,13 @@ var APISwaggerJSON string = `{
             "x-ves-proto-message": "ves.io.schema.global_log_receiver.RequestLogsConfig",
             "properties": {
                 "sampled": {
-                    "description": "Exclusive with [unsampled]\n Sampled request logs delivered via Kafka pipeline (default)",
+                    "description": "Exclusive with [unsampled]\n Forward a sample of logs. Recommended for trend analysis and troubleshooting.",
                     "title": "Sampled Request Logs",
                     "$ref": "#/definitions/ioschemaEmpty",
                     "x-displayname": "Sampled"
                 },
                 "unsampled": {
-                    "description": "Exclusive with [sampled]\n Full (unsampled) request logs delivered via S3 file-based pipeline.\n Note: Unsampled logs require additional infrastructure and may have higher latency.",
+                    "description": "Exclusive with [sampled]\n Forward all logs. Recommended for deep analysis and compliance, but will increase cost due to higher log volume.",
                     "title": "Unsampled Request Logs",
                     "$ref": "#/definitions/ioschemaEmpty",
                     "x-displayname": "Unsampled"
@@ -3875,14 +3900,13 @@ var APISwaggerJSON string = `{
                 },
                 "trusted_ca_url": {
                     "type": "string",
-                    "description": "Exclusive with [no_ca]\n The URL or value for trusted Server CA certificate or certificate chain\n Certificates in PEM format including the PEM headers.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_bytes: 131072\n  ves.io.schema.rules.string.truststore_url: true\n  ves.io.schema.rules.string.uri_ref: true\n",
+                    "description": "Exclusive with [no_ca]\n The URL or value for trusted Server CA certificate or certificate chain\n Certificates in PEM format including the PEM headers.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_bytes: 131072\n  ves.io.schema.rules.string.truststore_url: true\n",
                     "title": "Server CA certificates",
                     "maxLength": 131072,
                     "x-displayname": "Server CA Certificates",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.max_bytes": "131072",
-                        "ves.io.schema.rules.string.truststore_url": "true",
-                        "ves.io.schema.rules.string.uri_ref": "true"
+                        "ves.io.schema.rules.string.truststore_url": "true"
                     }
                 }
             }
@@ -3950,6 +3974,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -4195,7 +4240,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -4259,7 +4303,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -4325,7 +4368,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -4443,7 +4485,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

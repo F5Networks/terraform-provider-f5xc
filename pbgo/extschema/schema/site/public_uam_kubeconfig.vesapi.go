@@ -580,10 +580,7 @@ var UamKubeConfigAPISwaggerJSON string = `{
         "description": "API for manage kube configs.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -650,6 +647,12 @@ var UamKubeConfigAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -735,6 +738,12 @@ var UamKubeConfigAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -814,6 +823,12 @@ var UamKubeConfigAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -886,6 +901,27 @@ var UamKubeConfigAPISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "siteCreateGlobalKubeConfigReq": {
             "type": "object",
             "description": "Create kubeconfig request parameters",
@@ -933,7 +969,6 @@ var UamKubeConfigAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Result status flag.\n\nExample: - \"true\"-",
                     "title": "Status",
-                    "format": "boolean",
                     "x-displayname": "status",
                     "x-ves-example": "true"
                 }

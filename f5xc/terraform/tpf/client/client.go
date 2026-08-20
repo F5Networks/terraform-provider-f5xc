@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"golang.org/x/time/rate"
 	ves_io_schema_combined "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/combined"
 	"software.sslmate.com/src/go-pkcs12"
 
@@ -43,8 +42,10 @@ type Authenticator interface {
 
 // AuthClient is the Context structure.
 type AuthClient struct {
-	URL           string
-	Authenticator Authenticator
+	URL              string
+	Authenticator    Authenticator
+	ThrottlePolicy   throttlingPolicy
+	ThrottleRegistry *ResourceThrottleRegistry
 }
 
 // APITokenAuth is a Concrete Strategy for API Token authentication.
@@ -60,37 +61,46 @@ type P12CertAuth struct {
 	Client   *http.Client // The client must be pre-configured for P12
 }
 
-// ProviderLimiter rate limiting configuration
-type ProviderLimiter struct {
-	Rate  rate.Limit
-	Burst int32
+// ClientTimeouts holds per-operation timeout overrides for CRUD operations.
+// Each field is a Go duration string (e.g. "10m", "1h30m"). An empty string
+// means "use the resource-level default".
+type ClientTimeouts struct {
+	TimeoutCreate string // Default timeout for Create operations.
+	TimeoutRead   string // Default timeout for Read operations.
+	TimeoutUpdate string // Default timeout for Update operations.
+	TimeoutDelete string // Default timeout for Delete operations.
 }
 
-// ProviderConfig data for volterra provider
+// ProviderConfig data for f5xc provider
 type ProviderConfig struct {
-	Url            string           // The base URL for the F5XC API endpoint.
-	Test           bool             // Indicates whether the provider is running in test mode.
-	Vesenv         bool             // Specifies if the provider is running in a Ves environment.
-	tenant         string           // The tenant identifier for API requests.
-	Timeout        string           // The timeout duration for API requests, as a string (e.g., "30s").
-	Limiter        *ProviderLimiter // Pointer to the ProviderLimiter for rate limiting API requests.
-	ApiCert        string           // The path to the API client certificate file.
-	ApiKey         string           // The path to the API client key file.
-	ApiToken       string           // The API token used for authentication.
-	ApiCACert      string           // The path to the CA certificate file for API requests.
-	ApiP12File     string           // The path to the PKCS#12 file containing client credentials.
-	ApiP12Password string           // The password for the PKCS#12 file.
+	Url            string            // The base URL for the F5XC API endpoint.
+	Test           bool              // Indicates whether the provider is running in test mode.
+	Vesenv         bool              // Specifies if the provider is running in a Ves environment.
+	tenant         string            // The tenant identifier for API requests.
+	Timeout        string            // The timeout duration for API requests, as a string (e.g., "30s").
+	TimeoutCreate  string            // Default timeout for Create operations (e.g. "10m"). Falls back to resource default if empty.
+	TimeoutRead    string            // Default timeout for Read operations (e.g. "5m"). Falls back to resource default if empty.
+	TimeoutUpdate  string            // Default timeout for Update operations (e.g. "10m"). Falls back to resource default if empty.
+	TimeoutDelete  string            // Default timeout for Delete operations (e.g. "10m"). Falls back to resource default if empty.
+	Throttling     *ThrottlingConfig // Backend-driven request throttling configuration.
+	ApiCert        string            // The path to the API client certificate file.
+	ApiKey         string            // The path to the API client key file.
+	ApiToken       string            // The API token used for authentication.
+	ApiCACert      string            // The path to the CA certificate file for API requests.
+	ApiP12File     string            // The path to the PKCS#12 file containing client credentials.
+	ApiP12Password string            // The password for the PKCS#12 file.
 }
 
 // APIClient embeds vesapi.APIClient
 type APIClient struct {
 	APIClient  *vesapi.APIClient
 	RestClient *AuthClient
+	Config     *ClientTimeouts // Per-operation timeout overrides propagated from the provider configuration.
 }
 
-// ResourceF5XCApiDefinitionUploaderMetadataApiModel represents metadata information for an F5XC API definition upload.
+// ResourceF5XCApiDefinitionUploaderMetadataApiResponse represents metadata information for an F5XC API definition upload.
 // This struct contains details such as the URL, name, version, namespace, description, and creation timestamp of the uploaded API definition.
-type ResourceF5XCApiDefinitionUploaderMetadataApiModel struct {
+type ResourceF5XCApiDefinitionUploaderMetadataApiResponse struct {
 	Url               string `json:"url"`               // The URL where the API definition is accessible or stored.
 	Name              string `json:"name"`              // The human-readable name of the API definition.
 	Version           string `json:"version"`           // The version identifier for the API definition.
@@ -101,8 +111,8 @@ type ResourceF5XCApiDefinitionUploaderMetadataApiModel struct {
 
 // ResourceF5XCApiDefinitionUploaderApiModel describes the API data model.
 type ResourceF5XCApiDefinitionUploaderApiModel struct {
-	Metadata    ResourceF5XCApiDefinitionUploaderMetadataApiModel `json:"metadata"`
-	StringValue string                                            `json:"string_value"`
+	Metadata    ResourceF5XCApiDefinitionUploaderMetadataApiResponse `json:"metadata"`
+	StringValue string                                               `json:"string_value"`
 }
 
 // Supported CRUD operations
@@ -112,10 +122,6 @@ const (
 	Replace
 	Get
 )
-
-// Create a global rate limiter instance (the bucket)
-// The limiter is initialized to allow 'Limit' events per second, with a 'Burst' capacity.
-var limiter *rate.Limiter
 
 // NewAuthClient creates a new client with a specified authentication strategy.
 func NewAuthClient(url string, auth Authenticator) *AuthClient {
@@ -136,9 +142,9 @@ func NewAPITokenAuth(token string, timeout time.Duration) *APITokenAuth {
 	return &APITokenAuth{
 		Token: token,
 		Client: &http.Client{
-			Transport: &http.Transport{
+			Transport: wrapTransportForVCR(&http.Transport{
 				Proxy: http.ProxyFromEnvironment,
-			},
+			}),
 			Timeout: timeout,
 		},
 	}
@@ -216,10 +222,10 @@ func NewP12CertAuth(p12Path, password string, timeout time.Duration) (*P12CertAu
 	}
 
 	client := &http.Client{
-		Transport: &http.Transport{
+		Transport: wrapTransportForVCR(&http.Transport{
 			Proxy:           http.ProxyFromEnvironment,
 			TLSClientConfig: tlsConfig,
-		},
+		}),
 		Timeout: timeout,
 	}
 
@@ -252,13 +258,18 @@ func (a *APITokenAuth) ApplyAuth(req *http.Request) error {
 // Returns:
 //   - *http.Client: The HTTP client instance
 func (a *APITokenAuth) GetClient() *http.Client {
-	return &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			// InsecureSkipVerify: true,
-			Proxy: http.ProxyFromEnvironment,
-		},
+	if a.Client != nil {
+		return a.Client
 	}
+
+	a.Client = &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: wrapTransportForVCR(&http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		}),
+	}
+
+	return a.Client
 }
 
 // GetClientData implements the Authenticator interface for APITokenAuth.
@@ -315,7 +326,7 @@ func (a *P12CertAuth) GetClientData() string {
 //   - []byte: The response body as a byte slice.
 //   - error: Any error encountered during request creation, authentication, execution, or response reading.
 func (ac *AuthClient) Execute(ctx context.Context, method, url string, body []byte) ([]byte, error) {
-	req, httpErr := http.NewRequest(method, url, bytes.NewBuffer(body))
+	req, httpErr := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(body))
 	if httpErr != nil {
 		return nil, fmt.Errorf("error creating request: %w", httpErr)
 	}
@@ -336,7 +347,10 @@ func (ac *AuthClient) Execute(ctx context.Context, method, url string, body []by
 	tflog.Info(ctx, fmt.Sprintf("Req URL: %s", req.URL.String()))
 	tflog.Info(ctx, fmt.Sprintf("Req Header: %s", req.Header))
 
-	resp, err := client.Do(req)
+	resourceKey := resolveRequestResourceKey(req)
+	resp, err := doRequestWithThrottling(ctx, req, resourceKey, ac.ThrottlePolicy, ac.ThrottleRegistry, func(attemptReq *http.Request) (*http.Response, error) {
+		return client.Do(attemptReq)
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error executing request: %w", err)
 	}
@@ -370,13 +384,10 @@ func (ac *AuthClient) Execute(ctx context.Context, method, url string, body []by
 
 // CreateObject populates the correct slug and calls F5XC CreateObject
 func (a *APIClient) CreateObject(ctx context.Context, objType string, req vesapi.CreateObjectRequest, opts ...vesapi.CallOpt) (vesapi.CreateObjectResponse, error) {
-	err := limiter.Wait(ctx)
-	if err != nil {
-		tflog.Info(ctx, fmt.Sprintf("Create request %s failed to wait: %v", objType, err))
-		return nil, err
-	}
+	ctx = contextFromResourceKey(ctx, objType)
 	tflog.Info(ctx, fmt.Sprintf("Create request %s sent at %s\n", objType, time.Now().Format("15:04:05.000")))
 
+	var err error
 	ctx, err = addSvcSlugToContextForCRUD(ctx, objType)
 	if err != nil {
 		return nil, err
@@ -387,13 +398,10 @@ func (a *APIClient) CreateObject(ctx context.Context, objType string, req vesapi
 
 // GetObject populates the correct slug and calls F5XC GetObject
 func (a *APIClient) GetObject(ctx context.Context, objType, namespace, name string, opts ...vesapi.CallOpt) (vesapi.GetObjectResponse, error) {
-	err := limiter.Wait(ctx)
-	if err != nil {
-		tflog.Info(ctx, fmt.Sprintf("Get request %s failed to wait: %v", objType, err))
-		return nil, err
-	}
+	ctx = contextFromResourceKey(ctx, objType)
 	tflog.Info(ctx, fmt.Sprintf("Get request %s sent at %s\n", objType, time.Now().Format("15:04:05.000")))
 
+	var err error
 	ctx, err = addSvcSlugToContextForCRUD(ctx, objType)
 	if err != nil {
 		return nil, err
@@ -403,13 +411,10 @@ func (a *APIClient) GetObject(ctx context.Context, objType, namespace, name stri
 
 // ReplaceObject populates the correct slug and calls F5XC ReplaceObject
 func (a *APIClient) ReplaceObject(ctx context.Context, objType string, req vesapi.ReplaceObjectRequest, opts ...vesapi.CallOpt) error {
-	err := limiter.Wait(ctx)
-	if err != nil {
-		tflog.Info(ctx, fmt.Sprintf("Replace request %s failed to wait: %v", objType, err))
-		return err
-	}
+	ctx = contextFromResourceKey(ctx, objType)
 	tflog.Info(ctx, fmt.Sprintf("Replace request %s sent at %s\n", objType, time.Now().Format("15:04:05.000")))
 
+	var err error
 	ctx, err = addSvcSlugToContextForCRUD(ctx, objType)
 	if err != nil {
 		return err
@@ -420,13 +425,10 @@ func (a *APIClient) ReplaceObject(ctx context.Context, objType string, req vesap
 
 // DeleteObject populates the correct slug and calls F5XC DeleteObject
 func (a *APIClient) DeleteObject(ctx context.Context, objType string, namespace, name string, opts ...vesapi.CallOpt) error {
-	err := limiter.Wait(ctx)
-	if err != nil {
-		tflog.Info(ctx, fmt.Sprintf("Delete request %s failed to wait: %v", objType, err))
-		return err
-	}
+	ctx = contextFromResourceKey(ctx, objType)
 	tflog.Info(ctx, fmt.Sprintf("Delete request %s sent at %s\n", objType, time.Now().Format("15:04:05.000")))
 
+	var err error
 	ctx, err = addSvcSlugToContextForCRUD(ctx, objType)
 	if err != nil {
 		return err
@@ -436,13 +438,10 @@ func (a *APIClient) DeleteObject(ctx context.Context, objType string, namespace,
 
 // ListObjects populates the correct slug and calls F5XC ListObjects
 func (a *APIClient) ListObjects(ctx context.Context, objType, namespace string, opts ...vesapi.CallOpt) ([]vesapi.ListObjectItem, error) {
-	err := limiter.Wait(ctx)
-	if err != nil {
-		tflog.Info(ctx, fmt.Sprintf("List request %s failed to wait: %v", objType, err))
-		return nil, err
-	}
+	ctx = contextFromResourceKey(ctx, objType)
 	tflog.Info(ctx, fmt.Sprintf("List request %s sent at %s\n", objType, time.Now().Format("15:04:05.000")))
 
+	var err error
 	ctx, err = addSvcSlugToContextForCRUD(ctx, objType)
 	if err != nil {
 		return nil, err
@@ -452,13 +451,10 @@ func (a *APIClient) ListObjects(ctx context.Context, objType, namespace string, 
 
 // CustomAPI populates the correct slug and calls F5XC custom API
 func (a *APIClient) CustomAPI(ctx context.Context, method, uri, rpcFQN, reqYml string, opts ...vesapi.CallOpt) (proto.Message, error) {
-	err := limiter.Wait(ctx)
-	if err != nil {
-		tflog.Info(ctx, fmt.Sprintf("Custom API request %s failed to wait: %v", method, err))
-		return nil, err
-	}
+	ctx = contextFromResourceKey(ctx, resourceKeyForCustomRPC(rpcFQN))
 	tflog.Info(ctx, fmt.Sprintf("Custom API request %s sent at %s\n", method, time.Now().Format("15:04:05.000")))
 
+	var err error
 	ctx, err = addSvcSlugToContextForCustom(ctx, rpcFQN)
 	if err != nil {
 		return nil, err
@@ -489,7 +485,7 @@ func logAndRoundTrip(rt http.RoundTripper, req *http.Request) (*http.Response, e
 		log.Printf("[TRACE] Request Sent: \n%s\n", curlOut)
 	}
 
-	rsp, err := rt.RoundTrip(req)
+	rsp, err := wrapTransportForVCR(rt).RoundTrip(req)
 	if err != nil {
 		log.Printf("[TRACE] Response Error: \n%s\n", err.Error())
 	} else {
@@ -508,38 +504,39 @@ func logAndRoundTrip(rt http.RoundTripper, req *http.Request) (*http.Response, e
 // Returns:
 //   - *http.Response: The HTTP response received from the server.
 //   - error: Any error encountered during the request or remapping process.
-func prismURIRemapperFn(apiGwURL string) (stdlibClient.RoundTripperFunc, error) {
+func prismURIRemapperFn(apiGwURL string, policy throttlingPolicy, registry *ResourceThrottleRegistry) (stdlibClient.RoundTripperFunc, error) {
 	u, err := url.Parse(apiGwURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Parsing apigw url %s", apiGwURL)
 	}
 	rtFn := func(req *http.Request, rt http.RoundTripper) (*http.Response, error) {
-		// convert https://x.y.volterra.us/api + /public/some/thing/here to
-		//         https://x.y.volterra.us/api/config/some/thing/here
-		srvURI := u.Path
-		ctx := req.Context()
-		slug := serviceSlugFromContext(ctx)
-		if slug == "" {
-			return nil, fmt.Errorf("no service slug defined for URI %s", srvURI)
-		}
-		toStrip := "/public"
-		if len(srvURI) > 0 && srvURI[len(srvURI)-1] != '/' {
-			// "/public" should be replaced by "/<slug>"
-			slug = "/" + slug
-		}
-		uriPfx := fmt.Sprintf("%s%s", srvURI, toStrip)
-		if strings.HasPrefix(req.URL.Path, uriPfx) {
-			// replace "public" with "config"
-			newURL := strings.Replace(req.URL.String(), toStrip, slug, 1)
-			u, err := url.Parse(newURL)
-			if err != nil {
-				return nil, errors.Wrapf(err, "Parsing remapped url %s", newURL)
+		resourceKey := resolveRequestResourceKey(req)
+		return doRequestWithThrottling(req.Context(), req, resourceKey, policy, registry, func(attemptReq *http.Request) (*http.Response, error) {
+			// convert https://x.y.volterra.us/api + /public/some/thing/here to
+			//         https://x.y.volterra.us/api/config/some/thing/here
+			srvURI := u.Path
+			ctx := attemptReq.Context()
+			slug := serviceSlugFromContext(ctx)
+			if slug == "" {
+				return nil, fmt.Errorf("no service slug defined for URI %s", srvURI)
 			}
-			req.URL = u
-		}
+			toStrip := "/public"
+			if len(srvURI) > 0 && srvURI[len(srvURI)-1] != '/' {
+				// "/public" should be replaced by "/<slug>"
+				slug = "/" + slug
+			}
+			uriPfx := fmt.Sprintf("%s%s", srvURI, toStrip)
+			if strings.HasPrefix(attemptReq.URL.Path, uriPfx) {
+				newURL := strings.Replace(attemptReq.URL.String(), toStrip, slug, 1)
+				u, parseErr := url.Parse(newURL)
+				if parseErr != nil {
+					return nil, errors.Wrapf(parseErr, "Parsing remapped url %s", newURL)
+				}
+				attemptReq.URL = u
+			}
 
-		rsp, err := logAndRoundTrip(rt, req)
-		return rsp, err
+			return logAndRoundTrip(rt, attemptReq)
+		})
 	}
 	return rtFn, nil
 }
@@ -552,11 +549,13 @@ func prismURIRemapperFn(apiGwURL string) (stdlibClient.RoundTripperFunc, error) 
 // Returns:
 //   - *http.Response: The HTTP response received from the server.
 //   - error: Any error encountered during the request or remapping process.
-func uriRemapperFn(tenant string) stdlibClient.RoundTripperFunc {
+func uriRemapperFn(tenant string, policy throttlingPolicy, registry *ResourceThrottleRegistry) stdlibClient.RoundTripperFunc {
 	rtFn := func(req *http.Request, rt http.RoundTripper) (*http.Response, error) {
-		req.Header.Set(server.TenantHdrName, tenant)
-		rsp, err := logAndRoundTrip(rt, req)
-		return rsp, err
+		resourceKey := resolveRequestResourceKey(req)
+		return doRequestWithThrottling(req.Context(), req, resourceKey, policy, registry, func(attemptReq *http.Request) (*http.Response, error) {
+			attemptReq.Header.Set(server.TenantHdrName, tenant)
+			return logAndRoundTrip(rt, attemptReq)
+		})
 	}
 	return rtFn
 }
@@ -568,13 +567,13 @@ func uriRemapperFn(tenant string) stdlibClient.RoundTripperFunc {
 //
 // Returns:
 //   - []VesAPIClientOpt: A slice of client options to be used when creating a VesAPI client.
-func getClientOpts(c *ProviderConfig) ([]vesapi.ConfigOpt, error) {
-	remapperFn, err := prismURIRemapperFn(c.Url)
+func getClientOpts(c *ProviderConfig, policy throttlingPolicy, registry *ResourceThrottleRegistry) ([]vesapi.ConfigOpt, error) {
+	remapperFn, err := prismURIRemapperFn(c.Url, policy, registry)
 	if err != nil {
 		return nil, err
 	}
 	if c.Vesenv {
-		remapperFn = uriRemapperFn(c.tenant)
+		remapperFn = uriRemapperFn(c.tenant, policy, registry)
 	}
 
 	dur, err := time.ParseDuration(c.Timeout)
@@ -624,8 +623,14 @@ func getClientOpts(c *ProviderConfig) ([]vesapi.ConfigOpt, error) {
 //   - *VesAPIClient: The initialized VesAPI client instance.
 //   - error: Any error encountered during client initialization.
 func NewVesAPIClient(c *ProviderConfig) (*APIClient, error) {
+	throttlingPolicy, err := resolveThrottlingPolicy(c.Throttling)
+	if err != nil {
+		return nil, errors.Wrap(err, "Building throttling policy")
+	}
+	throttleRegistry := newResourceThrottleRegistry()
+
 	var clOpts []vesapi.ConfigOpt
-	clOpts, err := getClientOpts(c)
+	clOpts, err = getClientOpts(c, throttlingPolicy, throttleRegistry)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "Building client options")
@@ -657,19 +662,20 @@ func NewVesAPIClient(c *ProviderConfig) (*APIClient, error) {
 		}
 		authClient = NewAuthClient(c.Url, p12Auth)
 	}
-
-	// Initialize the global rate limiter.
-	// If no limiter config is provided, use rate.Inf (no rate limiting) so that
-	// limiter.Wait() calls in CRUD methods never panic on a nil limiter.
-	if c.Limiter != nil {
-		limiter = rate.NewLimiter(rate.Limit(c.Limiter.Rate/60.0), int(c.Limiter.Burst))
-	} else {
-		limiter = rate.NewLimiter(rate.Inf, 1)
+	if authClient != nil {
+		authClient.ThrottlePolicy = throttlingPolicy
+		authClient.ThrottleRegistry = throttleRegistry
 	}
 
 	c1 := APIClient{
 		APIClient:  apiClient,
 		RestClient: authClient,
+		Config: &ClientTimeouts{
+			TimeoutCreate: c.TimeoutCreate,
+			TimeoutRead:   c.TimeoutRead,
+			TimeoutUpdate: c.TimeoutUpdate,
+			TimeoutDelete: c.TimeoutDelete,
+		},
 	}
 
 	return &c1, nil

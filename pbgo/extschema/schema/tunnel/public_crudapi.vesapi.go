@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Tunnel configuration allows user to specify parameters for configuring static tunnels.\nConfiguration involves specification of encapsulation and related parameters to be used\nfor this tunnel\nPayload traffic which will be encapsulated to go on tunnel belongs to a network which is derived\nby looking at tunnel network interface to which this tunnel is attached. IOW VN of referring network\ninterface is the network from which payload is sent inside the tunnel\nNote: For tunnel configuration to come into effect it has to be attached to a tunnel network interface\n\nConfiguration Parameters\n- Tunnel Type - Supported encapsulations are IPSEC\n- Local IP Address - Provides local source IP for tunnel and virtual network type selection for transporting encapsulated packets\n- Remote IP Address - IP used for remote in destination of encapsulated packet\n- Tunnel Params - Involves configuration for supported tunnel type i.e. IPSEC\n\nIPSec configuration params\n- Ipsec PSK - pre shared key to be used by IKE to establish SA",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2308,6 +2335,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -2464,6 +2512,27 @@ var APISwaggerJSON string = `{
             ],
             "default": "DH_GROUP_DEFAULT"
         },
+        "schemaDualStackAddressType": {
+            "type": "object",
+            "description": "DualStackAddressType represents both IPv4 and IPv6 together.",
+            "title": "Dualstack IPv4 and IPv6 Address",
+            "x-displayname": "Dualstack Address",
+            "x-ves-proto-message": "ves.io.schema.DualStackAddressType",
+            "properties": {
+                "ipv4": {
+                    "description": " IPv4 Address",
+                    "title": "IPv4 Address",
+                    "$ref": "#/definitions/schemaIpv4AddressType",
+                    "x-displayname": "IPv4 Address"
+                },
+                "ipv6": {
+                    "description": " IPv6 Address",
+                    "title": "IPv6 Address",
+                    "$ref": "#/definitions/schemaIpv6AddressType",
+                    "x-displayname": "IPv6 Address"
+                }
+            }
+        },
         "schemaEncryptionAlgorithm": {
             "type": "string",
             "description": "x-displayName: \"Encryption Algorithm\"\nDefinitions for Encryption Algorithms\n\n - ENC_ALG_DEFAULT: Default Encryption\n\nx-displayName: \"Default Encryption(AES256_GCM)\"\nSelect default Encryption Algorithm\n - AES128_CBC: AES128_CBC\n\nx-displayName: \"AES128_CBC\"\nSelect AES128_CBC encryption algorithm\n - AES192_CBC: AES192_CBC\n\nx-displayName: \"AES192_CBC\"\nSelect AES192_CBC encryption algorithm\n - AES256_CBC: AES256_CBC\n\nx-displayName: \"AES256_CBC\"\nSelect AES256_CBC encryption algorithm\n - TRIPLE_DES_CBC: TRIPLE_DES_CBC\n\nx-displayName: \"TRIPLE_DES_CBC\"\nSelect TRIPLE_DES_CBC encryption algorithm\n - AES128_GCM: AES128_GCM\n\nx-displayName: \"AES128_GCM\"\nSelect AES128_GCM AEAD algorithm\n - AES192_GCM: AES192_GCM\n\nx-displayName: \"AES192_GCM\"\nSelect AES192_GCM AEAD algorithm\n - AES256_GCM: AES256_GCM\n\nx-displayName: \"AES256_GCM\"\nSelect AES256_GCM AEAD algorithm",
@@ -2572,17 +2641,23 @@ var APISwaggerJSON string = `{
             "title": "IP Address",
             "x-displayname": "IP Address",
             "x-ves-displayorder": "3",
-            "x-ves-oneof-field-ver": "[\"ipv4\",\"ipv6\"]",
+            "x-ves-oneof-field-ver": "[\"dual_stack\",\"ipv4\",\"ipv6\"]",
             "x-ves-proto-message": "ves.io.schema.IpAddressType",
             "properties": {
+                "dual_stack": {
+                    "description": "Exclusive with [ipv4 ipv6]\n Both IPv4 and IPv6 addresses are specified together",
+                    "title": "Dual-stack Address (IPv4 + IPv6)",
+                    "$ref": "#/definitions/schemaDualStackAddressType",
+                    "x-displayname": "Dual-stack Address"
+                },
                 "ipv4": {
-                    "description": "Exclusive with [ipv6]\n IPv4 Address",
+                    "description": "Exclusive with [dual_stack ipv6]\n IPv4 Address",
                     "title": "IPv4 Address",
                     "$ref": "#/definitions/schemaIpv4AddressType",
                     "x-displayname": "IPv4 Address"
                 },
                 "ipv6": {
-                    "description": "Exclusive with [ipv4]\n IPv6 Address",
+                    "description": "Exclusive with [dual_stack ipv4]\n IPv6 Address",
                     "title": "IPv6 ADDRESS",
                     "$ref": "#/definitions/schemaIpv6AddressType",
                     "x-displayname": "IPv6 Address"
@@ -2696,7 +2771,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2760,7 +2834,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -2826,7 +2899,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2956,7 +3028,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -3223,6 +3294,41 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "schemasiteBfdPeerState": {
+            "type": "string",
+            "description": "Indicates the state of BFD session\n\nBFD session state is unknown\nBFD session is Down\nBFD session is Up",
+            "title": "BFD Peer State",
+            "enum": [
+                "BFD_PEER_UNKNOWN",
+                "BFD_PEER_DOWN",
+                "BFD_PEER_UP"
+            ],
+            "default": "BFD_PEER_UNKNOWN",
+            "x-displayname": "BFD Peer State",
+            "x-ves-proto-enum": "ves.io.schema.site.BfdPeerState"
+        },
+        "schemasiteBfdPeerStatusType": {
+            "type": "object",
+            "description": "Status of BFD session for this BGP peer",
+            "title": "BFD Peer Status",
+            "x-displayname": "BFD Peer Status",
+            "x-ves-proto-message": "ves.io.schema.site.BfdPeerStatusType",
+            "properties": {
+                "state": {
+                    "description": " Current state of the BFD session",
+                    "title": "State",
+                    "$ref": "#/definitions/schemasiteBfdPeerState",
+                    "x-displayname": "State"
+                },
+                "state_change_timestamp": {
+                    "type": "string",
+                    "description": " Timestamp at which last BFD state change happened",
+                    "title": "State Change Timestamp",
+                    "format": "date-time",
+                    "x-displayname": "State Change Timestamp"
+                }
+            }
+        },
         "schematunnelCreateSpecType": {
             "type": "object",
             "description": "Create tunnel in a given namespace. If one already exist it will give a error.",
@@ -3356,6 +3462,12 @@ var APISwaggerJSON string = `{
             "x-displayname": "Tunnel Connection Status",
             "x-ves-proto-message": "ves.io.schema.site.TunnelConnectionStatus",
             "properties": {
+                "bfd_status": {
+                    "description": " Status of BFD session for this peer. Only present when BFD is enabled for the peer.",
+                    "title": "BFD Status",
+                    "$ref": "#/definitions/schemasiteBfdPeerStatusType",
+                    "x-displayname": "BFD Status"
+                },
                 "bgp": {
                     "type": "array",
                     "description": " Internal reference to BGP object corresponding to this tunnel\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 1\n",
@@ -3397,7 +3509,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Identifies if the ipsec connection is local to the ver node or not",
                     "title": "isLocal",
-                    "format": "boolean",
                     "x-displayname": "Local"
                 },
                 "remoteAddress": {
@@ -3565,7 +3676,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -3831,7 +3941,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates tunnel is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {

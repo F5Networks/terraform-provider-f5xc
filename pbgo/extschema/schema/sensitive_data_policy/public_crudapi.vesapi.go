@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "The sensitive_data_policy is a policy defined by the user to discover the relevant compliances\nand data types to the user.\nthe user can disabled predefined data types, and add custom data types.\nthe user defines the compliance list that he'd like to monitor.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2297,6 +2324,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -2475,7 +2523,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2539,7 +2586,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -2605,7 +2651,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2691,7 +2736,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -2906,7 +2950,7 @@ var APISwaggerJSON string = `{
                 },
                 "disabled_predefined_data_types": {
                     "type": "array",
-                    "description": " Select which pre-configured data types to disable, disabled data types will not be shown as sensitive in the API discovery\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 100\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.max_len: 64\n",
+                    "description": " Select which pre-configured data types to disable, disabled data types will not be shown as sensitive in the API discovery\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.max_len: 64\n  ves.io.schema.rules.repeated.max_items: 100\n  ves.io.schema.rules.repeated.unique: true\n",
                     "maxItems": 100,
                     "items": {
                         "type": "string",
@@ -2914,9 +2958,9 @@ var APISwaggerJSON string = `{
                     },
                     "x-displayname": "Disabled Built-In Sensitive Data Types",
                     "x-ves-validation-rules": {
+                        "ves.io.schema.rules.repeated.items.string.max_len": "64",
                         "ves.io.schema.rules.repeated.max_items": "100",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.max_len": "64"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -2956,7 +3000,7 @@ var APISwaggerJSON string = `{
                 },
                 "disabled_predefined_data_types": {
                     "type": "array",
-                    "description": " Select which pre-configured data types to disable, disabled data types will not be shown as sensitive in the API discovery\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 100\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.max_len: 64\n",
+                    "description": " Select which pre-configured data types to disable, disabled data types will not be shown as sensitive in the API discovery\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.max_len: 64\n  ves.io.schema.rules.repeated.max_items: 100\n  ves.io.schema.rules.repeated.unique: true\n",
                     "maxItems": 100,
                     "items": {
                         "type": "string",
@@ -2964,9 +3008,9 @@ var APISwaggerJSON string = `{
                     },
                     "x-displayname": "Disabled Built-In Sensitive Data Types",
                     "x-ves-validation-rules": {
+                        "ves.io.schema.rules.repeated.items.string.max_len": "64",
                         "ves.io.schema.rules.repeated.max_items": "100",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.max_len": "64"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -3006,7 +3050,7 @@ var APISwaggerJSON string = `{
                 },
                 "disabled_predefined_data_types": {
                     "type": "array",
-                    "description": " Select which pre-configured data types to disable, disabled data types will not be shown as sensitive in the API discovery\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 100\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.max_len: 64\n",
+                    "description": " Select which pre-configured data types to disable, disabled data types will not be shown as sensitive in the API discovery\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.max_len: 64\n  ves.io.schema.rules.repeated.max_items: 100\n  ves.io.schema.rules.repeated.unique: true\n",
                     "maxItems": 100,
                     "items": {
                         "type": "string",
@@ -3014,9 +3058,9 @@ var APISwaggerJSON string = `{
                     },
                     "x-displayname": "Disabled Built-In Sensitive Data Types",
                     "x-ves-validation-rules": {
+                        "ves.io.schema.rules.repeated.items.string.max_len": "64",
                         "ves.io.schema.rules.repeated.max_items": "100",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.max_len": "64"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -3175,7 +3219,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -3334,7 +3377,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates sensitive_data_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {

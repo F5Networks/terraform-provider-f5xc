@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "WAF Configuration",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2738,7 +2765,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2786,7 +2812,8 @@ var APISwaggerJSON string = `{
                     "description": "Exclusive with [violation_settings]\n All violations are enabled for detection",
                     "title": "Default Violation Settings",
                     "$ref": "#/definitions/ioschemaEmpty",
-                    "x-displayname": "Default"
+                    "x-displayname": "Default",
+                    "x-ves-deprecated": "Deprecated"
                 },
                 "disable_staging": {
                     "description": "Exclusive with [stage_new_and_updated_signatures stage_new_signatures]\n Enforce new and updated attack signatures",
@@ -2840,7 +2867,8 @@ var APISwaggerJSON string = `{
                     "description": "Exclusive with [default_violation_settings]\n Define violations to be disabled for detection",
                     "title": "Custom Violation Settings",
                     "$ref": "#/definitions/app_firewallViolationSettings",
-                    "x-displayname": "Custom"
+                    "x-displayname": "Custom",
+                    "x-ves-deprecated": "Deprecated"
                 },
                 "violations_view": {
                     "type": "array",
@@ -3088,7 +3116,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates app_firewall is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3286,13 +3313,63 @@ var APISwaggerJSON string = `{
             ],
             "default": "AI_BLOCK"
         },
+        "app_firewallSignatureAction": {
+            "type": "string",
+            "description": "Action to be performed on the request\n\nLog and block\nLog only\nDisable detection",
+            "title": "Signature Action",
+            "enum": [
+                "SIG_BLOCK",
+                "SIG_REPORT",
+                "SIG_IGNORE"
+            ],
+            "default": "SIG_BLOCK",
+            "x-displayname": "Signature Action",
+            "x-ves-proto-enum": "ves.io.schema.app_firewall.SignatureAction"
+        },
+        "app_firewallSignatureProtectionSetting": {
+            "type": "object",
+            "description": "Configuration of WAF Signature Protection",
+            "title": "SignatureProtectionSetting",
+            "x-displayname": "Signature Protection",
+            "x-ves-proto-message": "ves.io.schema.app_firewall.SignatureProtectionSetting",
+            "properties": {
+                "high_accuracy_action": {
+                    "description": " High Accuracy signatures level are associated with attack behaviors that are accurately identified and have a low false positive rate.\n\nValidation Rules:\n  ves.io.schema.rules.enum.defined_only: true\n",
+                    "title": "high_accuracy_action",
+                    "$ref": "#/definitions/app_firewallSignatureAction",
+                    "x-displayname": "High Accuracy",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.enum.defined_only": "true"
+                    }
+                },
+                "low_accuracy_action": {
+                    "description": " Low Accuracy signatures are associated with attack behaviors that have a high false positive rate. It is advisable to set low accuracy signatures to ignore to reduce false positives.\n\nValidation Rules:\n  ves.io.schema.rules.enum.defined_only: true\n",
+                    "title": "low_accuracy_action",
+                    "$ref": "#/definitions/app_firewallSignatureAction",
+                    "x-displayname": "Low Accuracy",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.enum.defined_only": "true"
+                    }
+                },
+                "medium_accuracy_action": {
+                    "description": " Medium Accuracy signatures are associated with attack behaviors that are accurately identified but have a higher false positive rate than high accuracy signatures.\n\nValidation Rules:\n  ves.io.schema.rules.enum.defined_only: true\n",
+                    "title": "medium_accuracy_action",
+                    "$ref": "#/definitions/app_firewallSignatureAction",
+                    "x-displayname": "Medium Accuracy",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.enum.defined_only": "true"
+                    }
+                }
+            }
+        },
         "app_firewallSignatureSelectionSetting": {
             "type": "object",
             "description": "Attack Signatures are patterns that identify attacks on a web application and its components",
             "title": "Attack Signatures",
             "x-displayname": "Attack Signatures",
-            "x-ves-displayorder": "5,1",
+            "x-ves-displayorder": "5,1,9",
             "x-ves-oneof-field-attack_type_setting": "[\"attack_type_settings\",\"default_attack_type_settings\"]",
+            "x-ves-oneof-field-signature_protection_choice": "[\"default_signature_setting\",\"signature_settings_by_accuracy\"]",
             "x-ves-oneof-field-signature_selection_by_accuracy": "[\"high_medium_accuracy_signatures\",\"high_medium_low_accuracy_signatures\",\"only_high_accuracy_signatures\"]",
             "x-ves-proto-message": "ves.io.schema.app_firewall.SignatureSelectionSetting",
             "properties": {
@@ -3308,23 +3385,38 @@ var APISwaggerJSON string = `{
                     "$ref": "#/definitions/ioschemaEmpty",
                     "x-displayname": "Default"
                 },
+                "default_signature_setting": {
+                    "description": "Exclusive with [signature_settings_by_accuracy]\n Default Signature Protection settings will be applied.\n High and Medium accuracy signatures will be blocked, Low accuracy signatures will be ignored.",
+                    "title": "Default Signature Settings",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Default"
+                },
                 "high_medium_accuracy_signatures": {
                     "description": "Exclusive with [high_medium_low_accuracy_signatures only_high_accuracy_signatures]\n Enables high and medium accuracy signatures",
                     "title": "High/Medium Accuracy Signatures",
                     "$ref": "#/definitions/ioschemaEmpty",
-                    "x-displayname": "High and Medium"
+                    "x-displayname": "High and Medium",
+                    "x-ves-deprecated": "This setting is deprecated, please use Signature Settings by Accuracy instead"
                 },
                 "high_medium_low_accuracy_signatures": {
                     "description": "Exclusive with [high_medium_accuracy_signatures only_high_accuracy_signatures]\n Enables high, medium and low accuracy signatures",
                     "title": "High/Medium/Low Accuracy Signatures",
                     "$ref": "#/definitions/ioschemaEmpty",
-                    "x-displayname": "High, Medium and Low"
+                    "x-displayname": "High, Medium and Low",
+                    "x-ves-deprecated": "This setting is deprecated, please use Signature Settings by Accuracy instead"
                 },
                 "only_high_accuracy_signatures": {
                     "description": "Exclusive with [high_medium_accuracy_signatures high_medium_low_accuracy_signatures]\n Enables only high accuracy signatures",
                     "title": "Only High Accuracy Signatures",
                     "$ref": "#/definitions/ioschemaEmpty",
-                    "x-displayname": "High"
+                    "x-displayname": "High",
+                    "x-ves-deprecated": "This setting is deprecated, please use Signature Settings by Accuracy instead"
+                },
+                "signature_settings_by_accuracy": {
+                    "description": "Exclusive with [default_signature_setting]\n Define Custom Signature Protection settings by accuracy level.",
+                    "title": "Custom Signature Settings",
+                    "$ref": "#/definitions/app_firewallSignatureProtectionSetting",
+                    "x-displayname": "Custom"
                 }
             }
         },
@@ -3399,7 +3491,6 @@ var APISwaggerJSON string = `{
                 "enabled": {
                     "type": "boolean",
                     "title": "user customised state",
-                    "format": "boolean",
                     "x-displayname": "State"
                 },
                 "enabled_by_default": {
@@ -3458,6 +3549,7 @@ var APISwaggerJSON string = `{
                         "$ref": "#/definitions/app_firewallAppFirewallViolationType"
                     },
                     "x-displayname": "Disabled Violations",
+                    "x-ves-deprecated": "Deprecated",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
@@ -3486,6 +3578,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3731,7 +3844,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3795,7 +3907,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3905,7 +4016,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3991,7 +4101,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

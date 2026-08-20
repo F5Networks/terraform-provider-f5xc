@@ -2186,10 +2186,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "This API can be used to manage various attributes of the user like\nrole, contact information etc.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -2256,6 +2253,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2341,6 +2344,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2425,6 +2434,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2508,6 +2523,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2601,6 +2622,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2692,6 +2719,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2785,6 +2818,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2869,6 +2908,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2947,6 +2992,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3034,6 +3085,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3126,6 +3183,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3227,6 +3290,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3319,6 +3388,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3402,6 +3477,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3487,6 +3568,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3536,9 +3623,30 @@ var CustomAPISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaAddonServiceAccess": {
             "type": "string",
-            "description": "x-displayName: \"Addon Service Access\"\nState of access into service\n\n - AS_AC_NONE: x-displayName: \"None\"\ndefault state\nThis can mean that addon service is not subscribed or is in pending subscription.\n - AS_AC_ALLOWED: x-displayName: \"Allow\"\naccess is allowed\n - AS_AC_PBAC_DENY: x-displayName: \"PBAC Deny\"\nAddon service is not allowed as part of current plan\n - AS_AC_PBAC_DENY_UPGRADE_PLAN: x-displayName: \"PBAC Deny - Upgrade plan\"\nAddon service is not allowed as part of current plan. To enable it, user is requested to uprade the plan\n - AS_AC_PBAC_DENY_CONTACT_SALES: x-displayName: \"PBAC Deny - Contact Sales\"\nAddon service is not allowed as part of current plan. To enable or to find out more, user is requested to contact sales\n - AS_AC_PBAC_DENY_AS_AC_EOL: x-displayName: \"PBAC Deny - End of  Life\"\nAddon service is not allowed as part of current plan as it is discontinued. User is requested to contact sales discuss alternatives",
+            "description": "x-displayName: \"Addon Service Access\"\nState of access into service\n\n - AS_AC_NONE: x-displayName: \"None\"\ndefault state\nThis can mean that addon service is not subscribed or is in pending subscription.\n - AS_AC_ALLOWED: x-displayName: \"Allow\"\naccess is allowed\n - AS_AC_PBAC_DENY: x-displayName: \"PBAC Deny\"\nAddon service is not allowed as part of current plan\n - AS_AC_PBAC_DENY_UPGRADE_PLAN: x-displayName: \"PBAC Deny - Upgrade plan\"\nAddon service is not allowed as part of current plan. To enable it, user is requested to uprade the plan\n - AS_AC_PBAC_DENY_CONTACT_SALES: x-displayName: \"PBAC Deny - Contact Sales\"\nAddon service is not allowed as part of current plan. To enable or to find out more, user is requested to contact sales\n - AS_AC_PBAC_DENY_AS_AC_EOL: x-displayName: \"PBAC Deny - End of Life\"\nAddon service is not allowed as part of current plan as it is discontinued. User is requested to contact sales discuss alternatives\n - AS_AC_UNAVAILABLE: x-displayName: \"Unavailable\"\nAddon service is not available as part of current plan",
             "title": "AddonServiceAccess",
             "enum": [
                 "AS_AC_NONE",
@@ -3546,7 +3654,8 @@ var CustomAPISwaggerJSON string = `{
                 "AS_AC_PBAC_DENY",
                 "AS_AC_PBAC_DENY_UPGRADE_PLAN",
                 "AS_AC_PBAC_DENY_CONTACT_SALES",
-                "AS_AC_PBAC_DENY_AS_AC_EOL"
+                "AS_AC_PBAC_DENY_AS_AC_EOL",
+                "AS_AC_UNAVAILABLE"
             ],
             "default": "AS_AC_NONE"
         },
@@ -3739,7 +3848,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -4024,7 +4132,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -4059,7 +4166,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -4079,13 +4185,14 @@ var CustomAPISwaggerJSON string = `{
         },
         "schemaTileAccessState": {
             "type": "string",
-            "description": "x-displayName: \"Tile Access State\"\nState of access to Primary navigation tile.\n\n - TILE_AC_NONE: x-displayName: \"None\"\ndefault state\n - TILE_AC_ALLOWED: x-displayName: \"Allowed\"\naccess is allowed\n - TILE_AC_UPGRADE_PLAN: x-displayName: \"Upgrade Plan\"\nRequire plan upgrade.\n - TILE_AC_NOT_SUBSCRIBED: x-displayName: \"Not Subscribed\"\nRequired Addon Service is not subscribed.",
+            "description": "x-displayName: \"Tile Access State\"\nState of access to Primary navigation tile.\n\n - TILE_AC_NONE: x-displayName: \"None\"\ndefault state\n - TILE_AC_ALLOWED: x-displayName: \"Allowed\"\naccess is allowed\n - TILE_AC_UPGRADE_PLAN: x-displayName: \"Upgrade Plan\"\nRequire plan upgrade.\n - TILE_AC_NOT_SUBSCRIBED: x-displayName: \"Not Subscribed\"\nRequired Addon Service is not subscribed.\n - TILE_AC_UNAVAILABLE: x-displayName: \"Unavailable\"\nRequired addon service is not available as part of current plan",
             "title": "TileAccessState",
             "enum": [
                 "TILE_AC_NONE",
                 "TILE_AC_ALLOWED",
                 "TILE_AC_UPGRADE_PLAN",
-                "TILE_AC_NOT_SUBSCRIBED"
+                "TILE_AC_NOT_SUBSCRIBED",
+                "TILE_AC_UNAVAILABLE"
             ],
             "default": "TILE_AC_NONE"
         },
@@ -4283,7 +4390,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If true then the billing feature is failed and to be looked into.\n\nExample: - \"true\"-",
                     "title": "Failed",
-                    "format": "boolean",
                     "x-displayname": "Failed",
                     "x-ves-example": "true"
                 }
@@ -4404,7 +4510,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " status of the deleted objects.\n \"true\" value indicates that the operation had been successful for all the objects.\n \"false\" value indicates that at least one of the delete operations had been unsuccessful.\n\nExample: - \"true\"-",
                     "title": "delete_ok",
-                    "format": "boolean",
                     "x-displayname": "Delete Ok",
                     "x-ves-example": "true"
                 },
@@ -4444,7 +4549,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " x-displayName \"Disabled\"\n status of whether this feature should be disabled for current plan\n\nExample: - \"true\"-",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-ves-example": "true"
                 },
                 "name": {
@@ -4542,14 +4646,12 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If set to true user is completely disabled including IDM.",
                     "title": "Disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "domain_owner": {
                     "type": "boolean",
                     "description": " Domain owner is the first user who registered or signed up the associated Tenant.\n User created via signup flow will have this value set to true.\n Few restrictions apply to this user w.r.t role update and deletion.\n\nExample: - \"true\"-",
                     "title": "Domain Owner",
-                    "format": "boolean",
                     "x-displayname": "Domain Owner",
                     "x-ves-example": "true"
                 },
@@ -4783,7 +4885,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Domain owner is the first user who registered or signed up the associated Tenant.\n User created via signup flow will have this value set to true.\n Few restrictions apply to this user w.r.t role update and deletion.\n\nExample: - \"true\"-",
                     "title": "Domain Owner",
-                    "format": "boolean",
                     "x-displayname": "Domain Owner",
                     "x-ves-example": "true"
                 },
@@ -4929,14 +5030,12 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If set to true user is completely disabled including IDM.",
                     "title": "Disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "domain_owner": {
                     "type": "boolean",
                     "description": " Domain owner is the first user who registered or signed up the associated Tenant.\n User created via signup flow will have this value set to true.\n Few restrictions apply to this user w.r.t role update and deletion.\n\nExample: - \"true\"-",
                     "title": "Domain Owner",
-                    "format": "boolean",
                     "x-displayname": "Domain Owner",
                     "x-ves-example": "true"
                 },
@@ -5011,7 +5110,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Shows if OTP is enabled in IDM Provider.",
                     "title": "OTP Enabled",
-                    "format": "boolean",
                     "x-displayname": "OTP Enabled"
                 },
                 "sync_mode": {

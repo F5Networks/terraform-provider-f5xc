@@ -5,15 +5,16 @@ package advertise_policy
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	golang_proto "github.com/golang/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -39,6 +40,17 @@ type GlobalSpecType struct {
 	//   * virtual_site Advertised on all sites that are selected by virtual_site.labelSelector
 	//   * site Advertised on site local network in case of customer sites and Public network in case of regional sites
 	Where *schema.NetworkSiteRefSelector `protobuf:"bytes,1,opt,name=where,proto3" json:"where,omitempty"`
+	// address_type
+	//
+	// x-displayName: "VIP Address Type"
+	// Indicates the VIP address family to use for this advertise policy.
+	// Select ipv4, ipv6 or dualstack. Defaults to ipv4.
+	//
+	// Types that are valid to be assigned to AddressType:
+	//	*GlobalSpecType_Ipv4
+	//	*GlobalSpecType_Ipv6
+	//	*GlobalSpecType_Dualstack
+	AddressType isGlobalSpecType_AddressType `protobuf_oneof:"address_type"`
 	// address
 	//
 	// x-displayName: "VIP"
@@ -122,6 +134,12 @@ func (m *GlobalSpecType) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GlobalSpecType proto.InternalMessageInfo
 
+type isGlobalSpecType_AddressType interface {
+	isGlobalSpecType_AddressType()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 type isGlobalSpecType_PortChoice interface {
 	isGlobalSpecType_PortChoice()
 	Equal(interface{}) bool
@@ -135,6 +153,15 @@ type isGlobalSpecType_AdvertisePolicyType interface {
 	Size() int
 }
 
+type GlobalSpecType_Ipv4 struct {
+	Ipv4 *schema.Empty `protobuf:"bytes,14,opt,name=ipv4,proto3,oneof" json:"ipv4,omitempty"`
+}
+type GlobalSpecType_Ipv6 struct {
+	Ipv6 *schema.Empty `protobuf:"bytes,15,opt,name=ipv6,proto3,oneof" json:"ipv6,omitempty"`
+}
+type GlobalSpecType_Dualstack struct {
+	Dualstack *schema.Empty `protobuf:"bytes,16,opt,name=dualstack,proto3,oneof" json:"dualstack,omitempty"`
+}
 type GlobalSpecType_Port struct {
 	Port uint32 `protobuf:"varint,4,opt,name=port,proto3,oneof" json:"port,omitempty"`
 }
@@ -148,11 +175,20 @@ type GlobalSpecType_TmmVirtualAddress struct {
 	TmmVirtualAddress *TMMVirtualAddressType `protobuf:"bytes,12,opt,name=tmm_virtual_address,json=tmmVirtualAddress,proto3,oneof" json:"tmm_virtual_address,omitempty"`
 }
 
+func (*GlobalSpecType_Ipv4) isGlobalSpecType_AddressType()                           {}
+func (*GlobalSpecType_Ipv6) isGlobalSpecType_AddressType()                           {}
+func (*GlobalSpecType_Dualstack) isGlobalSpecType_AddressType()                      {}
 func (*GlobalSpecType_Port) isGlobalSpecType_PortChoice()                            {}
 func (*GlobalSpecType_PortRanges) isGlobalSpecType_PortChoice()                      {}
 func (*GlobalSpecType_DefaultAdvertisePolicy) isGlobalSpecType_AdvertisePolicyType() {}
 func (*GlobalSpecType_TmmVirtualAddress) isGlobalSpecType_AdvertisePolicyType()      {}
 
+func (m *GlobalSpecType) GetAddressType() isGlobalSpecType_AddressType {
+	if m != nil {
+		return m.AddressType
+	}
+	return nil
+}
 func (m *GlobalSpecType) GetPortChoice() isGlobalSpecType_PortChoice {
 	if m != nil {
 		return m.PortChoice
@@ -169,6 +205,27 @@ func (m *GlobalSpecType) GetAdvertisePolicyType() isGlobalSpecType_AdvertisePoli
 func (m *GlobalSpecType) GetWhere() *schema.NetworkSiteRefSelector {
 	if m != nil {
 		return m.Where
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetIpv4() *schema.Empty {
+	if x, ok := m.GetAddressType().(*GlobalSpecType_Ipv4); ok {
+		return x.Ipv4
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetIpv6() *schema.Empty {
+	if x, ok := m.GetAddressType().(*GlobalSpecType_Ipv6); ok {
+		return x.Ipv6
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetDualstack() *schema.Empty {
+	if x, ok := m.GetAddressType().(*GlobalSpecType_Dualstack); ok {
+		return x.Dualstack
 	}
 	return nil
 }
@@ -239,6 +296,9 @@ func (m *GlobalSpecType) GetTmmVirtualAddress() *TMMVirtualAddressType {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
+		(*GlobalSpecType_Ipv4)(nil),
+		(*GlobalSpecType_Ipv6)(nil),
+		(*GlobalSpecType_Dualstack)(nil),
 		(*GlobalSpecType_Port)(nil),
 		(*GlobalSpecType_PortRanges)(nil),
 		(*GlobalSpecType_DefaultAdvertisePolicy)(nil),
@@ -299,10 +359,15 @@ func (m *TMMVirtualAddressType) GetState() *schema.TMMStateType {
 // x-displayName: "Create Advertise Policy"
 // advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.
 type CreateSpecType struct {
-	Where    *schema.NetworkSiteRefSelector `protobuf:"bytes,1,opt,name=where,proto3" json:"where,omitempty"`
-	Address  string                         `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	PublicIp []*schema.ObjectRefType        `protobuf:"bytes,7,rep,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
-	Protocol string                         `protobuf:"bytes,3,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	Where *schema.NetworkSiteRefSelector `protobuf:"bytes,1,opt,name=where,proto3" json:"where,omitempty"`
+	// Types that are valid to be assigned to AddressType:
+	//	*CreateSpecType_Ipv4
+	//	*CreateSpecType_Ipv6
+	//	*CreateSpecType_Dualstack
+	AddressType isCreateSpecType_AddressType `protobuf_oneof:"address_type"`
+	Address     string                       `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	PublicIp    []*schema.ObjectRefType      `protobuf:"bytes,7,rep,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
+	Protocol    string                       `protobuf:"bytes,3,opt,name=protocol,proto3" json:"protocol,omitempty"`
 	// Types that are valid to be assigned to PortChoice:
 	//	*CreateSpecType_Port
 	//	*CreateSpecType_PortRanges
@@ -339,6 +404,12 @@ func (m *CreateSpecType) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateSpecType proto.InternalMessageInfo
 
+type isCreateSpecType_AddressType interface {
+	isCreateSpecType_AddressType()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 type isCreateSpecType_PortChoice interface {
 	isCreateSpecType_PortChoice()
 	Equal(interface{}) bool
@@ -346,6 +417,15 @@ type isCreateSpecType_PortChoice interface {
 	Size() int
 }
 
+type CreateSpecType_Ipv4 struct {
+	Ipv4 *schema.Empty `protobuf:"bytes,14,opt,name=ipv4,proto3,oneof" json:"ipv4,omitempty"`
+}
+type CreateSpecType_Ipv6 struct {
+	Ipv6 *schema.Empty `protobuf:"bytes,15,opt,name=ipv6,proto3,oneof" json:"ipv6,omitempty"`
+}
+type CreateSpecType_Dualstack struct {
+	Dualstack *schema.Empty `protobuf:"bytes,16,opt,name=dualstack,proto3,oneof" json:"dualstack,omitempty"`
+}
 type CreateSpecType_Port struct {
 	Port uint32 `protobuf:"varint,4,opt,name=port,proto3,oneof" json:"port,omitempty"`
 }
@@ -353,9 +433,18 @@ type CreateSpecType_PortRanges struct {
 	PortRanges string `protobuf:"bytes,8,opt,name=port_ranges,json=portRanges,proto3,oneof" json:"port_ranges,omitempty"`
 }
 
+func (*CreateSpecType_Ipv4) isCreateSpecType_AddressType()      {}
+func (*CreateSpecType_Ipv6) isCreateSpecType_AddressType()      {}
+func (*CreateSpecType_Dualstack) isCreateSpecType_AddressType() {}
 func (*CreateSpecType_Port) isCreateSpecType_PortChoice()       {}
 func (*CreateSpecType_PortRanges) isCreateSpecType_PortChoice() {}
 
+func (m *CreateSpecType) GetAddressType() isCreateSpecType_AddressType {
+	if m != nil {
+		return m.AddressType
+	}
+	return nil
+}
 func (m *CreateSpecType) GetPortChoice() isCreateSpecType_PortChoice {
 	if m != nil {
 		return m.PortChoice
@@ -366,6 +455,27 @@ func (m *CreateSpecType) GetPortChoice() isCreateSpecType_PortChoice {
 func (m *CreateSpecType) GetWhere() *schema.NetworkSiteRefSelector {
 	if m != nil {
 		return m.Where
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetIpv4() *schema.Empty {
+	if x, ok := m.GetAddressType().(*CreateSpecType_Ipv4); ok {
+		return x.Ipv4
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetIpv6() *schema.Empty {
+	if x, ok := m.GetAddressType().(*CreateSpecType_Ipv6); ok {
+		return x.Ipv6
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetDualstack() *schema.Empty {
+	if x, ok := m.GetAddressType().(*CreateSpecType_Dualstack); ok {
+		return x.Dualstack
 	}
 	return nil
 }
@@ -422,6 +532,9 @@ func (m *CreateSpecType) GetSkipXffAppend() bool {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
+		(*CreateSpecType_Ipv4)(nil),
+		(*CreateSpecType_Ipv6)(nil),
+		(*CreateSpecType_Dualstack)(nil),
 		(*CreateSpecType_Port)(nil),
 		(*CreateSpecType_PortRanges)(nil),
 	}
@@ -432,10 +545,15 @@ func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 // x-displayName: "Replace Advertise Policy"
 // advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.
 type ReplaceSpecType struct {
-	Where    *schema.NetworkSiteRefSelector `protobuf:"bytes,1,opt,name=where,proto3" json:"where,omitempty"`
-	Address  string                         `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	PublicIp []*schema.ObjectRefType        `protobuf:"bytes,7,rep,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
-	Protocol string                         `protobuf:"bytes,3,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	Where *schema.NetworkSiteRefSelector `protobuf:"bytes,1,opt,name=where,proto3" json:"where,omitempty"`
+	// Types that are valid to be assigned to AddressType:
+	//	*ReplaceSpecType_Ipv4
+	//	*ReplaceSpecType_Ipv6
+	//	*ReplaceSpecType_Dualstack
+	AddressType isReplaceSpecType_AddressType `protobuf_oneof:"address_type"`
+	Address     string                        `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	PublicIp    []*schema.ObjectRefType       `protobuf:"bytes,7,rep,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
+	Protocol    string                        `protobuf:"bytes,3,opt,name=protocol,proto3" json:"protocol,omitempty"`
 	// Types that are valid to be assigned to PortChoice:
 	//	*ReplaceSpecType_Port
 	//	*ReplaceSpecType_PortRanges
@@ -472,6 +590,12 @@ func (m *ReplaceSpecType) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ReplaceSpecType proto.InternalMessageInfo
 
+type isReplaceSpecType_AddressType interface {
+	isReplaceSpecType_AddressType()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 type isReplaceSpecType_PortChoice interface {
 	isReplaceSpecType_PortChoice()
 	Equal(interface{}) bool
@@ -479,6 +603,15 @@ type isReplaceSpecType_PortChoice interface {
 	Size() int
 }
 
+type ReplaceSpecType_Ipv4 struct {
+	Ipv4 *schema.Empty `protobuf:"bytes,14,opt,name=ipv4,proto3,oneof" json:"ipv4,omitempty"`
+}
+type ReplaceSpecType_Ipv6 struct {
+	Ipv6 *schema.Empty `protobuf:"bytes,15,opt,name=ipv6,proto3,oneof" json:"ipv6,omitempty"`
+}
+type ReplaceSpecType_Dualstack struct {
+	Dualstack *schema.Empty `protobuf:"bytes,16,opt,name=dualstack,proto3,oneof" json:"dualstack,omitempty"`
+}
 type ReplaceSpecType_Port struct {
 	Port uint32 `protobuf:"varint,4,opt,name=port,proto3,oneof" json:"port,omitempty"`
 }
@@ -486,9 +619,18 @@ type ReplaceSpecType_PortRanges struct {
 	PortRanges string `protobuf:"bytes,8,opt,name=port_ranges,json=portRanges,proto3,oneof" json:"port_ranges,omitempty"`
 }
 
+func (*ReplaceSpecType_Ipv4) isReplaceSpecType_AddressType()      {}
+func (*ReplaceSpecType_Ipv6) isReplaceSpecType_AddressType()      {}
+func (*ReplaceSpecType_Dualstack) isReplaceSpecType_AddressType() {}
 func (*ReplaceSpecType_Port) isReplaceSpecType_PortChoice()       {}
 func (*ReplaceSpecType_PortRanges) isReplaceSpecType_PortChoice() {}
 
+func (m *ReplaceSpecType) GetAddressType() isReplaceSpecType_AddressType {
+	if m != nil {
+		return m.AddressType
+	}
+	return nil
+}
 func (m *ReplaceSpecType) GetPortChoice() isReplaceSpecType_PortChoice {
 	if m != nil {
 		return m.PortChoice
@@ -499,6 +641,27 @@ func (m *ReplaceSpecType) GetPortChoice() isReplaceSpecType_PortChoice {
 func (m *ReplaceSpecType) GetWhere() *schema.NetworkSiteRefSelector {
 	if m != nil {
 		return m.Where
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetIpv4() *schema.Empty {
+	if x, ok := m.GetAddressType().(*ReplaceSpecType_Ipv4); ok {
+		return x.Ipv4
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetIpv6() *schema.Empty {
+	if x, ok := m.GetAddressType().(*ReplaceSpecType_Ipv6); ok {
+		return x.Ipv6
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetDualstack() *schema.Empty {
+	if x, ok := m.GetAddressType().(*ReplaceSpecType_Dualstack); ok {
+		return x.Dualstack
 	}
 	return nil
 }
@@ -555,6 +718,9 @@ func (m *ReplaceSpecType) GetSkipXffAppend() bool {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
+		(*ReplaceSpecType_Ipv4)(nil),
+		(*ReplaceSpecType_Ipv6)(nil),
+		(*ReplaceSpecType_Dualstack)(nil),
 		(*ReplaceSpecType_Port)(nil),
 		(*ReplaceSpecType_PortRanges)(nil),
 	}
@@ -565,10 +731,15 @@ func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 // x-displayName: "Get Advertise Policy"
 // Get advertise_policy read a given object from storage backend for metadata.namespace
 type GetSpecType struct {
-	Where    *schema.NetworkSiteRefSelector `protobuf:"bytes,1,opt,name=where,proto3" json:"where,omitempty"`
-	Address  string                         `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	PublicIp []*schema.ObjectRefType        `protobuf:"bytes,7,rep,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
-	Protocol string                         `protobuf:"bytes,3,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	Where *schema.NetworkSiteRefSelector `protobuf:"bytes,1,opt,name=where,proto3" json:"where,omitempty"`
+	// Types that are valid to be assigned to AddressType:
+	//	*GetSpecType_Ipv4
+	//	*GetSpecType_Ipv6
+	//	*GetSpecType_Dualstack
+	AddressType isGetSpecType_AddressType `protobuf_oneof:"address_type"`
+	Address     string                    `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	PublicIp    []*schema.ObjectRefType   `protobuf:"bytes,7,rep,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
+	Protocol    string                    `protobuf:"bytes,3,opt,name=protocol,proto3" json:"protocol,omitempty"`
 	// Types that are valid to be assigned to PortChoice:
 	//	*GetSpecType_Port
 	//	*GetSpecType_PortRanges
@@ -605,6 +776,12 @@ func (m *GetSpecType) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetSpecType proto.InternalMessageInfo
 
+type isGetSpecType_AddressType interface {
+	isGetSpecType_AddressType()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 type isGetSpecType_PortChoice interface {
 	isGetSpecType_PortChoice()
 	Equal(interface{}) bool
@@ -612,6 +789,15 @@ type isGetSpecType_PortChoice interface {
 	Size() int
 }
 
+type GetSpecType_Ipv4 struct {
+	Ipv4 *schema.Empty `protobuf:"bytes,14,opt,name=ipv4,proto3,oneof" json:"ipv4,omitempty"`
+}
+type GetSpecType_Ipv6 struct {
+	Ipv6 *schema.Empty `protobuf:"bytes,15,opt,name=ipv6,proto3,oneof" json:"ipv6,omitempty"`
+}
+type GetSpecType_Dualstack struct {
+	Dualstack *schema.Empty `protobuf:"bytes,16,opt,name=dualstack,proto3,oneof" json:"dualstack,omitempty"`
+}
 type GetSpecType_Port struct {
 	Port uint32 `protobuf:"varint,4,opt,name=port,proto3,oneof" json:"port,omitempty"`
 }
@@ -619,9 +805,18 @@ type GetSpecType_PortRanges struct {
 	PortRanges string `protobuf:"bytes,8,opt,name=port_ranges,json=portRanges,proto3,oneof" json:"port_ranges,omitempty"`
 }
 
+func (*GetSpecType_Ipv4) isGetSpecType_AddressType()      {}
+func (*GetSpecType_Ipv6) isGetSpecType_AddressType()      {}
+func (*GetSpecType_Dualstack) isGetSpecType_AddressType() {}
 func (*GetSpecType_Port) isGetSpecType_PortChoice()       {}
 func (*GetSpecType_PortRanges) isGetSpecType_PortChoice() {}
 
+func (m *GetSpecType) GetAddressType() isGetSpecType_AddressType {
+	if m != nil {
+		return m.AddressType
+	}
+	return nil
+}
 func (m *GetSpecType) GetPortChoice() isGetSpecType_PortChoice {
 	if m != nil {
 		return m.PortChoice
@@ -632,6 +827,27 @@ func (m *GetSpecType) GetPortChoice() isGetSpecType_PortChoice {
 func (m *GetSpecType) GetWhere() *schema.NetworkSiteRefSelector {
 	if m != nil {
 		return m.Where
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetIpv4() *schema.Empty {
+	if x, ok := m.GetAddressType().(*GetSpecType_Ipv4); ok {
+		return x.Ipv4
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetIpv6() *schema.Empty {
+	if x, ok := m.GetAddressType().(*GetSpecType_Ipv6); ok {
+		return x.Ipv6
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetDualstack() *schema.Empty {
+	if x, ok := m.GetAddressType().(*GetSpecType_Dualstack); ok {
+		return x.Dualstack
 	}
 	return nil
 }
@@ -688,6 +904,9 @@ func (m *GetSpecType) GetSkipXffAppend() bool {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
+		(*GetSpecType_Ipv4)(nil),
+		(*GetSpecType_Ipv6)(nil),
+		(*GetSpecType_Dualstack)(nil),
 		(*GetSpecType_Port)(nil),
 		(*GetSpecType_PortRanges)(nil),
 	}
@@ -783,68 +1002,76 @@ func init() {
 }
 
 var fileDescriptor_c2a7dbc5a9f3eb12 = []byte{
-	// 973 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x56, 0xcf, 0x6f, 0xdb, 0x54,
-	0x1c, 0xcf, 0xb7, 0x76, 0xbb, 0xf4, 0xa5, 0x3f, 0x4d, 0x37, 0x99, 0xae, 0x32, 0x59, 0xd1, 0xd6,
-	0x68, 0x4a, 0x1d, 0xd6, 0x51, 0x28, 0x43, 0x42, 0x6a, 0x3a, 0xd4, 0x52, 0x08, 0x8b, 0xdc, 0xf0,
-	0x43, 0x5c, 0x2c, 0xc7, 0x79, 0x76, 0x4d, 0xed, 0xbc, 0xa7, 0xe7, 0x97, 0xb4, 0x3d, 0x20, 0x55,
-	0xfc, 0x01, 0x88, 0x3f, 0x03, 0x71, 0x44, 0x1a, 0x07, 0xcc, 0x21, 0xe2, 0x84, 0x38, 0xe5, 0x58,
-	0xed, 0x44, 0xd3, 0x0b, 0xdc, 0x7a, 0xe6, 0x32, 0xe4, 0xe7, 0xa4, 0x4b, 0xcc, 0x86, 0x84, 0xd8,
-	0x65, 0xd2, 0x4e, 0x7e, 0xcf, 0x9f, 0xcf, 0xe7, 0x7d, 0x7f, 0xbd, 0x8f, 0x65, 0x74, 0xbb, 0x8d,
-	0x43, 0xdd, 0x23, 0xa5, 0xd0, 0xde, 0xc7, 0x81, 0x55, 0xb2, 0x1a, 0x6d, 0xcc, 0xb8, 0x17, 0x62,
-	0x93, 0x12, 0xdf, 0xb3, 0x8f, 0x4b, 0xfc, 0x98, 0xe2, 0x50, 0xa7, 0x8c, 0x70, 0xa2, 0x68, 0x09,
-	0x57, 0x4f, 0xb8, 0x7a, 0x9a, 0xbb, 0xb8, 0xea, 0x7a, 0x7c, 0xbf, 0x55, 0xd7, 0x6d, 0x12, 0x94,
-	0x5c, 0xe2, 0x92, 0x92, 0x90, 0xd5, 0x5b, 0x8e, 0xd8, 0x89, 0x8d, 0x58, 0x25, 0xc7, 0x2d, 0xbe,
-	0x36, 0x1a, 0xba, 0xee, 0xb9, 0x1e, 0x35, 0x87, 0xe2, 0x2d, 0x6a, 0xa3, 0x04, 0x1b, 0x33, 0x3e,
-	0x82, 0x5f, 0x1f, 0xc5, 0x09, 0xe5, 0x1e, 0x69, 0x0e, 0xc0, 0x57, 0x47, 0xc1, 0x61, 0xdd, 0xd2,
-	0x28, 0xd4, 0xb6, 0x7c, 0xaf, 0x61, 0x71, 0xdc, 0x47, 0xf3, 0x29, 0xd4, 0xc3, 0x87, 0xe6, 0xc8,
-	0xd1, 0xcb, 0x0f, 0x27, 0xd0, 0xcc, 0xb6, 0x4f, 0xea, 0x96, 0xbf, 0x47, 0xb1, 0x5d, 0x3b, 0xa6,
-	0x58, 0x79, 0x17, 0x8d, 0x1f, 0xee, 0x63, 0x86, 0x55, 0xc8, 0x43, 0x21, 0xb7, 0x76, 0x53, 0x1f,
-	0x6d, 0xd5, 0xc7, 0x98, 0x1f, 0x12, 0x76, 0xb0, 0xe7, 0x71, 0x6c, 0x60, 0x67, 0x0f, 0xfb, 0xd8,
-	0xe6, 0x84, 0x19, 0x89, 0x46, 0x59, 0x41, 0x57, 0xac, 0x46, 0x83, 0xe1, 0x30, 0x54, 0xc7, 0xf2,
-	0x50, 0x98, 0x2c, 0x4f, 0x77, 0x22, 0x80, 0x9f, 0xfe, 0xec, 0x48, 0x32, 0x1b, 0xa3, 0x60, 0x0c,
-	0x50, 0xe5, 0x01, 0x9a, 0xa4, 0xad, 0xba, 0xef, 0xd9, 0xa6, 0x47, 0xd5, 0x2b, 0x79, 0xa9, 0x90,
-	0x5b, 0x5b, 0x4a, 0x45, 0x7a, 0x50, 0xff, 0x12, 0xdb, 0xdc, 0xc0, 0x4e, 0x9c, 0x56, 0x79, 0xe1,
-	0xfb, 0xaf, 0x9e, 0x28, 0xe2, 0x43, 0x4f, 0x7e, 0x06, 0x30, 0xb2, 0xc9, 0xab, 0x0f, 0xa8, 0xb2,
-	0x81, 0xb2, 0xa2, 0x24, 0x9b, 0xf8, 0xaa, 0x24, 0x42, 0x2f, 0xc5, 0xac, 0x47, 0x11, 0x48, 0xb5,
-	0xad, 0x6a, 0x9c, 0xc1, 0x14, 0x43, 0x46, 0xbc, 0x36, 0xa4, 0x4f, 0xee, 0x57, 0x8d, 0x4b, 0xb6,
-	0xb2, 0x82, 0x64, 0x4a, 0x18, 0x57, 0xe5, 0x3c, 0x14, 0xa6, 0xcb, 0xf3, 0x8f, 0x22, 0x18, 0xdb,
-	0x78, 0x23, 0x16, 0x4c, 0xdc, 0x96, 0xd5, 0xc7, 0x8f, 0xa5, 0x9d, 0x8c, 0x21, 0x08, 0xca, 0x87,
-	0x28, 0x17, 0x3f, 0x4d, 0x66, 0x35, 0x5d, 0x1c, 0xaa, 0x59, 0x11, 0xa5, 0x10, 0x33, 0xc7, 0x99,
-	0xa4, 0x9e, 0xc8, 0x42, 0xc3, 0xe4, 0xae, 0x7c, 0x92, 0xed, 0x57, 0x3c, 0x07, 0x7d, 0xf4, 0x54,
-	0x86, 0x9d, 0x8c, 0x81, 0x62, 0xb9, 0x21, 0xd4, 0xca, 0x67, 0x68, 0x86, 0xfb, 0xa1, 0x49, 0x2d,
-	0x66, 0x05, 0x98, 0x63, 0x16, 0xaa, 0xe3, 0xa2, 0xdf, 0xb7, 0x52, 0x5d, 0xb8, 0x4f, 0x0e, 0x9b,
-	0x21, 0x67, 0xd8, 0x0a, 0x6a, 0x7e, 0x58, 0x8d, 0xd9, 0xa1, 0xe8, 0x47, 0x36, 0xae, 0xae, 0x1b,
-	0x01, 0x18, 0xd3, 0xbc, 0x0f, 0x88, 0x63, 0x94, 0x22, 0x9a, 0x0d, 0x0f, 0x3c, 0x6a, 0x1e, 0x39,
-	0x8e, 0x69, 0x51, 0x8a, 0x9b, 0x0d, 0x75, 0x22, 0x0f, 0x85, 0x6c, 0x59, 0xee, 0x08, 0x76, 0x0c,
-	0x7e, 0xee, 0x38, 0x9b, 0x02, 0x52, 0xaa, 0x48, 0x6d, 0x60, 0xc7, 0x6a, 0xf9, 0xdc, 0x4c, 0x9b,
-	0x40, 0xcd, 0x89, 0x84, 0x16, 0x52, 0x09, 0xbd, 0x1f, 0x50, 0x7e, 0xbc, 0x03, 0xc6, 0xb5, 0xbe,
-	0x6e, 0x73, 0x20, 0xab, 0x0a, 0x95, 0xe2, 0xa2, 0x57, 0x78, 0x10, 0x98, 0x6d, 0x8f, 0xf1, 0x96,
-	0xe5, 0x9b, 0x83, 0xeb, 0x30, 0x25, 0x0e, 0x5b, 0xd7, 0xff, 0xdd, 0x78, 0x7a, 0xad, 0x52, 0xf9,
-	0x34, 0x51, 0x6e, 0x26, 0xc2, 0xb8, 0xd8, 0x1d, 0x30, 0xe6, 0x79, 0x10, 0x8c, 0x02, 0xf7, 0x56,
-	0x7e, 0x89, 0xe0, 0x75, 0x74, 0x03, 0xcd, 0x5d, 0x66, 0x90, 0xef, 0xa7, 0x30, 0x7d, 0xa7, 0x78,
-	0xb7, 0xf8, 0x4e, 0x71, 0xad, 0xb8, 0x5e, 0x7c, 0xab, 0xf8, 0x76, 0x59, 0xeb, 0xcf, 0xcd, 0xde,
-	0x27, 0x9e, 0x8d, 0x95, 0xd9, 0x4e, 0x04, 0x72, 0x37, 0x82, 0xc9, 0x5e, 0x04, 0xd2, 0x9b, 0xc5,
-	0x8d, 0xf2, 0x4d, 0x74, 0x35, 0x9d, 0x87, 0x30, 0xa7, 0x32, 0xd5, 0x89, 0x20, 0xd7, 0x8d, 0x00,
-	0x5d, 0x44, 0x00, 0xbb, 0x72, 0x76, 0x72, 0x0e, 0xed, 0xca, 0x59, 0x34, 0x97, 0x5b, 0xde, 0x45,
-	0x57, 0x9f, 0x9a, 0xa9, 0x72, 0x07, 0x8d, 0x87, 0xdc, 0xe2, 0x03, 0xf7, 0x5c, 0x4f, 0xd5, 0x5b,
-	0xab, 0x54, 0xf6, 0x62, 0x38, 0xe6, 0x1a, 0x09, 0x73, 0xf9, 0xa1, 0x84, 0x66, 0xb6, 0x18, 0xb6,
-	0x38, 0x7e, 0x3e, 0x1e, 0x54, 0x53, 0x1e, 0x7c, 0x62, 0xba, 0xed, 0xff, 0x6a, 0xba, 0xa9, 0x61,
-	0xd3, 0x0d, 0x99, 0x6d, 0x31, 0x6d, 0xb6, 0x21, 0x3b, 0x2d, 0x0c, 0xdb, 0xe9, 0xd2, 0x3b, 0x37,
-	0x9e, 0xe2, 0x9d, 0x94, 0x23, 0x2a, 0xff, 0xcf, 0x11, 0x69, 0x1f, 0xdc, 0x7a, 0x86, 0x0f, 0x52,
-	0x0e, 0xb8, 0x37, 0xff, 0xdb, 0x7b, 0xa9, 0x4f, 0xe0, 0x3f, 0x2e, 0xcc, 0xd7, 0x7f, 0xc1, 0xf0,
-	0x8b, 0xe4, 0x26, 0x2c, 0xff, 0x28, 0xa1, 0x59, 0x03, 0x53, 0xdf, 0xb2, 0x5f, 0x0e, 0xee, 0x85,
-	0x1a, 0xdc, 0x0f, 0x12, 0xca, 0x6d, 0x63, 0xfe, 0x72, 0x68, 0x2f, 0xd2, 0xd0, 0xaa, 0x68, 0xe6,
-	0x23, 0x2f, 0xe4, 0xb8, 0x89, 0xd9, 0x16, 0x69, 0x3a, 0x9e, 0xab, 0x28, 0x48, 0x6e, 0x5a, 0x41,
-	0x32, 0xb5, 0x49, 0x43, 0xac, 0x95, 0x6b, 0x68, 0x22, 0xfe, 0xa8, 0xb6, 0x06, 0xc3, 0xe8, 0xef,
-	0x62, 0xae, 0x68, 0x53, 0xdc, 0xbe, 0xe9, 0xa4, 0x49, 0xe5, 0x6f, 0xa0, 0x7b, 0xa6, 0x65, 0x4e,
-	0xcf, 0xb4, 0xcc, 0xc5, 0x99, 0x06, 0x27, 0x3d, 0x0d, 0xbe, 0xeb, 0x69, 0xf0, 0x6b, 0x4f, 0x83,
-	0x6e, 0x4f, 0x83, 0xd3, 0x9e, 0x06, 0xbf, 0xf7, 0x34, 0xf8, 0xa3, 0xa7, 0x65, 0x2e, 0x7a, 0x1a,
-	0x7c, 0x7b, 0xae, 0x65, 0x3a, 0xe7, 0x1a, 0x74, 0xcf, 0xb5, 0xcc, 0xe9, 0xb9, 0x96, 0xf9, 0xa2,
-	0xea, 0x12, 0x7a, 0xe0, 0xea, 0x6d, 0xe2, 0x73, 0xcc, 0x98, 0xa5, 0xb7, 0xc2, 0x92, 0x58, 0x38,
-	0x84, 0x05, 0xab, 0x94, 0x91, 0xb6, 0xd7, 0xc0, 0x6c, 0xd5, 0x59, 0x3f, 0xb2, 0x4b, 0xb4, 0xee,
-	0x92, 0x12, 0x3e, 0xe2, 0xfd, 0xff, 0xb0, 0x67, 0xfc, 0xa0, 0xd6, 0x27, 0xc4, 0x54, 0xef, 0xfe,
-	0x1d, 0x00, 0x00, 0xff, 0xff, 0x38, 0x11, 0x50, 0x68, 0xc9, 0x0a, 0x00, 0x00,
+	// 1090 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0xcf, 0x4f, 0xe3, 0x46,
+	0x14, 0xce, 0x10, 0xc3, 0x26, 0x13, 0x12, 0x82, 0xcb, 0xae, 0x5c, 0x16, 0xb9, 0x29, 0xea, 0xb2,
+	0x11, 0x0a, 0xc9, 0x86, 0x5f, 0xa5, 0x54, 0xaa, 0x44, 0xd8, 0x0a, 0x4a, 0x4b, 0x37, 0x32, 0xf4,
+	0x87, 0x7a, 0xb1, 0x1c, 0x67, 0x1c, 0x5c, 0xec, 0xcc, 0x68, 0x3c, 0x09, 0x70, 0xa8, 0x84, 0xf6,
+	0xd4, 0x53, 0xd5, 0x3f, 0xa3, 0xea, 0x9f, 0x50, 0xf7, 0x10, 0xf5, 0xb4, 0xea, 0x29, 0x47, 0xb4,
+	0xa7, 0x12, 0x2e, 0x5b, 0xb5, 0x07, 0xce, 0x7b, 0xd9, 0xca, 0x63, 0x07, 0x62, 0x77, 0xe9, 0x52,
+	0xb5, 0x7b, 0xe3, 0x94, 0x99, 0xf9, 0xbe, 0xef, 0xcd, 0xcc, 0x9b, 0xf7, 0xbe, 0xc8, 0x70, 0xb6,
+	0x8d, 0x9c, 0xa2, 0x89, 0x4b, 0x8e, 0xbe, 0x87, 0x6c, 0xad, 0xa4, 0xd5, 0xdb, 0x88, 0x32, 0xd3,
+	0x41, 0x2a, 0xc1, 0x96, 0xa9, 0x1f, 0x95, 0xd8, 0x11, 0x41, 0x4e, 0x91, 0x50, 0xcc, 0xb0, 0x28,
+	0xfb, 0xdc, 0xa2, 0xcf, 0x2d, 0x46, 0xb9, 0x93, 0x73, 0x0d, 0x93, 0xed, 0xb5, 0x6a, 0x45, 0x1d,
+	0xdb, 0xa5, 0x06, 0x6e, 0xe0, 0x12, 0x97, 0xd5, 0x5a, 0x06, 0x9f, 0xf1, 0x09, 0x1f, 0xf9, 0xe1,
+	0x26, 0xdf, 0x0a, 0x6f, 0x5d, 0x33, 0x1b, 0x26, 0x51, 0x07, 0xf6, 0x9b, 0x94, 0xc3, 0x04, 0x1d,
+	0x51, 0x16, 0xc2, 0xef, 0x86, 0x71, 0x4c, 0x98, 0x89, 0x9b, 0x7d, 0xf0, 0xcd, 0x30, 0x38, 0xa8,
+	0x9b, 0x0a, 0x43, 0x6d, 0xcd, 0x32, 0xeb, 0x1a, 0x43, 0x01, 0x9a, 0x8b, 0xa0, 0x26, 0x3a, 0x50,
+	0x43, 0xa1, 0xa7, 0xbf, 0x4d, 0xc0, 0xcc, 0x86, 0x85, 0x6b, 0x9a, 0xb5, 0x43, 0x90, 0xbe, 0x7b,
+	0x44, 0x90, 0xf8, 0x3e, 0x1c, 0x3e, 0xd8, 0x43, 0x14, 0x49, 0x20, 0x07, 0xf2, 0xa9, 0xf9, 0x7b,
+	0xc5, 0x70, 0xaa, 0x3e, 0x45, 0xec, 0x00, 0xd3, 0xfd, 0x1d, 0x93, 0x21, 0x05, 0x19, 0x3b, 0xc8,
+	0x42, 0x3a, 0xc3, 0x54, 0xf1, 0x35, 0xe2, 0x03, 0x28, 0x98, 0xa4, 0xbd, 0x28, 0x65, 0xb8, 0x76,
+	0x22, 0xa2, 0xfd, 0xd0, 0x26, 0xec, 0xa8, 0x22, 0x74, 0x5c, 0x00, 0x36, 0x63, 0x0a, 0x67, 0x06,
+	0x8a, 0x65, 0x69, 0xec, 0x9a, 0x8a, 0x65, 0x71, 0x15, 0x26, 0xeb, 0x2d, 0xcd, 0x72, 0x98, 0xa6,
+	0xef, 0x4b, 0xd9, 0x6b, 0xc8, 0x2e, 0xe9, 0xe2, 0x7d, 0x78, 0x4b, 0xab, 0xd7, 0x29, 0x72, 0x1c,
+	0x69, 0x28, 0x07, 0xf2, 0xc9, 0x4a, 0xda, 0xe3, 0xfc, 0xf4, 0x7b, 0x27, 0x2e, 0xd0, 0x21, 0x02,
+	0x94, 0x3e, 0x2a, 0x3e, 0x82, 0x49, 0xd2, 0xaa, 0x59, 0xa6, 0xae, 0x9a, 0x44, 0xba, 0x95, 0x8b,
+	0xe7, 0x53, 0xf3, 0x53, 0x91, 0x4d, 0x1e, 0xd5, 0xbe, 0x46, 0x3a, 0x53, 0x90, 0xe1, 0xa5, 0xad,
+	0x32, 0xf1, 0xe3, 0x37, 0x97, 0x0a, 0x2f, 0xe8, 0xf1, 0xcf, 0x00, 0x28, 0x09, 0x7f, 0xe9, 0x23,
+	0x22, 0xae, 0xc0, 0x04, 0x4f, 0xb9, 0x8e, 0x2d, 0x29, 0xce, 0xb7, 0x9e, 0xf2, 0x58, 0x4f, 0x5d,
+	0x10, 0xdf, 0x5d, 0xaf, 0x7a, 0x27, 0x18, 0xa5, 0x50, 0xf1, 0xc6, 0x4a, 0xfc, 0xb3, 0x87, 0x55,
+	0xe5, 0x82, 0x2d, 0xde, 0x87, 0x02, 0xc1, 0x94, 0x49, 0x42, 0x0e, 0xe4, 0xd3, 0x95, 0xf1, 0xa7,
+	0x2e, 0x18, 0x5a, 0x79, 0xe0, 0x09, 0x46, 0x66, 0x05, 0xe9, 0xc5, 0x8b, 0xf8, 0x26, 0x50, 0x38,
+	0x41, 0xfc, 0x18, 0xa6, 0xbc, 0x5f, 0x95, 0x6a, 0xcd, 0x06, 0x72, 0xa4, 0x04, 0xdf, 0x25, 0xef,
+	0x31, 0x87, 0x69, 0x5c, 0x3a, 0x16, 0xb8, 0x86, 0x0a, 0x5d, 0xe1, 0x38, 0x11, 0xdc, 0x38, 0x0b,
+	0x02, 0xf4, 0x44, 0x00, 0x9b, 0x40, 0x81, 0x9e, 0x5c, 0xe1, 0x6a, 0xf1, 0x0b, 0x98, 0x61, 0x96,
+	0xa3, 0x12, 0x8d, 0x6a, 0x36, 0x62, 0x88, 0x3a, 0xd2, 0x30, 0x4f, 0xf5, 0x4c, 0x24, 0x0b, 0x0f,
+	0xf1, 0x41, 0xd3, 0x61, 0x14, 0x69, 0xf6, 0xae, 0xe5, 0x54, 0x3d, 0xb6, 0xc3, 0xf3, 0x91, 0xf0,
+	0x6e, 0xd7, 0x75, 0x01, 0x50, 0xd2, 0x2c, 0x00, 0x78, 0x18, 0xb1, 0x00, 0xc7, 0x9c, 0x7d, 0x93,
+	0xa8, 0x87, 0x86, 0xa1, 0x6a, 0x84, 0xa0, 0x66, 0x5d, 0x1a, 0xc9, 0x81, 0x7c, 0xc2, 0x7f, 0x2e,
+	0x25, 0xed, 0x81, 0x5f, 0x1a, 0xc6, 0x1a, 0x87, 0xc4, 0x2a, 0x94, 0xea, 0xc8, 0xd0, 0x5a, 0x16,
+	0x53, 0xa3, 0x4d, 0x2a, 0xa5, 0xae, 0x7e, 0xfb, 0xcd, 0x21, 0xe5, 0x4e, 0xa0, 0x5b, 0xeb, 0xcb,
+	0xaa, 0x5c, 0x25, 0x36, 0xe0, 0x1b, 0xcc, 0xb6, 0xd5, 0xb6, 0x49, 0x59, 0x4b, 0xb3, 0xd4, 0x7e,
+	0x39, 0x8c, 0xf2, 0x60, 0x4b, 0xc5, 0x7f, 0x36, 0x86, 0xe2, 0xee, 0xf6, 0xf6, 0xe7, 0xbe, 0x72,
+	0xcd, 0x17, 0x7a, 0x97, 0xdd, 0x1c, 0x52, 0xc6, 0x99, 0x6d, 0x87, 0x81, 0xd5, 0xd9, 0x5f, 0x5c,
+	0x30, 0x03, 0xdf, 0x81, 0xd9, 0x8b, 0x13, 0xe4, 0x82, 0x23, 0x64, 0xcb, 0x85, 0x85, 0xc2, 0x7b,
+	0x85, 0xf2, 0x42, 0x61, 0xbe, 0xb0, 0x54, 0x58, 0x2e, 0xbc, 0x5b, 0xc9, 0xc3, 0xd1, 0xe0, 0x20,
+	0xdc, 0x16, 0x44, 0xa9, 0xe3, 0x82, 0xcc, 0x13, 0x3f, 0x83, 0xe9, 0x9e, 0x0b, 0x12, 0xe5, 0xc5,
+	0x42, 0x79, 0xa9, 0x50, 0x5e, 0xae, 0xc8, 0xc1, 0x23, 0xeb, 0x7b, 0xd8, 0xd4, 0x91, 0x38, 0xd6,
+	0x71, 0x81, 0xd0, 0x75, 0x41, 0xb2, 0xe7, 0x82, 0xf8, 0x62, 0x61, 0xa5, 0x72, 0x0f, 0xde, 0x8e,
+	0x1e, 0xda, 0x0f, 0x39, 0xda, 0x71, 0x41, 0xaa, 0xeb, 0x02, 0x78, 0xee, 0x02, 0xb0, 0x25, 0x24,
+	0xd2, 0xd9, 0xcc, 0x96, 0x90, 0x48, 0x66, 0xe1, 0x96, 0x90, 0x80, 0xd9, 0xd4, 0xf4, 0x16, 0xbc,
+	0xfd, 0xd2, 0xcb, 0x89, 0x65, 0x38, 0xec, 0x30, 0x8d, 0xf5, 0x0d, 0xe1, 0x6e, 0x24, 0x45, 0xbb,
+	0xdb, 0xdb, 0x3b, 0x1e, 0xec, 0x71, 0x15, 0x9f, 0x39, 0xfd, 0x87, 0x00, 0x33, 0xeb, 0x14, 0x69,
+	0x0c, 0xfd, 0x3f, 0xb6, 0x32, 0xfb, 0x6a, 0x5b, 0xb9, 0x30, 0x94, 0xd9, 0x57, 0x1b, 0xca, 0x85,
+	0x95, 0x2c, 0x5e, 0xd3, 0x4a, 0xc2, 0x26, 0x22, 0x45, 0x4c, 0xe4, 0xd2, 0x35, 0x36, 0xfe, 0xad,
+	0x6b, 0x8c, 0x0e, 0xba, 0xc6, 0x80, 0x5b, 0x4c, 0x46, 0xdd, 0x62, 0xc0, 0x0f, 0x26, 0x06, 0xfd,
+	0xe0, 0xa2, 0xf9, 0xdf, 0x7e, 0x49, 0xf3, 0x47, 0x5a, 0x7a, 0xfb, 0xbf, 0xb5, 0x74, 0xb4, 0x91,
+	0x67, 0xae, 0x68, 0xe4, 0x48, 0x0b, 0xaf, 0x8e, 0xff, 0xfa, 0x41, 0xe4, 0x3f, 0xa6, 0x92, 0x8b,
+	0x94, 0x7b, 0xf6, 0xf1, 0x73, 0x10, 0x5a, 0xf9, 0x5b, 0x99, 0x3f, 0x7e, 0x0e, 0x06, 0x17, 0x06,
+	0xeb, 0x77, 0xfa, 0x4f, 0x01, 0x8e, 0x29, 0x88, 0x58, 0x9a, 0x7e, 0x53, 0x6e, 0x37, 0xe5, 0xf6,
+	0xda, 0xcb, 0xed, 0x99, 0x00, 0x53, 0x1b, 0x88, 0xdd, 0x94, 0xda, 0x4d, 0xa9, 0xbd, 0xee, 0x52,
+	0xab, 0xc2, 0xcc, 0x27, 0xa6, 0xc3, 0x50, 0x13, 0xd1, 0x75, 0xdc, 0x34, 0xcc, 0x86, 0x28, 0x42,
+	0xa1, 0xa9, 0xd9, 0x7e, 0xad, 0x25, 0x15, 0x3e, 0x16, 0xef, 0xc0, 0x11, 0xef, 0x6f, 0xb7, 0xd5,
+	0x7f, 0xb4, 0x60, 0xe6, 0x71, 0x79, 0x3a, 0xbd, 0x34, 0xa7, 0xfd, 0x64, 0x56, 0xbe, 0x03, 0xdd,
+	0x53, 0x39, 0x76, 0x72, 0x2a, 0xc7, 0xce, 0x4f, 0x65, 0x70, 0xdc, 0x93, 0xc1, 0x0f, 0x3d, 0x19,
+	0x3c, 0xe9, 0xc9, 0xa0, 0xdb, 0x93, 0xc1, 0x49, 0x4f, 0x06, 0xbf, 0xf5, 0x64, 0xf0, 0xac, 0x27,
+	0xc7, 0xce, 0x7b, 0x32, 0xf8, 0xfe, 0x4c, 0x8e, 0x75, 0xce, 0x64, 0xd0, 0x3d, 0x93, 0x63, 0x27,
+	0x67, 0x72, 0xec, 0xab, 0x6a, 0x03, 0x93, 0xfd, 0x46, 0xb1, 0x8d, 0x2d, 0x86, 0x28, 0xd5, 0x8a,
+	0x2d, 0xa7, 0xc4, 0x07, 0x06, 0xa6, 0xf6, 0x1c, 0xa1, 0xb8, 0x6d, 0xd6, 0x11, 0x9d, 0x33, 0x96,
+	0x0e, 0xf5, 0x12, 0xa9, 0x35, 0x70, 0x09, 0x1d, 0xb2, 0xe0, 0xe3, 0xe3, 0x8a, 0xaf, 0xb2, 0xda,
+	0x08, 0x7f, 0xfd, 0x85, 0xbf, 0x02, 0x00, 0x00, 0xff, 0xff, 0x8c, 0xa8, 0xc3, 0x07, 0xbe, 0x0d,
+	0x00, 0x00,
 }
 
 func (this *GlobalSpecType) Equal(that interface{}) bool {
@@ -867,6 +1094,15 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Where.Equal(that1.Where) {
+		return false
+	}
+	if that1.AddressType == nil {
+		if this.AddressType != nil {
+			return false
+		}
+	} else if this.AddressType == nil {
+		return false
+	} else if !this.AddressType.Equal(that1.AddressType) {
 		return false
 	}
 	if this.Address != that1.Address {
@@ -905,6 +1141,78 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 	} else if this.AdvertisePolicyType == nil {
 		return false
 	} else if !this.AdvertisePolicyType.Equal(that1.AdvertisePolicyType) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_Ipv4) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_Ipv4)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_Ipv4)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv4.Equal(that1.Ipv4) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_Ipv6) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_Ipv6)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_Ipv6)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv6.Equal(that1.Ipv6) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_Dualstack) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_Dualstack)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_Dualstack)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Dualstack.Equal(that1.Dualstack) {
 		return false
 	}
 	return true
@@ -1051,6 +1359,15 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 	if !this.Where.Equal(that1.Where) {
 		return false
 	}
+	if that1.AddressType == nil {
+		if this.AddressType != nil {
+			return false
+		}
+	} else if this.AddressType == nil {
+		return false
+	} else if !this.AddressType.Equal(that1.AddressType) {
+		return false
+	}
 	if this.Address != that1.Address {
 		return false
 	}
@@ -1078,6 +1395,78 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if this.SkipXffAppend != that1.SkipXffAppend {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_Ipv4) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_Ipv4)
+	if !ok {
+		that2, ok := that.(CreateSpecType_Ipv4)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv4.Equal(that1.Ipv4) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_Ipv6) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_Ipv6)
+	if !ok {
+		that2, ok := that.(CreateSpecType_Ipv6)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv6.Equal(that1.Ipv6) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_Dualstack) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_Dualstack)
+	if !ok {
+		that2, ok := that.(CreateSpecType_Dualstack)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Dualstack.Equal(that1.Dualstack) {
 		return false
 	}
 	return true
@@ -1152,6 +1541,15 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if !this.Where.Equal(that1.Where) {
 		return false
 	}
+	if that1.AddressType == nil {
+		if this.AddressType != nil {
+			return false
+		}
+	} else if this.AddressType == nil {
+		return false
+	} else if !this.AddressType.Equal(that1.AddressType) {
+		return false
+	}
 	if this.Address != that1.Address {
 		return false
 	}
@@ -1179,6 +1577,78 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if this.SkipXffAppend != that1.SkipXffAppend {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_Ipv4) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_Ipv4)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_Ipv4)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv4.Equal(that1.Ipv4) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_Ipv6) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_Ipv6)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_Ipv6)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv6.Equal(that1.Ipv6) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_Dualstack) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_Dualstack)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_Dualstack)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Dualstack.Equal(that1.Dualstack) {
 		return false
 	}
 	return true
@@ -1253,6 +1723,15 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 	if !this.Where.Equal(that1.Where) {
 		return false
 	}
+	if that1.AddressType == nil {
+		if this.AddressType != nil {
+			return false
+		}
+	} else if this.AddressType == nil {
+		return false
+	} else if !this.AddressType.Equal(that1.AddressType) {
+		return false
+	}
 	if this.Address != that1.Address {
 		return false
 	}
@@ -1280,6 +1759,78 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if this.SkipXffAppend != that1.SkipXffAppend {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_Ipv4) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_Ipv4)
+	if !ok {
+		that2, ok := that.(GetSpecType_Ipv4)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv4.Equal(that1.Ipv4) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_Ipv6) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_Ipv6)
+	if !ok {
+		that2, ok := that.(GetSpecType_Ipv6)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ipv6.Equal(that1.Ipv6) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_Dualstack) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_Dualstack)
+	if !ok {
+		that2, ok := that.(GetSpecType_Dualstack)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Dualstack.Equal(that1.Dualstack) {
 		return false
 	}
 	return true
@@ -1366,10 +1917,13 @@ func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 14)
+	s := make([]string, 0, 17)
 	s = append(s, "&advertise_policy.GlobalSpecType{")
 	if this.Where != nil {
 		s = append(s, "Where: "+fmt.Sprintf("%#v", this.Where)+",\n")
+	}
+	if this.AddressType != nil {
+		s = append(s, "AddressType: "+fmt.Sprintf("%#v", this.AddressType)+",\n")
 	}
 	s = append(s, "Address: "+fmt.Sprintf("%#v", this.Address)+",\n")
 	if this.PublicIp != nil {
@@ -1388,6 +1942,30 @@ func (this *GlobalSpecType) GoString() string {
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
+}
+func (this *GlobalSpecType_Ipv4) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.GlobalSpecType_Ipv4{` +
+		`Ipv4:` + fmt.Sprintf("%#v", this.Ipv4) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_Ipv6) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.GlobalSpecType_Ipv6{` +
+		`Ipv6:` + fmt.Sprintf("%#v", this.Ipv6) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_Dualstack) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.GlobalSpecType_Dualstack{` +
+		`Dualstack:` + fmt.Sprintf("%#v", this.Dualstack) + `}`}, ", ")
+	return s
 }
 func (this *GlobalSpecType_Port) GoString() string {
 	if this == nil {
@@ -1437,10 +2015,13 @@ func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 12)
+	s := make([]string, 0, 15)
 	s = append(s, "&advertise_policy.CreateSpecType{")
 	if this.Where != nil {
 		s = append(s, "Where: "+fmt.Sprintf("%#v", this.Where)+",\n")
+	}
+	if this.AddressType != nil {
+		s = append(s, "AddressType: "+fmt.Sprintf("%#v", this.AddressType)+",\n")
 	}
 	s = append(s, "Address: "+fmt.Sprintf("%#v", this.Address)+",\n")
 	if this.PublicIp != nil {
@@ -1456,6 +2037,30 @@ func (this *CreateSpecType) GoString() string {
 	s = append(s, "SkipXffAppend: "+fmt.Sprintf("%#v", this.SkipXffAppend)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
+}
+func (this *CreateSpecType_Ipv4) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.CreateSpecType_Ipv4{` +
+		`Ipv4:` + fmt.Sprintf("%#v", this.Ipv4) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_Ipv6) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.CreateSpecType_Ipv6{` +
+		`Ipv6:` + fmt.Sprintf("%#v", this.Ipv6) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_Dualstack) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.CreateSpecType_Dualstack{` +
+		`Dualstack:` + fmt.Sprintf("%#v", this.Dualstack) + `}`}, ", ")
+	return s
 }
 func (this *CreateSpecType_Port) GoString() string {
 	if this == nil {
@@ -1477,10 +2082,13 @@ func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 12)
+	s := make([]string, 0, 15)
 	s = append(s, "&advertise_policy.ReplaceSpecType{")
 	if this.Where != nil {
 		s = append(s, "Where: "+fmt.Sprintf("%#v", this.Where)+",\n")
+	}
+	if this.AddressType != nil {
+		s = append(s, "AddressType: "+fmt.Sprintf("%#v", this.AddressType)+",\n")
 	}
 	s = append(s, "Address: "+fmt.Sprintf("%#v", this.Address)+",\n")
 	if this.PublicIp != nil {
@@ -1496,6 +2104,30 @@ func (this *ReplaceSpecType) GoString() string {
 	s = append(s, "SkipXffAppend: "+fmt.Sprintf("%#v", this.SkipXffAppend)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
+}
+func (this *ReplaceSpecType_Ipv4) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.ReplaceSpecType_Ipv4{` +
+		`Ipv4:` + fmt.Sprintf("%#v", this.Ipv4) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_Ipv6) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.ReplaceSpecType_Ipv6{` +
+		`Ipv6:` + fmt.Sprintf("%#v", this.Ipv6) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_Dualstack) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.ReplaceSpecType_Dualstack{` +
+		`Dualstack:` + fmt.Sprintf("%#v", this.Dualstack) + `}`}, ", ")
+	return s
 }
 func (this *ReplaceSpecType_Port) GoString() string {
 	if this == nil {
@@ -1517,10 +2149,13 @@ func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 12)
+	s := make([]string, 0, 15)
 	s = append(s, "&advertise_policy.GetSpecType{")
 	if this.Where != nil {
 		s = append(s, "Where: "+fmt.Sprintf("%#v", this.Where)+",\n")
+	}
+	if this.AddressType != nil {
+		s = append(s, "AddressType: "+fmt.Sprintf("%#v", this.AddressType)+",\n")
 	}
 	s = append(s, "Address: "+fmt.Sprintf("%#v", this.Address)+",\n")
 	if this.PublicIp != nil {
@@ -1536,6 +2171,30 @@ func (this *GetSpecType) GoString() string {
 	s = append(s, "SkipXffAppend: "+fmt.Sprintf("%#v", this.SkipXffAppend)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
+}
+func (this *GetSpecType_Ipv4) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.GetSpecType_Ipv4{` +
+		`Ipv4:` + fmt.Sprintf("%#v", this.Ipv4) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_Ipv6) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.GetSpecType_Ipv6{` +
+		`Ipv6:` + fmt.Sprintf("%#v", this.Ipv6) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_Dualstack) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&advertise_policy.GetSpecType_Dualstack{` +
+		`Dualstack:` + fmt.Sprintf("%#v", this.Dualstack) + `}`}, ", ")
+	return s
 }
 func (this *GetSpecType_Port) GoString() string {
 	if this == nil {
@@ -1593,6 +2252,15 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.AddressType != nil {
+		{
+			size := m.AddressType.Size()
+			i -= size
+			if _, err := m.AddressType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.AdvertisePolicyType != nil {
 		{
 			size := m.AdvertisePolicyType.Size()
@@ -1744,6 +2412,71 @@ func (m *GlobalSpecType_TmmVirtualAddress) MarshalToSizedBuffer(dAtA []byte) (in
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GlobalSpecType_Ipv4) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_Ipv4) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv4 != nil {
+		{
+			size, err := m.Ipv4.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GlobalSpecType_Ipv6) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_Ipv6) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv6 != nil {
+		{
+			size, err := m.Ipv6.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GlobalSpecType_Dualstack) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_Dualstack) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Dualstack != nil {
+		{
+			size, err := m.Dualstack.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
 func (m *TMMVirtualAddressType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1799,6 +2532,15 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.AddressType != nil {
+		{
+			size := m.AddressType.Size()
+			i -= size
+			if _, err := m.AddressType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.PortChoice != nil {
 		{
 			size := m.PortChoice.Size()
@@ -1899,6 +2641,71 @@ func (m *CreateSpecType_PortRanges) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	dAtA[i] = 0x42
 	return len(dAtA) - i, nil
 }
+func (m *CreateSpecType_Ipv4) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_Ipv4) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv4 != nil {
+		{
+			size, err := m.Ipv4.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_Ipv6) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_Ipv6) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv6 != nil {
+		{
+			size, err := m.Ipv6.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_Dualstack) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_Dualstack) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Dualstack != nil {
+		{
+			size, err := m.Dualstack.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ReplaceSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1919,6 +2726,15 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.AddressType != nil {
+		{
+			size := m.AddressType.Size()
+			i -= size
+			if _, err := m.AddressType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.PortChoice != nil {
 		{
 			size := m.PortChoice.Size()
@@ -2019,6 +2835,71 @@ func (m *ReplaceSpecType_PortRanges) MarshalToSizedBuffer(dAtA []byte) (int, err
 	dAtA[i] = 0x42
 	return len(dAtA) - i, nil
 }
+func (m *ReplaceSpecType_Ipv4) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_Ipv4) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv4 != nil {
+		{
+			size, err := m.Ipv4.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_Ipv6) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_Ipv6) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv6 != nil {
+		{
+			size, err := m.Ipv6.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_Dualstack) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_Dualstack) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Dualstack != nil {
+		{
+			size, err := m.Dualstack.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
 func (m *GetSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -2039,6 +2920,15 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.AddressType != nil {
+		{
+			size := m.AddressType.Size()
+			i -= size
+			if _, err := m.AddressType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.PortChoice != nil {
 		{
 			size := m.PortChoice.Size()
@@ -2139,6 +3029,71 @@ func (m *GetSpecType_PortRanges) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	dAtA[i] = 0x42
 	return len(dAtA) - i, nil
 }
+func (m *GetSpecType_Ipv4) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_Ipv4) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv4 != nil {
+		{
+			size, err := m.Ipv4.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_Ipv6) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_Ipv6) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ipv6 != nil {
+		{
+			size, err := m.Ipv6.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_Dualstack) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_Dualstack) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Dualstack != nil {
+		{
+			size, err := m.Dualstack.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ListenerConfig) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -2229,6 +3184,9 @@ func (m *GlobalSpecType) Size() (n int) {
 	if m.AdvertisePolicyType != nil {
 		n += m.AdvertisePolicyType.Size()
 	}
+	if m.AddressType != nil {
+		n += m.AddressType.Size()
+	}
 	return n
 }
 
@@ -2272,6 +3230,42 @@ func (m *GlobalSpecType_TmmVirtualAddress) Size() (n int) {
 	if m.TmmVirtualAddress != nil {
 		l = m.TmmVirtualAddress.Size()
 		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GlobalSpecType_Ipv4) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv4 != nil {
+		l = m.Ipv4.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GlobalSpecType_Ipv6) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv6 != nil {
+		l = m.Ipv6.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GlobalSpecType_Dualstack) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Dualstack != nil {
+		l = m.Dualstack.Size()
+		n += 2 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -2322,6 +3316,9 @@ func (m *CreateSpecType) Size() (n int) {
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.AddressType != nil {
+		n += m.AddressType.Size()
+	}
 	return n
 }
 
@@ -2342,6 +3339,42 @@ func (m *CreateSpecType_PortRanges) Size() (n int) {
 	_ = l
 	l = len(m.PortRanges)
 	n += 1 + l + sovTypes(uint64(l))
+	return n
+}
+func (m *CreateSpecType_Ipv4) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv4 != nil {
+		l = m.Ipv4.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_Ipv6) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv6 != nil {
+		l = m.Ipv6.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_Dualstack) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Dualstack != nil {
+		l = m.Dualstack.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 func (m *ReplaceSpecType) Size() (n int) {
@@ -2378,6 +3411,9 @@ func (m *ReplaceSpecType) Size() (n int) {
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.AddressType != nil {
+		n += m.AddressType.Size()
+	}
 	return n
 }
 
@@ -2398,6 +3434,42 @@ func (m *ReplaceSpecType_PortRanges) Size() (n int) {
 	_ = l
 	l = len(m.PortRanges)
 	n += 1 + l + sovTypes(uint64(l))
+	return n
+}
+func (m *ReplaceSpecType_Ipv4) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv4 != nil {
+		l = m.Ipv4.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_Ipv6) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv6 != nil {
+		l = m.Ipv6.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_Dualstack) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Dualstack != nil {
+		l = m.Dualstack.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 func (m *GetSpecType) Size() (n int) {
@@ -2434,6 +3506,9 @@ func (m *GetSpecType) Size() (n int) {
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.AddressType != nil {
+		n += m.AddressType.Size()
+	}
 	return n
 }
 
@@ -2454,6 +3529,42 @@ func (m *GetSpecType_PortRanges) Size() (n int) {
 	_ = l
 	l = len(m.PortRanges)
 	n += 1 + l + sovTypes(uint64(l))
+	return n
+}
+func (m *GetSpecType_Ipv4) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv4 != nil {
+		l = m.Ipv4.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_Ipv6) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ipv6 != nil {
+		l = m.Ipv6.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_Dualstack) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Dualstack != nil {
+		l = m.Dualstack.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 func (m *ListenerConfig) Size() (n int) {
@@ -2500,6 +3611,7 @@ func (this *GlobalSpecType) String() string {
 		`SkipXffAppend:` + fmt.Sprintf("%v", this.SkipXffAppend) + `,`,
 		`PublicIp:` + repeatedStringForPublicIp + `,`,
 		`AdvertisePolicyType:` + fmt.Sprintf("%v", this.AdvertisePolicyType) + `,`,
+		`AddressType:` + fmt.Sprintf("%v", this.AddressType) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2544,6 +3656,36 @@ func (this *GlobalSpecType_TmmVirtualAddress) String() string {
 	}, "")
 	return s
 }
+func (this *GlobalSpecType_Ipv4) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_Ipv4{`,
+		`Ipv4:` + strings.Replace(fmt.Sprintf("%v", this.Ipv4), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalSpecType_Ipv6) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_Ipv6{`,
+		`Ipv6:` + strings.Replace(fmt.Sprintf("%v", this.Ipv6), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalSpecType_Dualstack) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_Dualstack{`,
+		`Dualstack:` + strings.Replace(fmt.Sprintf("%v", this.Dualstack), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *TMMVirtualAddressType) String() string {
 	if this == nil {
 		return "nil"
@@ -2571,6 +3713,7 @@ func (this *CreateSpecType) String() string {
 		`TlsParameters:` + strings.Replace(fmt.Sprintf("%v", this.TlsParameters), "DownstreamTlsParamsType", "schema.DownstreamTlsParamsType", 1) + `,`,
 		`SkipXffAppend:` + fmt.Sprintf("%v", this.SkipXffAppend) + `,`,
 		`PublicIp:` + repeatedStringForPublicIp + `,`,
+		`AddressType:` + fmt.Sprintf("%v", this.AddressType) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2595,6 +3738,36 @@ func (this *CreateSpecType_PortRanges) String() string {
 	}, "")
 	return s
 }
+func (this *CreateSpecType_Ipv4) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_Ipv4{`,
+		`Ipv4:` + strings.Replace(fmt.Sprintf("%v", this.Ipv4), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_Ipv6) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_Ipv6{`,
+		`Ipv6:` + strings.Replace(fmt.Sprintf("%v", this.Ipv6), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_Dualstack) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_Dualstack{`,
+		`Dualstack:` + strings.Replace(fmt.Sprintf("%v", this.Dualstack), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *ReplaceSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -2612,6 +3785,7 @@ func (this *ReplaceSpecType) String() string {
 		`TlsParameters:` + strings.Replace(fmt.Sprintf("%v", this.TlsParameters), "DownstreamTlsParamsType", "schema.DownstreamTlsParamsType", 1) + `,`,
 		`SkipXffAppend:` + fmt.Sprintf("%v", this.SkipXffAppend) + `,`,
 		`PublicIp:` + repeatedStringForPublicIp + `,`,
+		`AddressType:` + fmt.Sprintf("%v", this.AddressType) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2636,6 +3810,36 @@ func (this *ReplaceSpecType_PortRanges) String() string {
 	}, "")
 	return s
 }
+func (this *ReplaceSpecType_Ipv4) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_Ipv4{`,
+		`Ipv4:` + strings.Replace(fmt.Sprintf("%v", this.Ipv4), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_Ipv6) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_Ipv6{`,
+		`Ipv6:` + strings.Replace(fmt.Sprintf("%v", this.Ipv6), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_Dualstack) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_Dualstack{`,
+		`Dualstack:` + strings.Replace(fmt.Sprintf("%v", this.Dualstack), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *GetSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -2653,6 +3857,7 @@ func (this *GetSpecType) String() string {
 		`TlsParameters:` + strings.Replace(fmt.Sprintf("%v", this.TlsParameters), "DownstreamTlsParamsType", "schema.DownstreamTlsParamsType", 1) + `,`,
 		`SkipXffAppend:` + fmt.Sprintf("%v", this.SkipXffAppend) + `,`,
 		`PublicIp:` + repeatedStringForPublicIp + `,`,
+		`AddressType:` + fmt.Sprintf("%v", this.AddressType) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2673,6 +3878,36 @@ func (this *GetSpecType_PortRanges) String() string {
 	}
 	s := strings.Join([]string{`&GetSpecType_PortRanges{`,
 		`PortRanges:` + fmt.Sprintf("%v", this.PortRanges) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_Ipv4) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_Ipv4{`,
+		`Ipv4:` + strings.Replace(fmt.Sprintf("%v", this.Ipv4), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_Ipv6) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_Ipv6{`,
+		`Ipv6:` + strings.Replace(fmt.Sprintf("%v", this.Ipv6), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_Dualstack) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_Dualstack{`,
+		`Dualstack:` + strings.Replace(fmt.Sprintf("%v", this.Dualstack), "Empty", "schema.Empty", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -3038,16 +4273,118 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.AdvertisePolicyType = &GlobalSpecType_TmmVirtualAddress{v}
 			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv4", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &GlobalSpecType_Ipv4{v}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv6", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &GlobalSpecType_Ipv6{v}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Dualstack", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &GlobalSpecType_Dualstack{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -3133,10 +4470,7 @@ func (m *TMMVirtualAddressType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -3422,16 +4756,118 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.PortChoice = &CreateSpecType_PortRanges{string(dAtA[iNdEx:postIndex])}
 			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv4", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &CreateSpecType_Ipv4{v}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv6", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &CreateSpecType_Ipv6{v}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Dualstack", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &CreateSpecType_Dualstack{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -3717,16 +5153,118 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.PortChoice = &ReplaceSpecType_PortRanges{string(dAtA[iNdEx:postIndex])}
 			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv4", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &ReplaceSpecType_Ipv4{v}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv6", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &ReplaceSpecType_Ipv6{v}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Dualstack", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &ReplaceSpecType_Dualstack{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -4012,16 +5550,118 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.PortChoice = &GetSpecType_PortRanges{string(dAtA[iNdEx:postIndex])}
 			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv4", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &GetSpecType_Ipv4{v}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ipv6", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &GetSpecType_Ipv6{v}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Dualstack", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AddressType = &GetSpecType_Dualstack{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -4154,10 +5794,7 @@ func (m *ListenerConfig) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {

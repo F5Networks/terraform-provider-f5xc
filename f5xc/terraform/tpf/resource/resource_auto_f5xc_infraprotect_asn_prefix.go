@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -20,19 +21,22 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -43,7 +47,6 @@ import (
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_infraprotect_asn_prefix "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/infraprotect_asn_prefix"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCInfraprotectAsnPrefix defines the resource implementation.
@@ -51,41 +54,41 @@ type ResourceF5XCInfraprotectAsnPrefix struct {
 	client *client.APIClient
 }
 
-type InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice struct {
-	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
-	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
-	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
-	ReviewTypeGrace    types.Bool `tfsdk:"review_type_grace"`
-}
-
-type InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice struct {
+type InfraprotectAsnPrefixIrrStatusChoice struct {
 	IrrStatusMissing    types.Bool `tfsdk:"irr_status_missing"`
-	IrrStatusValid      types.Bool `tfsdk:"irr_status_valid"`
 	IrrStatusUnverified types.Bool `tfsdk:"irr_status_unverified"`
+	IrrStatusValid      types.Bool `tfsdk:"irr_status_valid"`
 }
 
-type InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice struct {
-	RpkiStatusUnverified types.Bool `tfsdk:"rpki_status_unverified"`
-	RpkiStatusUnknown    types.Bool `tfsdk:"rpki_status_unknown"`
+type InfraprotectAsnPrefixReviewTypeChoice struct {
+	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
+	ReviewTypeGrace    types.Bool `tfsdk:"review_type_grace"`
+	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
+	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
+}
+
+type InfraprotectAsnPrefixRpkiStatusChoice struct {
 	RpkiStatusInvalid    types.Bool `tfsdk:"rpki_status_invalid"`
+	RpkiStatusUnknown    types.Bool `tfsdk:"rpki_status_unknown"`
+	RpkiStatusUnverified types.Bool `tfsdk:"rpki_status_unverified"`
 	RpkiStatusValid      types.Bool `tfsdk:"rpki_status_valid"`
 }
 
 // ResourceF5XCInfraprotectAsnPrefixModel describes the resource data model.
 type ResourceF5XCInfraprotectAsnPrefixModel struct {
-	Labels               types.Map         `tfsdk:"labels"`
 	Annotations          types.Map         `tfsdk:"annotations"`
 	Description          types.String      `tfsdk:"description"`
+	Labels               types.Map         `tfsdk:"labels"`
 	Name                 types.String      `tfsdk:"name"`
 	Namespace            types.String      `tfsdk:"namespace"`
 	Uid                  types.String      `tfsdk:"uid"`
-	ReviewTypeChoice     types.Object      `tfsdk:"review_type_choice"`
+	Asn                  types.Object      `tfsdk:"asn"`
+	CustomerAsn          types.Int64       `tfsdk:"customer_asn"`
 	IrrStatusChoice      types.Object      `tfsdk:"irr_status_choice"`
+	Prefix               types.String      `tfsdk:"prefix"`
+	ReviewTypeChoice     types.Object      `tfsdk:"review_type_choice"`
 	RpkiStatusChoice     types.Object      `tfsdk:"rpki_status_choice"`
 	StateChangeTimestamp timetypes.RFC3339 `tfsdk:"state_change_timestamp"`
-	CustomerAsn          types.Int64       `tfsdk:"customer_asn"`
-	Asn                  types.Object      `tfsdk:"asn"`
-	Prefix               types.String      `tfsdk:"prefix"`
 	Timeouts             timeouts.Value    `tfsdk:"timeouts"`
 }
 
@@ -99,38 +102,38 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> ReviewType
-var InfraprotectAsnPrefixReviewTypeModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredPointerField --> Asn
+var InfraprotectAsnPrefixAsnModelAttributeMap = map[string]attr.Type{
 
-	"review_type_pending":  types.BoolType,
-	"review_type_approved": types.BoolType,
-	"review_type_rejected": types.BoolType,
-	"review_type_grace":    types.BoolType,
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> IrrStatus
 var InfraprotectAsnPrefixIrrStatusModelAttributeMap = map[string]attr.Type{
 
 	"irr_status_missing":    types.BoolType,
-	"irr_status_valid":      types.BoolType,
 	"irr_status_unverified": types.BoolType,
+	"irr_status_valid":      types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> ReviewType
+var InfraprotectAsnPrefixReviewTypeModelAttributeMap = map[string]attr.Type{
+
+	"review_type_approved": types.BoolType,
+	"review_type_grace":    types.BoolType,
+	"review_type_pending":  types.BoolType,
+	"review_type_rejected": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> RpkiStatus
 var InfraprotectAsnPrefixRpkiStatusModelAttributeMap = map[string]attr.Type{
 
-	"rpki_status_unverified": types.BoolType,
-	"rpki_status_unknown":    types.BoolType,
 	"rpki_status_invalid":    types.BoolType,
+	"rpki_status_unknown":    types.BoolType,
+	"rpki_status_unverified": types.BoolType,
 	"rpki_status_valid":      types.BoolType,
-}
-
-// Attribute map for RequiredPointerField --> Asn
-var InfraprotectAsnPrefixAsnModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 func NewResourceF5XCInfraprotectAsnPrefix() resource.Resource {
@@ -144,58 +147,69 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Metadata(ctx context.Context, reques
 func (r *ResourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "InfraprotectAsnPrefix resource",
-		Description:         "InfraprotectAsnPrefix resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_asn_prefix This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn_prefix) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a infraprotect_asn_prefix This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn_prefix) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
 			"labels": schema.MapAttribute{
 				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				PlanModifiers: []planmodifier.Map{
 					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
 				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
 			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"system"}...),
+				},
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -203,189 +217,21 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, request 
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"review_type_choice": schema.SingleNestedAttribute{
-				Description:         "Review Status Review for Prefix",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"review_type_pending",
-						"review_type_approved",
-						"review_type_rejected",
-						"review_type_grace",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"review_type_pending": schema.BoolAttribute{
-						Description:         "Pending Pending",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"review_type_approved": schema.BoolAttribute{
-						Description:         "Approved Approved",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"review_type_rejected": schema.BoolAttribute{
-						Description:         "Rejected Rejected",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"review_type_grace": schema.BoolAttribute{
-						Description:         "Grace Notify A prefix losing its valid status will transition to grace notify before being rejected",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
-			"irr_status_choice": schema.SingleNestedAttribute{
-				Description:         "IRR Status Individual Ready Reserve Status",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"irr_status_unverified",
-						"irr_status_missing",
-						"irr_status_valid",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"irr_status_missing": schema.BoolAttribute{
-						Description:         "Missing Missing",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"irr_status_valid": schema.BoolAttribute{
-						Description:         "Valid Valid",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"irr_status_unverified": schema.BoolAttribute{
-						Description:         "Unverified Unverified",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
-			"rpki_status_choice": schema.SingleNestedAttribute{
-				Description:         "RPKI Status Resource Public Key Infrastructure Status",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"rpki_status_unverified",
-						"rpki_status_unknown",
-						"rpki_status_invalid",
-						"rpki_status_valid",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"rpki_status_unverified": schema.BoolAttribute{
-						Description:         "Unverified Unverified",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"rpki_status_unknown": schema.BoolAttribute{
-						Description:         "Unknown Unknown",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"rpki_status_invalid": schema.BoolAttribute{
-						Description:         "Invalid Invalid",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"rpki_status_valid": schema.BoolAttribute{
-						Description:         "Valid Valid",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
-			"state_change_timestamp": schema.StringAttribute{
-				Description:         "Last State Change Last State Change",
-				MarkdownDescription: "",
-				CustomType:          timetypes.RFC3339Type{},
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-			},
-			"customer_asn": schema.Int64Attribute{
-				Description:         "Customer ASN Customer ASN",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-			},
 			"asn": schema.SingleNestedAttribute{
 				Description:         "ASN ASN",
-				MarkdownDescription: "",
+				MarkdownDescription: "ASN ASN",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
 					"name": schema.StringAttribute{
+						Description:         "",
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+					},
+					"namespace": schema.StringAttribute{
 						Description:         "",
 						MarkdownDescription: "",
 						Required:            true,
@@ -402,25 +248,158 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, request 
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"namespace": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+				},
+			},
+			"customer_asn": schema.Int64Attribute{
+				Description:         "Customer ASN Customer ASN",
+				MarkdownDescription: "Customer ASN Customer ASN",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"irr_status_choice": schema.SingleNestedAttribute{
+				Description:         "IRR Status Individual Ready Reserve Status",
+				MarkdownDescription: "IRR Status Individual Ready Reserve Status",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+					"irr_status_missing": schema.BoolAttribute{
+						Description:         "Missing Missing",
+						MarkdownDescription: "Missing Missing",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"irr_status_unverified": schema.BoolAttribute{
+						Description:         "Unverified Unverified",
+						MarkdownDescription: "Unverified Unverified",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"irr_status_valid": schema.BoolAttribute{
+						Description:         "Valid Valid",
+						MarkdownDescription: "Valid Valid",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 					},
 				},
 			},
 			"prefix": schema.StringAttribute{
 				Description:         "Prefix Prefix",
-				MarkdownDescription: "",
+				MarkdownDescription: "Prefix Prefix",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+						"must be a globally routable IP prefix (no private/loopback/multicast ranges)",
+					),
+				},
+			},
+			"review_type_choice": schema.SingleNestedAttribute{
+				Description:         "Review Status Review for Prefix",
+				MarkdownDescription: "Review Status Review for Prefix",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+					"review_type_approved": schema.BoolAttribute{
+						Description:         "Approved Approved",
+						MarkdownDescription: "Approved Approved",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"review_type_grace": schema.BoolAttribute{
+						Description:         "Grace Notify A prefix losing its valid status will transition to grace notify before being rejected",
+						MarkdownDescription: "Grace Notify A prefix losing its valid status will transition to grace notify before being rejected",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"review_type_pending": schema.BoolAttribute{
+						Description:         "Pending Pending",
+						MarkdownDescription: "Pending Pending",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"review_type_rejected": schema.BoolAttribute{
+						Description:         "Rejected Rejected",
+						MarkdownDescription: "Rejected Rejected",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+				},
+			},
+			"rpki_status_choice": schema.SingleNestedAttribute{
+				Description:         "RPKI Status Resource Public Key Infrastructure Status",
+				MarkdownDescription: "RPKI Status Resource Public Key Infrastructure Status",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+					"rpki_status_invalid": schema.BoolAttribute{
+						Description:         "Invalid Invalid",
+						MarkdownDescription: "Invalid Invalid",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"rpki_status_unknown": schema.BoolAttribute{
+						Description:         "Unknown Unknown",
+						MarkdownDescription: "Unknown Unknown",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"rpki_status_unverified": schema.BoolAttribute{
+						Description:         "Unverified Unverified",
+						MarkdownDescription: "Unverified Unverified",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+					"rpki_status_valid": schema.BoolAttribute{
+						Description:         "Valid Valid",
+						MarkdownDescription: "Valid Valid",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+					},
+				},
+			},
+			"state_change_timestamp": schema.StringAttribute{
+				Description:         "Last State Change Last State Change",
+				MarkdownDescription: "Last State Change Last State Change",
+				CustomType:          timetypes.RFC3339Type{},
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -526,7 +505,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -537,6 +516,20 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -579,11 +572,18 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 	// resource modelToSpecRoot RequiredStringField --> Prefix
 	spec.Prefix = string(data.Prefix.ValueString())
 
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_infraprotect_asn_prefix.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -612,86 +612,100 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
 		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
 		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -701,209 +715,6 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot RequiredOneOfField --> ReviewType
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetReviewType() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		reviewTypeChoiceChoices := specData.GetReviewType()
-
-		// The model struct that will be populated by the nested template.
-		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
-		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypePending)
-
-		if isReviewTypePending {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeApproved
-		_, isReviewTypeApproved := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeApproved)
-
-		if isReviewTypeApproved {
-			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
-		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeRejected)
-
-		if isReviewTypeRejected {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
-		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
-
-		if isReviewTypeGrace {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reviewTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixReviewTypeModelAttributeMap,
-			reviewTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ReviewTypeChoice = reviewTypeChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ReviewTypeChoice = types.ObjectNull(InfraprotectAsnPrefixReviewTypeModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> IrrStatus
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetIrrStatus() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		irrStatusChoiceChoices := specData.GetIrrStatus()
-
-		// The model struct that will be populated by the nested template.
-		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusMissing
-		_, isIrrStatusMissing := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusMissing)
-
-		if isIrrStatusMissing {
-			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
-		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
-
-		if isIrrStatusValid {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusUnverified
-		_, isIrrStatusUnverified := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusUnverified)
-
-		if isIrrStatusUnverified {
-			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		irrStatusChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixIrrStatusModelAttributeMap,
-			irrStatusChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IrrStatusChoice = irrStatusChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IrrStatusChoice = types.ObjectNull(InfraprotectAsnPrefixIrrStatusModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> RpkiStatus
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetRpkiStatus() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
-
-		// The model struct that will be populated by the nested template.
-		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
-		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
-
-		if isRpkiStatusUnverified {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
-		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
-
-		if isRpkiStatusUnknown {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
-		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
-
-		if isRpkiStatusInvalid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
-		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
-
-		if isRpkiStatusValid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		rpkiStatusChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
-			rpkiStatusChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.RpkiStatusChoice = rpkiStatusChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot TimeStampField --> StateChangeTimestamp
-	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
-
-	// resource SpecToModelRoot UintField --> CustomerAsn
-	customerAsnValue := specData.GetCustomerAsn()
-	if customerAsnValue > 0 {
-		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
-	} else {
-		data.CustomerAsn = types.Int64Null()
-	}
 
 	// resource SpecToModelRoot RequiredPointerField --> Asn
 	if specData.GetAsn() != nil {
@@ -918,20 +729,20 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if asnElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(asnElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if asnElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(asnElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if asnElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(asnElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		asnObj, asnDiags := utils.GoStructToObjectValue(
@@ -948,6 +759,76 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 		data.Asn = types.ObjectNull(InfraprotectAsnPrefixAsnModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot UintField --> CustomerAsn
+	customerAsnValue := specData.GetCustomerAsn()
+	if customerAsnValue > 0 {
+		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
+	} else {
+		data.CustomerAsn = types.Int64Null()
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> IrrStatus
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetIrrStatus() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		irrStatusChoiceChoices := specData.GetIrrStatus()
+
+		// The model struct that will be populated by the nested template.
+		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixIrrStatusChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusMissing
+		_, isIrrStatusMissing := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusMissing)
+
+		if isIrrStatusMissing {
+			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusUnverified
+		_, isIrrStatusUnverified := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusUnverified)
+
+		if isIrrStatusUnverified {
+			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
+		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
+
+		if isIrrStatusValid {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			irrStatusChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixIrrStatusModelAttributeMap,
+				irrStatusChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IrrStatusChoice = irrStatusChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.IrrStatusChoice = types.ObjectNull(InfraprotectAsnPrefixIrrStatusModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot RequiredStringField --> Prefix
 	if specData.GetPrefix() != "" {
 		data.Prefix = types.StringValue(specData.GetPrefix())
@@ -955,6 +836,151 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 		// Empty string, set to null
 		data.Prefix = types.StringNull()
 	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> ReviewType
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetReviewType() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		reviewTypeChoiceChoices := specData.GetReviewType()
+
+		// The model struct that will be populated by the nested template.
+		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixReviewTypeChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeApproved
+		_, isReviewTypeApproved := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeApproved)
+
+		if isReviewTypeApproved {
+			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
+		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
+
+		if isReviewTypeGrace {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
+		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypePending)
+
+		if isReviewTypePending {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
+		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeRejected)
+
+		if isReviewTypeRejected {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			reviewTypeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixReviewTypeModelAttributeMap,
+				reviewTypeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ReviewTypeChoice = reviewTypeChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.ReviewTypeChoice = types.ObjectNull(InfraprotectAsnPrefixReviewTypeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> RpkiStatus
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetRpkiStatus() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
+
+		// The model struct that will be populated by the nested template.
+		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixRpkiStatusChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
+		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
+
+		if isRpkiStatusInvalid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
+		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
+
+		if isRpkiStatusUnknown {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
+		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
+
+		if isRpkiStatusUnverified {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
+		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
+
+		if isRpkiStatusValid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			rpkiStatusChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
+				rpkiStatusChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.RpkiStatusChoice = rpkiStatusChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot TimeStampField --> StateChangeTimestamp
+	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
 
 	if response.Diagnostics.HasError() {
 		return
@@ -1019,102 +1045,101 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1124,209 +1149,6 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot RequiredOneOfField --> ReviewType
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetReviewType() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		reviewTypeChoiceChoices := specData.GetReviewType()
-
-		// The model struct that will be populated by the nested template.
-		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
-		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypePending)
-
-		if isReviewTypePending {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeApproved
-		_, isReviewTypeApproved := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeApproved)
-
-		if isReviewTypeApproved {
-			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
-		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeRejected)
-
-		if isReviewTypeRejected {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
-		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
-
-		if isReviewTypeGrace {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reviewTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixReviewTypeModelAttributeMap,
-			reviewTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ReviewTypeChoice = reviewTypeChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ReviewTypeChoice = types.ObjectNull(InfraprotectAsnPrefixReviewTypeModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> IrrStatus
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetIrrStatus() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		irrStatusChoiceChoices := specData.GetIrrStatus()
-
-		// The model struct that will be populated by the nested template.
-		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusMissing
-		_, isIrrStatusMissing := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusMissing)
-
-		if isIrrStatusMissing {
-			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
-		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
-
-		if isIrrStatusValid {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusUnverified
-		_, isIrrStatusUnverified := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusUnverified)
-
-		if isIrrStatusUnverified {
-			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		irrStatusChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixIrrStatusModelAttributeMap,
-			irrStatusChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IrrStatusChoice = irrStatusChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IrrStatusChoice = types.ObjectNull(InfraprotectAsnPrefixIrrStatusModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> RpkiStatus
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetRpkiStatus() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
-
-		// The model struct that will be populated by the nested template.
-		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
-		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
-
-		if isRpkiStatusUnverified {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
-		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
-
-		if isRpkiStatusUnknown {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
-		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
-
-		if isRpkiStatusInvalid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
-		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
-
-		if isRpkiStatusValid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		rpkiStatusChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
-			rpkiStatusChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.RpkiStatusChoice = rpkiStatusChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot TimeStampField --> StateChangeTimestamp
-	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
-
-	// resource SpecToModelRoot UintField --> CustomerAsn
-	customerAsnValue := specData.GetCustomerAsn()
-	if customerAsnValue > 0 {
-		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
-	} else {
-		data.CustomerAsn = types.Int64Null()
-	}
 
 	// resource SpecToModelRoot RequiredPointerField --> Asn
 	if specData.GetAsn() != nil {
@@ -1341,20 +1163,20 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if asnElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(asnElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if asnElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(asnElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if asnElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(asnElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		asnObj, asnDiags := utils.GoStructToObjectValue(
@@ -1371,6 +1193,76 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 		data.Asn = types.ObjectNull(InfraprotectAsnPrefixAsnModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot UintField --> CustomerAsn
+	customerAsnValue := specData.GetCustomerAsn()
+	if customerAsnValue > 0 {
+		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
+	} else {
+		data.CustomerAsn = types.Int64Null()
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> IrrStatus
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetIrrStatus() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		irrStatusChoiceChoices := specData.GetIrrStatus()
+
+		// The model struct that will be populated by the nested template.
+		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixIrrStatusChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusMissing
+		_, isIrrStatusMissing := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusMissing)
+
+		if isIrrStatusMissing {
+			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusUnverified
+		_, isIrrStatusUnverified := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusUnverified)
+
+		if isIrrStatusUnverified {
+			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
+		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
+
+		if isIrrStatusValid {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			irrStatusChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixIrrStatusModelAttributeMap,
+				irrStatusChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IrrStatusChoice = irrStatusChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.IrrStatusChoice = types.ObjectNull(InfraprotectAsnPrefixIrrStatusModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot RequiredStringField --> Prefix
 	if specData.GetPrefix() != "" {
 		data.Prefix = types.StringValue(specData.GetPrefix())
@@ -1378,6 +1270,151 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 		// Empty string, set to null
 		data.Prefix = types.StringNull()
 	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> ReviewType
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetReviewType() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		reviewTypeChoiceChoices := specData.GetReviewType()
+
+		// The model struct that will be populated by the nested template.
+		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixReviewTypeChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeApproved
+		_, isReviewTypeApproved := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeApproved)
+
+		if isReviewTypeApproved {
+			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
+		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
+
+		if isReviewTypeGrace {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
+		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypePending)
+
+		if isReviewTypePending {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
+		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeRejected)
+
+		if isReviewTypeRejected {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			reviewTypeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixReviewTypeModelAttributeMap,
+				reviewTypeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ReviewTypeChoice = reviewTypeChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.ReviewTypeChoice = types.ObjectNull(InfraprotectAsnPrefixReviewTypeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> RpkiStatus
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetRpkiStatus() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
+
+		// The model struct that will be populated by the nested template.
+		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixRpkiStatusChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
+		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
+
+		if isRpkiStatusInvalid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
+		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
+
+		if isRpkiStatusUnknown {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
+		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
+
+		if isRpkiStatusUnverified {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
+		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
+
+		if isRpkiStatusValid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			rpkiStatusChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
+				rpkiStatusChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.RpkiStatusChoice = rpkiStatusChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot TimeStampField --> StateChangeTimestamp
+	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
 
 	if response.Diagnostics.HasError() {
 		return
@@ -1396,6 +1433,25 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCInfraprotectAsnPrefixModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1432,7 +1488,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1445,6 +1501,20 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -1453,6 +1523,13 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1489,102 +1566,100 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1594,209 +1669,6 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot RequiredOneOfField --> ReviewType
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetReviewType() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		reviewTypeChoiceChoices := specData.GetReviewType()
-
-		// The model struct that will be populated by the nested template.
-		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
-		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypePending)
-
-		if isReviewTypePending {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeApproved
-		_, isReviewTypeApproved := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeApproved)
-
-		if isReviewTypeApproved {
-			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
-		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeRejected)
-
-		if isReviewTypeRejected {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
-		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
-
-		if isReviewTypeGrace {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reviewTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixReviewTypeModelAttributeMap,
-			reviewTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.ReviewTypeChoice = reviewTypeChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.ReviewTypeChoice = types.ObjectNull(InfraprotectAsnPrefixReviewTypeModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> IrrStatus
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetIrrStatus() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		irrStatusChoiceChoices := specData.GetIrrStatus()
-
-		// The model struct that will be populated by the nested template.
-		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusMissing
-		_, isIrrStatusMissing := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusMissing)
-
-		if isIrrStatusMissing {
-			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
-		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
-
-		if isIrrStatusValid {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusUnverified
-		_, isIrrStatusUnverified := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusUnverified)
-
-		if isIrrStatusUnverified {
-			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		irrStatusChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixIrrStatusModelAttributeMap,
-			irrStatusChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IrrStatusChoice = irrStatusChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IrrStatusChoice = types.ObjectNull(InfraprotectAsnPrefixIrrStatusModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> RpkiStatus
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetRpkiStatus() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
-
-		// The model struct that will be populated by the nested template.
-		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
-		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
-
-		if isRpkiStatusUnverified {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
-		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
-
-		if isRpkiStatusUnknown {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
-		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
-
-		if isRpkiStatusInvalid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
-		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
-
-		if isRpkiStatusValid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		rpkiStatusChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
-			rpkiStatusChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.RpkiStatusChoice = rpkiStatusChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot TimeStampField --> StateChangeTimestamp
-	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
-
-	// resource SpecToModelRoot UintField --> CustomerAsn
-	customerAsnValue := specData.GetCustomerAsn()
-	if customerAsnValue > 0 {
-		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
-	} else {
-		data.CustomerAsn = types.Int64Null()
-	}
 
 	// resource SpecToModelRoot RequiredPointerField --> Asn
 	if specData.GetAsn() != nil {
@@ -1811,20 +1683,20 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 			objectRefTypeModelModel.Name = types.StringNull()
 		}
 
-		// resource specToModelNested StringField --> Tenant
-		if asnElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(asnElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Namespace
 		if asnElement.GetNamespace() != "" {
 			objectRefTypeModelModel.Namespace = types.StringValue(asnElement.GetNamespace())
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if asnElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(asnElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		asnObj, asnDiags := utils.GoStructToObjectValue(
@@ -1841,12 +1713,253 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 		data.Asn = types.ObjectNull(InfraprotectAsnPrefixAsnModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot UintField --> CustomerAsn
+	customerAsnValue := specData.GetCustomerAsn()
+	if customerAsnValue > 0 {
+		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
+	} else {
+		data.CustomerAsn = types.Int64Null()
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> IrrStatus
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetIrrStatus() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		irrStatusChoiceChoices := specData.GetIrrStatus()
+
+		// The model struct that will be populated by the nested template.
+		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixIrrStatusChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusMissing
+		_, isIrrStatusMissing := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusMissing)
+
+		if isIrrStatusMissing {
+			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusUnverified
+		_, isIrrStatusUnverified := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusUnverified)
+
+		if isIrrStatusUnverified {
+			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusUnverified = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
+		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
+
+		if isIrrStatusValid {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			irrStatusChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixIrrStatusModelAttributeMap,
+				irrStatusChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IrrStatusChoice = irrStatusChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.IrrStatusChoice = types.ObjectNull(InfraprotectAsnPrefixIrrStatusModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot RequiredStringField --> Prefix
 	if specData.GetPrefix() != "" {
 		data.Prefix = types.StringValue(specData.GetPrefix())
 	} else {
 		// Empty string, set to null
 		data.Prefix = types.StringNull()
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> ReviewType
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetReviewType() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		reviewTypeChoiceChoices := specData.GetReviewType()
+
+		// The model struct that will be populated by the nested template.
+		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixReviewTypeChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeApproved
+		_, isReviewTypeApproved := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeApproved)
+
+		if isReviewTypeApproved {
+			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
+		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
+
+		if isReviewTypeGrace {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
+		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypePending)
+
+		if isReviewTypePending {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
+		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeRejected)
+
+		if isReviewTypeRejected {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			reviewTypeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixReviewTypeModelAttributeMap,
+				reviewTypeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ReviewTypeChoice = reviewTypeChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.ReviewTypeChoice = types.ObjectNull(InfraprotectAsnPrefixReviewTypeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> RpkiStatus
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetRpkiStatus() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
+
+		// The model struct that will be populated by the nested template.
+		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixRpkiStatusChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
+		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
+
+		if isRpkiStatusInvalid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
+		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
+
+		if isRpkiStatusUnknown {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
+		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
+
+		if isRpkiStatusUnverified {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
+		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
+
+		if isRpkiStatusValid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			rpkiStatusChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
+				rpkiStatusChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.RpkiStatusChoice = rpkiStatusChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot TimeStampField --> StateChangeTimestamp
+	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -1883,9 +1996,8 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Delete(ctx context.Context, request 
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -1900,19 +2012,32 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Delete(ctx context.Context, request 
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCInfraprotectAsnPrefix) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

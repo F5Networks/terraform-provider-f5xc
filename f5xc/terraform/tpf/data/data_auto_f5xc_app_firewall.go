@@ -28,10 +28,19 @@ type DataSourceF5XCAppFirewall struct {
 	client *client.APIClient
 }
 
+type AppFirewallGlobalSpecTypeAllowedResponseCodesChoice struct {
+	AllowAllResponseCodes types.Bool   `tfsdk:"allow_all_response_codes"`
+	AllowedResponseCodes  types.Object `tfsdk:"allowed_response_codes"`
+}
+
+type AppFirewallGlobalSpecTypeAllowedResponseCodes struct {
+	ResponseCode types.List `tfsdk:"response_code"`
+}
+
 type AppFirewallGlobalSpecTypeAnonymizationSettingChoice struct {
-	DisableAnonymization types.Bool   `tfsdk:"disable_anonymization"`
-	DefaultAnonymization types.Bool   `tfsdk:"default_anonymization"`
 	CustomAnonymization  types.Object `tfsdk:"custom_anonymization"`
+	DefaultAnonymization types.Bool   `tfsdk:"default_anonymization"`
+	DisableAnonymization types.Bool   `tfsdk:"disable_anonymization"`
 }
 
 type AppFirewallGlobalSpecTypeCustomAnonymization struct {
@@ -61,32 +70,13 @@ type AppFirewallAnonymizationConfigurationQueryParameter struct {
 }
 
 type AppFirewallGlobalSpecTypeBlockingPageChoice struct {
-	UseDefaultBlockingPage types.Bool   `tfsdk:"use_default_blocking_page"`
 	BlockingPage           types.Object `tfsdk:"blocking_page"`
+	UseDefaultBlockingPage types.Bool   `tfsdk:"use_default_blocking_page"`
 }
 
 type AppFirewallGlobalSpecTypeBlockingPage struct {
 	BlockingPage types.String `tfsdk:"blocking_page"`
 	ResponseCode types.List   `tfsdk:"response_code"`
-}
-
-type AppFirewallGlobalSpecTypeEnhanceWithAiChoice struct {
-	DisableAiEnhancements types.Bool   `tfsdk:"disable_ai_enhancements"`
-	EnableAiEnhancements  types.Object `tfsdk:"enable_ai_enhancements"`
-}
-
-type AppFirewallGlobalSpecTypeEnableAiEnhancements struct {
-	RiskScoreActionChoice types.Object `tfsdk:"risk_score_action_choice"`
-}
-
-type AppFirewallAIEnhancementsConfigRiskScoreActionChoice struct {
-	MitigateHighRiskAction       types.Bool `tfsdk:"mitigate_high_risk_action"`
-	MitigateHighMediumRiskAction types.Bool `tfsdk:"mitigate_high_medium_risk_action"`
-}
-
-type AppFirewallGlobalSpecTypeEnforcementModeChoice struct {
-	Blocking   types.Bool `tfsdk:"blocking"`
-	Monitoring types.Bool `tfsdk:"monitoring"`
 }
 
 type AppFirewallGlobalSpecTypeDetectionSettingChoice struct {
@@ -96,11 +86,10 @@ type AppFirewallGlobalSpecTypeDetectionSettingChoice struct {
 
 type AppFirewallGlobalSpecTypeDetectionSettings struct {
 	BotProtectionChoice             types.Object `tfsdk:"bot_protection_choice"`
-	ViolationsView                  types.List   `tfsdk:"violations_view"`
-	SignatureSelectionSetting       types.Object `tfsdk:"signature_selection_setting"`
 	FalsePositiveSuppressionChoice  types.Object `tfsdk:"false_positive_suppression_choice"`
-	ThreatCampaignChoice            types.Object `tfsdk:"threat_campaign_choice"`
+	SignatureSelectionSetting       types.Object `tfsdk:"signature_selection_setting"`
 	SignaturesStagingSettingsChoice types.Object `tfsdk:"signatures_staging_settings_choice"`
+	ThreatCampaignChoice            types.Object `tfsdk:"threat_campaign_choice"`
 }
 
 type AppFirewallDetectionSettingBotProtectionChoice struct {
@@ -114,23 +103,15 @@ type AppFirewallDetectionSettingBotProtectionSetting struct {
 	SuspiciousBotAction types.List `tfsdk:"suspicious_bot_action"`
 }
 
-type AppFirewallAppFirewallViolationConfigView struct {
-	Enabled          types.Bool   `tfsdk:"enabled"`
-	Title            types.String `tfsdk:"title"`
-	Name             types.String `tfsdk:"name"`
-	Description      types.String `tfsdk:"description"`
-	EnabledByDefault types.String `tfsdk:"enabled_by_default"`
+type AppFirewallDetectionSettingFalsePositiveSuppressionChoice struct {
+	DisableSuppression types.Bool `tfsdk:"disable_suppression"`
+	EnableSuppression  types.Bool `tfsdk:"enable_suppression"`
 }
 
 type AppFirewallAppFirewallSignatureSelectionSetting struct {
-	SignatureSelectionByAccuracyChoice types.Object `tfsdk:"signature_selection_by_accuracy_choice"`
 	AttackTypeSettingChoice            types.Object `tfsdk:"attack_type_setting_choice"`
-}
-
-type AppFirewallSignatureSelectionSettingSignatureSelectionByAccuracyChoice struct {
-	HighMediumAccuracySignatures    types.Bool `tfsdk:"high_medium_accuracy_signatures"`
-	HighMediumLowAccuracySignatures types.Bool `tfsdk:"high_medium_low_accuracy_signatures"`
-	OnlyHighAccuracySignatures      types.Bool `tfsdk:"only_high_accuracy_signatures"`
+	SignatureProtectionChoice          types.Object `tfsdk:"signature_protection_choice"`
+	SignatureSelectionByAccuracyChoice types.Object `tfsdk:"signature_selection_by_accuracy_choice"`
 }
 
 type AppFirewallSignatureSelectionSettingAttackTypeSettingChoice struct {
@@ -142,65 +123,104 @@ type AppFirewallSignatureSelectionSettingAttackTypeSettings struct {
 	DisabledAttackTypes types.List `tfsdk:"disabled_attack_types"`
 }
 
-type AppFirewallDetectionSettingFalsePositiveSuppressionChoice struct {
-	EnableSuppression  types.Bool `tfsdk:"enable_suppression"`
-	DisableSuppression types.Bool `tfsdk:"disable_suppression"`
+type AppFirewallSignatureSelectionSettingSignatureProtectionChoice struct {
+	DefaultSignatureSetting     types.Bool   `tfsdk:"default_signature_setting"`
+	SignatureSettingsByAccuracy types.Object `tfsdk:"signature_settings_by_accuracy"`
 }
 
-type AppFirewallDetectionSettingThreatCampaignChoice struct {
-	EnableThreatCampaigns  types.Bool `tfsdk:"enable_threat_campaigns"`
-	DisableThreatCampaigns types.Bool `tfsdk:"disable_threat_campaigns"`
+type AppFirewallSignatureSelectionSettingSignatureSettingsByAccuracy struct {
+	HighAccuracyAction   types.List `tfsdk:"high_accuracy_action"`
+	LowAccuracyAction    types.List `tfsdk:"low_accuracy_action"`
+	MediumAccuracyAction types.List `tfsdk:"medium_accuracy_action"`
+}
+
+type AppFirewallSignatureSelectionSettingSignatureSelectionByAccuracyChoice struct {
+	HighMediumAccuracySignatures    types.Bool `tfsdk:"high_medium_accuracy_signatures"`
+	HighMediumLowAccuracySignatures types.Bool `tfsdk:"high_medium_low_accuracy_signatures"`
+	OnlyHighAccuracySignatures      types.Bool `tfsdk:"only_high_accuracy_signatures"`
 }
 
 type AppFirewallDetectionSettingSignaturesStagingSettingsChoice struct {
 	DisableStaging               types.Bool   `tfsdk:"disable_staging"`
-	StageNewSignatures           types.Object `tfsdk:"stage_new_signatures"`
 	StageNewAndUpdatedSignatures types.Object `tfsdk:"stage_new_and_updated_signatures"`
-}
-
-type AppFirewallDetectionSettingStageNewSignatures struct {
-	StagingPeriod types.Int64 `tfsdk:"staging_period"`
+	StageNewSignatures           types.Object `tfsdk:"stage_new_signatures"`
 }
 
 type AppFirewallDetectionSettingStageNewAndUpdatedSignatures struct {
 	StagingPeriod types.Int64 `tfsdk:"staging_period"`
 }
 
-type AppFirewallGlobalSpecTypeAllowedResponseCodesChoice struct {
-	AllowAllResponseCodes types.Bool   `tfsdk:"allow_all_response_codes"`
-	AllowedResponseCodes  types.Object `tfsdk:"allowed_response_codes"`
+type AppFirewallDetectionSettingStageNewSignatures struct {
+	StagingPeriod types.Int64 `tfsdk:"staging_period"`
 }
 
-type AppFirewallGlobalSpecTypeAllowedResponseCodes struct {
-	ResponseCode types.List `tfsdk:"response_code"`
+type AppFirewallDetectionSettingThreatCampaignChoice struct {
+	DisableThreatCampaigns types.Bool `tfsdk:"disable_threat_campaigns"`
+	EnableThreatCampaigns  types.Bool `tfsdk:"enable_threat_campaigns"`
+}
+
+type AppFirewallGlobalSpecTypeEnforcementModeChoice struct {
+	Blocking   types.Bool `tfsdk:"blocking"`
+	Monitoring types.Bool `tfsdk:"monitoring"`
+}
+
+type AppFirewallGlobalSpecTypeEnhanceWithAiChoice struct {
+	DisableAiEnhancements types.Bool   `tfsdk:"disable_ai_enhancements"`
+	EnableAiEnhancements  types.Object `tfsdk:"enable_ai_enhancements"`
+}
+
+type AppFirewallGlobalSpecTypeEnableAiEnhancements struct {
+	RiskScoreActionChoice types.Object `tfsdk:"risk_score_action_choice"`
+}
+
+type AppFirewallAIEnhancementsConfigRiskScoreActionChoice struct {
+	MitigateHighMediumRiskAction types.Bool `tfsdk:"mitigate_high_medium_risk_action"`
+	MitigateHighRiskAction       types.Bool `tfsdk:"mitigate_high_risk_action"`
 }
 
 // DataSourceF5XCAppFirewallModel describes the resource data model.
 type DataSourceF5XCAppFirewallModel struct {
-	Labels                     types.Map      `tfsdk:"labels"`
 	Annotations                types.Map      `tfsdk:"annotations"`
 	Description                types.String   `tfsdk:"description"`
+	Labels                     types.Map      `tfsdk:"labels"`
 	Name                       types.String   `tfsdk:"name"`
 	Namespace                  types.String   `tfsdk:"namespace"`
 	Uid                        types.String   `tfsdk:"uid"`
+	AllowedResponseCodesChoice types.Object   `tfsdk:"allowed_response_codes_choice"`
 	AnonymizationSettingChoice types.Object   `tfsdk:"anonymization_setting_choice"`
 	BlockingPageChoice         types.Object   `tfsdk:"blocking_page_choice"`
-	EnhanceWithAiChoice        types.Object   `tfsdk:"enhance_with_ai_choice"`
-	EnforcementModeChoice      types.Object   `tfsdk:"enforcement_mode_choice"`
 	DetectionSettingChoice     types.Object   `tfsdk:"detection_setting_choice"`
-	AllowedResponseCodesChoice types.Object   `tfsdk:"allowed_response_codes_choice"`
+	EnforcementModeChoice      types.Object   `tfsdk:"enforcement_mode_choice"`
+	EnhanceWithAiChoice        types.Object   `tfsdk:"enhance_with_ai_choice"`
 	Timeouts                   timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for RequiredOneOfField --> AllowedResponseCodesChoice
+var AppFirewallAllowedResponseCodesChoiceModelAttributeMap = map[string]attr.Type{
+
+	"allow_all_response_codes": types.BoolType,
+	"allowed_response_codes": types.ObjectType{
+		AttrTypes: AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> AllowedResponseCodes
+var AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap = map[string]attr.Type{
+
+	"response_code": types.ListType{
+		ElemType: types.Int64Type,
+	},
+}
+
 // Attribute map for RequiredOneOfField --> AnonymizationSetting
 var AppFirewallAnonymizationSettingModelAttributeMap = map[string]attr.Type{
 
-	"disable_anonymization": types.BoolType,
-	"default_anonymization": types.BoolType,
 	"custom_anonymization": types.ObjectType{
 		AttrTypes: AppFirewallAnonymizationSettingCustomAnonymizationModelAttributeMap,
 	},
+	"default_anonymization": types.BoolType,
+	"disable_anonymization": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> CustomAnonymization
@@ -261,10 +281,10 @@ var AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymi
 // Attribute map for RequiredOneOfField --> BlockingPageChoice
 var AppFirewallBlockingPageChoiceModelAttributeMap = map[string]attr.Type{
 
-	"use_default_blocking_page": types.BoolType,
 	"blocking_page": types.ObjectType{
 		AttrTypes: AppFirewallBlockingPageChoiceBlockingPageModelAttributeMap,
 	},
+	"use_default_blocking_page": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlockingPage
@@ -274,37 +294,6 @@ var AppFirewallBlockingPageChoiceBlockingPageModelAttributeMap = map[string]attr
 	"response_code": types.ListType{
 		ElemType: types.StringType,
 	},
-}
-
-// Attribute map for RequiredOneOfField --> EnhanceWithAiChoice
-var AppFirewallEnhanceWithAiChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_ai_enhancements": types.BoolType,
-	"enable_ai_enhancements": types.ObjectType{
-		AttrTypes: AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> EnableAiEnhancements
-var AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap = map[string]attr.Type{
-
-	"risk_score_action_choice": types.ObjectType{
-		AttrTypes: AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> RiskScoreActionChoice
-var AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap = map[string]attr.Type{
-
-	"mitigate_high_risk_action":        types.BoolType,
-	"mitigate_high_medium_risk_action": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> EnforcementModeChoice
-var AppFirewallEnforcementModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"blocking":   types.BoolType,
-	"monitoring": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> DetectionSettingChoice
@@ -322,34 +311,25 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsModelAttributeMap = map[st
 	"bot_protection_choice": types.ObjectType{
 		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceModelAttributeMap,
 	},
-	"violations_view": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"enabled":            types.BoolType,
-				"title":              types.StringType,
-				"name":               types.StringType,
-				"description":        types.StringType,
-				"enabled_by_default": types.StringType,
-			},
-		},
-	}, "signature_selection_setting": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"signature_selection_by_accuracy_choice": types.ObjectType{
-				AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureSelectionByAccuracyModelAttributeMap,
-			},
-			"attack_type_setting_choice": types.ObjectType{
-				AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap,
-			}},
-	},
 	"false_positive_suppression_choice": types.ObjectType{
 		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap,
-	},
-	"threat_campaign_choice": types.ObjectType{
-		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap,
+	}, "signature_selection_setting": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"attack_type_setting_choice": types.ObjectType{
+				AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap,
+			},
+			"signature_protection_choice": types.ObjectType{
+				AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceModelAttributeMap,
+			},
+			"signature_selection_by_accuracy_choice": types.ObjectType{
+				AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureSelectionByAccuracyModelAttributeMap,
+			}},
 	},
 	"signatures_staging_settings_choice": types.ObjectType{
 		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsModelAttributeMap,
+	},
+	"threat_campaign_choice": types.ObjectType{
+		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap,
 	},
 }
 
@@ -376,33 +356,25 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceBotProt
 	},
 }
 
-// Attribute map for RequiredArrayOfPointerField --> ViolationsView
-var AppFirewallDetectionSettingChoiceDetectionSettingsViolationsViewModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> FalsePositiveSuppression
+var AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap = map[string]attr.Type{
 
-	"enabled":            types.BoolType,
-	"title":              types.StringType,
-	"name":               types.StringType,
-	"description":        types.StringType,
-	"enabled_by_default": types.StringType,
+	"disable_suppression": types.BoolType,
+	"enable_suppression":  types.BoolType,
 }
 
 // Attribute map for PointerField --> SignatureSelectionSetting
 var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingModelAttributeMap = map[string]attr.Type{
 
-	"signature_selection_by_accuracy_choice": types.ObjectType{
-		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureSelectionByAccuracyModelAttributeMap,
-	},
 	"attack_type_setting_choice": types.ObjectType{
 		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap,
 	},
-}
-
-// Attribute map for RequiredOneOfField --> SignatureSelectionByAccuracy
-var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureSelectionByAccuracyModelAttributeMap = map[string]attr.Type{
-
-	"high_medium_accuracy_signatures":     types.BoolType,
-	"high_medium_low_accuracy_signatures": types.BoolType,
-	"only_high_accuracy_signatures":       types.BoolType,
+	"signature_protection_choice": types.ObjectType{
+		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceModelAttributeMap,
+	},
+	"signature_selection_by_accuracy_choice": types.ObjectType{
+		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureSelectionByAccuracyModelAttributeMap,
+	},
 }
 
 // Attribute map for RequiredOneOfField --> AttackTypeSetting
@@ -422,36 +394,47 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingA
 	},
 }
 
-// Attribute map for RequiredOneOfField --> FalsePositiveSuppression
-var AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap = map[string]attr.Type{
+// Attribute map for OneOfField --> SignatureProtectionChoice
+var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"enable_suppression":  types.BoolType,
-	"disable_suppression": types.BoolType,
+	"default_signature_setting": types.BoolType,
+	"signature_settings_by_accuracy": types.ObjectType{
+		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceSignatureSettingsByAccuracyModelAttributeMap,
+	},
 }
 
-// Attribute map for RequiredOneOfField --> ThreatCampaignChoice
-var AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> SignatureSettingsByAccuracy
+var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceSignatureSettingsByAccuracyModelAttributeMap = map[string]attr.Type{
 
-	"enable_threat_campaigns":  types.BoolType,
-	"disable_threat_campaigns": types.BoolType,
+	"high_accuracy_action": types.ListType{
+		ElemType: types.StringType,
+	},
+	"low_accuracy_action": types.ListType{
+		ElemType: types.StringType,
+	},
+	"medium_accuracy_action": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SignatureSelectionByAccuracy
+var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureSelectionByAccuracyModelAttributeMap = map[string]attr.Type{
+
+	"high_medium_accuracy_signatures":     types.BoolType,
+	"high_medium_low_accuracy_signatures": types.BoolType,
+	"only_high_accuracy_signatures":       types.BoolType,
 }
 
 // Attribute map for OneOfField --> SignaturesStagingSettings
 var AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsModelAttributeMap = map[string]attr.Type{
 
 	"disable_staging": types.BoolType,
-	"stage_new_signatures": types.ObjectType{
-		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap,
-	},
 	"stage_new_and_updated_signatures": types.ObjectType{
 		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewAndUpdatedSignaturesModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> StageNewSignatures
-var AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap = map[string]attr.Type{
-
-	"staging_period": types.Int64Type,
+	"stage_new_signatures": types.ObjectType{
+		AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> StageNewAndUpdatedSignatures
@@ -460,21 +443,48 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsS
 	"staging_period": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> AllowedResponseCodesChoice
-var AppFirewallAllowedResponseCodesChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> StageNewSignatures
+var AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap = map[string]attr.Type{
 
-	"allow_all_response_codes": types.BoolType,
-	"allowed_response_codes": types.ObjectType{
-		AttrTypes: AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap,
+	"staging_period": types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> ThreatCampaignChoice
+var AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_threat_campaigns": types.BoolType,
+	"enable_threat_campaigns":  types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> EnforcementModeChoice
+var AppFirewallEnforcementModeChoiceModelAttributeMap = map[string]attr.Type{
+
+	"blocking":   types.BoolType,
+	"monitoring": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> EnhanceWithAiChoice
+var AppFirewallEnhanceWithAiChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_ai_enhancements": types.BoolType,
+	"enable_ai_enhancements": types.ObjectType{
+		AttrTypes: AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap,
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> AllowedResponseCodes
-var AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> EnableAiEnhancements
+var AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap = map[string]attr.Type{
 
-	"response_code": types.ListType{
-		ElemType: types.Int64Type,
+	"risk_score_action_choice": types.ObjectType{
+		AttrTypes: AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap,
 	},
+}
+
+// Attribute map for RequiredOneOfField --> RiskScoreActionChoice
+var AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap = map[string]attr.Type{
+
+	"mitigate_high_medium_risk_action": types.BoolType,
+	"mitigate_high_risk_action":        types.BoolType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -491,17 +501,10 @@ func (d *DataSourceF5XCAppFirewall) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "AppFirewall data source",
-		Description:         "AppFirewall data source",
+		MarkdownDescription: "AI Risk Based Blocking All Attack Types, including high, medium, and low accuracy signatures, automatic Attack Signature tuning, Threat Campaigns, and all Violations will be enabled. AI and ML algorithms will assess request risk, and only high-risk requests will be blocked by default. This feature is in preview mode.",
+		Description:         "AI Risk Based Blocking All Attack Types, including high, medium, and low accuracy signatures, automatic Attack Signature tuning, Threat Campaigns, and all Violations will be enabled. AI and ML algorithms will assess request risk, and only high-risk requests will be blocked by default. This feature is in preview mode.",
 
 		Attributes: map[string]schema.Attribute{
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"annotations": schema.MapAttribute{
 				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				Required:    false,
@@ -514,6 +517,13 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -533,24 +543,41 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 				Optional:    false,
 				Computed:    true,
 			},
+			"allowed_response_codes_choice": schema.SingleNestedAttribute{
+				Description: "Allowed Response Status Codes HTTP response status codes which are allowed to pass through the platform to the client. All response codes other than the allowed ones are blocked by the platform.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"allow_all_response_codes": schema.BoolAttribute{
+						Description: "Default All HTTP response status codes are allowed",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"allowed_response_codes": schema.SingleNestedAttribute{
+						Description: "Custom Define list of HTTP response status codes that are allowed",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"response_code": schema.ListAttribute{
+								Description: "response_code List of HTTP response status codes that are allowed",
+								ElementType: types.Int64Type,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+				},
+			},
 			"anonymization_setting_choice": schema.SingleNestedAttribute{
 				Description: "Anonymization Settings Replaces sensitive data in the logs (as defined in the context) with a string of asterisks (*)",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"disable_anonymization": schema.BoolAttribute{
-						Description: "DisableAnonymization Disable masking of sensitive parameters in logs",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"default_anonymization": schema.BoolAttribute{
-						Description: "DefaultAnonymization Default settings will be applied. Values of query parameters 'card', 'pass', 'pwd' and 'password' will be masked.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"custom_anonymization": schema.SingleNestedAttribute{
 						Description: "CustomAnonymization Define HTTP headers, query parameters, or cookies whose values should be masked",
 						Required:    false,
@@ -619,6 +646,18 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 							},
 						},
 					},
+					"default_anonymization": schema.BoolAttribute{
+						Description: "DefaultAnonymization Default settings will be applied. Values of query parameters 'card', 'pass', 'pwd' and 'password' will be masked.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"disable_anonymization": schema.BoolAttribute{
+						Description: "DisableAnonymization Disable masking of sensitive parameters in logs",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 				},
 			},
 			"blocking_page_choice": schema.SingleNestedAttribute{
@@ -627,12 +666,6 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"use_default_blocking_page": schema.BoolAttribute{
-						Description: "Default Blocking Page The system returns the system-supplied response page in HTML. No further configuration is needed.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"blocking_page": schema.SingleNestedAttribute{
 						Description: "Custom Blocking Page The system returns a response page with HTML code that you define",
 						Required:    false,
@@ -654,64 +687,8 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 							},
 						},
 					},
-				},
-			},
-			"enhance_with_ai_choice": schema.SingleNestedAttribute{
-				Description: "Enhance with AI This setting controls whether enforcement decisions consider AI-powered risk evaluations. When activated, machine learning models provide additional context to improve detection accuracy and help prioritize responses based on the assessed threat level. When inactive, enforcement relies solely on traditional, signature-based policy evaluations.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"disable_ai_enhancements": schema.BoolAttribute{
-						Description: "Disable AI Enhancements Risk-base AI evaluations will not factor into enforcement actions",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"enable_ai_enhancements": schema.SingleNestedAttribute{
-						Description: "Enable AI Enhancements Evaluations for enforcement actions will be complimented by the additional intelligence of the F5 AI Powered Risk-based analysis",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"risk_score_action_choice": schema.SingleNestedAttribute{
-								Description: "Action By Risk Score Determines which risk levels will trigger mitigation when AI-based risk evaluation is enabled",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"mitigate_high_risk_action": schema.BoolAttribute{
-										Description: "Mitigate High Risk Only Mitigate requests only if the risk score is classified as High",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"mitigate_high_medium_risk_action": schema.BoolAttribute{
-										Description: "Mitigate High and Medium Risk Mitigate requests if the risk score is High or Medium",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			"enforcement_mode_choice": schema.SingleNestedAttribute{
-				Description: "Enforcement Mode Monitoring mode will identify and log threats, whereas Blocking mode will both log and block threats",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"blocking": schema.BoolAttribute{
-						Description: "Blocking Log and block threats",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"monitoring": schema.BoolAttribute{
-						Description: "Monitoring Log threats",
+					"use_default_blocking_page": schema.BoolAttribute{
+						Description: "Default Blocking Page The system returns the system-supplied response page in HTML. No further configuration is needed.",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -779,43 +756,23 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 									},
 								},
 							},
-							"violations_view": schema.ListNestedAttribute{
-								Description: "Violations configuration settings for view only List of violation checks that are performed on HTTP request to ensure the requests are properly formatted, detection of evasion techniques and other violations.",
+							"false_positive_suppression_choice": schema.SingleNestedAttribute{
+								Description: "Automatic Attack Signatures Tuning Self-learning probabilistic machine learning model that suppresses false positive triggers",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"enabled": schema.BoolAttribute{
-											Description: "user customised state",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"title": schema.StringAttribute{
-											Description: "name",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"name": schema.StringAttribute{
-											Description: "code",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"description": schema.StringAttribute{
-											Description: "description",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"enabled_by_default": schema.StringAttribute{
-											Description: "enabled_by_default Violations that are enabled by default by F5 are advisable to leave enabled",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
+								Attributes: map[string]schema.Attribute{
+									"disable_suppression": schema.BoolAttribute{
+										Description: "Disable Suppression",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"enable_suppression": schema.BoolAttribute{
+										Description: "Enable Suppression",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
 									},
 								},
 							},
@@ -825,32 +782,6 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"signature_selection_by_accuracy_choice": schema.SingleNestedAttribute{
-										Description: "Signature selection by accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"high_medium_accuracy_signatures": schema.BoolAttribute{
-												Description: "High/Medium Accuracy Signatures Enables high and medium accuracy signatures",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"high_medium_low_accuracy_signatures": schema.BoolAttribute{
-												Description: "High/Medium/Low Accuracy Signatures Enables high, medium and low accuracy signatures",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"only_high_accuracy_signatures": schema.BoolAttribute{
-												Description: "Only High Accuracy Signatures Enables only high accuracy signatures",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
 									"attack_type_setting_choice": schema.SingleNestedAttribute{
 										Description: "Attack Types The types of attacks that Attack Signatures can detect",
 										Required:    false,
@@ -880,45 +811,77 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 											},
 										},
 									},
-								},
-							},
-							"false_positive_suppression_choice": schema.SingleNestedAttribute{
-								Description: "Automatic Attack Signatures Tuning Self-learning probabilistic machine learning model that suppresses false positive triggers",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"enable_suppression": schema.BoolAttribute{
-										Description: "Enable Suppression",
+									"signature_protection_choice": schema.SingleNestedAttribute{
+										Description: "Signature Settings by Accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"default_signature_setting": schema.BoolAttribute{
+												Description: "Default Signature Settings Default Signature Protection settings will be applied. High and Medium accuracy signatures will be blocked, Low accuracy signatures will be ignored.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"signature_settings_by_accuracy": schema.SingleNestedAttribute{
+												Description: "Custom Signature Settings Define Custom Signature Protection settings by accuracy level.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"high_accuracy_action": schema.ListAttribute{
+														Description: "high_accuracy_action High Accuracy signatures level are associated with attack behaviors that are accurately identified and have a low false positive rate.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"low_accuracy_action": schema.ListAttribute{
+														Description: "low_accuracy_action Low Accuracy signatures are associated with attack behaviors that have a high false positive rate. It is advisable to set low accuracy signatures to ignore to reduce false positives.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"medium_accuracy_action": schema.ListAttribute{
+														Description: "medium_accuracy_action Medium Accuracy signatures are associated with attack behaviors that are accurately identified but have a higher false positive rate than high accuracy signatures.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
 									},
-									"disable_suppression": schema.BoolAttribute{
-										Description: "Disable Suppression",
+									"signature_selection_by_accuracy_choice": schema.SingleNestedAttribute{
+										Description: "Signature selection by accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
-									},
-								},
-							},
-							"threat_campaign_choice": schema.SingleNestedAttribute{
-								Description: "Threat Campaigns Threat Campaigns provide targeted signatures to protect organizations from sophisticated attacks",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"enable_threat_campaigns": schema.BoolAttribute{
-										Description: "enable_threat_campaigns",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"disable_threat_campaigns": schema.BoolAttribute{
-										Description: "disable_threat_campaigns",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"high_medium_accuracy_signatures": schema.BoolAttribute{
+												Description:        "High/Medium Accuracy Signatures Enables high and medium accuracy signatures",
+												Required:           false,
+												Optional:           false,
+												Computed:           true,
+												DeprecationMessage: "This setting is deprecated, please use Signature Settings by Accuracy instead",
+											},
+											"high_medium_low_accuracy_signatures": schema.BoolAttribute{
+												Description:        "High/Medium/Low Accuracy Signatures Enables high, medium and low accuracy signatures",
+												Required:           false,
+												Optional:           false,
+												Computed:           true,
+												DeprecationMessage: "This setting is deprecated, please use Signature Settings by Accuracy instead",
+											},
+											"only_high_accuracy_signatures": schema.BoolAttribute{
+												Description:        "Only High Accuracy Signatures Enables only high accuracy signatures",
+												Required:           false,
+												Optional:           false,
+												Computed:           true,
+												DeprecationMessage: "This setting is deprecated, please use Signature Settings by Accuracy instead",
+											},
+										},
 									},
 								},
 							},
@@ -934,20 +897,6 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 										Optional:    false,
 										Computed:    true,
 									},
-									"stage_new_signatures": schema.SingleNestedAttribute{
-										Description: "New Signatures Staging Settings Stage new attack signatures only. Updated signatures will be enforced",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"staging_period": schema.Int64Attribute{
-												Description: "Staging Period Define staging period in days. The default staging period is 7 days and the max supported staging period is 20 days.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
 									"stage_new_and_updated_signatures": schema.SingleNestedAttribute{
 										Description: "New and Updated Signatures Staging Settings Stage both new and updated attack signatures. Note: Staging updated signatures may lead to change in behaviour of those signatures and reduce the protection level of the App firewall policy. For example, if AppFirewall was in blocking mode and a signature was updated in a recent release, staging this signature would not enforce it i.e signature would be in monitoring mode for staging period (instead of blocking mode)",
 										Required:    false,
@@ -962,36 +911,103 @@ func (r *DataSourceF5XCAppFirewall) Schema(ctx context.Context, request datasour
 											},
 										},
 									},
+									"stage_new_signatures": schema.SingleNestedAttribute{
+										Description: "New Signatures Staging Settings Stage new attack signatures only. Updated signatures will be enforced",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"staging_period": schema.Int64Attribute{
+												Description: "Staging Period Define staging period in days. The default staging period is 7 days and the max supported staging period is 20 days.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+								},
+							},
+							"threat_campaign_choice": schema.SingleNestedAttribute{
+								Description: "Threat Campaigns Threat Campaigns provide targeted signatures to protect organizations from sophisticated attacks",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"disable_threat_campaigns": schema.BoolAttribute{
+										Description: "disable_threat_campaigns",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"enable_threat_campaigns": schema.BoolAttribute{
+										Description: "enable_threat_campaigns",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
 								},
 							},
 						},
 					},
 				},
 			},
-			"allowed_response_codes_choice": schema.SingleNestedAttribute{
-				Description: "Allowed Response Status Codes HTTP response status codes which are allowed to pass through the platform to the client. All response codes other than the allowed ones are blocked by the platform.",
+			"enforcement_mode_choice": schema.SingleNestedAttribute{
+				Description: "Enforcement Mode Monitoring mode will identify and log threats, whereas Blocking mode will both log and block threats",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"allow_all_response_codes": schema.BoolAttribute{
-						Description: "Default All HTTP response status codes are allowed",
+					"blocking": schema.BoolAttribute{
+						Description: "Blocking Log and block threats",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"allowed_response_codes": schema.SingleNestedAttribute{
-						Description: "Custom Define list of HTTP response status codes that are allowed",
+					"monitoring": schema.BoolAttribute{
+						Description: "Monitoring Log threats",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
+			"enhance_with_ai_choice": schema.SingleNestedAttribute{
+				Description: "Enhance with AI This setting controls whether enforcement decisions consider AI-powered risk evaluations. When activated, machine learning models provide additional context to improve detection accuracy and help prioritize responses based on the assessed threat level. When inactive, enforcement relies solely on traditional, signature-based policy evaluations.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"disable_ai_enhancements": schema.BoolAttribute{
+						Description: "Disable AI Enhancements Risk-base AI evaluations will not factor into enforcement actions",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"enable_ai_enhancements": schema.SingleNestedAttribute{
+						Description: "Enable AI Enhancements Evaluations for enforcement actions will be complimented by the additional intelligence of the F5 AI Powered Risk-based analysis",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"response_code": schema.ListAttribute{
-								Description: "response_code List of HTTP response status codes that are allowed",
-								ElementType: types.Int64Type,
+							"risk_score_action_choice": schema.SingleNestedAttribute{
+								Description: "Action By Risk Score Determines which risk levels will trigger mitigation when AI-based risk evaluation is enabled",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"mitigate_high_medium_risk_action": schema.BoolAttribute{
+										Description: "Mitigate High and Medium Risk Mitigate requests if the risk score is High or Medium",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"mitigate_high_risk_action": schema.BoolAttribute{
+										Description: "Mitigate High Risk Only Mitigate requests only if the risk score is classified as High",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
 							},
 						},
 					},
@@ -1044,15 +1060,14 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_app_firewall.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -1067,24 +1082,6 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -1107,6 +1104,24 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1115,6 +1130,83 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 
 	// data SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot RequiredOneOfField --> AllowedResponseCodesChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetAllowedResponseCodesChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		allowedResponseCodesChoiceChoices := specData.GetAllowedResponseCodesChoice()
+
+		// The model struct that will be populated by the nested template.
+		var allowedResponseCodesChoiceChoicesModel = &AppFirewallGlobalSpecTypeAllowedResponseCodesChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> AllowAllResponseCodes
+		_, isAllowAllResponseCodes := allowedResponseCodesChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_AllowAllResponseCodes)
+
+		if isAllowAllResponseCodes {
+			allowedResponseCodesChoiceChoicesModel.AllowAllResponseCodes = types.BoolValue(true)
+		} else {
+			allowedResponseCodesChoiceChoicesModel.AllowAllResponseCodes = types.BoolNull()
+		}
+
+		// data specToModelNested PointerOfOneOfField --> AllowedResponseCodes
+		// <no value>
+		// false
+		{
+			allowedResponseCodesOptionsWrapper, isAllowedResponseCodes := allowedResponseCodesChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_AllowedResponseCodes)
+			allowedResponseCodesAttributeMap := make(map[string]attr.Value)
+
+			if isAllowedResponseCodes && allowedResponseCodesOptionsWrapper != nil && allowedResponseCodesOptionsWrapper.AllowedResponseCodes != nil {
+				allowedResponseCodesElement := allowedResponseCodesOptionsWrapper.AllowedResponseCodes
+
+				// data specToModelNested RequiredArrayOfUintField --> ResponseCode
+				responseCodeValue := allowedResponseCodesElement.GetResponseCode()
+				if len(responseCodeValue) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, allowedResponseCodesElement.GetResponseCode())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					allowedResponseCodesAttributeMap["response_code"] = listValue
+				} else {
+					allowedResponseCodesAttributeMap["response_code"] = types.ListNull(types.Int64Type)
+				}
+
+				allowedResponseCodesObj, allowedResponseCodesObjDiags := types.ObjectValue(AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap, allowedResponseCodesAttributeMap)
+				response.Diagnostics.Append(allowedResponseCodesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				allowedResponseCodesChoiceChoicesModel.AllowedResponseCodes = allowedResponseCodesObj
+			} else {
+				allowedResponseCodesChoiceChoicesModel.AllowedResponseCodes = types.ObjectNull(AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			allowedResponseCodesChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AppFirewallAllowedResponseCodesChoiceModelAttributeMap,
+				allowedResponseCodesChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.AllowedResponseCodesChoice = allowedResponseCodesChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.AllowedResponseCodesChoice = types.ObjectNull(AppFirewallAllowedResponseCodesChoiceModelAttributeMap)
+	}
 
 	// data SpecToModelRoot RequiredOneOfField --> AnonymizationSetting
 	// false
@@ -1130,39 +1222,22 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> DisableAnonymization
-		_, isDisableAnonymization := anonymizationSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DisableAnonymization)
-
-		if isDisableAnonymization {
-			anonymizationSettingChoiceChoicesModel.DisableAnonymization = types.BoolValue(true)
-		} else {
-			anonymizationSettingChoiceChoicesModel.DisableAnonymization = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> DefaultAnonymization
-		_, isDefaultAnonymization := anonymizationSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DefaultAnonymization)
-
-		if isDefaultAnonymization {
-			anonymizationSettingChoiceChoicesModel.DefaultAnonymization = types.BoolValue(true)
-		} else {
-			anonymizationSettingChoiceChoicesModel.DefaultAnonymization = types.BoolNull()
-		}
-
 		// data specToModelNested PointerOfOneOfField --> CustomAnonymization
 		// <no value>
 		// false
 		{
-			customAnonymizationOptions, isCustomAnonymization := anonymizationSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_CustomAnonymization)
+			customAnonymizationOptionsWrapper, isCustomAnonymization := anonymizationSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_CustomAnonymization)
 			customAnonymizationAttributeMap := make(map[string]attr.Value)
 
-			if isCustomAnonymization && customAnonymizationOptions != nil {
+			if isCustomAnonymization && customAnonymizationOptionsWrapper != nil && customAnonymizationOptionsWrapper.CustomAnonymization != nil {
+				customAnonymizationElement := customAnonymizationOptionsWrapper.CustomAnonymization
 
 				// data specToModelNested RequiredArrayOfPointerField --> AnonymizationConfig
-				if len(customAnonymizationOptions.CustomAnonymization.GetAnonymizationConfig()) > 0 {
+				if len(customAnonymizationElement.GetAnonymizationConfig()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					anonymizationConfigElements := make([]AppFirewallAppFirewallAnonymizationConfiguration, 0, len(customAnonymizationOptions.CustomAnonymization.GetAnonymizationConfig()))
-					for _, anonymizationConfigElement := range customAnonymizationOptions.CustomAnonymization.GetAnonymizationConfig() {
+					anonymizationConfigElements := make([]AppFirewallAppFirewallAnonymizationConfiguration, 0, len(customAnonymizationElement.GetAnonymizationConfig()))
+					for _, anonymizationConfigElement := range customAnonymizationElement.GetAnonymizationConfig() {
 						appFirewallAppFirewallAnonymizationConfigurationModel := AppFirewallAppFirewallAnonymizationConfiguration{}
 
 						// data specToModelNested RequiredOneOfField --> AnonymizationChoice
@@ -1181,21 +1256,22 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 							// <no value>
 							// false
 							{
-								cookieOptions, isCookie := anonymizationConfiganonymizationChoiceChoices.(*ves_io_schema_app_firewall.AnonymizationConfiguration_Cookie)
+								cookieOptionsWrapper, isCookie := anonymizationConfiganonymizationChoiceChoices.(*ves_io_schema_app_firewall.AnonymizationConfiguration_Cookie)
 								cookieAttributeMap := make(map[string]attr.Value)
 
-								if isCookie && cookieOptions != nil {
+								if isCookie && cookieOptionsWrapper != nil && cookieOptionsWrapper.Cookie != nil {
+									cookieElement := cookieOptionsWrapper.Cookie
 
 									// data specToModelNested RequiredStringField --> CookieName
-									if cookieOptions.Cookie.GetCookieName() != "" {
-										cookieAttributeMap["cookie_name"] = types.StringValue(cookieOptions.Cookie.GetCookieName())
+									if cookieElement.GetCookieName() != "" {
+										cookieAttributeMap["cookie_name"] = types.StringValue(cookieElement.GetCookieName())
 									} else {
 										// Empty string, set to null
 										cookieAttributeMap["cookie_name"] = types.StringNull()
 									}
 
-									cookieObj, diags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymizationChoiceCookieModelAttributeMap, cookieAttributeMap)
-									response.Diagnostics.Append(diags...)
+									cookieObj, cookieObjDiags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymizationChoiceCookieModelAttributeMap, cookieAttributeMap)
+									response.Diagnostics.Append(cookieObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -1209,21 +1285,22 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 							// <no value>
 							// false
 							{
-								httpHeaderOptions, isHttpHeader := anonymizationConfiganonymizationChoiceChoices.(*ves_io_schema_app_firewall.AnonymizationConfiguration_HttpHeader)
+								httpHeaderOptionsWrapper, isHttpHeader := anonymizationConfiganonymizationChoiceChoices.(*ves_io_schema_app_firewall.AnonymizationConfiguration_HttpHeader)
 								httpHeaderAttributeMap := make(map[string]attr.Value)
 
-								if isHttpHeader && httpHeaderOptions != nil {
+								if isHttpHeader && httpHeaderOptionsWrapper != nil && httpHeaderOptionsWrapper.HttpHeader != nil {
+									httpHeaderElement := httpHeaderOptionsWrapper.HttpHeader
 
 									// data specToModelNested RequiredStringField --> HeaderName
-									if httpHeaderOptions.HttpHeader.GetHeaderName() != "" {
-										httpHeaderAttributeMap["header_name"] = types.StringValue(httpHeaderOptions.HttpHeader.GetHeaderName())
+									if httpHeaderElement.GetHeaderName() != "" {
+										httpHeaderAttributeMap["header_name"] = types.StringValue(httpHeaderElement.GetHeaderName())
 									} else {
 										// Empty string, set to null
 										httpHeaderAttributeMap["header_name"] = types.StringNull()
 									}
 
-									httpHeaderObj, diags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymizationChoiceHttpHeaderModelAttributeMap, httpHeaderAttributeMap)
-									response.Diagnostics.Append(diags...)
+									httpHeaderObj, httpHeaderObjDiags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymizationChoiceHttpHeaderModelAttributeMap, httpHeaderAttributeMap)
+									response.Diagnostics.Append(httpHeaderObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -1237,21 +1314,22 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 							// <no value>
 							// false
 							{
-								queryParameterOptions, isQueryParameter := anonymizationConfiganonymizationChoiceChoices.(*ves_io_schema_app_firewall.AnonymizationConfiguration_QueryParameter)
+								queryParameterOptionsWrapper, isQueryParameter := anonymizationConfiganonymizationChoiceChoices.(*ves_io_schema_app_firewall.AnonymizationConfiguration_QueryParameter)
 								queryParameterAttributeMap := make(map[string]attr.Value)
 
-								if isQueryParameter && queryParameterOptions != nil {
+								if isQueryParameter && queryParameterOptionsWrapper != nil && queryParameterOptionsWrapper.QueryParameter != nil {
+									queryParameterElement := queryParameterOptionsWrapper.QueryParameter
 
 									// data specToModelNested RequiredStringField --> QueryParamName
-									if queryParameterOptions.QueryParameter.GetQueryParamName() != "" {
-										queryParameterAttributeMap["query_param_name"] = types.StringValue(queryParameterOptions.QueryParameter.GetQueryParamName())
+									if queryParameterElement.GetQueryParamName() != "" {
+										queryParameterAttributeMap["query_param_name"] = types.StringValue(queryParameterElement.GetQueryParamName())
 									} else {
 										// Empty string, set to null
 										queryParameterAttributeMap["query_param_name"] = types.StringNull()
 									}
 
-									queryParameterObj, diags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymizationChoiceQueryParameterModelAttributeMap, queryParameterAttributeMap)
-									response.Diagnostics.Append(diags...)
+									queryParameterObj, queryParameterObjDiags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymizationChoiceQueryParameterModelAttributeMap, queryParameterAttributeMap)
+									response.Diagnostics.Append(queryParameterObjDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -1284,8 +1362,8 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					anonymizationConfigListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigModelAttributeMap}, anonymizationConfigElements)
-					response.Diagnostics.Append(diags...)
+					anonymizationConfigListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigModelAttributeMap}, anonymizationConfigElements)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1298,8 +1376,8 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 					customAnonymizationAttributeMap["anonymization_config"] = types.ListNull(types.ObjectType{AttrTypes: AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigModelAttributeMap})
 				}
 
-				customAnonymizationObj, diags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationModelAttributeMap, customAnonymizationAttributeMap)
-				response.Diagnostics.Append(diags...)
+				customAnonymizationObj, customAnonymizationObjDiags := types.ObjectValue(AppFirewallAnonymizationSettingCustomAnonymizationModelAttributeMap, customAnonymizationAttributeMap)
+				response.Diagnostics.Append(customAnonymizationObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1309,19 +1387,39 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		anonymizationSettingChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			AppFirewallAnonymizationSettingModelAttributeMap,
-			anonymizationSettingChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// data specToModelNested BoolOfOneOfPointerField --> DefaultAnonymization
+		_, isDefaultAnonymization := anonymizationSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DefaultAnonymization)
+
+		if isDefaultAnonymization {
+			anonymizationSettingChoiceChoicesModel.DefaultAnonymization = types.BoolValue(true)
+		} else {
+			anonymizationSettingChoiceChoicesModel.DefaultAnonymization = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.AnonymizationSettingChoice = anonymizationSettingChoiceObj
+		// data specToModelNested BoolOfOneOfPointerField --> DisableAnonymization
+		_, isDisableAnonymization := anonymizationSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DisableAnonymization)
+
+		if isDisableAnonymization {
+			anonymizationSettingChoiceChoicesModel.DisableAnonymization = types.BoolValue(true)
+		} else {
+			anonymizationSettingChoiceChoicesModel.DisableAnonymization = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			anonymizationSettingChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AppFirewallAnonymizationSettingModelAttributeMap,
+				anonymizationSettingChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.AnonymizationSettingChoice = anonymizationSettingChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.AnonymizationSettingChoice = types.ObjectNull(AppFirewallAnonymizationSettingModelAttributeMap)
@@ -1341,38 +1439,30 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> UseDefaultBlockingPage
-		_, isUseDefaultBlockingPage := blockingPageChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_UseDefaultBlockingPage)
-
-		if isUseDefaultBlockingPage {
-			blockingPageChoiceChoicesModel.UseDefaultBlockingPage = types.BoolValue(true)
-		} else {
-			blockingPageChoiceChoicesModel.UseDefaultBlockingPage = types.BoolNull()
-		}
-
 		// data specToModelNested PointerOfOneOfField --> BlockingPage
 		// <no value>
 		// false
 		{
-			blockingPageOptions, isBlockingPage := blockingPageChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_BlockingPage)
+			blockingPageOptionsWrapper, isBlockingPage := blockingPageChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_BlockingPage)
 			blockingPageAttributeMap := make(map[string]attr.Value)
 
-			if isBlockingPage && blockingPageOptions != nil {
+			if isBlockingPage && blockingPageOptionsWrapper != nil && blockingPageOptionsWrapper.BlockingPage != nil {
+				blockingPageElement := blockingPageOptionsWrapper.BlockingPage
 
 				// data specToModelNested StringField --> BlockingPage
-				if blockingPageOptions.BlockingPage.GetBlockingPage() != "" {
-					blockingPageAttributeMap["blocking_page"] = types.StringValue(blockingPageOptions.BlockingPage.GetBlockingPage())
+				if blockingPageElement.GetBlockingPage() != "" {
+					blockingPageAttributeMap["blocking_page"] = types.StringValue(blockingPageElement.GetBlockingPage())
 				} else {
 					// Empty string, set to null
 					blockingPageAttributeMap["blocking_page"] = types.StringNull()
 				}
 
 				// data specToModelNested EnumField --> ResponseCode
-				if blockingPageOptions.BlockingPage.GetResponseCode().String() != "" {
-					stringValue := types.StringValue(blockingPageOptions.BlockingPage.GetResponseCode().String())
+				if blockingPageElement.GetResponseCode().String() != "" {
+					stringValue := types.StringValue(blockingPageElement.GetResponseCode().String())
 					stringSlice := []types.String{stringValue}
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-					response.Diagnostics.Append(diags...)
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1381,8 +1471,8 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 					blockingPageAttributeMap["response_code"] = types.ListNull(types.StringType)
 				}
 
-				blockingPageObj, diags := types.ObjectValue(AppFirewallBlockingPageChoiceBlockingPageModelAttributeMap, blockingPageAttributeMap)
-				response.Diagnostics.Append(diags...)
+				blockingPageObj, blockingPageObjDiags := types.ObjectValue(AppFirewallBlockingPageChoiceBlockingPageModelAttributeMap, blockingPageAttributeMap)
+				response.Diagnostics.Append(blockingPageObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1392,182 +1482,33 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		blockingPageChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			AppFirewallBlockingPageChoiceModelAttributeMap,
-			blockingPageChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// data specToModelNested BoolOfOneOfPointerField --> UseDefaultBlockingPage
+		_, isUseDefaultBlockingPage := blockingPageChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_UseDefaultBlockingPage)
+
+		if isUseDefaultBlockingPage {
+			blockingPageChoiceChoicesModel.UseDefaultBlockingPage = types.BoolValue(true)
+		} else {
+			blockingPageChoiceChoicesModel.UseDefaultBlockingPage = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.BlockingPageChoice = blockingPageChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			blockingPageChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AppFirewallBlockingPageChoiceModelAttributeMap,
+				blockingPageChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.BlockingPageChoice = blockingPageChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.BlockingPageChoice = types.ObjectNull(AppFirewallBlockingPageChoiceModelAttributeMap)
-	}
-
-	// data SpecToModelRoot RequiredOneOfField --> EnhanceWithAiChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetEnhanceWithAiChoice() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		enhanceWithAiChoiceChoices := specData.GetEnhanceWithAiChoice()
-
-		// The model struct that will be populated by the nested template.
-		var enhanceWithAiChoiceChoicesModel = &AppFirewallGlobalSpecTypeEnhanceWithAiChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested BoolOfOneOfPointerField --> DisableAiEnhancements
-		_, isDisableAiEnhancements := enhanceWithAiChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DisableAiEnhancements)
-
-		if isDisableAiEnhancements {
-			enhanceWithAiChoiceChoicesModel.DisableAiEnhancements = types.BoolValue(true)
-		} else {
-			enhanceWithAiChoiceChoicesModel.DisableAiEnhancements = types.BoolNull()
-		}
-
-		// data specToModelNested PointerOfOneOfField --> EnableAiEnhancements
-		// <no value>
-		// false
-		{
-			enableAiEnhancementsOptions, isEnableAiEnhancements := enhanceWithAiChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_EnableAiEnhancements)
-			enableAiEnhancementsAttributeMap := make(map[string]attr.Value)
-
-			if isEnableAiEnhancements && enableAiEnhancementsOptions != nil {
-
-				// data specToModelNested RequiredOneOfField --> RiskScoreActionChoice
-				// <no value>
-				if enableAiEnhancementsOptions.EnableAiEnhancements.GetRiskScoreActionChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					enableAiEnhancementsriskScoreActionChoiceChoices := enableAiEnhancementsOptions.EnableAiEnhancements.GetRiskScoreActionChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> MitigateHighRiskAction
-					_, isMitigateHighRiskAction := enableAiEnhancementsriskScoreActionChoiceChoices.(*ves_io_schema_app_firewall.AIEnhancementsConfig_MitigateHighRiskAction)
-
-					if isMitigateHighRiskAction {
-						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_risk_action"] = types.BoolValue(true)
-					} else {
-						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_risk_action"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> MitigateHighMediumRiskAction
-					_, isMitigateHighMediumRiskAction := enableAiEnhancementsriskScoreActionChoiceChoices.(*ves_io_schema_app_firewall.AIEnhancementsConfig_MitigateHighMediumRiskAction)
-
-					if isMitigateHighMediumRiskAction {
-						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_medium_risk_action"] = types.BoolValue(true)
-					} else {
-						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_medium_risk_action"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, enableAiEnhancementsriskScoreActionChoiceChoicesObjDiags := types.ObjectValue(
-						AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(enableAiEnhancementsriskScoreActionChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					enableAiEnhancementsAttributeMap["risk_score_action_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					enableAiEnhancementsAttributeMap["risk_score_action_choice"] = types.ObjectNull(AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap)
-				}
-
-				enableAiEnhancementsObj, diags := types.ObjectValue(AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap, enableAiEnhancementsAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				enhanceWithAiChoiceChoicesModel.EnableAiEnhancements = enableAiEnhancementsObj
-			} else {
-				enhanceWithAiChoiceChoicesModel.EnableAiEnhancements = types.ObjectNull(AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap)
-			}
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		enhanceWithAiChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			AppFirewallEnhanceWithAiChoiceModelAttributeMap,
-			enhanceWithAiChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.EnhanceWithAiChoice = enhanceWithAiChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.EnhanceWithAiChoice = types.ObjectNull(AppFirewallEnhanceWithAiChoiceModelAttributeMap)
-	}
-
-	// data SpecToModelRoot RequiredOneOfField --> EnforcementModeChoice
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetEnforcementModeChoice() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		enforcementModeChoiceChoices := specData.GetEnforcementModeChoice()
-
-		// The model struct that will be populated by the nested template.
-		var enforcementModeChoiceChoicesModel = &AppFirewallGlobalSpecTypeEnforcementModeChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested BoolOfOneOfPointerField --> Blocking
-		_, isBlocking := enforcementModeChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_Blocking)
-
-		if isBlocking {
-			enforcementModeChoiceChoicesModel.Blocking = types.BoolValue(true)
-		} else {
-			enforcementModeChoiceChoicesModel.Blocking = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> Monitoring
-		_, isMonitoring := enforcementModeChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_Monitoring)
-
-		if isMonitoring {
-			enforcementModeChoiceChoicesModel.Monitoring = types.BoolValue(true)
-		} else {
-			enforcementModeChoiceChoicesModel.Monitoring = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		enforcementModeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			AppFirewallEnforcementModeChoiceModelAttributeMap,
-			enforcementModeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.EnforcementModeChoice = enforcementModeChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.EnforcementModeChoice = types.ObjectNull(AppFirewallEnforcementModeChoiceModelAttributeMap)
 	}
 
 	// data SpecToModelRoot RequiredOneOfField --> DetectionSettingChoice
@@ -1597,20 +1538,21 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 		// <no value>
 		// false
 		{
-			detectionSettingsOptions, isDetectionSettings := detectionSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DetectionSettings)
+			detectionSettingsOptionsWrapper, isDetectionSettings := detectionSettingChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DetectionSettings)
 			detectionSettingsAttributeMap := make(map[string]attr.Value)
 
-			if isDetectionSettings && detectionSettingsOptions != nil {
+			if isDetectionSettings && detectionSettingsOptionsWrapper != nil && detectionSettingsOptionsWrapper.DetectionSettings != nil {
+				detectionSettingsElement := detectionSettingsOptionsWrapper.DetectionSettings
 
 				// data specToModelNested RequiredOneOfField --> BotProtectionChoice
 				// <no value>
-				if detectionSettingsOptions.DetectionSettings.GetBotProtectionChoice() != nil {
+				if detectionSettingsElement.GetBotProtectionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsbotProtectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					detectionSettingsbotProtectionChoiceChoices := detectionSettingsOptions.DetectionSettings.GetBotProtectionChoice()
+					detectionSettingsbotProtectionChoiceChoices := detectionSettingsElement.GetBotProtectionChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -1618,17 +1560,18 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 					// <no value>
 					// false
 					{
-						botProtectionSettingOptions, isBotProtectionSetting := detectionSettingsbotProtectionChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_BotProtectionSetting)
+						botProtectionSettingOptionsWrapper, isBotProtectionSetting := detectionSettingsbotProtectionChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_BotProtectionSetting)
 						botProtectionSettingAttributeMap := make(map[string]attr.Value)
 
-						if isBotProtectionSetting && botProtectionSettingOptions != nil {
+						if isBotProtectionSetting && botProtectionSettingOptionsWrapper != nil && botProtectionSettingOptionsWrapper.BotProtectionSetting != nil {
+							botProtectionSettingElement := botProtectionSettingOptionsWrapper.BotProtectionSetting
 
 							// data specToModelNested EnumField --> GoodBotAction
-							if botProtectionSettingOptions.BotProtectionSetting.GetGoodBotAction().String() != "" {
-								stringValue := types.StringValue(botProtectionSettingOptions.BotProtectionSetting.GetGoodBotAction().String())
+							if botProtectionSettingElement.GetGoodBotAction().String() != "" {
+								stringValue := types.StringValue(botProtectionSettingElement.GetGoodBotAction().String())
 								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1638,11 +1581,11 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 							}
 
 							// data specToModelNested EnumField --> MaliciousBotAction
-							if botProtectionSettingOptions.BotProtectionSetting.GetMaliciousBotAction().String() != "" {
-								stringValue := types.StringValue(botProtectionSettingOptions.BotProtectionSetting.GetMaliciousBotAction().String())
+							if botProtectionSettingElement.GetMaliciousBotAction().String() != "" {
+								stringValue := types.StringValue(botProtectionSettingElement.GetMaliciousBotAction().String())
 								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1652,11 +1595,11 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 							}
 
 							// data specToModelNested EnumField --> SuspiciousBotAction
-							if botProtectionSettingOptions.BotProtectionSetting.GetSuspiciousBotAction().String() != "" {
-								stringValue := types.StringValue(botProtectionSettingOptions.BotProtectionSetting.GetSuspiciousBotAction().String())
+							if botProtectionSettingElement.GetSuspiciousBotAction().String() != "" {
+								stringValue := types.StringValue(botProtectionSettingElement.GetSuspiciousBotAction().String())
 								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1665,8 +1608,8 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 								botProtectionSettingAttributeMap["suspicious_bot_action"] = types.ListNull(types.StringType)
 							}
 
-							botProtectionSettingObj, diags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceBotProtectionSettingModelAttributeMap, botProtectionSettingAttributeMap)
-							response.Diagnostics.Append(diags...)
+							botProtectionSettingObj, botProtectionSettingObjDiags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceBotProtectionSettingModelAttributeMap, botProtectionSettingAttributeMap)
+							response.Diagnostics.Append(botProtectionSettingObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -1704,74 +1647,243 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 					detectionSettingsAttributeMap["bot_protection_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceModelAttributeMap)
 				}
 
-				// data specToModelNested RequiredArrayOfPointerField --> ViolationsView
-				if len(detectionSettingsOptions.DetectionSettings.GetViolationsView()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					violationsViewElements := make([]AppFirewallAppFirewallViolationConfigView, 0, len(detectionSettingsOptions.DetectionSettings.GetViolationsView()))
-					for _, violationsViewElement := range detectionSettingsOptions.DetectionSettings.GetViolationsView() {
-						appFirewallAppFirewallViolationConfigViewModel := AppFirewallAppFirewallViolationConfigView{}
+				// data specToModelNested RequiredOneOfField --> FalsePositiveSuppression
+				// <no value>
+				if detectionSettingsElement.GetFalsePositiveSuppression() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
-						// data specToModelNested BoolField --> Enabled
-						appFirewallAppFirewallViolationConfigViewModel.Enabled = types.BoolValue(bool(violationsViewElement.GetEnabled()))
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					detectionSettingsfalsePositiveSuppressionChoiceChoices := detectionSettingsElement.GetFalsePositiveSuppression()
 
-						// data specToModelNested StringField --> Title
-						if violationsViewElement.GetTitle() != "" {
-							appFirewallAppFirewallViolationConfigViewModel.Title = types.StringValue(violationsViewElement.GetTitle())
-						} else {
-							// Empty string, set to null
-							appFirewallAppFirewallViolationConfigViewModel.Title = types.StringNull()
-						}
+					// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested StringField --> Name
-						if violationsViewElement.GetName() != "" {
-							appFirewallAppFirewallViolationConfigViewModel.Name = types.StringValue(violationsViewElement.GetName())
-						} else {
-							// Empty string, set to null
-							appFirewallAppFirewallViolationConfigViewModel.Name = types.StringNull()
-						}
+					// data specToModelNested BoolOfOneOfPointerField --> DisableSuppression
+					_, isDisableSuppression := detectionSettingsfalsePositiveSuppressionChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_DisableSuppression)
 
-						// data specToModelNested StringField --> Description
-						if violationsViewElement.GetDescription() != "" {
-							appFirewallAppFirewallViolationConfigViewModel.Description = types.StringValue(violationsViewElement.GetDescription())
-						} else {
-							// Empty string, set to null
-							appFirewallAppFirewallViolationConfigViewModel.Description = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> EnabledByDefault
-						if violationsViewElement.GetEnabledByDefault() != "" {
-							appFirewallAppFirewallViolationConfigViewModel.EnabledByDefault = types.StringValue(violationsViewElement.GetEnabledByDefault())
-						} else {
-							// Empty string, set to null
-							appFirewallAppFirewallViolationConfigViewModel.EnabledByDefault = types.StringNull()
-						}
-
-						violationsViewElements = append(violationsViewElements, appFirewallAppFirewallViolationConfigViewModel)
+					if isDisableSuppression {
+						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["disable_suppression"] = types.BoolValue(true)
+					} else {
+						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["disable_suppression"] = types.BoolNull()
 					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					violationsViewListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsViolationsViewModelAttributeMap}, violationsViewElements)
-					response.Diagnostics.Append(diags...)
+
+					// data specToModelNested BoolOfOneOfPointerField --> EnableSuppression
+					_, isEnableSuppression := detectionSettingsfalsePositiveSuppressionChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_EnableSuppression)
+
+					if isEnableSuppression {
+						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["enable_suppression"] = types.BoolValue(true)
+					} else {
+						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["enable_suppression"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, detectionSettingsfalsePositiveSuppressionChoiceChoicesObjDiags := types.ObjectValue(
+						AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap, // The attribute schema for the OneOf choices
+						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(detectionSettingsfalsePositiveSuppressionChoiceChoicesObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					detectionSettingsAttributeMap["violations_view"] = violationsViewListValue
 
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					detectionSettingsAttributeMap["false_positive_suppression_choice"] = finalObj
 				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					detectionSettingsAttributeMap["violations_view"] = types.ListNull(types.ObjectType{AttrTypes: AppFirewallDetectionSettingChoiceDetectionSettingsViolationsViewModelAttributeMap})
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					detectionSettingsAttributeMap["false_positive_suppression_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap)
 				}
 
 				// data specToModelNested PointerField --> SignatureSelectionSetting
-				if detectionSettingsOptions.DetectionSettings.GetSignatureSelectionSetting() != nil {
+				if detectionSettingsElement.GetSignatureSelectionSetting() != nil {
 					// Create the nested Go struct
 					appFirewallAppFirewallSignatureSelectionSettingModel := &AppFirewallAppFirewallSignatureSelectionSetting{}
-					signatureSelectionSettingElement := detectionSettingsOptions.DetectionSettings.GetSignatureSelectionSetting()
+					signatureSelectionSettingElement := detectionSettingsElement.GetSignatureSelectionSetting()
 
 					// Recursively populate the nested struct
+
+					// data specToModelNested RequiredOneOfField --> AttackTypeSetting
+					// <no value>
+					if signatureSelectionSettingElement.GetAttackTypeSetting() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						signatureSelectionSettingattackTypeSettingChoiceChoices := signatureSelectionSettingElement.GetAttackTypeSetting()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested PointerOfOneOfField --> AttackTypeSettings
+						// <no value>
+						// false
+						{
+							attackTypeSettingsOptionsWrapper, isAttackTypeSettings := signatureSelectionSettingattackTypeSettingChoiceChoices.(*ves_io_schema_app_firewall.SignatureSelectionSetting_AttackTypeSettings)
+							attackTypeSettingsAttributeMap := make(map[string]attr.Value)
+
+							if isAttackTypeSettings && attackTypeSettingsOptionsWrapper != nil && attackTypeSettingsOptionsWrapper.AttackTypeSettings != nil {
+								attackTypeSettingsElement := attackTypeSettingsOptionsWrapper.AttackTypeSettings
+
+								// data SpecToModelNested RequiredArrayOfEnumField --> DisabledAttackTypes
+								if len(attackTypeSettingsElement.GetDisabledAttackTypes()) > 0 {
+									disabledAttackTypesStrings := make([]string, 0, len(attackTypeSettingsElement.GetDisabledAttackTypes()))
+									for _, v := range attackTypeSettingsElement.GetDisabledAttackTypes() {
+										if strVal, exists := ves_io_schema_app_firewall.AttackType_name[int32(v)]; exists {
+											disabledAttackTypesStrings = append(disabledAttackTypesStrings, strVal)
+										}
+									}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, disabledAttackTypesStrings)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									attackTypeSettingsAttributeMap["disabled_attack_types"] = listValue
+								} else {
+									attackTypeSettingsAttributeMap["disabled_attack_types"] = types.ListNull(types.StringType)
+								}
+
+								attackTypeSettingsObj, attackTypeSettingsObjDiags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingAttackTypeSettingsModelAttributeMap, attackTypeSettingsAttributeMap)
+								response.Diagnostics.Append(attackTypeSettingsObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["attack_type_settings"] = attackTypeSettingsObj
+							} else {
+								signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["attack_type_settings"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingAttackTypeSettingsModelAttributeMap)
+							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> DefaultAttackTypeSettings
+						_, isDefaultAttackTypeSettings := signatureSelectionSettingattackTypeSettingChoiceChoices.(*ves_io_schema_app_firewall.SignatureSelectionSetting_DefaultAttackTypeSettings)
+
+						if isDefaultAttackTypeSettings {
+							signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["default_attack_type_settings"] = types.BoolValue(true)
+						} else {
+							signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["default_attack_type_settings"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, signatureSelectionSettingattackTypeSettingChoiceChoicesObjDiags := types.ObjectValue(
+							AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap, // The attribute schema for the OneOf choices
+							signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(signatureSelectionSettingattackTypeSettingChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						appFirewallAppFirewallSignatureSelectionSettingModel.AttackTypeSettingChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						appFirewallAppFirewallSignatureSelectionSettingModel.AttackTypeSettingChoice = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap)
+					}
+
+					// data specToModelNested OneOfField --> SignatureProtectionChoice
+					if signatureSelectionSettingElement.GetSignatureProtectionChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						signatureSelectionSettingsignatureProtectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						signatureSelectionSettingsignatureProtectionChoiceChoices := signatureSelectionSettingElement.GetSignatureProtectionChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> DefaultSignatureSetting
+						_, isDefaultSignatureSetting := signatureSelectionSettingsignatureProtectionChoiceChoices.(*ves_io_schema_app_firewall.SignatureSelectionSetting_DefaultSignatureSetting)
+
+						if isDefaultSignatureSetting {
+							signatureSelectionSettingsignatureProtectionChoiceChoicesAttributeMap["default_signature_setting"] = types.BoolValue(true)
+						} else {
+							signatureSelectionSettingsignatureProtectionChoiceChoicesAttributeMap["default_signature_setting"] = types.BoolNull()
+						}
+
+						// data specToModelNested PointerOfOneOfField --> SignatureSettingsByAccuracy
+						// <no value>
+						// false
+						{
+							signatureSettingsByAccuracyOptionsWrapper, isSignatureSettingsByAccuracy := signatureSelectionSettingsignatureProtectionChoiceChoices.(*ves_io_schema_app_firewall.SignatureSelectionSetting_SignatureSettingsByAccuracy)
+							signatureSettingsByAccuracyAttributeMap := make(map[string]attr.Value)
+
+							if isSignatureSettingsByAccuracy && signatureSettingsByAccuracyOptionsWrapper != nil && signatureSettingsByAccuracyOptionsWrapper.SignatureSettingsByAccuracy != nil {
+								signatureSettingsByAccuracyElement := signatureSettingsByAccuracyOptionsWrapper.SignatureSettingsByAccuracy
+
+								// data specToModelNested EnumField --> HighAccuracyAction
+								if signatureSettingsByAccuracyElement.GetHighAccuracyAction().String() != "" {
+									stringValue := types.StringValue(signatureSettingsByAccuracyElement.GetHighAccuracyAction().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									signatureSettingsByAccuracyAttributeMap["high_accuracy_action"] = listValue
+								} else {
+									signatureSettingsByAccuracyAttributeMap["high_accuracy_action"] = types.ListNull(types.StringType)
+								}
+
+								// data specToModelNested EnumField --> LowAccuracyAction
+								if signatureSettingsByAccuracyElement.GetLowAccuracyAction().String() != "" {
+									stringValue := types.StringValue(signatureSettingsByAccuracyElement.GetLowAccuracyAction().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									signatureSettingsByAccuracyAttributeMap["low_accuracy_action"] = listValue
+								} else {
+									signatureSettingsByAccuracyAttributeMap["low_accuracy_action"] = types.ListNull(types.StringType)
+								}
+
+								// data specToModelNested EnumField --> MediumAccuracyAction
+								if signatureSettingsByAccuracyElement.GetMediumAccuracyAction().String() != "" {
+									stringValue := types.StringValue(signatureSettingsByAccuracyElement.GetMediumAccuracyAction().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									signatureSettingsByAccuracyAttributeMap["medium_accuracy_action"] = listValue
+								} else {
+									signatureSettingsByAccuracyAttributeMap["medium_accuracy_action"] = types.ListNull(types.StringType)
+								}
+
+								signatureSettingsByAccuracyObj, signatureSettingsByAccuracyObjDiags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceSignatureSettingsByAccuracyModelAttributeMap, signatureSettingsByAccuracyAttributeMap)
+								response.Diagnostics.Append(signatureSettingsByAccuracyObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								signatureSelectionSettingsignatureProtectionChoiceChoicesAttributeMap["signature_settings_by_accuracy"] = signatureSettingsByAccuracyObj
+							} else {
+								signatureSelectionSettingsignatureProtectionChoiceChoicesAttributeMap["signature_settings_by_accuracy"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceSignatureSettingsByAccuracyModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, signatureSelectionSettingsignatureProtectionChoiceChoicesObjDiags := types.ObjectValue(
+							AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							signatureSelectionSettingsignatureProtectionChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(signatureSelectionSettingsignatureProtectionChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						appFirewallAppFirewallSignatureSelectionSettingModel.SignatureProtectionChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						appFirewallAppFirewallSignatureSelectionSettingModel.SignatureProtectionChoice = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureProtectionChoiceModelAttributeMap)
+					}
 
 					// data specToModelNested RequiredOneOfField --> SignatureSelectionByAccuracy
 					// <no value>
@@ -1831,87 +1943,9 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 						appFirewallAppFirewallSignatureSelectionSettingModel.SignatureSelectionByAccuracyChoice = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingSignatureSelectionByAccuracyModelAttributeMap)
 					}
 
-					// data specToModelNested RequiredOneOfField --> AttackTypeSetting
-					// <no value>
-					if signatureSelectionSettingElement.GetAttackTypeSetting() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						signatureSelectionSettingattackTypeSettingChoiceChoices := signatureSelectionSettingElement.GetAttackTypeSetting()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested PointerOfOneOfField --> AttackTypeSettings
-						// <no value>
-						// false
-						{
-							attackTypeSettingsOptions, isAttackTypeSettings := signatureSelectionSettingattackTypeSettingChoiceChoices.(*ves_io_schema_app_firewall.SignatureSelectionSetting_AttackTypeSettings)
-							attackTypeSettingsAttributeMap := make(map[string]attr.Value)
-
-							if isAttackTypeSettings && attackTypeSettingsOptions != nil {
-
-								// data SpecToModelNested RequiredArrayOfEnumField --> DisabledAttackTypes
-								if len(attackTypeSettingsOptions.AttackTypeSettings.GetDisabledAttackTypes()) > 0 {
-									disabledAttackTypesStrings := make([]string, 0, len(attackTypeSettingsOptions.AttackTypeSettings.GetDisabledAttackTypes()))
-									for _, v := range attackTypeSettingsOptions.AttackTypeSettings.GetDisabledAttackTypes() {
-										if strVal, exists := ves_io_schema_app_firewall.AttackType_name[int32(v)]; exists {
-											disabledAttackTypesStrings = append(disabledAttackTypesStrings, strVal)
-										}
-									}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, disabledAttackTypesStrings)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									attackTypeSettingsAttributeMap["disabled_attack_types"] = listValue
-								} else {
-									attackTypeSettingsAttributeMap["disabled_attack_types"] = types.ListNull(types.StringType)
-								}
-
-								attackTypeSettingsObj, diags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingAttackTypeSettingsModelAttributeMap, attackTypeSettingsAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["attack_type_settings"] = attackTypeSettingsObj
-							} else {
-								signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["attack_type_settings"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingAttackTypeSettingsModelAttributeMap)
-							}
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> DefaultAttackTypeSettings
-						_, isDefaultAttackTypeSettings := signatureSelectionSettingattackTypeSettingChoiceChoices.(*ves_io_schema_app_firewall.SignatureSelectionSetting_DefaultAttackTypeSettings)
-
-						if isDefaultAttackTypeSettings {
-							signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["default_attack_type_settings"] = types.BoolValue(true)
-						} else {
-							signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap["default_attack_type_settings"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, signatureSelectionSettingattackTypeSettingChoiceChoicesObjDiags := types.ObjectValue(
-							AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap, // The attribute schema for the OneOf choices
-							signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(signatureSelectionSettingattackTypeSettingChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						appFirewallAppFirewallSignatureSelectionSettingModel.AttackTypeSettingChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						appFirewallAppFirewallSignatureSelectionSettingModel.AttackTypeSettingChoice = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap)
-					}
-
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					appFirewallAppFirewallSignatureSelectionSettingModelObj, diags := types.ObjectValueFrom(ctx, AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingModelAttributeMap, appFirewallAppFirewallSignatureSelectionSettingModel)
-					response.Diagnostics.Append(diags...)
+					appFirewallAppFirewallSignatureSelectionSettingModelObj, objDiags := types.ObjectValueFrom(ctx, AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingModelAttributeMap, appFirewallAppFirewallSignatureSelectionSettingModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1927,112 +1961,14 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 					detectionSettingsAttributeMap["signature_selection_setting"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingModelAttributeMap)
 				}
 
-				// data specToModelNested RequiredOneOfField --> FalsePositiveSuppression
-				// <no value>
-				if detectionSettingsOptions.DetectionSettings.GetFalsePositiveSuppression() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					detectionSettingsfalsePositiveSuppressionChoiceChoices := detectionSettingsOptions.DetectionSettings.GetFalsePositiveSuppression()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> EnableSuppression
-					_, isEnableSuppression := detectionSettingsfalsePositiveSuppressionChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_EnableSuppression)
-
-					if isEnableSuppression {
-						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["enable_suppression"] = types.BoolValue(true)
-					} else {
-						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["enable_suppression"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> DisableSuppression
-					_, isDisableSuppression := detectionSettingsfalsePositiveSuppressionChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_DisableSuppression)
-
-					if isDisableSuppression {
-						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["disable_suppression"] = types.BoolValue(true)
-					} else {
-						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap["disable_suppression"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, detectionSettingsfalsePositiveSuppressionChoiceChoicesObjDiags := types.ObjectValue(
-						AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap, // The attribute schema for the OneOf choices
-						detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(detectionSettingsfalsePositiveSuppressionChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					detectionSettingsAttributeMap["false_positive_suppression_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					detectionSettingsAttributeMap["false_positive_suppression_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap)
-				}
-
-				// data specToModelNested RequiredOneOfField --> ThreatCampaignChoice
-				// <no value>
-				if detectionSettingsOptions.DetectionSettings.GetThreatCampaignChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					detectionSettingsthreatCampaignChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					detectionSettingsthreatCampaignChoiceChoices := detectionSettingsOptions.DetectionSettings.GetThreatCampaignChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> EnableThreatCampaigns
-					_, isEnableThreatCampaigns := detectionSettingsthreatCampaignChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_EnableThreatCampaigns)
-
-					if isEnableThreatCampaigns {
-						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["enable_threat_campaigns"] = types.BoolValue(true)
-					} else {
-						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["enable_threat_campaigns"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> DisableThreatCampaigns
-					_, isDisableThreatCampaigns := detectionSettingsthreatCampaignChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_DisableThreatCampaigns)
-
-					if isDisableThreatCampaigns {
-						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["disable_threat_campaigns"] = types.BoolValue(true)
-					} else {
-						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["disable_threat_campaigns"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, detectionSettingsthreatCampaignChoiceChoicesObjDiags := types.ObjectValue(
-						AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						detectionSettingsthreatCampaignChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(detectionSettingsthreatCampaignChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					detectionSettingsAttributeMap["threat_campaign_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					detectionSettingsAttributeMap["threat_campaign_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap)
-				}
-
 				// data specToModelNested OneOfField --> SignaturesStagingSettings
-				if detectionSettingsOptions.DetectionSettings.GetSignaturesStagingSettings() != nil {
+				if detectionSettingsElement.GetSignaturesStagingSettings() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					detectionSettingssignaturesStagingSettingsChoiceChoices := detectionSettingsOptions.DetectionSettings.GetSignaturesStagingSettings()
+					detectionSettingssignaturesStagingSettingsChoiceChoices := detectionSettingsElement.GetSignaturesStagingSettings()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -2045,49 +1981,51 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 						detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap["disable_staging"] = types.BoolNull()
 					}
 
-					// data specToModelNested PointerOfOneOfField --> StageNewSignatures
-					// <no value>
-					// false
-					{
-						stageNewSignaturesOptions, isStageNewSignatures := detectionSettingssignaturesStagingSettingsChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_StageNewSignatures)
-						stageNewSignaturesAttributeMap := make(map[string]attr.Value)
-
-						if isStageNewSignatures && stageNewSignaturesOptions != nil {
-
-							// data specToModelNested RequiredUintField --> StagingPeriod
-							stageNewSignaturesAttributeMap["staging_period"] = types.Int64Value(int64(stageNewSignaturesOptions.StageNewSignatures.GetStagingPeriod()))
-
-							stageNewSignaturesObj, diags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap, stageNewSignaturesAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap["stage_new_signatures"] = stageNewSignaturesObj
-						} else {
-							detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap["stage_new_signatures"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap)
-						}
-					}
-
 					// data specToModelNested PointerOfOneOfField --> StageNewAndUpdatedSignatures
 					// <no value>
 					// false
 					{
-						stageNewAndUpdatedSignaturesOptions, isStageNewAndUpdatedSignatures := detectionSettingssignaturesStagingSettingsChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_StageNewAndUpdatedSignatures)
+						stageNewAndUpdatedSignaturesOptionsWrapper, isStageNewAndUpdatedSignatures := detectionSettingssignaturesStagingSettingsChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_StageNewAndUpdatedSignatures)
 						stageNewAndUpdatedSignaturesAttributeMap := make(map[string]attr.Value)
 
-						if isStageNewAndUpdatedSignatures && stageNewAndUpdatedSignaturesOptions != nil {
+						if isStageNewAndUpdatedSignatures && stageNewAndUpdatedSignaturesOptionsWrapper != nil && stageNewAndUpdatedSignaturesOptionsWrapper.StageNewAndUpdatedSignatures != nil {
+							stageNewAndUpdatedSignaturesElement := stageNewAndUpdatedSignaturesOptionsWrapper.StageNewAndUpdatedSignatures
 
 							// data specToModelNested RequiredUintField --> StagingPeriod
-							stageNewAndUpdatedSignaturesAttributeMap["staging_period"] = types.Int64Value(int64(stageNewAndUpdatedSignaturesOptions.StageNewAndUpdatedSignatures.GetStagingPeriod()))
+							stageNewAndUpdatedSignaturesAttributeMap["staging_period"] = types.Int64Value(int64(stageNewAndUpdatedSignaturesElement.GetStagingPeriod()))
 
-							stageNewAndUpdatedSignaturesObj, diags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewAndUpdatedSignaturesModelAttributeMap, stageNewAndUpdatedSignaturesAttributeMap)
-							response.Diagnostics.Append(diags...)
+							stageNewAndUpdatedSignaturesObj, stageNewAndUpdatedSignaturesObjDiags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewAndUpdatedSignaturesModelAttributeMap, stageNewAndUpdatedSignaturesAttributeMap)
+							response.Diagnostics.Append(stageNewAndUpdatedSignaturesObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap["stage_new_and_updated_signatures"] = stageNewAndUpdatedSignaturesObj
 						} else {
 							detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap["stage_new_and_updated_signatures"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewAndUpdatedSignaturesModelAttributeMap)
+						}
+					}
+
+					// data specToModelNested PointerOfOneOfField --> StageNewSignatures
+					// <no value>
+					// false
+					{
+						stageNewSignaturesOptionsWrapper, isStageNewSignatures := detectionSettingssignaturesStagingSettingsChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_StageNewSignatures)
+						stageNewSignaturesAttributeMap := make(map[string]attr.Value)
+
+						if isStageNewSignatures && stageNewSignaturesOptionsWrapper != nil && stageNewSignaturesOptionsWrapper.StageNewSignatures != nil {
+							stageNewSignaturesElement := stageNewSignaturesOptionsWrapper.StageNewSignatures
+
+							// data specToModelNested RequiredUintField --> StagingPeriod
+							stageNewSignaturesAttributeMap["staging_period"] = types.Int64Value(int64(stageNewSignaturesElement.GetStagingPeriod()))
+
+							stageNewSignaturesObj, stageNewSignaturesObjDiags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap, stageNewSignaturesAttributeMap)
+							response.Diagnostics.Append(stageNewSignaturesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap["stage_new_signatures"] = stageNewSignaturesObj
+						} else {
+							detectionSettingssignaturesStagingSettingsChoiceChoicesAttributeMap["stage_new_signatures"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsStageNewSignaturesModelAttributeMap)
 						}
 					}
 
@@ -2110,8 +2048,57 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 					detectionSettingsAttributeMap["signatures_staging_settings_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsModelAttributeMap)
 				}
 
-				detectionSettingsObj, diags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsModelAttributeMap, detectionSettingsAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// data specToModelNested RequiredOneOfField --> ThreatCampaignChoice
+				// <no value>
+				if detectionSettingsElement.GetThreatCampaignChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					detectionSettingsthreatCampaignChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					detectionSettingsthreatCampaignChoiceChoices := detectionSettingsElement.GetThreatCampaignChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> DisableThreatCampaigns
+					_, isDisableThreatCampaigns := detectionSettingsthreatCampaignChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_DisableThreatCampaigns)
+
+					if isDisableThreatCampaigns {
+						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["disable_threat_campaigns"] = types.BoolValue(true)
+					} else {
+						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["disable_threat_campaigns"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> EnableThreatCampaigns
+					_, isEnableThreatCampaigns := detectionSettingsthreatCampaignChoiceChoices.(*ves_io_schema_app_firewall.DetectionSetting_EnableThreatCampaigns)
+
+					if isEnableThreatCampaigns {
+						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["enable_threat_campaigns"] = types.BoolValue(true)
+					} else {
+						detectionSettingsthreatCampaignChoiceChoicesAttributeMap["enable_threat_campaigns"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, detectionSettingsthreatCampaignChoiceChoicesObjDiags := types.ObjectValue(
+						AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						detectionSettingsthreatCampaignChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(detectionSettingsthreatCampaignChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					detectionSettingsAttributeMap["threat_campaign_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					detectionSettingsAttributeMap["threat_campaign_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap)
+				}
+
+				detectionSettingsObj, detectionSettingsObjDiags := types.ObjectValue(AppFirewallDetectionSettingChoiceDetectionSettingsModelAttributeMap, detectionSettingsAttributeMap)
+				response.Diagnostics.Append(detectionSettingsObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2122,99 +2109,192 @@ func (d *DataSourceF5XCAppFirewall) Read(ctx context.Context, request datasource
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		detectionSettingChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			AppFirewallDetectionSettingChoiceModelAttributeMap,
-			detectionSettingChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			detectionSettingChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AppFirewallDetectionSettingChoiceModelAttributeMap,
+				detectionSettingChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.DetectionSettingChoice = detectionSettingChoiceObj
+			// Assign the final object to the root data model.
+			data.DetectionSettingChoice = detectionSettingChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.DetectionSettingChoice = types.ObjectNull(AppFirewallDetectionSettingChoiceModelAttributeMap)
 	}
 
-	// data SpecToModelRoot RequiredOneOfField --> AllowedResponseCodesChoice
+	// data SpecToModelRoot RequiredOneOfField --> EnforcementModeChoice
 	// false
-	// true
+	// false
 	// This resource uses standard struct-based resolution.
-	if specData.GetAllowedResponseCodesChoice() != nil {
+	if specData.GetEnforcementModeChoice() != nil {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		allowedResponseCodesChoiceChoices := specData.GetAllowedResponseCodesChoice()
+		enforcementModeChoiceChoices := specData.GetEnforcementModeChoice()
 
 		// The model struct that will be populated by the nested template.
-		var allowedResponseCodesChoiceChoicesModel = &AppFirewallGlobalSpecTypeAllowedResponseCodesChoice{}
+		var enforcementModeChoiceChoicesModel = &AppFirewallGlobalSpecTypeEnforcementModeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> AllowAllResponseCodes
-		_, isAllowAllResponseCodes := allowedResponseCodesChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_AllowAllResponseCodes)
+		// data specToModelNested BoolOfOneOfPointerField --> Blocking
+		_, isBlocking := enforcementModeChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_Blocking)
 
-		if isAllowAllResponseCodes {
-			allowedResponseCodesChoiceChoicesModel.AllowAllResponseCodes = types.BoolValue(true)
+		if isBlocking {
+			enforcementModeChoiceChoicesModel.Blocking = types.BoolValue(true)
 		} else {
-			allowedResponseCodesChoiceChoicesModel.AllowAllResponseCodes = types.BoolNull()
+			enforcementModeChoiceChoicesModel.Blocking = types.BoolNull()
 		}
 
-		// data specToModelNested PointerOfOneOfField --> AllowedResponseCodes
+		// data specToModelNested BoolOfOneOfPointerField --> Monitoring
+		_, isMonitoring := enforcementModeChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_Monitoring)
+
+		if isMonitoring {
+			enforcementModeChoiceChoicesModel.Monitoring = types.BoolValue(true)
+		} else {
+			enforcementModeChoiceChoicesModel.Monitoring = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			enforcementModeChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AppFirewallEnforcementModeChoiceModelAttributeMap,
+				enforcementModeChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.EnforcementModeChoice = enforcementModeChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.EnforcementModeChoice = types.ObjectNull(AppFirewallEnforcementModeChoiceModelAttributeMap)
+	}
+
+	// data SpecToModelRoot RequiredOneOfField --> EnhanceWithAiChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetEnhanceWithAiChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		enhanceWithAiChoiceChoices := specData.GetEnhanceWithAiChoice()
+
+		// The model struct that will be populated by the nested template.
+		var enhanceWithAiChoiceChoicesModel = &AppFirewallGlobalSpecTypeEnhanceWithAiChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> DisableAiEnhancements
+		_, isDisableAiEnhancements := enhanceWithAiChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_DisableAiEnhancements)
+
+		if isDisableAiEnhancements {
+			enhanceWithAiChoiceChoicesModel.DisableAiEnhancements = types.BoolValue(true)
+		} else {
+			enhanceWithAiChoiceChoicesModel.DisableAiEnhancements = types.BoolNull()
+		}
+
+		// data specToModelNested PointerOfOneOfField --> EnableAiEnhancements
 		// <no value>
 		// false
 		{
-			allowedResponseCodesOptions, isAllowedResponseCodes := allowedResponseCodesChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_AllowedResponseCodes)
-			allowedResponseCodesAttributeMap := make(map[string]attr.Value)
+			enableAiEnhancementsOptionsWrapper, isEnableAiEnhancements := enhanceWithAiChoiceChoices.(*ves_io_schema_app_firewall.GlobalSpecType_EnableAiEnhancements)
+			enableAiEnhancementsAttributeMap := make(map[string]attr.Value)
 
-			if isAllowedResponseCodes && allowedResponseCodesOptions != nil {
+			if isEnableAiEnhancements && enableAiEnhancementsOptionsWrapper != nil && enableAiEnhancementsOptionsWrapper.EnableAiEnhancements != nil {
+				enableAiEnhancementsElement := enableAiEnhancementsOptionsWrapper.EnableAiEnhancements
 
-				// data specToModelNested RequiredArrayOfUintField --> ResponseCode
-				responseCodeValue := allowedResponseCodesOptions.AllowedResponseCodes.GetResponseCode()
-				if len(responseCodeValue) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.Int64Type, allowedResponseCodesOptions.AllowedResponseCodes.GetResponseCode())
-					response.Diagnostics.Append(diags...)
+				// data specToModelNested RequiredOneOfField --> RiskScoreActionChoice
+				// <no value>
+				if enableAiEnhancementsElement.GetRiskScoreActionChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					enableAiEnhancementsriskScoreActionChoiceChoices := enableAiEnhancementsElement.GetRiskScoreActionChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> MitigateHighMediumRiskAction
+					_, isMitigateHighMediumRiskAction := enableAiEnhancementsriskScoreActionChoiceChoices.(*ves_io_schema_app_firewall.AIEnhancementsConfig_MitigateHighMediumRiskAction)
+
+					if isMitigateHighMediumRiskAction {
+						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_medium_risk_action"] = types.BoolValue(true)
+					} else {
+						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_medium_risk_action"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> MitigateHighRiskAction
+					_, isMitigateHighRiskAction := enableAiEnhancementsriskScoreActionChoiceChoices.(*ves_io_schema_app_firewall.AIEnhancementsConfig_MitigateHighRiskAction)
+
+					if isMitigateHighRiskAction {
+						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_risk_action"] = types.BoolValue(true)
+					} else {
+						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap["mitigate_high_risk_action"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, enableAiEnhancementsriskScoreActionChoiceChoicesObjDiags := types.ObjectValue(
+						AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(enableAiEnhancementsriskScoreActionChoiceChoicesObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					allowedResponseCodesAttributeMap["response_code"] = listValue
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					enableAiEnhancementsAttributeMap["risk_score_action_choice"] = finalObj
 				} else {
-					allowedResponseCodesAttributeMap["response_code"] = types.ListNull(types.Int64Type)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					enableAiEnhancementsAttributeMap["risk_score_action_choice"] = types.ObjectNull(AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap)
 				}
 
-				allowedResponseCodesObj, diags := types.ObjectValue(AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap, allowedResponseCodesAttributeMap)
-				response.Diagnostics.Append(diags...)
+				enableAiEnhancementsObj, enableAiEnhancementsObjDiags := types.ObjectValue(AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap, enableAiEnhancementsAttributeMap)
+				response.Diagnostics.Append(enableAiEnhancementsObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				allowedResponseCodesChoiceChoicesModel.AllowedResponseCodes = allowedResponseCodesObj
+				enhanceWithAiChoiceChoicesModel.EnableAiEnhancements = enableAiEnhancementsObj
 			} else {
-				allowedResponseCodesChoiceChoicesModel.AllowedResponseCodes = types.ObjectNull(AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap)
+				enhanceWithAiChoiceChoicesModel.EnableAiEnhancements = types.ObjectNull(AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap)
 			}
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		allowedResponseCodesChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			AppFirewallAllowedResponseCodesChoiceModelAttributeMap,
-			allowedResponseCodesChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			enhanceWithAiChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AppFirewallEnhanceWithAiChoiceModelAttributeMap,
+				enhanceWithAiChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.AllowedResponseCodesChoice = allowedResponseCodesChoiceObj
+			// Assign the final object to the root data model.
+			data.EnhanceWithAiChoice = enhanceWithAiChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.AllowedResponseCodesChoice = types.ObjectNull(AppFirewallAllowedResponseCodesChoiceModelAttributeMap)
+		data.EnhanceWithAiChoice = types.ObjectNull(AppFirewallEnhanceWithAiChoiceModelAttributeMap)
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

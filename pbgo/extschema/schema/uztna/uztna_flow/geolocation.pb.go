@@ -5,15 +5,16 @@ package uztna_flow
 
 import (
 	fmt "fmt"
-	proto "github.com/gogo/protobuf/proto"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_group_element"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
+
+	proto "github.com/gogo/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_group_element"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -480,10 +481,7 @@ func (m *MatchingCriteria) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthGeolocation
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthGeolocation
 			}
 			if (iNdEx + skippy) > l {
@@ -567,10 +565,7 @@ func (m *GeoMatch) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthGeolocation
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthGeolocation
 			}
 			if (iNdEx + skippy) > l {

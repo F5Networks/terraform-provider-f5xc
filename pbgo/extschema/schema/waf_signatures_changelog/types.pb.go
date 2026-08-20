@@ -5,15 +5,17 @@ package waf_signatures_changelog
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/app_firewall"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
+	strconv "strconv"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/app_firewall"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -26,6 +28,37 @@ var _ = math.Inf
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
+
+// Bot Class
+//
+// x-displayName: "Bot Class"
+// Enumeration for Bot Class
+type BotClass int32
+
+const (
+	None      BotClass = 0
+	Malicious BotClass = 1
+	Trusted   BotClass = 2
+	Untrusted BotClass = 3
+)
+
+var BotClass_name = map[int32]string{
+	0: "None",
+	1: "Malicious",
+	2: "Trusted",
+	3: "Untrusted",
+}
+
+var BotClass_value = map[string]int32{
+	"None":      0,
+	"Malicious": 1,
+	"Trusted":   2,
+	"Untrusted": 3,
+}
+
+func (BotClass) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_126413124a3f5ee5, []int{0}
+}
 
 // GlobalSpecType
 //
@@ -176,7 +209,6 @@ type Signature struct {
 	// description
 	//
 	// x-displayName: "Description"
-	// x-example: "Summary:\nThis event is generated when an attempt is made to inject Server-side Include code. This is a general attack detection signature (i.e. it is not specific to any web application).\n\nImpact:\nSerious. Execution of arbitrary commands may be possible.\n\nDetailed Information:\nThis event indicates that an attempt has been made to inject Server-side Include (SSI) code. SSI Injection allows to attacker to send server side code that could be executed locally by the web server.\n\nAffected Systems:\nAll systems.\n\nAttack Scenarios:\nThere are many possible.\n\nEase Of Attack:\nSimple to medium.\n\nFalse Positives:\nSome applications may accept valid input which matches these signatures.\n\nFalse Negatives:\nNone known.\n\nCorrective Action:\nEnsure the system is using an up to date version of the software and has had all vendor supplied patches applied. Utilize \"Positive Security Model\" by accepting only known types of input in web application.\n\nAdditional References:\nhttp://www.webappsec.org/projects/threat/classes/ssi_injection.shtml\n\n"
 	// The Signature Description
 	Description string `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
 	// references
@@ -296,6 +328,137 @@ func (m *Signature) GetLastUpdate() string {
 	return ""
 }
 
+// Bot Signature
+//
+// x-displayName: "Bot Signature"
+// Bot signature information
+type BotSignature struct {
+	// ID
+	//
+	// x-displayName: "ID"
+	// x-example: "200104853"
+	// The Signature ID
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Bot Name
+	//
+	// x-displayName: "Bot Name"
+	// x-example: "Baidu"
+	// The Bot name
+	BotName string `protobuf:"bytes,2,opt,name=bot_name,json=botName,proto3" json:"bot_name,omitempty"`
+	// Bot Class
+	//
+	// x-displayName: "Bot Class"
+	// x-example: "Malicious"
+	// The Bot class
+	BotClass BotClass `protobuf:"varint,3,opt,name=bot_class,json=botClass,proto3,enum=ves.io.schema.waf_signatures_changelog.BotClass" json:"bot_class,omitempty"`
+	// Bot Category
+	//
+	// x-displayName: "Category"
+	// x-example: "Crawler"
+	// The Bot category
+	Category string `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`
+	// risk
+	//
+	// x-displayName: "Risk"
+	// x-example: "Crawler"
+	// The Bot risk
+	Risk string `protobuf:"bytes,5,opt,name=risk,proto3" json:"risk,omitempty"`
+	// Hostnames
+	//
+	// x-displayName: "Hostnames"
+	// x-example: ".googlebot.com"
+	// A list of hostnames associated with the bot
+	Hostnames []string `protobuf:"bytes,6,rep,name=hostnames,proto3" json:"hostnames,omitempty"`
+	// Last Updated
+	//
+	// x-displayName: "Last Update"
+	// x-example: "2022/11/29 20:19:17"
+	// x-required
+	// The Signature last update time
+	LastUpdated string `protobuf:"bytes,7,opt,name=last_updated,json=lastUpdated,proto3" json:"last_updated,omitempty"`
+}
+
+func (m *BotSignature) Reset()      { *m = BotSignature{} }
+func (*BotSignature) ProtoMessage() {}
+func (*BotSignature) Descriptor() ([]byte, []int) {
+	return fileDescriptor_126413124a3f5ee5, []int{2}
+}
+func (m *BotSignature) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *BotSignature) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_BotSignature.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *BotSignature) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BotSignature.Merge(m, src)
+}
+func (m *BotSignature) XXX_Size() int {
+	return m.Size()
+}
+func (m *BotSignature) XXX_DiscardUnknown() {
+	xxx_messageInfo_BotSignature.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BotSignature proto.InternalMessageInfo
+
+func (m *BotSignature) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *BotSignature) GetBotName() string {
+	if m != nil {
+		return m.BotName
+	}
+	return ""
+}
+
+func (m *BotSignature) GetBotClass() BotClass {
+	if m != nil {
+		return m.BotClass
+	}
+	return None
+}
+
+func (m *BotSignature) GetCategory() string {
+	if m != nil {
+		return m.Category
+	}
+	return ""
+}
+
+func (m *BotSignature) GetRisk() string {
+	if m != nil {
+		return m.Risk
+	}
+	return ""
+}
+
+func (m *BotSignature) GetHostnames() []string {
+	if m != nil {
+		return m.Hostnames
+	}
+	return nil
+}
+
+func (m *BotSignature) GetLastUpdated() string {
+	if m != nil {
+		return m.LastUpdated
+	}
+	return ""
+}
+
 // Create Signatures Changelog
 //
 // x-displayName: "Create Signatures Changelog"
@@ -311,7 +474,7 @@ type CreateSpecType struct {
 func (m *CreateSpecType) Reset()      { *m = CreateSpecType{} }
 func (*CreateSpecType) ProtoMessage() {}
 func (*CreateSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_126413124a3f5ee5, []int{2}
+	return fileDescriptor_126413124a3f5ee5, []int{3}
 }
 func (m *CreateSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -390,7 +553,7 @@ type ReplaceSpecType struct {
 func (m *ReplaceSpecType) Reset()      { *m = ReplaceSpecType{} }
 func (*ReplaceSpecType) ProtoMessage() {}
 func (*ReplaceSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_126413124a3f5ee5, []int{3}
+	return fileDescriptor_126413124a3f5ee5, []int{4}
 }
 func (m *ReplaceSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -469,7 +632,7 @@ type GetSpecType struct {
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
 func (*GetSpecType) ProtoMessage() {}
 func (*GetSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_126413124a3f5ee5, []int{4}
+	return fileDescriptor_126413124a3f5ee5, []int{5}
 }
 func (m *GetSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -534,8 +697,10 @@ func (m *GetSpecType) GetUpdatedSignaturesData() []*Signature {
 }
 
 func init() {
+	proto.RegisterEnum("ves.io.schema.waf_signatures_changelog.BotClass", BotClass_name, BotClass_value)
 	proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.waf_signatures_changelog.GlobalSpecType")
 	proto.RegisterType((*Signature)(nil), "ves.io.schema.waf_signatures_changelog.Signature")
+	proto.RegisterType((*BotSignature)(nil), "ves.io.schema.waf_signatures_changelog.BotSignature")
 	proto.RegisterType((*CreateSpecType)(nil), "ves.io.schema.waf_signatures_changelog.CreateSpecType")
 	proto.RegisterType((*ReplaceSpecType)(nil), "ves.io.schema.waf_signatures_changelog.ReplaceSpecType")
 	proto.RegisterType((*GetSpecType)(nil), "ves.io.schema.waf_signatures_changelog.GetSpecType")
@@ -546,51 +711,67 @@ func init() {
 }
 
 var fileDescriptor_126413124a3f5ee5 = []byte{
-	// 668 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x56, 0xcd, 0x6e, 0xd3, 0x4a,
-	0x18, 0x8d, 0x9d, 0xf4, 0x27, 0x93, 0xab, 0xf6, 0x76, 0xae, 0xaa, 0x6b, 0x02, 0x4c, 0x4d, 0x84,
-	0xaa, 0xb2, 0x88, 0x2d, 0x8a, 0xd8, 0xb0, 0x60, 0x51, 0x2a, 0x55, 0x62, 0x99, 0x16, 0x09, 0xb1,
-	0xb1, 0x26, 0xf6, 0x17, 0x77, 0x54, 0x27, 0x33, 0x9a, 0x99, 0x24, 0xcd, 0xa2, 0x12, 0x4f, 0x80,
-	0x78, 0x00, 0xd6, 0x88, 0x47, 0x41, 0xac, 0xba, 0xec, 0x92, 0xba, 0x1b, 0x76, 0x54, 0xf0, 0x02,
-	0xc8, 0xe3, 0x34, 0x72, 0x52, 0x55, 0xfc, 0x2c, 0xba, 0xa1, 0xbb, 0x99, 0xf3, 0xf9, 0x9c, 0xef,
-	0xef, 0x24, 0x36, 0xda, 0x1c, 0x80, 0xf2, 0x18, 0xf7, 0x55, 0xb8, 0x0f, 0x5d, 0xea, 0x0f, 0x69,
-	0x27, 0x50, 0x2c, 0xee, 0x51, 0xdd, 0x97, 0xa0, 0x82, 0x70, 0x9f, 0xf6, 0x62, 0x48, 0x78, 0xec,
-	0xeb, 0x91, 0x00, 0xe5, 0x09, 0xc9, 0x35, 0xc7, 0xeb, 0x39, 0xc7, 0xcb, 0x39, 0xde, 0x55, 0x9c,
-	0x7a, 0x33, 0x66, 0x7a, 0xbf, 0xdf, 0xf6, 0x42, 0xde, 0xf5, 0x63, 0x1e, 0x73, 0xdf, 0xd0, 0xdb,
-	0xfd, 0x8e, 0xb9, 0x99, 0x8b, 0x39, 0xe5, 0xb2, 0xf5, 0xf5, 0xe9, 0x52, 0xa8, 0x10, 0x41, 0x87,
-	0x49, 0x18, 0xd2, 0x24, 0x29, 0xa6, 0xaf, 0xdf, 0x9e, 0x7e, 0x8e, 0x0b, 0xcd, 0x78, 0xef, 0x22,
-	0x78, 0x6b, 0x3a, 0x58, 0xe4, 0xdd, 0x99, 0x0e, 0x0d, 0x68, 0xc2, 0x22, 0xaa, 0x61, 0x1c, 0x75,
-	0x67, 0xa2, 0x0c, 0x86, 0xc1, 0x94, 0x74, 0xe3, 0x7d, 0x19, 0x2d, 0xed, 0x24, 0xbc, 0x4d, 0x93,
-	0x5d, 0x01, 0xe1, 0xde, 0x48, 0x00, 0xbe, 0x87, 0xfe, 0x91, 0x90, 0x00, 0x55, 0x10, 0x64, 0x52,
-	0x8e, 0xe5, 0x5a, 0x1b, 0xd5, 0x56, 0x6d, 0x8c, 0x6d, 0x53, 0x0d, 0xf8, 0x39, 0xfa, 0x97, 0x46,
-	0x11, 0x44, 0x85, 0x11, 0x39, 0xb6, 0x5b, 0xde, 0xa8, 0x6e, 0xad, 0xa5, 0x47, 0xf5, 0x16, 0x88,
-	0x84, 0x86, 0x10, 0xb9, 0xed, 0x91, 0xdb, 0x83, 0xa1, 0x5b, 0x78, 0xc8, 0x6a, 0x2d, 0x1b, 0xe2,
-	0xee, 0x04, 0xc2, 0xbb, 0x08, 0xf7, 0x45, 0x96, 0x68, 0x4a, 0xad, 0x6c, 0xd4, 0xee, 0xa7, 0x47,
-	0x6b, 0x45, 0xb5, 0x2e, 0x8f, 0x58, 0x87, 0x41, 0x34, 0x2d, 0xb9, 0x32, 0xe6, 0x17, 0x44, 0x01,
-	0xad, 0xce, 0x16, 0x98, 0x35, 0x43, 0x9d, 0x8a, 0x5b, 0xde, 0xa8, 0x6d, 0x3e, 0xf4, 0x7e, 0x6d,
-	0xdb, 0xde, 0x44, 0xb2, 0xf5, 0xdf, 0x4c, 0xdd, 0xdb, 0x54, 0x53, 0xcc, 0xd0, 0xff, 0x97, 0x6b,
-	0xcf, 0x13, 0xcd, 0xfd, 0x69, 0xa2, 0xd5, 0x4b, 0xdd, 0x64, 0xa9, 0x1a, 0xef, 0x6c, 0x54, 0x9d,
-	0x40, 0x78, 0x09, 0xd9, 0x2c, 0x32, 0x9b, 0x29, 0xb7, 0x6c, 0x16, 0x61, 0x8c, 0x2a, 0x3d, 0xda,
-	0x05, 0xc7, 0x36, 0xbb, 0x32, 0x67, 0xbc, 0x86, 0x6a, 0x54, 0x6b, 0x1a, 0x1e, 0x04, 0x99, 0x61,
-	0x9c, 0xb2, 0x09, 0xa1, 0x1c, 0x32, 0x8b, 0xc6, 0xa8, 0x22, 0x99, 0x3a, 0x70, 0x2a, 0x39, 0x29,
-	0x3b, 0xe3, 0x3a, 0x5a, 0xa4, 0x61, 0xd8, 0x97, 0x34, 0x1c, 0x39, 0x73, 0x06, 0x9f, 0xdc, 0xf1,
-	0x5d, 0x84, 0xa8, 0x10, 0x09, 0x03, 0x15, 0x68, 0xee, 0xcc, 0x9b, 0x68, 0x75, 0x8c, 0xec, 0x71,
-	0xec, 0xa0, 0x05, 0x35, 0x52, 0x1a, 0xba, 0xca, 0x59, 0xc8, 0xb6, 0xd7, 0xba, 0xb8, 0x62, 0x17,
-	0xd5, 0x22, 0x50, 0xa1, 0x64, 0xc6, 0x7a, 0xce, 0x62, 0x6e, 0xa8, 0x02, 0x84, 0x09, 0x42, 0x12,
-	0x3a, 0x20, 0xa1, 0x17, 0x82, 0x72, 0xaa, 0x86, 0x5e, 0x40, 0xb2, 0x5e, 0x12, 0xaa, 0x74, 0x90,
-	0xcf, 0xc6, 0x41, 0x79, 0x2f, 0x19, 0xf4, 0xc2, 0x20, 0x8d, 0x6f, 0x36, 0x5a, 0x7a, 0x26, 0x81,
-	0x6a, 0xf8, 0x1d, 0x1f, 0x3f, 0xb8, 0xca, 0xc7, 0x97, 0x6d, 0xda, 0xbc, 0xda, 0xa6, 0x7f, 0x85,
-	0x01, 0x9f, 0xac, 0x7c, 0x7a, 0x3a, 0xf3, 0x4f, 0xd1, 0xf8, 0x6e, 0xa3, 0xe5, 0xf1, 0xcf, 0xf3,
-	0x66, 0xea, 0xd7, 0x36, 0xf5, 0xaf, 0x36, 0xaa, 0xed, 0x80, 0xbe, 0x99, 0xf8, 0x75, 0x4d, 0x7c,
-	0xeb, 0x8d, 0x75, 0x7c, 0x4a, 0x4a, 0x27, 0xa7, 0xa4, 0x74, 0x7e, 0x4a, 0xac, 0xd7, 0x29, 0xb1,
-	0x3e, 0xa4, 0xc4, 0xfa, 0x98, 0x12, 0xeb, 0x38, 0x25, 0xd6, 0xe7, 0x94, 0x58, 0x5f, 0x52, 0x52,
-	0x3a, 0x4f, 0x89, 0xf5, 0xf6, 0x8c, 0x94, 0x8e, 0xcf, 0x48, 0xe9, 0xe4, 0x8c, 0x94, 0x5e, 0xbd,
-	0x8c, 0xb9, 0x38, 0x88, 0xbd, 0x01, 0x4f, 0x34, 0x48, 0x49, 0xbd, 0xbe, 0xf2, 0xcd, 0xa1, 0xc3,
-	0x65, 0xb7, 0x29, 0x24, 0x1f, 0xb0, 0x08, 0x64, 0xb3, 0xf3, 0xf8, 0x30, 0xf4, 0x45, 0x3b, 0xe6,
-	0x3e, 0x1c, 0xea, 0xf1, 0x8b, 0xfa, 0x27, 0x1f, 0x2e, 0xed, 0x79, 0xf3, 0xf2, 0x7e, 0xf4, 0x23,
-	0x00, 0x00, 0xff, 0xff, 0x32, 0xbb, 0x19, 0x48, 0xe9, 0x08, 0x00, 0x00,
+	// 812 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x56, 0x41, 0x6f, 0xdc, 0x44,
+	0x14, 0x5e, 0x7b, 0x37, 0xd9, 0xf5, 0xdb, 0x92, 0xa6, 0x83, 0x2a, 0xdc, 0xa5, 0x38, 0xcb, 0x0a,
+	0x55, 0x01, 0x29, 0x5e, 0x08, 0xe2, 0xc2, 0x01, 0xa4, 0xb4, 0x52, 0x25, 0xa4, 0xf6, 0xb0, 0x49,
+	0x25, 0xc4, 0xc5, 0x1a, 0xdb, 0x6f, 0x9d, 0x51, 0xbc, 0x1e, 0x6b, 0x66, 0x9c, 0x74, 0x0f, 0x95,
+	0xf8, 0x05, 0x88, 0x1f, 0xc0, 0x19, 0xf1, 0x53, 0x10, 0xa7, 0x1c, 0x7b, 0x24, 0xce, 0x85, 0x1b,
+	0x15, 0x9c, 0xb8, 0xa1, 0x19, 0x3b, 0x5b, 0xef, 0x86, 0x88, 0xc2, 0xa1, 0x97, 0xe6, 0x36, 0xef,
+	0x7b, 0xfe, 0xbe, 0x99, 0xf7, 0x3d, 0xbf, 0xd1, 0xc0, 0xee, 0x31, 0x4a, 0x9f, 0xf1, 0xb1, 0x8c,
+	0x0e, 0x71, 0x46, 0xc7, 0x27, 0x74, 0x1a, 0x48, 0x96, 0x64, 0x54, 0x15, 0x02, 0x65, 0x10, 0x1d,
+	0xd2, 0x2c, 0xc1, 0x94, 0x27, 0x63, 0x35, 0xcf, 0x51, 0xfa, 0xb9, 0xe0, 0x8a, 0x93, 0x7b, 0x15,
+	0xc7, 0xaf, 0x38, 0xfe, 0x55, 0x9c, 0xc1, 0x4e, 0xc2, 0xd4, 0x61, 0x11, 0xfa, 0x11, 0x9f, 0x8d,
+	0x13, 0x9e, 0xf0, 0xb1, 0xa1, 0x87, 0xc5, 0xd4, 0x44, 0x26, 0x30, 0xab, 0x4a, 0x76, 0x70, 0x6f,
+	0xf9, 0x28, 0x34, 0xcf, 0x83, 0x29, 0x13, 0x78, 0x42, 0xd3, 0xb4, 0xb9, 0xfd, 0xe0, 0xdd, 0xe5,
+	0xef, 0x78, 0xae, 0x18, 0xcf, 0x2e, 0x92, 0x77, 0x96, 0x93, 0x4d, 0xde, 0xdd, 0xe5, 0xd4, 0x31,
+	0x4d, 0x59, 0x4c, 0x15, 0xd6, 0xd9, 0xe1, 0x4a, 0x96, 0xe1, 0x49, 0xb0, 0x24, 0x3d, 0xfa, 0xb1,
+	0x0d, 0x1b, 0x0f, 0x53, 0x1e, 0xd2, 0x74, 0x3f, 0xc7, 0xe8, 0x60, 0x9e, 0x23, 0x79, 0x1f, 0x6e,
+	0x08, 0x4c, 0x91, 0x4a, 0x0c, 0xb4, 0x94, 0x6b, 0x0d, 0xad, 0x6d, 0x67, 0xd2, 0xaf, 0xb1, 0x07,
+	0x54, 0x21, 0xf9, 0x0a, 0x36, 0x69, 0x1c, 0x63, 0xdc, 0xb0, 0xc8, 0xb5, 0x87, 0xed, 0x6d, 0x67,
+	0x6f, 0xab, 0x7c, 0x36, 0x98, 0x60, 0x9e, 0xd2, 0x08, 0xe3, 0x61, 0x38, 0x1f, 0x66, 0x78, 0x32,
+	0x6c, 0x7c, 0x64, 0x4d, 0x6e, 0x1a, 0xe2, 0xfe, 0x02, 0x22, 0xfb, 0x40, 0x8a, 0x5c, 0x6f, 0xb4,
+	0xa4, 0xd6, 0x36, 0x6a, 0x1f, 0x94, 0xcf, 0xb6, 0x9a, 0x6a, 0x33, 0x1e, 0xb3, 0x29, 0xc3, 0x78,
+	0x59, 0xf2, 0x56, 0xcd, 0x6f, 0x88, 0x22, 0xdc, 0x5e, 0x3d, 0xa0, 0x2e, 0x86, 0xba, 0x9d, 0x61,
+	0x7b, 0xbb, 0xbf, 0xfb, 0x89, 0xff, 0x6a, 0xdd, 0xf6, 0x17, 0x92, 0x93, 0xb7, 0x57, 0xce, 0xfd,
+	0x80, 0x2a, 0x4a, 0x18, 0xbc, 0x73, 0xf9, 0xec, 0xd5, 0x46, 0x6b, 0xff, 0x77, 0xa3, 0xdb, 0x97,
+	0xaa, 0xd1, 0x5b, 0x8d, 0x7e, 0xb0, 0xc1, 0x59, 0x40, 0x64, 0x03, 0x6c, 0x16, 0x9b, 0xce, 0xb4,
+	0x27, 0x36, 0x8b, 0x09, 0x81, 0x4e, 0x46, 0x67, 0xe8, 0xda, 0xa6, 0x57, 0x66, 0x4d, 0xb6, 0xa0,
+	0x4f, 0x95, 0xa2, 0xd1, 0x51, 0xa0, 0x7f, 0x18, 0xb7, 0x6d, 0x52, 0x50, 0x41, 0xa6, 0xd1, 0x04,
+	0x3a, 0x82, 0xc9, 0x23, 0xb7, 0x53, 0x91, 0xf4, 0x9a, 0x0c, 0xa0, 0x47, 0xa3, 0xa8, 0x10, 0x34,
+	0x9a, 0xbb, 0x6b, 0x06, 0x5f, 0xc4, 0xe4, 0x3d, 0x00, 0x9a, 0xe7, 0x29, 0x43, 0x19, 0x28, 0xee,
+	0xae, 0x9b, 0xac, 0x53, 0x23, 0x07, 0x9c, 0xb8, 0xd0, 0x95, 0x73, 0xa9, 0x70, 0x26, 0xdd, 0xae,
+	0xee, 0xde, 0xe4, 0x22, 0x24, 0x43, 0xe8, 0xc7, 0x28, 0x23, 0xc1, 0xcc, 0xaf, 0xe7, 0xf6, 0xaa,
+	0x1f, 0xaa, 0x01, 0x11, 0x0f, 0x40, 0xe0, 0x14, 0x05, 0x66, 0x11, 0x4a, 0xd7, 0x31, 0xf4, 0x06,
+	0xa2, 0x6b, 0x49, 0xa9, 0x54, 0x41, 0xe5, 0x8d, 0x0b, 0x55, 0x2d, 0x1a, 0x7a, 0x62, 0x90, 0xd1,
+	0x5f, 0x16, 0xdc, 0xd8, 0xe3, 0xea, 0x9f, 0x1c, 0x72, 0x8c, 0x43, 0x77, 0xa0, 0x17, 0x72, 0x15,
+	0x34, 0x5c, 0xea, 0x86, 0x5c, 0x3d, 0xd6, 0x46, 0x3d, 0x02, 0x47, 0xa7, 0xa2, 0x94, 0x4a, 0x69,
+	0x6c, 0xda, 0xd8, 0xfd, 0xf8, 0x55, 0xfb, 0xb6, 0xc7, 0xd5, 0x7d, 0xcd, 0x9b, 0x68, 0x75, 0xb3,
+	0xd2, 0x16, 0x46, 0x54, 0x61, 0xc2, 0xc5, 0xbc, 0xb6, 0x76, 0x11, 0x2f, 0x2c, 0x5f, 0x6b, 0x58,
+	0x7e, 0x17, 0x9c, 0x43, 0x2e, 0x95, 0x3e, 0x99, 0x74, 0xd7, 0x4d, 0xe9, 0x2f, 0x01, 0x3d, 0x8d,
+	0x8d, 0xca, 0x63, 0xb7, 0x5b, 0x99, 0xf7, 0xb2, 0xf4, 0x78, 0xf4, 0x87, 0x0d, 0x1b, 0xf7, 0x05,
+	0x52, 0x85, 0xff, 0x65, 0x86, 0x3f, 0xbc, 0x6a, 0x86, 0x2f, 0x8f, 0xe8, 0xce, 0xd5, 0x23, 0xfa,
+	0x46, 0x0c, 0xdf, 0xe7, 0xb7, 0x7e, 0xf9, 0x62, 0xe5, 0x96, 0x1c, 0xfd, 0x69, 0xc3, 0xcd, 0xfa,
+	0x6a, 0xba, 0x76, 0xfd, 0xb5, 0xb9, 0xfe, 0xbb, 0x0d, 0xfd, 0x87, 0xa8, 0xae, 0x1d, 0x7f, 0x5d,
+	0x8e, 0x7f, 0xf4, 0x25, 0xf4, 0x2e, 0xee, 0x38, 0xd2, 0x83, 0xce, 0x63, 0x9e, 0xe1, 0x66, 0x8b,
+	0xbc, 0x05, 0xce, 0x23, 0x9a, 0xb2, 0x88, 0xf1, 0x42, 0x6e, 0x5a, 0xa4, 0x0f, 0xdd, 0x03, 0x51,
+	0x48, 0x85, 0xf1, 0xa6, 0xad, 0x73, 0x4f, 0x32, 0x55, 0x87, 0xed, 0xbd, 0xef, 0xac, 0xd3, 0x33,
+	0xaf, 0xf5, 0xfc, 0xcc, 0x6b, 0xbd, 0x38, 0xf3, 0xac, 0x6f, 0x4b, 0xcf, 0xfa, 0xa9, 0xf4, 0xac,
+	0x9f, 0x4b, 0xcf, 0x3a, 0x2d, 0x3d, 0xeb, 0xd7, 0xd2, 0xb3, 0x7e, 0x2b, 0xbd, 0xd6, 0x8b, 0xd2,
+	0xb3, 0xbe, 0x3f, 0xf7, 0x5a, 0xa7, 0xe7, 0x5e, 0xeb, 0xf9, 0xb9, 0xd7, 0xfa, 0xe6, 0xeb, 0x84,
+	0xe7, 0x47, 0x89, 0x7f, 0xcc, 0x53, 0x85, 0x42, 0x50, 0xbf, 0x90, 0x63, 0xb3, 0x98, 0x72, 0x31,
+	0xdb, 0xc9, 0x05, 0x3f, 0x66, 0x31, 0x8a, 0x9d, 0xe9, 0x67, 0x4f, 0xa3, 0x71, 0x1e, 0x26, 0x7c,
+	0x8c, 0x4f, 0x55, 0xfd, 0xca, 0xf9, 0x97, 0x57, 0x5f, 0xb8, 0x6e, 0x5e, 0x3e, 0x9f, 0xfe, 0x1d,
+	0x00, 0x00, 0xff, 0xff, 0x3c, 0x75, 0xe4, 0x28, 0x26, 0x0a, 0x00, 0x00,
 }
 
+func (x BotClass) String() string {
+	s, ok := BotClass_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
 func (this *GlobalSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -704,6 +885,53 @@ func (this *Signature) Equal(that interface{}) bool {
 		}
 	}
 	if this.LastUpdate != that1.LastUpdate {
+		return false
+	}
+	return true
+}
+func (this *BotSignature) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*BotSignature)
+	if !ok {
+		that2, ok := that.(BotSignature)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Id != that1.Id {
+		return false
+	}
+	if this.BotName != that1.BotName {
+		return false
+	}
+	if this.BotClass != that1.BotClass {
+		return false
+	}
+	if this.Category != that1.Category {
+		return false
+	}
+	if this.Risk != that1.Risk {
+		return false
+	}
+	if len(this.Hostnames) != len(that1.Hostnames) {
+		return false
+	}
+	for i := range this.Hostnames {
+		if this.Hostnames[i] != that1.Hostnames[i] {
+			return false
+		}
+	}
+	if this.LastUpdated != that1.LastUpdated {
 		return false
 	}
 	return true
@@ -910,6 +1138,22 @@ func (this *Signature) GoString() string {
 	s = append(s, "Description: "+fmt.Sprintf("%#v", this.Description)+",\n")
 	s = append(s, "References: "+fmt.Sprintf("%#v", this.References)+",\n")
 	s = append(s, "LastUpdate: "+fmt.Sprintf("%#v", this.LastUpdate)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *BotSignature) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 11)
+	s = append(s, "&waf_signatures_changelog.BotSignature{")
+	s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
+	s = append(s, "BotName: "+fmt.Sprintf("%#v", this.BotName)+",\n")
+	s = append(s, "BotClass: "+fmt.Sprintf("%#v", this.BotClass)+",\n")
+	s = append(s, "Category: "+fmt.Sprintf("%#v", this.Category)+",\n")
+	s = append(s, "Risk: "+fmt.Sprintf("%#v", this.Risk)+",\n")
+	s = append(s, "Hostnames: "+fmt.Sprintf("%#v", this.Hostnames)+",\n")
+	s = append(s, "LastUpdated: "+fmt.Sprintf("%#v", this.LastUpdated)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1142,6 +1386,78 @@ func (m *Signature) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintTypes(dAtA, i, uint64(m.Id))
 		i--
 		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *BotSignature) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *BotSignature) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *BotSignature) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.LastUpdated) > 0 {
+		i -= len(m.LastUpdated)
+		copy(dAtA[i:], m.LastUpdated)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.LastUpdated)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.Hostnames) > 0 {
+		for iNdEx := len(m.Hostnames) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Hostnames[iNdEx])
+			copy(dAtA[i:], m.Hostnames[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Hostnames[iNdEx])))
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.Risk) > 0 {
+		i -= len(m.Risk)
+		copy(dAtA[i:], m.Risk)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Risk)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Category) > 0 {
+		i -= len(m.Category)
+		copy(dAtA[i:], m.Category)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Category)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.BotClass != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.BotClass))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.BotName) > 0 {
+		i -= len(m.BotName)
+		copy(dAtA[i:], m.BotName)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.BotName)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -1474,6 +1790,44 @@ func (m *Signature) Size() (n int) {
 	return n
 }
 
+func (m *BotSignature) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.BotName)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.BotClass != 0 {
+		n += 1 + sovTypes(uint64(m.BotClass))
+	}
+	l = len(m.Category)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Risk)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.Hostnames) > 0 {
+		for _, s := range m.Hostnames {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	l = len(m.LastUpdated)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+
 func (m *CreateSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1630,6 +1984,22 @@ func (this *Signature) String() string {
 		`Description:` + fmt.Sprintf("%v", this.Description) + `,`,
 		`References:` + fmt.Sprintf("%v", this.References) + `,`,
 		`LastUpdate:` + fmt.Sprintf("%v", this.LastUpdate) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *BotSignature) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&BotSignature{`,
+		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
+		`BotName:` + fmt.Sprintf("%v", this.BotName) + `,`,
+		`BotClass:` + fmt.Sprintf("%v", this.BotClass) + `,`,
+		`Category:` + fmt.Sprintf("%v", this.Category) + `,`,
+		`Risk:` + fmt.Sprintf("%v", this.Risk) + `,`,
+		`Hostnames:` + fmt.Sprintf("%v", this.Hostnames) + `,`,
+		`LastUpdated:` + fmt.Sprintf("%v", this.LastUpdated) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1913,10 +2283,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -2273,10 +2640,268 @@ func (m *Signature) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
-			if (iNdEx + skippy) < 0 {
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *BotSignature) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: BotSignature: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: BotSignature: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BotName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BotName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BotClass", wireType)
+			}
+			m.BotClass = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.BotClass |= BotClass(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Category", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Category = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Risk", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Risk = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Hostnames", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Hostnames = append(m.Hostnames, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastUpdated", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.LastUpdated = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -2490,10 +3115,7 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -2707,10 +3329,7 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -2924,10 +3543,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {

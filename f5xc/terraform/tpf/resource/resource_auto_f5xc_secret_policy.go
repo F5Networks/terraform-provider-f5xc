@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -19,22 +20,27 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	types_pb "github.com/gogo/protobuf/types"
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	types_pb "github.com/gogo/protobuf/types"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -46,7 +52,6 @@ import (
 	ves_io_schema_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
 	ves_io_schema_secret_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/secret_policy"
 	ves_io_schema_secret_policy_rule "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/secret_policy_rule"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCSecretPolicy defines the resource implementation.
@@ -54,59 +59,59 @@ type ResourceF5XCSecretPolicy struct {
 	client *client.APIClient
 }
 
-type SecretPolicyGlobalSpecTypeRuleChoice struct {
-	RuleList       types.Object `tfsdk:"rule_list"`
+type SecretPolicyRuleChoice struct {
 	LegacyRuleList types.Object `tfsdk:"legacy_rule_list"`
+	RuleList       types.Object `tfsdk:"rule_list"`
 }
 
-type SecretPolicyGlobalSpecTypeRuleList struct {
+type SecretPolicyLegacyRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type SecretPolicySecretPolicyRule struct {
+type SecretPolicyRuleList struct {
+	Rules types.List `tfsdk:"rules"`
+}
+
+type SecretPolicyRule struct {
 	Metadata types.Object `tfsdk:"metadata"`
 	Spec     types.Object `tfsdk:"spec"`
 }
 
 type SecretPolicyMessageMetaType struct {
-	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
+	Name        types.String `tfsdk:"name"`
 }
 
-type SecretPolicySecretPolicyRuleGlobalSpecType struct {
+type SecretPolicyGst struct {
 	Action       types.List   `tfsdk:"action"`
 	ClientChoice types.Object `tfsdk:"client_choice"`
 }
 
-type SecretPolicyGlobalSpecTypeClientChoice struct {
-	ClientSelector    types.Object `tfsdk:"client_selector"`
-	ClientNameMatcher types.Object `tfsdk:"client_name_matcher"`
+type SecretPolicyClientChoice struct {
 	ClientName        types.String `tfsdk:"client_name"`
+	ClientNameMatcher types.Object `tfsdk:"client_name_matcher"`
+	ClientSelector    types.Object `tfsdk:"client_selector"`
 }
 
-type SecretPolicyGlobalSpecTypeClientSelector struct {
-	Expressions types.List `tfsdk:"expressions"`
-}
-
-type SecretPolicyGlobalSpecTypeClientNameMatcher struct {
+type SecretPolicyClientNameMatcher struct {
+	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
-	ExactValues  types.List `tfsdk:"exact_values"`
 }
 
-type SecretPolicyGlobalSpecTypeLegacyRuleList struct {
-	Rules types.List `tfsdk:"rules"`
+type SecretPolicyClientSelector struct {
+	Expressions types.List `tfsdk:"expressions"`
 }
 
 // ResourceF5XCSecretPolicyModel describes the resource data model.
 type ResourceF5XCSecretPolicyModel struct {
 	Annotations         types.Map            `tfsdk:"annotations"`
 	Description         types.String         `tfsdk:"description"`
+	Labels              types.Map            `tfsdk:"labels"`
 	Name                types.String         `tfsdk:"name"`
 	Namespace           types.String         `tfsdk:"namespace"`
 	Uid                 types.String         `tfsdk:"uid"`
-	Labels              types.Map            `tfsdk:"labels"`
-	AllowF5Xc           types.Bool           `tfsdk:"allow_f_5xc"`
+	AllowF5Xc           types.Bool           `tfsdk:"allow_f5xc"`
 	DecryptCacheTimeout timetypes.GoDuration `tfsdk:"decrypt_cache_timeout"`
 	RuleChoice          types.Object         `tfsdk:"rule_choice"`
 	Timeouts            timeouts.Value       `tfsdk:"timeouts"`
@@ -125,12 +130,35 @@ var (
 // Attribute map for OneOfField --> RuleChoice
 var SecretPolicyRuleChoiceModelAttributeMap = map[string]attr.Type{
 
-	"rule_list": types.ObjectType{
-		AttrTypes: SecretPolicyRuleChoiceRuleListModelAttributeMap,
-	},
 	"legacy_rule_list": types.ObjectType{
 		AttrTypes: SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap,
 	},
+	"rule_list": types.ObjectType{
+		AttrTypes: SecretPolicyRuleChoiceRuleListModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> LegacyRuleList
+var SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap = map[string]attr.Type{
+
+	"rules": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> Rules
+var SecretPolicyRulesObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> RuleList
@@ -141,8 +169,8 @@ var SecretPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.Type{
 			AttrTypes: map[string]attr.Type{
 				"metadata": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"name":        types.StringType,
-						"description": types.StringType},
+						"description": types.StringType,
+						"name":        types.StringType},
 				}, "spec": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"action": types.ListType{
@@ -161,8 +189,8 @@ var SecretPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.Type{
 var SecretPolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]attr.Type{
 	"metadata": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"name":        types.StringType,
-			"description": types.StringType},
+			"description": types.StringType,
+			"name":        types.StringType},
 	}, "spec": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"action": types.ListType{
@@ -177,8 +205,8 @@ var SecretPolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredPointerField --> Metadata
 var SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap = map[string]attr.Type{
 
-	"name":        types.StringType,
 	"description": types.StringType,
+	"name":        types.StringType,
 }
 
 // Attribute map for RequiredPointerField --> Spec
@@ -195,13 +223,27 @@ var SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap = map[string]attr.T
 // Attribute map for RequiredOneOfField --> ClientChoice
 var SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap = map[string]attr.Type{
 
-	"client_selector": types.ObjectType{
-		AttrTypes: SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap,
-	},
+	"client_name": types.StringType,
 	"client_name_matcher": types.ObjectType{
 		AttrTypes: SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap,
 	},
-	"client_name": types.StringType,
+	"client_selector": types.ObjectType{
+		AttrTypes: SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> ClientNameMatcher
+var SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap = map[string]attr.Type{
+
+	"exact_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"regex_values": types.ListType{
+		ElemType: types.StringType,
+	},
+	"transformers": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> ClientSelector
@@ -210,43 +252,6 @@ var SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttrib
 	"expressions": types.ListType{
 		ElemType: types.StringType,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> ClientNameMatcher
-var SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap = map[string]attr.Type{
-
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"transformers": types.ListType{
-		ElemType: types.StringType,
-	},
-	"exact_values": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> LegacyRuleList
-var SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap = map[string]attr.Type{
-
-	"rules": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> Rules
-var SecretPolicyRulesObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 func NewResourceF5XCSecretPolicy() resource.Resource {
@@ -260,47 +265,66 @@ func (r *ResourceF5XCSecretPolicy) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "SecretPolicy resource",
-		Description:         "SecretPolicy resource",
+		MarkdownDescription: "rule A Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced.",
+		Description:         "rule A Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
 				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				ElementType:         types.StringType,
 				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
 					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
 					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"description": schema.StringAttribute{
 				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
+				MarkdownDescription: "description Human readable description for the object",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -308,20 +332,9 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"allow_f_5xc": schema.BoolAttribute{
+			"allow_f5xc": schema.BoolAttribute{
 				Description:         "Allow Volterra if allow_f5xc is set to true, it allows relevant F5XC infrastructure services to decrypt the secret encrypted using this policy.",
-				MarkdownDescription: "<br>**Default:** `false`",
+				MarkdownDescription: "Allow Volterra if allow_f5xc is set to true, it allows relevant F5XC infrastructure services to decrypt the secret encrypted using this policy.<br>**Default:** `false`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -329,7 +342,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 			},
 			"decrypt_cache_timeout": schema.StringAttribute{
 				Description:         "Decrypt Cache Timeout decrypt_cache_timeout contains the amount of time a decrypted secret is cached in wingman. Value for this parameter is a string ending in the suffix 's' (indicating seconds), suffix 'm' (indicating minutes) or suffix 'h' (indicating hours)",
-				MarkdownDescription: "",
+				MarkdownDescription: "Decrypt Cache Timeout decrypt_cache_timeout contains the amount of time a decrypted secret is cached in wingman. Value for this parameter is a string ending in the suffix 's' (indicating seconds), suffix 'm' (indicating minutes) or suffix 'h' (indicating hours)",
 				CustomType:          timetypes.GoDurationType{},
 				Required:            false,
 				Optional:            true,
@@ -337,185 +350,46 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 			},
 			"rule_choice": schema.SingleNestedAttribute{
 				Description:         "rule choice Allowed/Denied Sources rules provide the ability to allow/deny lists of IP addresses, countries, TLS fingerprints and ASNs. Custom rules provide more flexibility to define your own logic to control incoming requests.",
-				MarkdownDescription: "",
+				MarkdownDescription: "rule choice Allowed/Denied Sources rules provide the ability to allow/deny lists of IP addresses, countries, TLS fingerprints and ASNs. Custom rules provide more flexibility to define your own logic to control incoming requests.",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"rule_list",
+					exactlyoneofvalidator.ExactlyOneOf(
 						"legacy_rule_list",
+						"rule_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
-					"rule_list": schema.SingleNestedAttribute{
-						Description:         "rule_list",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"rules": schema.ListNestedAttribute{
-								Description:         "rules Define the list of rules (with an order) that should be evaluated by this service policy. Rules are evaluated from top to bottom in the list.",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"metadata": schema.SingleNestedAttribute{
-											Description:         "metadata Common attributes for the rule including name and description.",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description:         "name This is the name of the message. The value of name has to follow DNS-1035 format.",
-													MarkdownDescription: "<br>**Validation:** `Length LengthAtLeast(1)`",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													Validators: []validator.String{
-														stringvalidator.LengthAtLeast(1),
-													},
-												},
-												"description": schema.StringAttribute{
-													Description:         "description Human readable description.",
-													MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.String{
-														stringvalidator.LengthAtMost(256),
-													},
-												},
-											},
-										},
-										"spec": schema.SingleNestedAttribute{
-											Description:         "spec Specification for the rule including match predicates and actions.",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"action": schema.ListAttribute{
-													Description:         "action Action to be enforced if all the predicates evaluates to true.",
-													MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"DENY\", \"ALLOW\", \"NEXT_POLICY_SET\", \"NEXT_POLICY\", \"LAST_POLICY\", \"GOTO_POLICY\"]`",
-													ElementType:         types.StringType,
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													Validators: []validator.List{
-														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY", "LAST_POLICY", "GOTO_POLICY"}...)),
-														listvalidator.SizeAtMost(1),
-													},
-												},
-												"client_choice": schema.SingleNestedAttribute{
-													Description:         "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													Validators: []validator.Object{
-														atmostoneofvalidator.AtMostOneOf(
-															"client_name",
-															"client_selector",
-															"client_name_matcher",
-														),
-													},
-													Attributes: map[string]schema.Attribute{
-														"client_selector": schema.SingleNestedAttribute{
-															Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"expressions": schema.ListAttribute{
-																	Description:         "expressions expressions contains the kubernetes style label expression for selections.",
-																	MarkdownDescription: "",
-																	ElementType:         types.StringType,
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
-															},
-														},
-														"client_name_matcher": schema.SingleNestedAttribute{
-															Description:         "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Attributes: map[string]schema.Attribute{
-																"regex_values": schema.ListAttribute{
-																	Description:         "regex values A list of regular expressions to match the input against.",
-																	MarkdownDescription: "",
-																	ElementType:         types.StringType,
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.List{
-																		listvalidator.SizeAtMost(16),
-																	},
-																},
-																"transformers": schema.ListAttribute{
-																	Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																	MarkdownDescription: "<br>**Valid Options:** `[\"TRANSFORMER_NONE\", \"LOWER_CASE\", \"UPPER_CASE\", \"NORMALIZE_PATH\", \"TRIM\", \"BASE64_DECODE\", \"REMOVE_WHITESPACE\", \"URL_DECODE\", \"TRIM_LEFT\", \"TRIM_RIGHT\"]` (Multiple selection allowed)",
-																	ElementType:         types.StringType,
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.List{
-																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "TRIM", "BASE64_DECODE", "REMOVE_WHITESPACE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT"}...)),
-																	},
-																},
-																"exact_values": schema.ListAttribute{
-																	Description:         "exact values A list of exact values to match the input against.",
-																	MarkdownDescription: "",
-																	ElementType:         types.StringType,
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.List{
-																		listvalidator.SizeAtMost(64),
-																	},
-																},
-															},
-														},
-														"client_name": schema.StringAttribute{
-															Description:         "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
 					"legacy_rule_list": schema.SingleNestedAttribute{
 						Description:         "legacy_rule_list",
-						MarkdownDescription: "",
+						MarkdownDescription: "legacy_rule_list",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"rules": schema.ListNestedAttribute{
 								Description:         "rules A list of references to service_policy_rule objects. The order of evaluation of the rules depends on the rule combining algorithm.",
-								MarkdownDescription: "",
+								MarkdownDescription: "rules A list of references to service_policy_rule objects. The order of evaluation of the rules depends on the rule combining algorithm.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(256),
+								},
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
+											Description:         "",
+											MarkdownDescription: "",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+										},
+										"namespace": schema.StringAttribute{
 											Description:         "",
 											MarkdownDescription: "",
 											Required:            true,
@@ -532,12 +406,178 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 												stringplanmodifier.UseStateForUnknown(),
 											},
 										},
-										"namespace": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+									},
+								},
+							},
+						},
+					},
+					"rule_list": schema.SingleNestedAttribute{
+						Description:         "rule_list",
+						MarkdownDescription: "rule_list",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"rules": schema.ListNestedAttribute{
+								Description:         "rules Define the list of rules (with an order) that should be evaluated by this service policy. Rules are evaluated from top to bottom in the list.",
+								MarkdownDescription: "rules Define the list of rules (with an order) that should be evaluated by this service policy. Rules are evaluated from top to bottom in the list.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeAtMost(256),
+								},
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"metadata": schema.SingleNestedAttribute{
+											Description:         "metadata Common attributes for the rule including name and description.",
+											MarkdownDescription: "metadata Common attributes for the rule including name and description.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"description": schema.StringAttribute{
+													Description:         "description Human readable description.",
+													MarkdownDescription: "description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.LengthAtMost(256),
+													},
+												},
+												"name": schema.StringAttribute{
+													Description:         "name This is the name of the message. The value of name has to follow DNS-1035 format.",
+													MarkdownDescription: "name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.LengthAtLeast(1),
+														stringvalidator.RegexMatches(
+															regexp.MustCompile(`^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?$`),
+															"must be a valid F5XC object name",
+														),
+													},
+												},
+											},
+										},
+										"spec": schema.SingleNestedAttribute{
+											Description:         "spec Specification for the rule including match predicates and actions.",
+											MarkdownDescription: "spec Specification for the rule including match predicates and actions.",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"action": schema.ListAttribute{
+													Description:         "action Action to be enforced if all the predicates evaluates to true.",
+													MarkdownDescription: "action Action to be enforced if all the predicates evaluates to true.<br>**Allowed Values (choose one):** `['ALLOW', 'DENY', 'GOTO_POLICY', 'LAST_POLICY', 'NEXT_POLICY', 'NEXT_POLICY_SET']`",
+													ElementType:         types.StringType,
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ALLOW", "DENY", "GOTO_POLICY", "LAST_POLICY", "NEXT_POLICY", "NEXT_POLICY_SET"}...)),
+														listvalidator.SizeAtMost(1),
+													},
+												},
+												"client_choice": schema.SingleNestedAttribute{
+													Description:         "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.",
+													MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.Object{
+														exactlyoneofvalidator.RequiredExactlyOneOf(
+															"client_name",
+															"client_name_matcher",
+															"client_selector",
+														),
+													},
+													Attributes: map[string]schema.Attribute{
+														"client_name": schema.StringAttribute{
+															Description:         "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
+															MarkdownDescription: "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.String{
+																bytesvalidator.BytesAtMost(256),
+															},
+														},
+														"client_name_matcher": schema.SingleNestedAttribute{
+															Description:         "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
+															MarkdownDescription: "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Attributes: map[string]schema.Attribute{
+																"exact_values": schema.ListAttribute{
+																	Description:         "exact values A list of exact values to match the input against.",
+																	MarkdownDescription: "exact values A list of exact values to match the input against.",
+																	ElementType:         types.StringType,
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            false,
+																	Validators: []validator.List{
+																		listvalidator.SizeAtMost(64),
+																		listvalidator.ValueStringsAre(bytesvalidator.BytesAtMost(256)),
+																		listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
+																		listvalidator.UniqueValues(),
+																	},
+																},
+																"regex_values": schema.ListAttribute{
+																	Description:         "regex values A list of regular expressions to match the input against.",
+																	MarkdownDescription: "regex values A list of regular expressions to match the input against.",
+																	ElementType:         types.StringType,
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            false,
+																	Validators: []validator.List{
+																		listvalidator.SizeAtMost(16),
+																		listvalidator.ValueStringsAre(bytesvalidator.BytesAtMost(256)),
+																		listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
+																		listvalidator.UniqueValues(),
+																	},
+																},
+																"transformers": schema.ListAttribute{
+																	Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
+																	MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+																	ElementType:         types.StringType,
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
+																	Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+																	Validators: []validator.List{
+																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+																	},
+																},
+															},
+														},
+														"client_selector": schema.SingleNestedAttribute{
+															Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+															MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Attributes: map[string]schema.Attribute{
+																"expressions": schema.ListAttribute{
+																	Description:         "expressions expressions contains the kubernetes style label expression for selections.",
+																	MarkdownDescription: "expressions expressions contains the kubernetes style label expression for selections.",
+																	ElementType:         types.StringType,
+																	Required:            true,
+																	Optional:            false,
+																	Computed:            false,
+																	Validators: []validator.List{
+																		listvalidator.SizeAtMost(1),
+																		listvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 4096)),
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
 										},
 									},
 								},
@@ -548,7 +588,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -654,7 +694,7 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -665,6 +705,20 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -684,25 +738,73 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 	// resource modelToSpecRoot DurationField --> DecryptCacheTimeout
 	if !data.DecryptCacheTimeout.IsNull() && !data.DecryptCacheTimeout.IsUnknown() {
-		dur, diags := data.DecryptCacheTimeout.ValueGoDuration()
-		response.Diagnostics.Append(diags...)
-		if !diags.HasError() {
-			spec.DecryptCacheTimeout = types_pb.DurationProto(dur)
+		{
+			dur, durationDiags := data.DecryptCacheTimeout.ValueGoDuration()
+			response.Diagnostics.Append(durationDiags...)
+			if !durationDiags.HasError() {
+				spec.DecryptCacheTimeout = types_pb.DurationProto(dur)
+			}
 		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> RuleChoice
 	if !data.RuleChoice.IsNull() && !data.RuleChoice.IsUnknown() {
-		ruleChoiceModel := SecretPolicyGlobalSpecTypeRuleChoice{}
+		ruleChoiceModel := SecretPolicyRuleChoice{}
 		response.Diagnostics.Append(data.RuleChoice.As(ctx, &ruleChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> LegacyRuleList
+		if !ruleChoiceModel.LegacyRuleList.IsNull() && !ruleChoiceModel.LegacyRuleList.IsUnknown() {
+			var secretPolicyLegacyRuleListModel SecretPolicyLegacyRuleList
+			response.Diagnostics.Append(ruleChoiceModel.LegacyRuleList.As(ctx, &secretPolicyLegacyRuleListModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			legacyRuleListOneOfSpec := &ves_io_schema_secret_policy.CreateSpecType_LegacyRuleList{}
+			legacyRuleListOneOfSpec.LegacyRuleList = &ves_io_schema_secret_policy.LegacyRuleList{}
+			spec.RuleChoice = legacyRuleListOneOfSpec
+
+			// resource modelToSpecNested ArrayOfPointerField --> Rules
+			if !secretPolicyLegacyRuleListModel.Rules.IsNull() && !secretPolicyLegacyRuleListModel.Rules.IsUnknown() && len(secretPolicyLegacyRuleListModel.Rules.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var rulesElements []ObjectRefTypeModel
+				response.Diagnostics.Append(secretPolicyLegacyRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				rulesSpec := make([]*ves_io_schema.ObjectRefType, len(rulesElements))
+				legacyRuleListOneOfSpec.LegacyRuleList.Rules = rulesSpec
+
+				// 3. Iterate over the converted Go slice
+				for i, rulesElement := range rulesElements {
+					// Initialize the spec struct for the current element
+					legacyRuleListOneOfSpec.LegacyRuleList.Rules[i] = &ves_io_schema.ObjectRefType{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> Name
+					if !rulesElement.Name.IsNull() && !rulesElement.Name.IsUnknown() {
+						legacyRuleListOneOfSpec.LegacyRuleList.Rules[i].Name = string(rulesElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Namespace
+					if !rulesElement.Namespace.IsNull() && !rulesElement.Namespace.IsUnknown() {
+						legacyRuleListOneOfSpec.LegacyRuleList.Rules[i].Namespace = string(rulesElement.Namespace.ValueString())
+					}
+
+				}
+			}
+
+		}
+
 		// resource modelToSpecNested PointerOfOneOfField --> RuleList
 		if !ruleChoiceModel.RuleList.IsNull() && !ruleChoiceModel.RuleList.IsUnknown() {
-			var secretPolicyGlobalSpecTypeRuleListModel SecretPolicyGlobalSpecTypeRuleList
-			response.Diagnostics.Append(ruleChoiceModel.RuleList.As(ctx, &secretPolicyGlobalSpecTypeRuleListModel, basetypes.ObjectAsOptions{})...)
+			var secretPolicyRuleListModel SecretPolicyRuleList
+			response.Diagnostics.Append(ruleChoiceModel.RuleList.As(ctx, &secretPolicyRuleListModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -711,10 +813,10 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 			spec.RuleChoice = ruleListOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> Rules
-			if !secretPolicyGlobalSpecTypeRuleListModel.Rules.IsNull() && !secretPolicyGlobalSpecTypeRuleListModel.Rules.IsUnknown() && len(secretPolicyGlobalSpecTypeRuleListModel.Rules.Elements()) > 0 {
+			if !secretPolicyRuleListModel.Rules.IsNull() && !secretPolicyRuleListModel.Rules.IsUnknown() && len(secretPolicyRuleListModel.Rules.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var rulesElements []SecretPolicySecretPolicyRule
-				response.Diagnostics.Append(secretPolicyGlobalSpecTypeRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
+				var rulesElements []SecretPolicyRule
+				response.Diagnostics.Append(secretPolicyRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -741,21 +843,21 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 						metadataSpec := &ves_io_schema.MessageMetaType{}
 						rulesSpec[i].Metadata = metadataSpec
 
-						// resource modelToSpecNested RequiredStringField --> Name
-						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
-							metadataSpec.Name = string(metadataModel.Name.ValueString())
-						}
-
 						// resource modelToSpecNested StringField --> Description
 						if !metadataModel.Description.IsNull() && !metadataModel.Description.IsUnknown() {
 							metadataSpec.Description = string(metadataModel.Description.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Name
+						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
+							metadataSpec.Name = string(metadataModel.Name.ValueString())
 						}
 
 					}
 
 					// resource modelToSpecNested RequiredPointerField --> Spec
 					if !rulesElement.Spec.IsNull() && !rulesElement.Spec.IsUnknown() {
-						var specModel SecretPolicySecretPolicyRuleGlobalSpecType
+						var specModel SecretPolicyGst
 						response.Diagnostics.Append(rulesElement.Spec.As(ctx, &specModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
@@ -790,38 +892,23 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 						// resource modelToSpecNested RequiredOneOfField --> ClientChoice
 						if !specModel.ClientChoice.IsNull() && !specModel.ClientChoice.IsUnknown() {
-							specClientChoiceModel := SecretPolicyGlobalSpecTypeClientChoice{}
+							specClientChoiceModel := SecretPolicyClientChoice{}
 							response.Diagnostics.Append(specModel.ClientChoice.As(ctx, &specClientChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 
-							// resource modelToSpecNested PointerOfOneOfField --> ClientSelector
-							if !specClientChoiceModel.ClientSelector.IsNull() && !specClientChoiceModel.ClientSelector.IsUnknown() {
-								var secretPolicyGlobalSpecTypeClientSelectorModel SecretPolicyGlobalSpecTypeClientSelector
-								response.Diagnostics.Append(specClientChoiceModel.ClientSelector.As(ctx, &secretPolicyGlobalSpecTypeClientSelectorModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSelectorOneOfSpec := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector{}
-								clientSelectorOneOfSpec.ClientSelector = &ves_io_schema.LabelSelectorType{}
-								specSpec.ClientChoice = clientSelectorOneOfSpec
-
-								// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
-								elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientSelectorModel.Expressions.Elements()))
-								diags = secretPolicyGlobalSpecTypeClientSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSelectorOneOfSpec.ClientSelector.Expressions = elements
-
+							// resource modelToSpecNested StringOfOneOfField --> ClientName
+							if !specClientChoiceModel.ClientName.IsNull() && !specClientChoiceModel.ClientName.IsUnknown() {
+								clientNameSpecStr := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName{}
+								clientNameSpecStr.ClientName = string(specClientChoiceModel.ClientName.ValueString())
+								specSpec.ClientChoice = clientNameSpecStr
 							}
 
 							// resource modelToSpecNested PointerOfOneOfField --> ClientNameMatcher
 							if !specClientChoiceModel.ClientNameMatcher.IsNull() && !specClientChoiceModel.ClientNameMatcher.IsUnknown() {
-								var secretPolicyGlobalSpecTypeClientNameMatcherModel SecretPolicyGlobalSpecTypeClientNameMatcher
-								response.Diagnostics.Append(specClientChoiceModel.ClientNameMatcher.As(ctx, &secretPolicyGlobalSpecTypeClientNameMatcherModel, basetypes.ObjectAsOptions{})...)
+								var secretPolicyClientNameMatcherModel SecretPolicyClientNameMatcher
+								response.Diagnostics.Append(specClientChoiceModel.ClientNameMatcher.As(ctx, &secretPolicyClientNameMatcherModel, basetypes.ObjectAsOptions{})...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -829,22 +916,37 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 								clientNameMatcherOneOfSpec.ClientNameMatcher = &ves_io_schema_policy.MatcherType{}
 								specSpec.ClientChoice = clientNameMatcherOneOfSpec
 
-								// resource modelToSpecNested ArrayOfStringField --> RegexValues
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsUnknown() {
-									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.Elements()))
-									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.ElementsAs(ctx, &elements, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								// resource modelToSpecNested ArrayOfStringField --> ExactValues
+								if !secretPolicyClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyClientNameMatcherModel.ExactValues.IsUnknown() {
+									{
+										elements := make([]string, 0, len(secretPolicyClientNameMatcherModel.ExactValues.Elements()))
+										diags = secretPolicyClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
 									}
-									clientNameMatcherOneOfSpec.ClientNameMatcher.RegexValues = elements
+								}
+
+								// resource modelToSpecNested ArrayOfStringField --> RegexValues
+								if !secretPolicyClientNameMatcherModel.RegexValues.IsNull() && !secretPolicyClientNameMatcherModel.RegexValues.IsUnknown() {
+									{
+										elements := make([]string, 0, len(secretPolicyClientNameMatcherModel.RegexValues.Elements()))
+										diags = secretPolicyClientNameMatcherModel.RegexValues.ElementsAs(ctx, &elements, false)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clientNameMatcherOneOfSpec.ClientNameMatcher.RegexValues = elements
+									}
 								}
 
 								// resource modelToSpecNested ArrayOfEnumField --> Transformers
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.IsUnknown() {
+								if !secretPolicyClientNameMatcherModel.Transformers.IsNull() && !secretPolicyClientNameMatcherModel.Transformers.IsUnknown() {
 									// 1. Get raw string elements
-									transformersRaw := make([]types.String, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.Elements()))
-									diags = secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.ElementsAs(ctx, &transformersRaw, false)
+									transformersRaw := make([]types.String, 0, len(secretPolicyClientNameMatcherModel.Transformers.Elements()))
+									diags = secretPolicyClientNameMatcherModel.Transformers.ElementsAs(ctx, &transformersRaw, false)
 									response.Diagnostics.Append(diags...)
 									if response.Diagnostics.HasError() {
 										return
@@ -865,24 +967,30 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 									clientNameMatcherOneOfSpec.ClientNameMatcher.Transformers = transformersSpec
 								}
 
-								// resource modelToSpecNested ArrayOfStringField --> ExactValues
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsUnknown() {
-									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.Elements()))
-									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> ClientSelector
+							if !specClientChoiceModel.ClientSelector.IsNull() && !specClientChoiceModel.ClientSelector.IsUnknown() {
+								var secretPolicyClientSelectorModel SecretPolicyClientSelector
+								response.Diagnostics.Append(specClientChoiceModel.ClientSelector.As(ctx, &secretPolicyClientSelectorModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSelectorOneOfSpec := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector{}
+								clientSelectorOneOfSpec.ClientSelector = &ves_io_schema.LabelSelectorType{}
+								specSpec.ClientChoice = clientSelectorOneOfSpec
+
+								// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
+								{
+									elements := make([]string, 0, len(secretPolicyClientSelectorModel.Expressions.Elements()))
+									diags = secretPolicyClientSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
 									response.Diagnostics.Append(diags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
+									clientSelectorOneOfSpec.ClientSelector.Expressions = elements
 								}
 
-							}
-
-							// resource modelToSpecNested StringOfOneOfField --> ClientName
-							if !specClientChoiceModel.ClientName.IsNull() && !specClientChoiceModel.ClientName.IsUnknown() {
-								clientNameSpecStr := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName{}
-								clientNameSpecStr.ClientName = string(specClientChoiceModel.ClientName.ValueString())
-								specSpec.ClientChoice = clientNameSpecStr
 							}
 
 						}
@@ -894,59 +1002,20 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> LegacyRuleList
-		if !ruleChoiceModel.LegacyRuleList.IsNull() && !ruleChoiceModel.LegacyRuleList.IsUnknown() {
-			var secretPolicyGlobalSpecTypeLegacyRuleListModel SecretPolicyGlobalSpecTypeLegacyRuleList
-			response.Diagnostics.Append(ruleChoiceModel.LegacyRuleList.As(ctx, &secretPolicyGlobalSpecTypeLegacyRuleListModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			legacyRuleListOneOfSpec := &ves_io_schema_secret_policy.CreateSpecType_LegacyRuleList{}
-			legacyRuleListOneOfSpec.LegacyRuleList = &ves_io_schema_secret_policy.LegacyRuleList{}
-			spec.RuleChoice = legacyRuleListOneOfSpec
+	}
 
-			// resource modelToSpecNested ArrayOfPointerField --> Rules
-			if !secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.IsNull() && !secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.IsUnknown() && len(secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var rulesElements []ObjectRefTypeModel
-				response.Diagnostics.Append(secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				rulesSpec := make([]*ves_io_schema.ObjectRefType, len(rulesElements))
-				legacyRuleListOneOfSpec.LegacyRuleList.Rules = rulesSpec
-
-				// 3. Iterate over the converted Go slice
-				for i, rulesElement := range rulesElements {
-					// Initialize the spec struct for the current element
-					legacyRuleListOneOfSpec.LegacyRuleList.Rules[i] = &ves_io_schema.ObjectRefType{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested RequiredStringField --> Name
-					if !rulesElement.Name.IsNull() && !rulesElement.Name.IsUnknown() {
-						rulesSpec[i].Name = string(rulesElement.Name.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredStringField --> Namespace
-					if !rulesElement.Namespace.IsNull() && !rulesElement.Namespace.IsUnknown() {
-						rulesSpec[i].Namespace = string(rulesElement.Namespace.ValueString())
-					}
-
-				}
-			}
-
-		}
-
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_secret_policy.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -976,46 +1045,99 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
 		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
 		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1025,45 +1147,6 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// resource SpecToModelRoot BoolField --> AllowF5Xc
 	data.AllowF5Xc = types.BoolValue(specData.GetAllowF5Xc())
@@ -1085,26 +1168,98 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &SecretPolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &SecretPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> LegacyRuleList
+		// GlobalSpecType
+		// false
+		{
+			legacyRuleListOptionsWrapper, isLegacyRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_LegacyRuleList)
+			legacyRuleListAttributeMap := make(map[string]attr.Value)
+
+			if isLegacyRuleList && legacyRuleListOptionsWrapper != nil && legacyRuleListOptionsWrapper.LegacyRuleList != nil {
+				legacyRuleListElement := legacyRuleListOptionsWrapper.LegacyRuleList
+
+				// resource specToModelNested ArrayOfPointerField --> Rules
+				if len(legacyRuleListElement.GetRules()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					rulesElements := make([]ObjectRefTypeModel, 0, len(legacyRuleListElement.GetRules()))
+					for _, rulesElement := range legacyRuleListElement.GetRules() {
+						objectRefTypeModelModel := ObjectRefTypeModel{}
+
+						// resource specToModelNested RequiredStringField --> Name
+						if rulesElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(rulesElement.GetName())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested RequiredStringField --> Namespace
+						if rulesElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Tenant
+						if rulesElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(rulesElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						rulesElements = append(rulesElements, objectRefTypeModelModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap}, rulesElements)
+					response.Diagnostics.Append(rulesListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					legacyRuleListAttributeMap["rules"] = rulesListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					legacyRuleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap})
+				}
+
+				legacyRuleListObj, legacyRuleListObjDiags := types.ObjectValue(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap, legacyRuleListAttributeMap)
+				response.Diagnostics.Append(legacyRuleListObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ruleChoiceChoicesModel.LegacyRuleList = legacyRuleListObj
+			} else {
+				ruleChoiceChoicesModel.LegacyRuleList = types.ObjectNull(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap)
+			}
+		}
 
 		// resource specToModelNested PointerOfOneOfField --> RuleList
 		// GlobalSpecType
 		// false
 		{
-			ruleListOptions, isRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_RuleList)
+			ruleListOptionsWrapper, isRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_RuleList)
 			ruleListAttributeMap := make(map[string]attr.Value)
 
-			if isRuleList && ruleListOptions != nil {
+			if isRuleList && ruleListOptionsWrapper != nil && ruleListOptionsWrapper.RuleList != nil {
+				ruleListElement := ruleListOptionsWrapper.RuleList
 
 				// resource specToModelNested ArrayOfPointerField --> Rules
-				if len(ruleListOptions.RuleList.GetRules()) > 0 {
+				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]SecretPolicySecretPolicyRule, 0, len(ruleListOptions.RuleList.GetRules()))
-					for _, rulesElement := range ruleListOptions.RuleList.GetRules() {
-						secretPolicySecretPolicyRuleModel := SecretPolicySecretPolicyRule{}
+					rulesElements := make([]SecretPolicyRule, 0, len(ruleListElement.GetRules()))
+					for _, rulesElement := range ruleListElement.GetRules() {
+						secretPolicyRuleModel := SecretPolicyRule{}
 
 						// resource specToModelNested RequiredPointerField --> Metadata
 						if rulesElement.GetMetadata() != nil {
@@ -1114,14 +1269,6 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredStringField --> Name
-							if metadataElement.GetName() != "" {
-								secretPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-							} else {
-								// Empty string, set to null
-								secretPolicyMessageMetaTypeModel.Name = types.StringNull()
-							}
-
 							// resource specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
 								secretPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -1130,13 +1277,21 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 								secretPolicyMessageMetaTypeModel.Description = types.StringNull()
 							}
 
+							// resource specToModelNested RequiredStringField --> Name
+							if metadataElement.GetName() != "" {
+								secretPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+							} else {
+								// Empty string, set to null
+								secretPolicyMessageMetaTypeModel.Name = types.StringNull()
+							}
+
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							secretPolicyMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, secretPolicyMessageMetaTypeModel)
-							response.Diagnostics.Append(diags...)
+							secretPolicyMessageMetaTypeModelObj, secretPolicyMessageMetaTypeModelObjDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, secretPolicyMessageMetaTypeModel)
+							response.Diagnostics.Append(secretPolicyMessageMetaTypeModelObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
+							secretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1145,29 +1300,31 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
+							secretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
 						// resource specToModelNested RequiredPointerField --> Spec
 						if rulesElement.GetSpec() != nil {
 							// Create the nested Go struct
-							secretPolicySecretPolicyRuleGlobalSpecTypeModel := &SecretPolicySecretPolicyRuleGlobalSpecType{}
+							secretPolicyGstModel := &SecretPolicyGst{}
 							specElement := rulesElement.GetSpec()
 
 							// Recursively populate the nested struct
 
 							// resource specToModelNested RequiredEnumField --> Action
-							if specElement.GetAction().String() != "" {
-								stringValue := types.StringValue(specElement.GetAction().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
+							{
+								if specElement.GetAction().String() != "" {
+									stringValue := types.StringValue(specElement.GetAction().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									secretPolicyGstModel.Action = listValue
+								} else {
+									secretPolicyGstModel.Action = types.ListNull(types.StringType)
 								}
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = listValue
-							} else {
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = types.ListNull(types.StringType)
 							}
 
 							// resource specToModelNested RequiredOneOfField --> ClientChoice
@@ -1181,91 +1338,76 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 								// Process nested choices, populating the temporary attribute map
 
-								// resource specToModelNested PointerOfOneOfField --> ClientSelector
-								// GlobalSpecType
-								// false
-								{
-									clientSelectorOptions, isClientSelector := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector)
-									clientSelectorAttributeMap := make(map[string]attr.Value)
+								// resource specToModelNested StringOfOneOfField --> ClientName
+								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
 
-									if isClientSelector && clientSelectorOptions != nil {
-
-										// resource specToModelNested RequiredArrayOfStringField --> Expressions
-										if len(clientSelectorOptions.ClientSelector.GetExpressions()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientSelectorOptions.ClientSelector.GetExpressions())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientSelectorAttributeMap["expressions"] = listValue
-										} else {
-											clientSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-										}
-
-										clientSelectorObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap, clientSelectorAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										specclientChoiceChoicesAttributeMap["client_selector"] = clientSelectorObj
-									} else {
-										specclientChoiceChoicesAttributeMap["client_selector"] = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap)
-									}
+								if isClientName {
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
+								} else {
+									// Empty string, set to null
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
 								}
 
 								// resource specToModelNested PointerOfOneOfField --> ClientNameMatcher
 								// GlobalSpecType
 								// false
 								{
-									clientNameMatcherOptions, isClientNameMatcher := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientNameMatcher)
+									clientNameMatcherOptionsWrapper, isClientNameMatcher := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientNameMatcher)
 									clientNameMatcherAttributeMap := make(map[string]attr.Value)
 
-									if isClientNameMatcher && clientNameMatcherOptions != nil {
+									if isClientNameMatcher && clientNameMatcherOptionsWrapper != nil && clientNameMatcherOptionsWrapper.ClientNameMatcher != nil {
+										clientNameMatcherElement := clientNameMatcherOptionsWrapper.ClientNameMatcher
+
+										// resource specToModelNested ArrayOfStringField --> ExactValues
+										{
+											if len(clientNameMatcherElement.GetExactValues()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherElement.GetExactValues())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["exact_values"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
+											}
+										}
 
 										// resource specToModelNested ArrayOfStringField --> RegexValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetRegexValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetRegexValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
+										{
+											if len(clientNameMatcherElement.GetRegexValues()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherElement.GetRegexValues())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["regex_values"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["regex_values"] = types.ListNull(types.StringType)
 											}
-											clientNameMatcherAttributeMap["regex_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["regex_values"] = types.ListNull(types.StringType)
 										}
 
 										// resource SpecToModelNested ArrayOfEnumField --> Transformers
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetTransformers()) > 0 {
-											transformersStrings := make([]string, 0, len(clientNameMatcherOptions.ClientNameMatcher.GetTransformers()))
-											for _, v := range clientNameMatcherOptions.ClientNameMatcher.GetTransformers() {
-												if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-													transformersStrings = append(transformersStrings, strVal)
+										{
+											if len(clientNameMatcherElement.GetTransformers()) > 0 {
+												transformersStrings := make([]string, 0, len(clientNameMatcherElement.GetTransformers()))
+												for _, v := range clientNameMatcherElement.GetTransformers() {
+													if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
+														transformersStrings = append(transformersStrings, strVal)
+													}
 												}
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["transformers"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
 											}
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["transformers"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
 										}
 
-										// resource specToModelNested ArrayOfStringField --> ExactValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["exact_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
-										}
-
-										clientNameMatcherObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
-										response.Diagnostics.Append(diags...)
+										clientNameMatcherObj, clientNameMatcherObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
+										response.Diagnostics.Append(clientNameMatcherObjDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -1275,14 +1417,39 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 									}
 								}
 
-								// resource specToModelNested StringOfOneOfField --> ClientName
-								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
+								// resource specToModelNested PointerOfOneOfField --> ClientSelector
+								// GlobalSpecType
+								// false
+								{
+									clientSelectorOptionsWrapper, isClientSelector := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector)
+									clientSelectorAttributeMap := make(map[string]attr.Value)
 
-								if isClientName {
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
-								} else {
-									// Empty string, set to null
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
+									if isClientSelector && clientSelectorOptionsWrapper != nil && clientSelectorOptionsWrapper.ClientSelector != nil {
+										clientSelectorElement := clientSelectorOptionsWrapper.ClientSelector
+
+										// resource specToModelNested RequiredArrayOfStringField --> Expressions
+										{
+											if len(clientSelectorElement.GetExpressions()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientSelectorElement.GetExpressions())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientSelectorAttributeMap["expressions"] = listValue
+											} else {
+												clientSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+											}
+										}
+
+										clientSelectorObj, clientSelectorObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap, clientSelectorAttributeMap)
+										response.Diagnostics.Append(clientSelectorObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										specclientChoiceChoicesAttributeMap["client_selector"] = clientSelectorObj
+									} else {
+										specclientChoiceChoicesAttributeMap["client_selector"] = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap)
+									}
 								}
 
 								// --- End of Choices ---
@@ -1298,19 +1465,19 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = finalObj
+								secretPolicyGstModel.ClientChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
+								secretPolicyGstModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							secretPolicySecretPolicyRuleGlobalSpecTypeModelObj, diags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicySecretPolicyRuleGlobalSpecTypeModel)
-							response.Diagnostics.Append(diags...)
+							secretPolicyGstModelObj, secretPolicyGstModelObjDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicyGstModel)
+							response.Diagnostics.Append(secretPolicyGstModelObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Spec = secretPolicySecretPolicyRuleGlobalSpecTypeModelObj
+							secretPolicyRuleModel.Spec = secretPolicyGstModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1319,15 +1486,15 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
+							secretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
 						}
 
-						rulesElements = append(rulesElements, secretPolicySecretPolicyRuleModel)
+						rulesElements = append(rulesElements, secretPolicyRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
-					response.Diagnostics.Append(diags...)
+					rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
+					response.Diagnostics.Append(rulesListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1340,8 +1507,8 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 					ruleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap})
 				}
 
-				ruleListObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ruleListObj, ruleListObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
+				response.Diagnostics.Append(ruleListObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1351,89 +1518,21 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> LegacyRuleList
-		// GlobalSpecType
-		// false
-		{
-			legacyRuleListOptions, isLegacyRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_LegacyRuleList)
-			legacyRuleListAttributeMap := make(map[string]attr.Value)
-
-			if isLegacyRuleList && legacyRuleListOptions != nil {
-
-				// resource specToModelNested ArrayOfPointerField --> Rules
-				if len(legacyRuleListOptions.LegacyRuleList.GetRules()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					rulesElements := make([]ObjectRefTypeModel, 0, len(legacyRuleListOptions.LegacyRuleList.GetRules()))
-					for _, rulesElement := range legacyRuleListOptions.LegacyRuleList.GetRules() {
-						objectRefTypeModelModel := ObjectRefTypeModel{}
-
-						// resource specToModelNested RequiredStringField --> Name
-						if rulesElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(rulesElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						// resource specToModelNested StringField --> Tenant
-						if rulesElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(rulesElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						// resource specToModelNested RequiredStringField --> Namespace
-						if rulesElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						rulesElements = append(rulesElements, objectRefTypeModelModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap}, rulesElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					legacyRuleListAttributeMap["rules"] = rulesListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					legacyRuleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap})
-				}
-
-				legacyRuleListObj, diags := types.ObjectValue(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap, legacyRuleListAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ruleChoiceChoicesModel.LegacyRuleList = legacyRuleListObj
-			} else {
-				ruleChoiceChoicesModel.LegacyRuleList = types.ObjectNull(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap)
-			}
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ruleChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SecretPolicyRuleChoiceModelAttributeMap,
-			ruleChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			ruleChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SecretPolicyRuleChoiceModelAttributeMap,
+				ruleChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.RuleChoice = ruleChoiceObj
+			// Assign the final object to the root data model.
+			data.RuleChoice = ruleChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.RuleChoice = types.ObjectNull(SecretPolicyRuleChoiceModelAttributeMap)
@@ -1503,54 +1602,100 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1560,53 +1705,6 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// resource SpecToModelRoot BoolField --> AllowF5Xc
 	data.AllowF5Xc = types.BoolValue(specData.GetAllowF5Xc())
@@ -1628,26 +1726,98 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &SecretPolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &SecretPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> LegacyRuleList
+		// <no value>
+		// false
+		{
+			legacyRuleListOptionsWrapper, isLegacyRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_LegacyRuleList)
+			legacyRuleListAttributeMap := make(map[string]attr.Value)
+
+			if isLegacyRuleList && legacyRuleListOptionsWrapper != nil && legacyRuleListOptionsWrapper.LegacyRuleList != nil {
+				legacyRuleListElement := legacyRuleListOptionsWrapper.LegacyRuleList
+
+				// resource specToModelNested ArrayOfPointerField --> Rules
+				if len(legacyRuleListElement.GetRules()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					rulesElements := make([]ObjectRefTypeModel, 0, len(legacyRuleListElement.GetRules()))
+					for _, rulesElement := range legacyRuleListElement.GetRules() {
+						objectRefTypeModelModel := ObjectRefTypeModel{}
+
+						// resource specToModelNested RequiredStringField --> Name
+						if rulesElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(rulesElement.GetName())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested RequiredStringField --> Namespace
+						if rulesElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Tenant
+						if rulesElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(rulesElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						rulesElements = append(rulesElements, objectRefTypeModelModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap}, rulesElements)
+					response.Diagnostics.Append(rulesListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					legacyRuleListAttributeMap["rules"] = rulesListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					legacyRuleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap})
+				}
+
+				legacyRuleListObj, legacyRuleListObjDiags := types.ObjectValue(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap, legacyRuleListAttributeMap)
+				response.Diagnostics.Append(legacyRuleListObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ruleChoiceChoicesModel.LegacyRuleList = legacyRuleListObj
+			} else {
+				ruleChoiceChoicesModel.LegacyRuleList = types.ObjectNull(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap)
+			}
+		}
 
 		// resource specToModelNested PointerOfOneOfField --> RuleList
 		// <no value>
 		// false
 		{
-			ruleListOptions, isRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_RuleList)
+			ruleListOptionsWrapper, isRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_RuleList)
 			ruleListAttributeMap := make(map[string]attr.Value)
 
-			if isRuleList && ruleListOptions != nil {
+			if isRuleList && ruleListOptionsWrapper != nil && ruleListOptionsWrapper.RuleList != nil {
+				ruleListElement := ruleListOptionsWrapper.RuleList
 
 				// resource specToModelNested ArrayOfPointerField --> Rules
-				if len(ruleListOptions.RuleList.GetRules()) > 0 {
+				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]SecretPolicySecretPolicyRule, 0, len(ruleListOptions.RuleList.GetRules()))
-					for _, rulesElement := range ruleListOptions.RuleList.GetRules() {
-						secretPolicySecretPolicyRuleModel := SecretPolicySecretPolicyRule{}
+					rulesElements := make([]SecretPolicyRule, 0, len(ruleListElement.GetRules()))
+					for _, rulesElement := range ruleListElement.GetRules() {
+						secretPolicyRuleModel := SecretPolicyRule{}
 
 						// resource specToModelNested RequiredPointerField --> Metadata
 						if rulesElement.GetMetadata() != nil {
@@ -1657,14 +1827,6 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredStringField --> Name
-							if metadataElement.GetName() != "" {
-								secretPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-							} else {
-								// Empty string, set to null
-								secretPolicyMessageMetaTypeModel.Name = types.StringNull()
-							}
-
 							// resource specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
 								secretPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -1673,13 +1835,21 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 								secretPolicyMessageMetaTypeModel.Description = types.StringNull()
 							}
 
+							// resource specToModelNested RequiredStringField --> Name
+							if metadataElement.GetName() != "" {
+								secretPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+							} else {
+								// Empty string, set to null
+								secretPolicyMessageMetaTypeModel.Name = types.StringNull()
+							}
+
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							secretPolicyMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, secretPolicyMessageMetaTypeModel)
-							response.Diagnostics.Append(diags...)
+							secretPolicyMessageMetaTypeModelObj, secretPolicyMessageMetaTypeModelObjDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, secretPolicyMessageMetaTypeModel)
+							response.Diagnostics.Append(secretPolicyMessageMetaTypeModelObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
+							secretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1688,29 +1858,31 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
+							secretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
 						// resource specToModelNested RequiredPointerField --> Spec
 						if rulesElement.GetSpec() != nil {
 							// Create the nested Go struct
-							secretPolicySecretPolicyRuleGlobalSpecTypeModel := &SecretPolicySecretPolicyRuleGlobalSpecType{}
+							secretPolicyGstModel := &SecretPolicyGst{}
 							specElement := rulesElement.GetSpec()
 
 							// Recursively populate the nested struct
 
 							// resource specToModelNested RequiredEnumField --> Action
-							if specElement.GetAction().String() != "" {
-								stringValue := types.StringValue(specElement.GetAction().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
+							{
+								if specElement.GetAction().String() != "" {
+									stringValue := types.StringValue(specElement.GetAction().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									secretPolicyGstModel.Action = listValue
+								} else {
+									secretPolicyGstModel.Action = types.ListNull(types.StringType)
 								}
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = listValue
-							} else {
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = types.ListNull(types.StringType)
 							}
 
 							// resource specToModelNested RequiredOneOfField --> ClientChoice
@@ -1724,91 +1896,76 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 
 								// Process nested choices, populating the temporary attribute map
 
-								// resource specToModelNested PointerOfOneOfField --> ClientSelector
-								// <no value>
-								// false
-								{
-									clientSelectorOptions, isClientSelector := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector)
-									clientSelectorAttributeMap := make(map[string]attr.Value)
+								// resource specToModelNested StringOfOneOfField --> ClientName
+								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
 
-									if isClientSelector && clientSelectorOptions != nil {
-
-										// resource specToModelNested RequiredArrayOfStringField --> Expressions
-										if len(clientSelectorOptions.ClientSelector.GetExpressions()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientSelectorOptions.ClientSelector.GetExpressions())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientSelectorAttributeMap["expressions"] = listValue
-										} else {
-											clientSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-										}
-
-										clientSelectorObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap, clientSelectorAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										specclientChoiceChoicesAttributeMap["client_selector"] = clientSelectorObj
-									} else {
-										specclientChoiceChoicesAttributeMap["client_selector"] = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap)
-									}
+								if isClientName {
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
+								} else {
+									// Empty string, set to null
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
 								}
 
 								// resource specToModelNested PointerOfOneOfField --> ClientNameMatcher
 								// <no value>
 								// false
 								{
-									clientNameMatcherOptions, isClientNameMatcher := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientNameMatcher)
+									clientNameMatcherOptionsWrapper, isClientNameMatcher := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientNameMatcher)
 									clientNameMatcherAttributeMap := make(map[string]attr.Value)
 
-									if isClientNameMatcher && clientNameMatcherOptions != nil {
+									if isClientNameMatcher && clientNameMatcherOptionsWrapper != nil && clientNameMatcherOptionsWrapper.ClientNameMatcher != nil {
+										clientNameMatcherElement := clientNameMatcherOptionsWrapper.ClientNameMatcher
+
+										// resource specToModelNested ArrayOfStringField --> ExactValues
+										{
+											if len(clientNameMatcherElement.GetExactValues()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherElement.GetExactValues())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["exact_values"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
+											}
+										}
 
 										// resource specToModelNested ArrayOfStringField --> RegexValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetRegexValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetRegexValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
+										{
+											if len(clientNameMatcherElement.GetRegexValues()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherElement.GetRegexValues())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["regex_values"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["regex_values"] = types.ListNull(types.StringType)
 											}
-											clientNameMatcherAttributeMap["regex_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["regex_values"] = types.ListNull(types.StringType)
 										}
 
 										// resource SpecToModelNested ArrayOfEnumField --> Transformers
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetTransformers()) > 0 {
-											transformersStrings := make([]string, 0, len(clientNameMatcherOptions.ClientNameMatcher.GetTransformers()))
-											for _, v := range clientNameMatcherOptions.ClientNameMatcher.GetTransformers() {
-												if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-													transformersStrings = append(transformersStrings, strVal)
+										{
+											if len(clientNameMatcherElement.GetTransformers()) > 0 {
+												transformersStrings := make([]string, 0, len(clientNameMatcherElement.GetTransformers()))
+												for _, v := range clientNameMatcherElement.GetTransformers() {
+													if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
+														transformersStrings = append(transformersStrings, strVal)
+													}
 												}
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["transformers"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
 											}
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["transformers"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
 										}
 
-										// resource specToModelNested ArrayOfStringField --> ExactValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["exact_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
-										}
-
-										clientNameMatcherObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
-										response.Diagnostics.Append(diags...)
+										clientNameMatcherObj, clientNameMatcherObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
+										response.Diagnostics.Append(clientNameMatcherObjDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -1818,14 +1975,39 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 									}
 								}
 
-								// resource specToModelNested StringOfOneOfField --> ClientName
-								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
+								// resource specToModelNested PointerOfOneOfField --> ClientSelector
+								// <no value>
+								// false
+								{
+									clientSelectorOptionsWrapper, isClientSelector := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector)
+									clientSelectorAttributeMap := make(map[string]attr.Value)
 
-								if isClientName {
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
-								} else {
-									// Empty string, set to null
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
+									if isClientSelector && clientSelectorOptionsWrapper != nil && clientSelectorOptionsWrapper.ClientSelector != nil {
+										clientSelectorElement := clientSelectorOptionsWrapper.ClientSelector
+
+										// resource specToModelNested RequiredArrayOfStringField --> Expressions
+										{
+											if len(clientSelectorElement.GetExpressions()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientSelectorElement.GetExpressions())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientSelectorAttributeMap["expressions"] = listValue
+											} else {
+												clientSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+											}
+										}
+
+										clientSelectorObj, clientSelectorObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap, clientSelectorAttributeMap)
+										response.Diagnostics.Append(clientSelectorObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										specclientChoiceChoicesAttributeMap["client_selector"] = clientSelectorObj
+									} else {
+										specclientChoiceChoicesAttributeMap["client_selector"] = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap)
+									}
 								}
 
 								// --- End of Choices ---
@@ -1841,19 +2023,19 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = finalObj
+								secretPolicyGstModel.ClientChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
+								secretPolicyGstModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							secretPolicySecretPolicyRuleGlobalSpecTypeModelObj, diags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicySecretPolicyRuleGlobalSpecTypeModel)
-							response.Diagnostics.Append(diags...)
+							secretPolicyGstModelObj, secretPolicyGstModelObjDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicyGstModel)
+							response.Diagnostics.Append(secretPolicyGstModelObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Spec = secretPolicySecretPolicyRuleGlobalSpecTypeModelObj
+							secretPolicyRuleModel.Spec = secretPolicyGstModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1862,15 +2044,15 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
+							secretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
 						}
 
-						rulesElements = append(rulesElements, secretPolicySecretPolicyRuleModel)
+						rulesElements = append(rulesElements, secretPolicyRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
-					response.Diagnostics.Append(diags...)
+					rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
+					response.Diagnostics.Append(rulesListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1883,8 +2065,8 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 					ruleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap})
 				}
 
-				ruleListObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ruleListObj, ruleListObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
+				response.Diagnostics.Append(ruleListObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1894,89 +2076,21 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> LegacyRuleList
-		// <no value>
-		// false
-		{
-			legacyRuleListOptions, isLegacyRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_LegacyRuleList)
-			legacyRuleListAttributeMap := make(map[string]attr.Value)
-
-			if isLegacyRuleList && legacyRuleListOptions != nil {
-
-				// resource specToModelNested ArrayOfPointerField --> Rules
-				if len(legacyRuleListOptions.LegacyRuleList.GetRules()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					rulesElements := make([]ObjectRefTypeModel, 0, len(legacyRuleListOptions.LegacyRuleList.GetRules()))
-					for _, rulesElement := range legacyRuleListOptions.LegacyRuleList.GetRules() {
-						objectRefTypeModelModel := ObjectRefTypeModel{}
-
-						// resource specToModelNested RequiredStringField --> Name
-						if rulesElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(rulesElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						// resource specToModelNested StringField --> Tenant
-						if rulesElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(rulesElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						// resource specToModelNested RequiredStringField --> Namespace
-						if rulesElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						rulesElements = append(rulesElements, objectRefTypeModelModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap}, rulesElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					legacyRuleListAttributeMap["rules"] = rulesListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					legacyRuleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap})
-				}
-
-				legacyRuleListObj, diags := types.ObjectValue(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap, legacyRuleListAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ruleChoiceChoicesModel.LegacyRuleList = legacyRuleListObj
-			} else {
-				ruleChoiceChoicesModel.LegacyRuleList = types.ObjectNull(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap)
-			}
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ruleChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SecretPolicyRuleChoiceModelAttributeMap,
-			ruleChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			ruleChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SecretPolicyRuleChoiceModelAttributeMap,
+				ruleChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.RuleChoice = ruleChoiceObj
+			// Assign the final object to the root data model.
+			data.RuleChoice = ruleChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.RuleChoice = types.ObjectNull(SecretPolicyRuleChoiceModelAttributeMap)
@@ -1999,6 +2113,25 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCSecretPolicyModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -2035,7 +2168,7 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -2046,6 +2179,20 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -2065,25 +2212,73 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 	// resource modelToSpecRoot DurationField --> DecryptCacheTimeout
 	if !data.DecryptCacheTimeout.IsNull() && !data.DecryptCacheTimeout.IsUnknown() {
-		dur, diags := data.DecryptCacheTimeout.ValueGoDuration()
-		response.Diagnostics.Append(diags...)
-		if !diags.HasError() {
-			spec.DecryptCacheTimeout = types_pb.DurationProto(dur)
+		{
+			dur, durationDiags := data.DecryptCacheTimeout.ValueGoDuration()
+			response.Diagnostics.Append(durationDiags...)
+			if !durationDiags.HasError() {
+				spec.DecryptCacheTimeout = types_pb.DurationProto(dur)
+			}
 		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> RuleChoice
 	if !data.RuleChoice.IsNull() && !data.RuleChoice.IsUnknown() {
-		ruleChoiceModel := SecretPolicyGlobalSpecTypeRuleChoice{}
+		ruleChoiceModel := SecretPolicyRuleChoice{}
 		response.Diagnostics.Append(data.RuleChoice.As(ctx, &ruleChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> LegacyRuleList
+		if !ruleChoiceModel.LegacyRuleList.IsNull() && !ruleChoiceModel.LegacyRuleList.IsUnknown() {
+			var secretPolicyLegacyRuleListModel SecretPolicyLegacyRuleList
+			response.Diagnostics.Append(ruleChoiceModel.LegacyRuleList.As(ctx, &secretPolicyLegacyRuleListModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			legacyRuleListOneOfSpec := &ves_io_schema_secret_policy.ReplaceSpecType_LegacyRuleList{}
+			legacyRuleListOneOfSpec.LegacyRuleList = &ves_io_schema_secret_policy.LegacyRuleList{}
+			spec.RuleChoice = legacyRuleListOneOfSpec
+
+			// resource modelToSpecNested ArrayOfPointerField --> Rules
+			if !secretPolicyLegacyRuleListModel.Rules.IsNull() && !secretPolicyLegacyRuleListModel.Rules.IsUnknown() && len(secretPolicyLegacyRuleListModel.Rules.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var rulesElements []ObjectRefTypeModel
+				response.Diagnostics.Append(secretPolicyLegacyRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				rulesSpec := make([]*ves_io_schema.ObjectRefType, len(rulesElements))
+				legacyRuleListOneOfSpec.LegacyRuleList.Rules = rulesSpec
+
+				// 3. Iterate over the converted Go slice
+				for i, rulesElement := range rulesElements {
+					// Initialize the spec struct for the current element
+					legacyRuleListOneOfSpec.LegacyRuleList.Rules[i] = &ves_io_schema.ObjectRefType{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> Name
+					if !rulesElement.Name.IsNull() && !rulesElement.Name.IsUnknown() {
+						legacyRuleListOneOfSpec.LegacyRuleList.Rules[i].Name = string(rulesElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Namespace
+					if !rulesElement.Namespace.IsNull() && !rulesElement.Namespace.IsUnknown() {
+						legacyRuleListOneOfSpec.LegacyRuleList.Rules[i].Namespace = string(rulesElement.Namespace.ValueString())
+					}
+
+				}
+			}
+
+		}
+
 		// resource modelToSpecNested PointerOfOneOfField --> RuleList
 		if !ruleChoiceModel.RuleList.IsNull() && !ruleChoiceModel.RuleList.IsUnknown() {
-			var secretPolicyGlobalSpecTypeRuleListModel SecretPolicyGlobalSpecTypeRuleList
-			response.Diagnostics.Append(ruleChoiceModel.RuleList.As(ctx, &secretPolicyGlobalSpecTypeRuleListModel, basetypes.ObjectAsOptions{})...)
+			var secretPolicyRuleListModel SecretPolicyRuleList
+			response.Diagnostics.Append(ruleChoiceModel.RuleList.As(ctx, &secretPolicyRuleListModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -2092,10 +2287,10 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 			spec.RuleChoice = ruleListOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> Rules
-			if !secretPolicyGlobalSpecTypeRuleListModel.Rules.IsNull() && !secretPolicyGlobalSpecTypeRuleListModel.Rules.IsUnknown() && len(secretPolicyGlobalSpecTypeRuleListModel.Rules.Elements()) > 0 {
+			if !secretPolicyRuleListModel.Rules.IsNull() && !secretPolicyRuleListModel.Rules.IsUnknown() && len(secretPolicyRuleListModel.Rules.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var rulesElements []SecretPolicySecretPolicyRule
-				response.Diagnostics.Append(secretPolicyGlobalSpecTypeRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
+				var rulesElements []SecretPolicyRule
+				response.Diagnostics.Append(secretPolicyRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2122,21 +2317,21 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 						metadataSpec := &ves_io_schema.MessageMetaType{}
 						rulesSpec[i].Metadata = metadataSpec
 
-						// resource modelToSpecNested RequiredStringField --> Name
-						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
-							metadataSpec.Name = string(metadataModel.Name.ValueString())
-						}
-
 						// resource modelToSpecNested StringField --> Description
 						if !metadataModel.Description.IsNull() && !metadataModel.Description.IsUnknown() {
 							metadataSpec.Description = string(metadataModel.Description.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Name
+						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
+							metadataSpec.Name = string(metadataModel.Name.ValueString())
 						}
 
 					}
 
 					// resource modelToSpecNested RequiredPointerField --> Spec
 					if !rulesElement.Spec.IsNull() && !rulesElement.Spec.IsUnknown() {
-						var specModel SecretPolicySecretPolicyRuleGlobalSpecType
+						var specModel SecretPolicyGst
 						response.Diagnostics.Append(rulesElement.Spec.As(ctx, &specModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
@@ -2171,38 +2366,23 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 						// resource modelToSpecNested RequiredOneOfField --> ClientChoice
 						if !specModel.ClientChoice.IsNull() && !specModel.ClientChoice.IsUnknown() {
-							specClientChoiceModel := SecretPolicyGlobalSpecTypeClientChoice{}
+							specClientChoiceModel := SecretPolicyClientChoice{}
 							response.Diagnostics.Append(specModel.ClientChoice.As(ctx, &specClientChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 
-							// resource modelToSpecNested PointerOfOneOfField --> ClientSelector
-							if !specClientChoiceModel.ClientSelector.IsNull() && !specClientChoiceModel.ClientSelector.IsUnknown() {
-								var secretPolicyGlobalSpecTypeClientSelectorModel SecretPolicyGlobalSpecTypeClientSelector
-								response.Diagnostics.Append(specClientChoiceModel.ClientSelector.As(ctx, &secretPolicyGlobalSpecTypeClientSelectorModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSelectorOneOfSpec := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector{}
-								clientSelectorOneOfSpec.ClientSelector = &ves_io_schema.LabelSelectorType{}
-								specSpec.ClientChoice = clientSelectorOneOfSpec
-
-								// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
-								elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientSelectorModel.Expressions.Elements()))
-								diags = secretPolicyGlobalSpecTypeClientSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSelectorOneOfSpec.ClientSelector.Expressions = elements
-
+							// resource modelToSpecNested StringOfOneOfField --> ClientName
+							if !specClientChoiceModel.ClientName.IsNull() && !specClientChoiceModel.ClientName.IsUnknown() {
+								clientNameSpecStr := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName{}
+								clientNameSpecStr.ClientName = string(specClientChoiceModel.ClientName.ValueString())
+								specSpec.ClientChoice = clientNameSpecStr
 							}
 
 							// resource modelToSpecNested PointerOfOneOfField --> ClientNameMatcher
 							if !specClientChoiceModel.ClientNameMatcher.IsNull() && !specClientChoiceModel.ClientNameMatcher.IsUnknown() {
-								var secretPolicyGlobalSpecTypeClientNameMatcherModel SecretPolicyGlobalSpecTypeClientNameMatcher
-								response.Diagnostics.Append(specClientChoiceModel.ClientNameMatcher.As(ctx, &secretPolicyGlobalSpecTypeClientNameMatcherModel, basetypes.ObjectAsOptions{})...)
+								var secretPolicyClientNameMatcherModel SecretPolicyClientNameMatcher
+								response.Diagnostics.Append(specClientChoiceModel.ClientNameMatcher.As(ctx, &secretPolicyClientNameMatcherModel, basetypes.ObjectAsOptions{})...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2210,22 +2390,37 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 								clientNameMatcherOneOfSpec.ClientNameMatcher = &ves_io_schema_policy.MatcherType{}
 								specSpec.ClientChoice = clientNameMatcherOneOfSpec
 
-								// resource modelToSpecNested ArrayOfStringField --> RegexValues
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsUnknown() {
-									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.Elements()))
-									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.ElementsAs(ctx, &elements, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								// resource modelToSpecNested ArrayOfStringField --> ExactValues
+								if !secretPolicyClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyClientNameMatcherModel.ExactValues.IsUnknown() {
+									{
+										elements := make([]string, 0, len(secretPolicyClientNameMatcherModel.ExactValues.Elements()))
+										diags = secretPolicyClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
 									}
-									clientNameMatcherOneOfSpec.ClientNameMatcher.RegexValues = elements
+								}
+
+								// resource modelToSpecNested ArrayOfStringField --> RegexValues
+								if !secretPolicyClientNameMatcherModel.RegexValues.IsNull() && !secretPolicyClientNameMatcherModel.RegexValues.IsUnknown() {
+									{
+										elements := make([]string, 0, len(secretPolicyClientNameMatcherModel.RegexValues.Elements()))
+										diags = secretPolicyClientNameMatcherModel.RegexValues.ElementsAs(ctx, &elements, false)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clientNameMatcherOneOfSpec.ClientNameMatcher.RegexValues = elements
+									}
 								}
 
 								// resource modelToSpecNested ArrayOfEnumField --> Transformers
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.IsUnknown() {
+								if !secretPolicyClientNameMatcherModel.Transformers.IsNull() && !secretPolicyClientNameMatcherModel.Transformers.IsUnknown() {
 									// 1. Get raw string elements
-									transformersRaw := make([]types.String, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.Elements()))
-									diags = secretPolicyGlobalSpecTypeClientNameMatcherModel.Transformers.ElementsAs(ctx, &transformersRaw, false)
+									transformersRaw := make([]types.String, 0, len(secretPolicyClientNameMatcherModel.Transformers.Elements()))
+									diags = secretPolicyClientNameMatcherModel.Transformers.ElementsAs(ctx, &transformersRaw, false)
 									response.Diagnostics.Append(diags...)
 									if response.Diagnostics.HasError() {
 										return
@@ -2246,24 +2441,30 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 									clientNameMatcherOneOfSpec.ClientNameMatcher.Transformers = transformersSpec
 								}
 
-								// resource modelToSpecNested ArrayOfStringField --> ExactValues
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsUnknown() {
-									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.Elements()))
-									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> ClientSelector
+							if !specClientChoiceModel.ClientSelector.IsNull() && !specClientChoiceModel.ClientSelector.IsUnknown() {
+								var secretPolicyClientSelectorModel SecretPolicyClientSelector
+								response.Diagnostics.Append(specClientChoiceModel.ClientSelector.As(ctx, &secretPolicyClientSelectorModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSelectorOneOfSpec := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector{}
+								clientSelectorOneOfSpec.ClientSelector = &ves_io_schema.LabelSelectorType{}
+								specSpec.ClientChoice = clientSelectorOneOfSpec
+
+								// resource modelToSpecNested RequiredArrayOfStringField --> Expressions
+								{
+									elements := make([]string, 0, len(secretPolicyClientSelectorModel.Expressions.Elements()))
+									diags = secretPolicyClientSelectorModel.Expressions.ElementsAs(ctx, &elements, false)
 									response.Diagnostics.Append(diags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
+									clientSelectorOneOfSpec.ClientSelector.Expressions = elements
 								}
 
-							}
-
-							// resource modelToSpecNested StringOfOneOfField --> ClientName
-							if !specClientChoiceModel.ClientName.IsNull() && !specClientChoiceModel.ClientName.IsUnknown() {
-								clientNameSpecStr := &ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName{}
-								clientNameSpecStr.ClientName = string(specClientChoiceModel.ClientName.ValueString())
-								specSpec.ClientChoice = clientNameSpecStr
 							}
 
 						}
@@ -2275,52 +2476,13 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> LegacyRuleList
-		if !ruleChoiceModel.LegacyRuleList.IsNull() && !ruleChoiceModel.LegacyRuleList.IsUnknown() {
-			var secretPolicyGlobalSpecTypeLegacyRuleListModel SecretPolicyGlobalSpecTypeLegacyRuleList
-			response.Diagnostics.Append(ruleChoiceModel.LegacyRuleList.As(ctx, &secretPolicyGlobalSpecTypeLegacyRuleListModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			legacyRuleListOneOfSpec := &ves_io_schema_secret_policy.ReplaceSpecType_LegacyRuleList{}
-			legacyRuleListOneOfSpec.LegacyRuleList = &ves_io_schema_secret_policy.LegacyRuleList{}
-			spec.RuleChoice = legacyRuleListOneOfSpec
+	}
 
-			// resource modelToSpecNested ArrayOfPointerField --> Rules
-			if !secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.IsNull() && !secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.IsUnknown() && len(secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var rulesElements []ObjectRefTypeModel
-				response.Diagnostics.Append(secretPolicyGlobalSpecTypeLegacyRuleListModel.Rules.ElementsAs(ctx, &rulesElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				rulesSpec := make([]*ves_io_schema.ObjectRefType, len(rulesElements))
-				legacyRuleListOneOfSpec.LegacyRuleList.Rules = rulesSpec
-
-				// 3. Iterate over the converted Go slice
-				for i, rulesElement := range rulesElements {
-					// Initialize the spec struct for the current element
-					legacyRuleListOneOfSpec.LegacyRuleList.Rules[i] = &ves_io_schema.ObjectRefType{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested RequiredStringField --> Name
-					if !rulesElement.Name.IsNull() && !rulesElement.Name.IsUnknown() {
-						rulesSpec[i].Name = string(rulesElement.Name.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredStringField --> Namespace
-					if !rulesElement.Namespace.IsNull() && !rulesElement.Namespace.IsUnknown() {
-						rulesSpec[i].Namespace = string(rulesElement.Namespace.ValueString())
-					}
-
-				}
-			}
-
-		}
-
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2358,54 +2520,99 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -2415,53 +2622,6 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// resource SpecToModelRoot BoolField --> AllowF5Xc
 	data.AllowF5Xc = types.BoolValue(specData.GetAllowF5Xc())
@@ -2483,26 +2643,98 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &SecretPolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &SecretPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> LegacyRuleList
+		// GlobalSpecType
+		// false
+		{
+			legacyRuleListOptionsWrapper, isLegacyRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_LegacyRuleList)
+			legacyRuleListAttributeMap := make(map[string]attr.Value)
+
+			if isLegacyRuleList && legacyRuleListOptionsWrapper != nil && legacyRuleListOptionsWrapper.LegacyRuleList != nil {
+				legacyRuleListElement := legacyRuleListOptionsWrapper.LegacyRuleList
+
+				// resource specToModelNested ArrayOfPointerField --> Rules
+				if len(legacyRuleListElement.GetRules()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					rulesElements := make([]ObjectRefTypeModel, 0, len(legacyRuleListElement.GetRules()))
+					for _, rulesElement := range legacyRuleListElement.GetRules() {
+						objectRefTypeModelModel := ObjectRefTypeModel{}
+
+						// resource specToModelNested RequiredStringField --> Name
+						if rulesElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(rulesElement.GetName())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested RequiredStringField --> Namespace
+						if rulesElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Tenant
+						if rulesElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(rulesElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						rulesElements = append(rulesElements, objectRefTypeModelModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap}, rulesElements)
+					response.Diagnostics.Append(rulesListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					legacyRuleListAttributeMap["rules"] = rulesListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					legacyRuleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap})
+				}
+
+				legacyRuleListObj, legacyRuleListObjDiags := types.ObjectValue(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap, legacyRuleListAttributeMap)
+				response.Diagnostics.Append(legacyRuleListObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ruleChoiceChoicesModel.LegacyRuleList = legacyRuleListObj
+			} else {
+				ruleChoiceChoicesModel.LegacyRuleList = types.ObjectNull(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap)
+			}
+		}
 
 		// resource specToModelNested PointerOfOneOfField --> RuleList
 		// GlobalSpecType
 		// false
 		{
-			ruleListOptions, isRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_RuleList)
+			ruleListOptionsWrapper, isRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_RuleList)
 			ruleListAttributeMap := make(map[string]attr.Value)
 
-			if isRuleList && ruleListOptions != nil {
+			if isRuleList && ruleListOptionsWrapper != nil && ruleListOptionsWrapper.RuleList != nil {
+				ruleListElement := ruleListOptionsWrapper.RuleList
 
 				// resource specToModelNested ArrayOfPointerField --> Rules
-				if len(ruleListOptions.RuleList.GetRules()) > 0 {
+				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]SecretPolicySecretPolicyRule, 0, len(ruleListOptions.RuleList.GetRules()))
-					for _, rulesElement := range ruleListOptions.RuleList.GetRules() {
-						secretPolicySecretPolicyRuleModel := SecretPolicySecretPolicyRule{}
+					rulesElements := make([]SecretPolicyRule, 0, len(ruleListElement.GetRules()))
+					for _, rulesElement := range ruleListElement.GetRules() {
+						secretPolicyRuleModel := SecretPolicyRule{}
 
 						// resource specToModelNested RequiredPointerField --> Metadata
 						if rulesElement.GetMetadata() != nil {
@@ -2512,14 +2744,6 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredStringField --> Name
-							if metadataElement.GetName() != "" {
-								secretPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-							} else {
-								// Empty string, set to null
-								secretPolicyMessageMetaTypeModel.Name = types.StringNull()
-							}
-
 							// resource specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
 								secretPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -2528,13 +2752,21 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 								secretPolicyMessageMetaTypeModel.Description = types.StringNull()
 							}
 
+							// resource specToModelNested RequiredStringField --> Name
+							if metadataElement.GetName() != "" {
+								secretPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+							} else {
+								// Empty string, set to null
+								secretPolicyMessageMetaTypeModel.Name = types.StringNull()
+							}
+
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							secretPolicyMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, secretPolicyMessageMetaTypeModel)
-							response.Diagnostics.Append(diags...)
+							secretPolicyMessageMetaTypeModelObj, secretPolicyMessageMetaTypeModelObjDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, secretPolicyMessageMetaTypeModel)
+							response.Diagnostics.Append(secretPolicyMessageMetaTypeModelObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
+							secretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2543,29 +2775,31 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
+							secretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
 						// resource specToModelNested RequiredPointerField --> Spec
 						if rulesElement.GetSpec() != nil {
 							// Create the nested Go struct
-							secretPolicySecretPolicyRuleGlobalSpecTypeModel := &SecretPolicySecretPolicyRuleGlobalSpecType{}
+							secretPolicyGstModel := &SecretPolicyGst{}
 							specElement := rulesElement.GetSpec()
 
 							// Recursively populate the nested struct
 
 							// resource specToModelNested RequiredEnumField --> Action
-							if specElement.GetAction().String() != "" {
-								stringValue := types.StringValue(specElement.GetAction().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
+							{
+								if specElement.GetAction().String() != "" {
+									stringValue := types.StringValue(specElement.GetAction().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									secretPolicyGstModel.Action = listValue
+								} else {
+									secretPolicyGstModel.Action = types.ListNull(types.StringType)
 								}
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = listValue
-							} else {
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = types.ListNull(types.StringType)
 							}
 
 							// resource specToModelNested RequiredOneOfField --> ClientChoice
@@ -2579,91 +2813,76 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 								// Process nested choices, populating the temporary attribute map
 
-								// resource specToModelNested PointerOfOneOfField --> ClientSelector
-								// GlobalSpecType
-								// false
-								{
-									clientSelectorOptions, isClientSelector := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector)
-									clientSelectorAttributeMap := make(map[string]attr.Value)
+								// resource specToModelNested StringOfOneOfField --> ClientName
+								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
 
-									if isClientSelector && clientSelectorOptions != nil {
-
-										// resource specToModelNested RequiredArrayOfStringField --> Expressions
-										if len(clientSelectorOptions.ClientSelector.GetExpressions()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientSelectorOptions.ClientSelector.GetExpressions())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientSelectorAttributeMap["expressions"] = listValue
-										} else {
-											clientSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-										}
-
-										clientSelectorObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap, clientSelectorAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										specclientChoiceChoicesAttributeMap["client_selector"] = clientSelectorObj
-									} else {
-										specclientChoiceChoicesAttributeMap["client_selector"] = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap)
-									}
+								if isClientName {
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
+								} else {
+									// Empty string, set to null
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
 								}
 
 								// resource specToModelNested PointerOfOneOfField --> ClientNameMatcher
 								// GlobalSpecType
 								// false
 								{
-									clientNameMatcherOptions, isClientNameMatcher := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientNameMatcher)
+									clientNameMatcherOptionsWrapper, isClientNameMatcher := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientNameMatcher)
 									clientNameMatcherAttributeMap := make(map[string]attr.Value)
 
-									if isClientNameMatcher && clientNameMatcherOptions != nil {
+									if isClientNameMatcher && clientNameMatcherOptionsWrapper != nil && clientNameMatcherOptionsWrapper.ClientNameMatcher != nil {
+										clientNameMatcherElement := clientNameMatcherOptionsWrapper.ClientNameMatcher
+
+										// resource specToModelNested ArrayOfStringField --> ExactValues
+										{
+											if len(clientNameMatcherElement.GetExactValues()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherElement.GetExactValues())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["exact_values"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
+											}
+										}
 
 										// resource specToModelNested ArrayOfStringField --> RegexValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetRegexValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetRegexValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
+										{
+											if len(clientNameMatcherElement.GetRegexValues()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherElement.GetRegexValues())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["regex_values"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["regex_values"] = types.ListNull(types.StringType)
 											}
-											clientNameMatcherAttributeMap["regex_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["regex_values"] = types.ListNull(types.StringType)
 										}
 
 										// resource SpecToModelNested ArrayOfEnumField --> Transformers
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetTransformers()) > 0 {
-											transformersStrings := make([]string, 0, len(clientNameMatcherOptions.ClientNameMatcher.GetTransformers()))
-											for _, v := range clientNameMatcherOptions.ClientNameMatcher.GetTransformers() {
-												if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
-													transformersStrings = append(transformersStrings, strVal)
+										{
+											if len(clientNameMatcherElement.GetTransformers()) > 0 {
+												transformersStrings := make([]string, 0, len(clientNameMatcherElement.GetTransformers()))
+												for _, v := range clientNameMatcherElement.GetTransformers() {
+													if strVal, exists := ves_io_schema_policy.Transformer_name[int32(v)]; exists {
+														transformersStrings = append(transformersStrings, strVal)
+													}
 												}
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientNameMatcherAttributeMap["transformers"] = listValue
+											} else {
+												clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
 											}
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, transformersStrings)
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["transformers"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
 										}
 
-										// resource specToModelNested ArrayOfStringField --> ExactValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["exact_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
-										}
-
-										clientNameMatcherObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
-										response.Diagnostics.Append(diags...)
+										clientNameMatcherObj, clientNameMatcherObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
+										response.Diagnostics.Append(clientNameMatcherObjDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -2673,14 +2892,39 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 									}
 								}
 
-								// resource specToModelNested StringOfOneOfField --> ClientName
-								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
+								// resource specToModelNested PointerOfOneOfField --> ClientSelector
+								// GlobalSpecType
+								// false
+								{
+									clientSelectorOptionsWrapper, isClientSelector := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientSelector)
+									clientSelectorAttributeMap := make(map[string]attr.Value)
 
-								if isClientName {
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
-								} else {
-									// Empty string, set to null
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
+									if isClientSelector && clientSelectorOptionsWrapper != nil && clientSelectorOptionsWrapper.ClientSelector != nil {
+										clientSelectorElement := clientSelectorOptionsWrapper.ClientSelector
+
+										// resource specToModelNested RequiredArrayOfStringField --> Expressions
+										{
+											if len(clientSelectorElement.GetExpressions()) > 0 {
+												listValue, listDiags := types.ListValueFrom(ctx, types.StringType, clientSelectorElement.GetExpressions())
+												response.Diagnostics.Append(listDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												clientSelectorAttributeMap["expressions"] = listValue
+											} else {
+												clientSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+											}
+										}
+
+										clientSelectorObj, clientSelectorObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap, clientSelectorAttributeMap)
+										response.Diagnostics.Append(clientSelectorObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										specclientChoiceChoicesAttributeMap["client_selector"] = clientSelectorObj
+									} else {
+										specclientChoiceChoicesAttributeMap["client_selector"] = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap)
+									}
 								}
 
 								// --- End of Choices ---
@@ -2696,19 +2940,19 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = finalObj
+								secretPolicyGstModel.ClientChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
+								secretPolicyGstModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							secretPolicySecretPolicyRuleGlobalSpecTypeModelObj, diags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicySecretPolicyRuleGlobalSpecTypeModel)
-							response.Diagnostics.Append(diags...)
+							secretPolicyGstModelObj, secretPolicyGstModelObjDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicyGstModel)
+							response.Diagnostics.Append(secretPolicyGstModelObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Spec = secretPolicySecretPolicyRuleGlobalSpecTypeModelObj
+							secretPolicyRuleModel.Spec = secretPolicyGstModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2717,15 +2961,15 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
+							secretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
 						}
 
-						rulesElements = append(rulesElements, secretPolicySecretPolicyRuleModel)
+						rulesElements = append(rulesElements, secretPolicyRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
-					response.Diagnostics.Append(diags...)
+					rulesListValue, rulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap}, rulesElements)
+					response.Diagnostics.Append(rulesListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2738,8 +2982,8 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 					ruleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRuleChoiceRuleListRulesModelAttributeMap})
 				}
 
-				ruleListObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ruleListObj, ruleListObjDiags := types.ObjectValue(SecretPolicyRuleChoiceRuleListModelAttributeMap, ruleListAttributeMap)
+				response.Diagnostics.Append(ruleListObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2749,92 +2993,50 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> LegacyRuleList
-		// GlobalSpecType
-		// false
-		{
-			legacyRuleListOptions, isLegacyRuleList := ruleChoiceChoices.(*ves_io_schema_secret_policy.GlobalSpecType_LegacyRuleList)
-			legacyRuleListAttributeMap := make(map[string]attr.Value)
-
-			if isLegacyRuleList && legacyRuleListOptions != nil {
-
-				// resource specToModelNested ArrayOfPointerField --> Rules
-				if len(legacyRuleListOptions.LegacyRuleList.GetRules()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					rulesElements := make([]ObjectRefTypeModel, 0, len(legacyRuleListOptions.LegacyRuleList.GetRules()))
-					for _, rulesElement := range legacyRuleListOptions.LegacyRuleList.GetRules() {
-						objectRefTypeModelModel := ObjectRefTypeModel{}
-
-						// resource specToModelNested RequiredStringField --> Name
-						if rulesElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(rulesElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						// resource specToModelNested StringField --> Tenant
-						if rulesElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(rulesElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						// resource specToModelNested RequiredStringField --> Namespace
-						if rulesElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						rulesElements = append(rulesElements, objectRefTypeModelModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap}, rulesElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					legacyRuleListAttributeMap["rules"] = rulesListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					legacyRuleListAttributeMap["rules"] = types.ListNull(types.ObjectType{AttrTypes: SecretPolicyRulesObjectRefModelAttributeMap})
-				}
-
-				legacyRuleListObj, diags := types.ObjectValue(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap, legacyRuleListAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ruleChoiceChoicesModel.LegacyRuleList = legacyRuleListObj
-			} else {
-				ruleChoiceChoicesModel.LegacyRuleList = types.ObjectNull(SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap)
-			}
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ruleChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SecretPolicyRuleChoiceModelAttributeMap,
-			ruleChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			ruleChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SecretPolicyRuleChoiceModelAttributeMap,
+				ruleChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.RuleChoice = ruleChoiceObj
+			// Assign the final object to the root data model.
+			data.RuleChoice = ruleChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.RuleChoice = types.ObjectNull(SecretPolicyRuleChoiceModelAttributeMap)
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -2871,9 +3073,8 @@ func (r *ResourceF5XCSecretPolicy) Delete(ctx context.Context, request resource.
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_secret_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -2888,19 +3089,32 @@ func (r *ResourceF5XCSecretPolicy) Delete(ctx context.Context, request resource.
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCSecretPolicy) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

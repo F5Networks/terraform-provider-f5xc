@@ -1,0 +1,184 @@
+#
+# Copyright (c) 2026 F5, Inc. All rights reserved.
+#
+# Categories mapping for F5 XC Terraform Provider documentation.
+# Used by update_subcategories.go to set the "subcategory" frontmatter attribute
+# in generated Terraform Registry documentation.
+#
+
+# Default subcategory for resources that do not match explicit resource keys or prefixes
+default_category: "General"
+
+# Prefix fallback rules (checked if resource is not explicitly listed in 'resources')
+prefix_mappings:
+  aws_: "Cloud Sites"
+  azure_: "Cloud Sites"
+  gcp_: "Cloud Sites"
+  dns_: "DNS & Edge Services"
+  bot_: "Bot Defense"
+  cdn_: "DNS & Edge Services"
+  api_: "API Security & Management"
+  ike_: "Networking & Connectivity"
+  infraprotect_: "Network Security & Firewalls"
+
+# Explicit resource-to-subcategory mapping
+resources:
+  # App Security & Load Balancing
+  http_loadbalancer: "App Security & Load Balancing"
+  tcp_loadbalancer: "App Security & Load Balancing"
+  udp_loadbalancer: "App Security & Load Balancing"
+  cdn_loadbalancer: "App Security & Load Balancing"
+  origin_pool: "App Security & Load Balancing"
+  app_firewall: "App Security & Load Balancing"
+  app_setting: "App Security & Load Balancing"
+  app_type: "App Security & Load Balancing"
+  healthcheck: "App Security & Load Balancing"
+  waf_exclusion_policy: "App Security & Load Balancing"
+  rate_limiter: "App Security & Load Balancing"
+  rate_limiter_policy: "App Security & Load Balancing"
+  malicious_user_mitigation: "App Security & Load Balancing"
+  protected_application: "App Security & Load Balancing"
+  protected_domain: "App Security & Load Balancing"
+  mitigated_domain: "App Security & Load Balancing"
+  sensitive_data_policy: "App Security & Load Balancing"
+
+  # API Security & Management
+  api_crawler: "API Security & Management"
+  api_credential: "API Security & Management"
+  api_definition: "API Security & Management"
+  api_definition_uploader: "API Security & Management"
+  api_discovery: "API Security & Management"
+  api_testing: "API Security & Management"
+  app_api_group: "API Security & Management"
+  authorization_server: "API Security & Management"
+  data_type: "API Security & Management"
+
+  # Bot Defense
+  bot_infrastructure: "Bot Defense"
+  bot_allowlist_policy: "Bot Defense"
+  bot_endpoint_policy: "Bot Defense"
+  bot_network_policy: "Bot Defense"
+
+  # Cloud & Infrastructure Sites
+  appstack_site: "Cloud & Infrastructure Sites"
+  aws_tgw_site: "Cloud & Infrastructure Sites"
+  aws_tgw_site_set_vip_info: "Cloud & Infrastructure Sites"
+  aws_vpc_site: "Cloud & Infrastructure Sites"
+  aws_vpc_site_set_cloud_site_info: "Cloud & Infrastructure Sites"
+  aws_vpc_site_set_vip_info: "Cloud & Infrastructure Sites"
+  azure_vnet_site: "Cloud & Infrastructure Sites"
+  azure_vnet_site_set_cloud_site_info: "Cloud & Infrastructure Sites"
+  azure_vnet_site_set_vip_info: "Cloud & Infrastructure Sites"
+  gcp_vpc_site: "Cloud & Infrastructure Sites"
+  gcp_vpc_site_set_cloud_site_info: "Cloud & Infrastructure Sites"
+  securemesh_site: "Cloud & Infrastructure Sites"
+  securemesh_site_v2: "Cloud & Infrastructure Sites"
+  dc_cluster_group: "Cloud & Infrastructure Sites"
+  fleet: "Cloud & Infrastructure Sites"
+  site_mesh_group: "Cloud & Infrastructure Sites"
+  virtual_site: "Cloud & Infrastructure Sites"
+  cloud_credentials: "Cloud & Infrastructure Sites"
+  cloud_elastic_ip: "Cloud & Infrastructure Sites"
+  cloud_link: "Cloud & Infrastructure Sites"
+  tgw_info: "Cloud & Infrastructure Sites"
+  tgw_vpc_ip_prefixes: "Cloud & Infrastructure Sites"
+  tgw_vpn_tunnels: "Cloud & Infrastructure Sites"
+
+  # DNS & Edge Services
+  cdn_cache_rule: "DNS & Edge Services"
+  dns_compliance_checks: "DNS & Edge Services"
+  dns_domain: "DNS & Edge Services"
+  dns_lb_health_check: "DNS & Edge Services"
+  dns_lb_pool: "DNS & Edge Services"
+  dns_load_balancer: "DNS & Edge Services"
+  dns_proxy: "DNS & Edge Services"
+  dns_zone: "DNS & Edge Services"
+  dns_zone_record: "DNS & Edge Services"
+  v1_dns_monitor: "DNS & Edge Services"
+  v1_http_monitor: "DNS & Edge Services"
+
+  # Networking & Connectivity
+  advertise_policy: "Networking & Connectivity"
+  bgp: "Networking & Connectivity"
+  bgp_asn_set: "Networking & Connectivity"
+  bgp_routing_policy: "Networking & Connectivity"
+  external_connector: "Networking & Connectivity"
+  ike1: "Networking & Connectivity"
+  ike2: "Networking & Connectivity"
+  ike_phase1_profile: "Networking & Connectivity"
+  ike_phase2_profile: "Networking & Connectivity"
+  network_connector: "Networking & Connectivity"
+  network_interface: "Networking & Connectivity"
+  network_policy: "Networking & Connectivity"
+  network_policy_rule: "Networking & Connectivity"
+  network_policy_view: "Networking & Connectivity"
+  active_network_policies: "Networking & Connectivity"
+  nat_policy: "Networking & Connectivity"
+  policer: "Networking & Connectivity"
+  policy_based_routing: "Networking & Connectivity"
+  protocol_policer: "Networking & Connectivity"
+  route: "Networking & Connectivity"
+  segment: "Networking & Connectivity"
+  segment_connection: "Networking & Connectivity"
+  subnet: "Networking & Connectivity"
+  virtual_network: "Networking & Connectivity"
+
+  # Network Security & Firewalls
+  enhanced_firewall_policy: "Network Security & Firewalls"
+  fast_acl: "Network Security & Firewalls"
+  fast_acl_rule: "Network Security & Firewalls"
+  fast_acls_for_internet_vips: "Network Security & Firewalls"
+  forward_proxy_policy: "Network Security & Firewalls"
+  geo_location_set: "Network Security & Firewalls"
+  infraprotect_asn: "Network Security & Firewalls"
+  infraprotect_asn_prefix: "Network Security & Firewalls"
+  infraprotect_firewall_rule_group: "Network Security & Firewalls"
+  ip_prefix_set: "Network Security & Firewalls"
+  network_firewall: "Network Security & Firewalls"
+  protocol_inspection: "Network Security & Firewalls"
+  service_policy: "Network Security & Firewalls"
+  service_policy_rule: "Network Security & Firewalls"
+  active_service_policies: "Network Security & Firewalls"
+
+  # Identity, Access & Secret Management
+  certificate: "Identity & Secret Management"
+  certificate_chain: "Identity & Secret Management"
+  crl: "Identity & Secret Management"
+  registration_approval: "Identity & Secret Management"
+  role: "Identity & Secret Management"
+  secret_policy: "Identity & Secret Management"
+  secret_policy_rule: "Identity & Secret Management"
+  service_credential: "Identity & Secret Management"
+  token: "Identity & Secret Management"
+  trusted_ca_list: "Identity & Secret Management"
+  user: "Identity & Secret Management"
+  user_group: "Identity & Secret Management"
+  user_identification: "Identity & Secret Management"
+
+  # Compute & Workloads
+  cluster: "Compute & Workloads"
+  code_base_integration: "Compute & Workloads"
+  container_registry: "Compute & Workloads"
+  discovery: "Compute & Workloads"
+  endpoint: "Compute & Workloads"
+  nginx_service_discovery: "Compute & Workloads"
+  virtual_k8s: "Compute & Workloads"
+  workload: "Compute & Workloads"
+  workload_flavor: "Compute & Workloads"
+
+  # Observability & Logging
+  active_alert_policies: "Observability & Logging"
+  alert_policy: "Observability & Logging"
+  alert_receiver: "Observability & Logging"
+  global_log_receiver: "Observability & Logging"
+  log_receiver: "Observability & Logging"
+
+  # System & Labels
+  allowed_domain: "System & Governance"
+  bigip_irule: "System & Governance"
+  irule: "System & Governance"
+  known_label: "System & Governance"
+  known_label_key: "System & Governance"
+  mobile_base_config: "System & Governance"
+  namespace: "System & Governance"
+  tf_params_action: "System & Governance"

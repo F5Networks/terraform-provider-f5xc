@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "An srv6_network_slice represents a network slice in an operator network that uses SRv6.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2270,6 +2297,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -2448,7 +2496,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2512,7 +2559,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -2578,7 +2624,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2664,7 +2709,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -2854,19 +2898,16 @@ var APISwaggerJSON string = `{
                 "connect_to_access_networks": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to their corresponding access networks by importing route\n targets specified in the virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Access Networks"
                 },
                 "connect_to_enterprise_networks": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to their corresponding enterprise networks by importing route\n targets specified in the virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Enterprise Networks"
                 },
                 "connect_to_internet": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to the Internet by importing route targets specified in the\n virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Internet"
                 },
                 "sid_prefixes": {
@@ -2902,19 +2943,16 @@ var APISwaggerJSON string = `{
                 "connect_to_access_networks": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to their corresponding access networks by importing route\n targets specified in the virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Access Networks"
                 },
                 "connect_to_enterprise_networks": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to their corresponding enterprise networks by importing route\n targets specified in the virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Enterprise Networks"
                 },
                 "connect_to_internet": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to the Internet by importing route targets specified in the\n virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Internet"
                 },
                 "sid_prefixes": {
@@ -2950,19 +2988,16 @@ var APISwaggerJSON string = `{
                 "connect_to_access_networks": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to their corresponding access networks by importing route\n targets specified in the virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Access Networks"
                 },
                 "connect_to_enterprise_networks": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to their corresponding enterprise networks by importing route\n targets specified in the virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Enterprise Networks"
                 },
                 "connect_to_internet": {
                     "type": "boolean",
                     "description": " Connect all SRv6 Virtual Networks in this slice to the Internet by importing route targets specified in the\n virtual network.",
-                    "format": "boolean",
                     "x-displayname": "Connect To Internet"
                 },
                 "sid_prefixes": {
@@ -3044,7 +3079,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -3203,7 +3237,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates srv6_network_slice is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {

@@ -28,105 +28,57 @@ type DataSourceF5XCNetworkPolicyRule struct {
 	client *client.APIClient
 }
 
-type NetworkPolicyRuleGlobalSpecTypeRemoteEndpointChoice struct {
-	Prefix         types.Object `tfsdk:"prefix"`
-	PrefixSelector types.Object `tfsdk:"prefix_selector"`
-	IpPrefixSet    types.Object `tfsdk:"ip_prefix_set"`
-}
-
-type NetworkPolicyRuleGlobalSpecTypePrefix struct {
-	Prefix     types.List `tfsdk:"prefix"`
-	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
-}
-
-type NetworkPolicyRuleGlobalSpecTypePrefixSelector struct {
-	Expressions types.List `tfsdk:"expressions"`
-}
-
-type NetworkPolicyRuleGlobalSpecTypeIpPrefixSet struct {
-	Ref types.List `tfsdk:"ref"`
+type NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
+	Action types.List `tfsdk:"action"`
 }
 
 type NetworkPolicyRuleLabelMatcherType struct {
 	Keys types.List `tfsdk:"keys"`
 }
 
-type NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
-	Action types.List `tfsdk:"action"`
+type NetworkPolicyRuleGlobalSpecTypeRemoteEndpointChoice struct {
+	IpPrefixSet    types.Object `tfsdk:"ip_prefix_set"`
+	Prefix         types.Object `tfsdk:"prefix"`
+	PrefixSelector types.Object `tfsdk:"prefix_selector"`
+}
+
+type NetworkPolicyRuleGlobalSpecTypeIpPrefixSet struct {
+	Ref types.List `tfsdk:"ref"`
+}
+
+type NetworkPolicyRuleGlobalSpecTypePrefix struct {
+	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
+	Prefix     types.List `tfsdk:"prefix"`
+}
+
+type NetworkPolicyRuleGlobalSpecTypePrefixSelector struct {
+	Expressions types.List `tfsdk:"expressions"`
 }
 
 // DataSourceF5XCNetworkPolicyRuleModel describes the resource data model.
 type DataSourceF5XCNetworkPolicyRuleModel struct {
+	Annotations          types.Map      `tfsdk:"annotations"`
+	Description          types.String   `tfsdk:"description"`
+	Labels               types.Map      `tfsdk:"labels"`
 	Name                 types.String   `tfsdk:"name"`
 	Namespace            types.String   `tfsdk:"namespace"`
 	Uid                  types.String   `tfsdk:"uid"`
-	Labels               types.Map      `tfsdk:"labels"`
-	Annotations          types.Map      `tfsdk:"annotations"`
-	Description          types.String   `tfsdk:"description"`
 	Action               types.List     `tfsdk:"action"`
+	AdvancedAction       types.Object   `tfsdk:"advanced_action"`
+	LabelMatcher         types.Object   `tfsdk:"label_matcher"`
 	Ports                types.List     `tfsdk:"ports"`
 	Protocol             types.String   `tfsdk:"protocol"`
 	RemoteEndpointChoice types.Object   `tfsdk:"remote_endpoint_choice"`
-	LabelMatcher         types.Object   `tfsdk:"label_matcher"`
-	AdvancedAction       types.Object   `tfsdk:"advanced_action"`
 	Timeouts             timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for OneOfField --> RemoteEndpoint
-var NetworkPolicyRuleRemoteEndpointModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> AdvancedAction
+var NetworkPolicyRuleAdvancedActionModelAttributeMap = map[string]attr.Type{
 
-	"prefix": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleRemoteEndpointPrefixModelAttributeMap,
-	},
-	"prefix_selector": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleRemoteEndpointPrefixSelectorModelAttributeMap,
-	},
-	"ip_prefix_set": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Prefix
-var NetworkPolicyRuleRemoteEndpointPrefixModelAttributeMap = map[string]attr.Type{
-
-	"prefix": types.ListType{
+	"action": types.ListType{
 		ElemType: types.StringType,
 	},
-	"ipv6_prefix": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PrefixSelector
-var NetworkPolicyRuleRemoteEndpointPrefixSelectorModelAttributeMap = map[string]attr.Type{
-
-	"expressions": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> IpPrefixSet
-var NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap = map[string]attr.Type{
-
-	"ref": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-				"name":      types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> Ref
-var NetworkPolicyRuleRefObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
 }
 
 // Attribute map for PointerField --> LabelMatcher
@@ -137,10 +89,58 @@ var NetworkPolicyRuleLabelMatcherModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for PointerField --> AdvancedAction
-var NetworkPolicyRuleAdvancedActionModelAttributeMap = map[string]attr.Type{
+// Attribute map for OneOfField --> RemoteEndpoint
+var NetworkPolicyRuleRemoteEndpointModelAttributeMap = map[string]attr.Type{
 
-	"action": types.ListType{
+	"ip_prefix_set": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap,
+	},
+	"prefix": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleRemoteEndpointPrefixModelAttributeMap,
+	},
+	"prefix_selector": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleRemoteEndpointPrefixSelectorModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> IpPrefixSet
+var NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap = map[string]attr.Type{
+
+	"ref": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> Ref
+var NetworkPolicyRuleRefObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Prefix
+var NetworkPolicyRuleRemoteEndpointPrefixModelAttributeMap = map[string]attr.Type{
+
+	"ipv6_prefix": types.ListType{
+		ElemType: types.StringType,
+	},
+	"prefix": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> PrefixSelector
+var NetworkPolicyRuleRemoteEndpointPrefixSelectorModelAttributeMap = map[string]attr.Type{
+
+	"expressions": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -159,10 +159,30 @@ func (d *DataSourceF5XCNetworkPolicyRule) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "NetworkPolicyRule data source",
-		Description:         "NetworkPolicyRule data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a network_policy_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_rule) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a network_policy_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_rule) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -181,32 +201,42 @@ func (r *DataSourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request da
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"action": schema.ListAttribute{
 				Description: "Action Action to be taken at rule match. Currently supported actions are Allow and  Deny",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				ElementType: types.StringType,
+			},
+			"advanced_action": schema.SingleNestedAttribute{
+				Description: "advanced_action Enable or disable logging.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"action": schema.ListAttribute{
+						Description: "Action Enable or disable logging.",
+						ElementType: types.StringType,
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
+			"label_matcher": schema.SingleNestedAttribute{
+				Description: "label matcher List of label keys to be matched in prefix_selector configured in remote_endpoint",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"keys": schema.ListAttribute{
+						Description: "keys The list of label key names that have to match",
+						ElementType: types.StringType,
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
 			},
 			"ports": schema.ListAttribute{
 				Description: "ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192",
@@ -227,21 +257,57 @@ func (r *DataSourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request da
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
+					"ip_prefix_set": schema.SingleNestedAttribute{
+						Description: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"ref": schema.ListNestedAttribute{
+								Description: "ref A list of references to ip_prefix_set objects.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"namespace": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"tenant": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+							},
+						},
+					},
 					"prefix": schema.SingleNestedAttribute{
 						Description: "prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"prefix": schema.ListAttribute{
-								Description: "Prefix",
+							"ipv6_prefix": schema.ListAttribute{
+								Description: "ipv6 prefix",
 								ElementType: types.StringType,
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 							},
-							"ipv6_prefix": schema.ListAttribute{
-								Description: "ipv6 prefix",
+							"prefix": schema.ListAttribute{
+								Description: "Prefix",
 								ElementType: types.StringType,
 								Required:    false,
 								Optional:    false,
@@ -263,72 +329,6 @@ func (r *DataSourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request da
 								Computed:    true,
 							},
 						},
-					},
-					"ip_prefix_set": schema.SingleNestedAttribute{
-						Description: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"ref": schema.ListNestedAttribute{
-								Description: "ref A list of references to ip_prefix_set objects.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"tenant": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"namespace": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"name": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			"label_matcher": schema.SingleNestedAttribute{
-				Description: "label matcher List of label keys to be matched in prefix_selector configured in remote_endpoint",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"keys": schema.ListAttribute{
-						Description: "keys The list of label key names that have to match",
-						ElementType: types.StringType,
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-				},
-			},
-			"advanced_action": schema.SingleNestedAttribute{
-				Description: "advanced_action Enable or disable logging.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"action": schema.ListAttribute{
-						Description: "Action Enable or disable logging.",
-						ElementType: types.StringType,
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
 					},
 				},
 			},
@@ -379,15 +379,14 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -402,33 +401,6 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -451,31 +423,120 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot EnumField --> Action
-	if specData.GetAction().String() != "" {
-		stringValue := types.StringValue(specData.GetAction().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.Action = listValue
-	} else {
-		// Empty string, set to null
-		data.Action = types.ListNull(types.StringType)
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// data specToModelRoot ArrayOfStringField --> Ports
-	if len(specData.GetPorts()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot EnumField --> Action
+	{
+		if specData.GetAction().String() != "" {
+			stringValue := types.StringValue(specData.GetAction().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Action = listValue
+		} else {
+			// Empty string, set to null
+			data.Action = types.ListNull(types.StringType)
 		}
-		data.Ports = listValue
+	}
+
+	// data SpecToModelRoot PointerField --> AdvancedAction
+	if specData.GetAdvancedAction() != nil {
+		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+		advancedActionElement := specData.GetAdvancedAction()
+
+		// data specToModelNested EnumField --> Action
+		if advancedActionElement.GetAction().String() != "" {
+			stringValue := types.StringValue(advancedActionElement.GetAction().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+		} else {
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+		}
+
+		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
+			ctx,
+			NetworkPolicyRuleAdvancedActionModelAttributeMap,
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
+		)
+		response.Diagnostics.Append(advancedActionDiags...)
+		data.AdvancedAction = advancedActionObj
 	} else {
-		data.Ports = types.ListNull(types.StringType)
+		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
+	}
+
+	// data SpecToModelRoot PointerField --> LabelMatcher
+	if specData.GetLabelMatcher() != nil {
+		var networkPolicyRuleLabelMatcherTypeModel = &NetworkPolicyRuleLabelMatcherType{}
+		labelMatcherElement := specData.GetLabelMatcher()
+
+		// data specToModelNested ArrayOfStringField --> Keys
+		if len(labelMatcherElement.GetKeys()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, labelMatcherElement.GetKeys())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			networkPolicyRuleLabelMatcherTypeModel.Keys = listValue
+		} else {
+			networkPolicyRuleLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
+		}
+
+		labelMatcherObj, labelMatcherDiags := utils.GoStructToObjectValue(
+			ctx,
+			NetworkPolicyRuleLabelMatcherModelAttributeMap,
+			networkPolicyRuleLabelMatcherTypeModel,
+		)
+		response.Diagnostics.Append(labelMatcherDiags...)
+		data.LabelMatcher = labelMatcherObj
+	} else {
+		data.LabelMatcher = types.ObjectNull(NetworkPolicyRuleLabelMatcherModelAttributeMap)
+	}
+
+	// data specToModelRootOld ArrayOfStringField --> Ports
+	{
+		if len(specData.GetPorts()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Ports = listValue
+		} else {
+			data.Ports = types.ListNull(types.StringType)
+		}
 	}
 
 	// data SpecToModelRoot StringField --> Protocol
@@ -500,31 +561,91 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// data specToModelNested PointerOfOneOfField --> IpPrefixSet
+		// <no value>
+		// false
+		{
+			ipPrefixSetOptionsWrapper, isIpPrefixSet := remoteEndpointChoiceChoices.(*ves_io_schema_network_policy_rule.GlobalSpecType_IpPrefixSet)
+			ipPrefixSetAttributeMap := make(map[string]attr.Value)
+
+			if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
+				ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
+
+				// data specToModelNested ArrayOfPointerField --> Ref
+				if len(ipPrefixSetElement.GetRef()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					refElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetElement.GetRef()))
+					for _, refElement := range ipPrefixSetElement.GetRef() {
+						objectRefTypeModelModel := ObjectRefTypeModel{}
+
+						// data specToModelNested RequiredStringField --> Name
+						if refElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(refElement.GetName())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Name = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if refElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Tenant
+						if refElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(refElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						refElements = append(refElements, objectRefTypeModelModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					refListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NetworkPolicyRuleRefObjectRefModelAttributeMap}, refElements)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					ipPrefixSetAttributeMap["ref"] = refListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					ipPrefixSetAttributeMap["ref"] = types.ListNull(types.ObjectType{AttrTypes: NetworkPolicyRuleRefObjectRefModelAttributeMap})
+				}
+
+				ipPrefixSetObj, ipPrefixSetObjDiags := types.ObjectValue(NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
+				response.Diagnostics.Append(ipPrefixSetObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				remoteEndpointChoiceChoicesModel.IpPrefixSet = ipPrefixSetObj
+			} else {
+				remoteEndpointChoiceChoicesModel.IpPrefixSet = types.ObjectNull(NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap)
+			}
+		}
+
 		// data specToModelNested PointerOfOneOfField --> Prefix
 		// <no value>
 		// false
 		{
-			prefixOptions, isPrefix := remoteEndpointChoiceChoices.(*ves_io_schema_network_policy_rule.GlobalSpecType_Prefix)
+			prefixOptionsWrapper, isPrefix := remoteEndpointChoiceChoices.(*ves_io_schema_network_policy_rule.GlobalSpecType_Prefix)
 			prefixAttributeMap := make(map[string]attr.Value)
 
-			if isPrefix && prefixOptions != nil {
-
-				// data specToModelNested ArrayOfStringField --> Prefix
-				if len(prefixOptions.Prefix.GetPrefix()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixOptions.Prefix.GetPrefix())
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					prefixAttributeMap["prefix"] = listValue
-				} else {
-					prefixAttributeMap["prefix"] = types.ListNull(types.StringType)
-				}
+			if isPrefix && prefixOptionsWrapper != nil && prefixOptionsWrapper.Prefix != nil {
+				prefixElement := prefixOptionsWrapper.Prefix
 
 				// data specToModelNested ArrayOfStringField --> Ipv6Prefix
-				if len(prefixOptions.Prefix.GetIpv6Prefix()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixOptions.Prefix.GetIpv6Prefix())
-					response.Diagnostics.Append(diags...)
+				if len(prefixElement.GetIpv6Prefix()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, prefixElement.GetIpv6Prefix())
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -533,8 +654,20 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 					prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
 				}
 
-				prefixObj, diags := types.ObjectValue(NetworkPolicyRuleRemoteEndpointPrefixModelAttributeMap, prefixAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// data specToModelNested ArrayOfStringField --> Prefix
+				if len(prefixElement.GetPrefix()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, prefixElement.GetPrefix())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					prefixAttributeMap["prefix"] = listValue
+				} else {
+					prefixAttributeMap["prefix"] = types.ListNull(types.StringType)
+				}
+
+				prefixObj, prefixObjDiags := types.ObjectValue(NetworkPolicyRuleRemoteEndpointPrefixModelAttributeMap, prefixAttributeMap)
+				response.Diagnostics.Append(prefixObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -548,15 +681,16 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 		// <no value>
 		// false
 		{
-			prefixSelectorOptions, isPrefixSelector := remoteEndpointChoiceChoices.(*ves_io_schema_network_policy_rule.GlobalSpecType_PrefixSelector)
+			prefixSelectorOptionsWrapper, isPrefixSelector := remoteEndpointChoiceChoices.(*ves_io_schema_network_policy_rule.GlobalSpecType_PrefixSelector)
 			prefixSelectorAttributeMap := make(map[string]attr.Value)
 
-			if isPrefixSelector && prefixSelectorOptions != nil {
+			if isPrefixSelector && prefixSelectorOptionsWrapper != nil && prefixSelectorOptionsWrapper.PrefixSelector != nil {
+				prefixSelectorElement := prefixSelectorOptionsWrapper.PrefixSelector
 
 				// data specToModelNested RequiredArrayOfStringField --> Expressions
-				if len(prefixSelectorOptions.PrefixSelector.GetExpressions()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixSelectorOptions.PrefixSelector.GetExpressions())
-					response.Diagnostics.Append(diags...)
+				if len(prefixSelectorElement.GetExpressions()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, prefixSelectorElement.GetExpressions())
+					response.Diagnostics.Append(listDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -565,8 +699,8 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 					prefixSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
 				}
 
-				prefixSelectorObj, diags := types.ObjectValue(NetworkPolicyRuleRemoteEndpointPrefixSelectorModelAttributeMap, prefixSelectorAttributeMap)
-				response.Diagnostics.Append(diags...)
+				prefixSelectorObj, prefixSelectorObjDiags := types.ObjectValue(NetworkPolicyRuleRemoteEndpointPrefixSelectorModelAttributeMap, prefixSelectorAttributeMap)
+				response.Diagnostics.Append(prefixSelectorObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -576,160 +710,28 @@ func (d *DataSourceF5XCNetworkPolicyRule) Read(ctx context.Context, request data
 			}
 		}
 
-		// data specToModelNested PointerOfOneOfField --> IpPrefixSet
-		// <no value>
-		// false
-		{
-			ipPrefixSetOptions, isIpPrefixSet := remoteEndpointChoiceChoices.(*ves_io_schema_network_policy_rule.GlobalSpecType_IpPrefixSet)
-			ipPrefixSetAttributeMap := make(map[string]attr.Value)
-
-			if isIpPrefixSet && ipPrefixSetOptions != nil {
-
-				// data specToModelNested ArrayOfPointerField --> Ref
-				if len(ipPrefixSetOptions.IpPrefixSet.GetRef()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					refElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetOptions.IpPrefixSet.GetRef()))
-					for _, refElement := range ipPrefixSetOptions.IpPrefixSet.GetRef() {
-						objectRefTypeModelModel := ObjectRefTypeModel{}
-
-						// data specToModelNested StringField --> Tenant
-						if refElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(refElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Namespace
-						if refElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Name
-						if refElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(refElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						refElements = append(refElements, objectRefTypeModelModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					refListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NetworkPolicyRuleRefObjectRefModelAttributeMap}, refElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					ipPrefixSetAttributeMap["ref"] = refListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					ipPrefixSetAttributeMap["ref"] = types.ListNull(types.ObjectType{AttrTypes: NetworkPolicyRuleRefObjectRefModelAttributeMap})
-				}
-
-				ipPrefixSetObj, diags := types.ObjectValue(NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				remoteEndpointChoiceChoicesModel.IpPrefixSet = ipPrefixSetObj
-			} else {
-				remoteEndpointChoiceChoicesModel.IpPrefixSet = types.ObjectNull(NetworkPolicyRuleRemoteEndpointIpPrefixSetModelAttributeMap)
-			}
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		remoteEndpointChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			NetworkPolicyRuleRemoteEndpointModelAttributeMap,
-			remoteEndpointChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			remoteEndpointChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				NetworkPolicyRuleRemoteEndpointModelAttributeMap,
+				remoteEndpointChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.RemoteEndpointChoice = remoteEndpointChoiceObj
+			// Assign the final object to the root data model.
+			data.RemoteEndpointChoice = remoteEndpointChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.RemoteEndpointChoice = types.ObjectNull(NetworkPolicyRuleRemoteEndpointModelAttributeMap)
 	}
 
-	// data SpecToModelRoot PointerField --> LabelMatcher
-	if specData.GetLabelMatcher() != nil {
-		var networkPolicyRuleLabelMatcherTypeModel = &NetworkPolicyRuleLabelMatcherType{}
-		labelMatcherElement := specData.GetLabelMatcher()
-
-		// data specToModelNested ArrayOfStringField --> Keys
-		if len(labelMatcherElement.GetKeys()) > 0 {
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, labelMatcherElement.GetKeys())
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			networkPolicyRuleLabelMatcherTypeModel.Keys = listValue
-		} else {
-			networkPolicyRuleLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
-		}
-
-		labelMatcherObj, labelMatcherDiags := utils.GoStructToObjectValue(
-			ctx,
-			NetworkPolicyRuleLabelMatcherModelAttributeMap,
-			networkPolicyRuleLabelMatcherTypeModel,
-		)
-		response.Diagnostics.Append(labelMatcherDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.LabelMatcher = labelMatcherObj
-	} else {
-		data.LabelMatcher = types.ObjectNull(NetworkPolicyRuleLabelMatcherModelAttributeMap)
-	}
-
-	// data SpecToModelRoot PointerField --> AdvancedAction
-	if specData.GetAdvancedAction() != nil {
-		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
-		advancedActionElement := specData.GetAdvancedAction()
-
-		// data specToModelNested EnumField --> Action
-		if advancedActionElement.GetAction().String() != "" {
-			stringValue := types.StringValue(advancedActionElement.GetAction().String())
-			stringSlice := []types.String{stringValue}
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
-		} else {
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
-		}
-
-		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
-			ctx,
-			NetworkPolicyRuleAdvancedActionModelAttributeMap,
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
-		)
-		response.Diagnostics.Append(advancedActionDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AdvancedAction = advancedActionObj
-	} else {
-		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
-	}
-
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

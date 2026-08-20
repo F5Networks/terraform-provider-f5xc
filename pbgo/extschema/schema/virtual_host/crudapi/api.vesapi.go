@@ -1423,10 +1423,7 @@ var APISwaggerJSON string = `{
         "title": "ves.io/schema/virtual_host/crudapi/api.proto",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1492,6 +1489,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1505,8 +1508,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -1523,8 +1525,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -1591,6 +1592,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1666,6 +1673,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1757,6 +1770,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1805,16 +1824,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -1897,6 +1914,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1931,7 +1954,16 @@ var APISwaggerJSON string = `{
                     "200": {
                         "description": "A successful response.(streaming responses)",
                         "schema": {
-                            "$ref": "#/x-stream-definitions/crudapiObjectListRsp"
+                            "type": "object",
+                            "title": "Stream result of crudapiObjectListRsp",
+                            "properties": {
+                                "error": {
+                                    "$ref": "#/definitions/runtimeStreamError"
+                                },
+                                "result": {
+                                    "$ref": "#/definitions/crudapiObjectListRsp"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -1981,6 +2013,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2029,16 +2067,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2128,6 +2164,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2141,8 +2183,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -2159,8 +2200,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -2235,6 +2275,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2283,16 +2329,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2382,6 +2426,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2456,6 +2506,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2546,6 +2602,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2996,6 +3058,27 @@ var APISwaggerJSON string = `{
             ],
             "default": "NULL_VALUE"
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "runtimeStreamError": {
             "type": "object",
             "properties": {
@@ -3092,7 +3175,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable buffering for a particular route. This is useful when virtual-host\n has buffering, but we need to disable it on a specific route.\n The value of this field is ignored for virtual-host",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "max_request_bytes": {
@@ -3385,7 +3467,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "secret_value": {
@@ -3418,7 +3499,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies whether the resource allows credentials",
                     "title": "allow_credentials",
-                    "format": "boolean",
                     "x-displayname": "Allow Credentials"
                 },
                 "allow_headers": {
@@ -3481,7 +3561,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable the CorsPolicy for a particular route. This is useful when\n virtual-host has CorsPolicy, but we need to disable it on a specific route.\n The value of this field is ignored for virtual-host",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "expose_headers": {
@@ -3678,7 +3757,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be appended? If true, the value is appended to existing values.\n Default value is do not append",
                     "title": "append",
-                    "format": "boolean",
                     "x-displayname": "Append"
                 },
                 "name": {
@@ -3740,7 +3818,7 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Preserve Case"
                 },
                 "proper_case_header_transformation": {
-                    "description": "Exclusive with [default_header_transformation legacy_header_transformation preserve_case_header_transformation]\n Normalize the headers to proper case words. The fist character and any character\n following a special character will be capitalized if it’s an alpha character.\n For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
+                    "description": "Exclusive with [default_header_transformation legacy_header_transformation preserve_case_header_transformation]\n Normalize the headers to proper case words. The first character and any character\n following a special character will be capitalized if it’s an alpha character.\n For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
                     "title": "Proper case header transformation",
                     "$ref": "#/definitions/schemaEmpty",
                     "x-displayname": "Proper Case"
@@ -3828,7 +3906,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -4151,7 +4228,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "samesite_lax": {
@@ -4247,7 +4323,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -4411,7 +4486,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -4446,7 +4520,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -4724,7 +4797,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " When True, skip verification of hostname i.e. CN/Subject Alt Name of certificate\n is not matched to the connecting hostname",
                     "title": "skip_hostname_verification",
-                    "format": "boolean",
                     "x-displayname": "Skip verification of hostname"
                 },
                 "trusted_ca": {
@@ -4850,7 +4922,7 @@ var APISwaggerJSON string = `{
         },
         "schemaVirtualNetworkType": {
             "type": "string",
-            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nNetwork internally created for a segment\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
+            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SEGMENT for segment interface\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
             "title": "VirtualNetworkType",
             "enum": [
                 "VIRTUAL_NETWORK_SITE_LOCAL",
@@ -4998,7 +5070,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " x-example: true\n Appends header x-volterra-location = \u003cre-site-name\u003e in responses. This configuration\n is ignored on CE sites.\n\nExample: - \"true\"-",
                     "title": "Add Site information",
-                    "format": "boolean",
                     "x-displayname": "Add Location",
                     "x-ves-example": "true"
                 },
@@ -5031,7 +5102,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Automatically generated certificates. If this field is set, the user cannot specifi the TLS certificates",
                     "title": "Auto Certificates",
-                    "format": "boolean",
                     "x-displayname": "Auto Certificates"
                 },
                 "auto_cert_error_msg": {
@@ -5147,7 +5217,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "\n An option to specify whether to disable using default F5XC error pages\n\nExample: - \"true\"-",
                     "title": "Disable use of default Error page",
-                    "format": "boolean",
                     "x-displayname": "Disable default error pages",
                     "x-ves-example": "true"
                 },
@@ -5155,7 +5224,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "\n Disable DNS resolution for domains specified in the virtual host\n\n When the  virtual host is configured as Dynamive Resolve Proxy (DRP), disable DNS resolution\n for domains configured.  This configuration is suitable for HTTP CONNECT proxy.\n\nExample: - \"false\"-",
                     "title": "Disable DNS Resolve",
-                    "format": "boolean",
                     "x-displayname": "Disable DNS resolution",
                     "x-ves-example": "false"
                 },
@@ -5197,7 +5265,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Is DNS for the specified domain managed by volterra. If this field is set, DNS record will be automatically added to the DNS domain.",
                     "title": "DNS F5XC Managed",
-                    "format": "boolean",
                     "x-displayname": "DNS F5XC Managed"
                 },
                 "dns_zones": {
@@ -5595,7 +5662,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Threat Mesh provides F5 Distributed Cloud customers with an additional layer of protection against web application attacks.\n Threat Mesh leverages cross-customer correlation (i.e. correlation of client attacks across different customers) to identify malicious intent of a client.\n Whenever a client is flagged due to a malicious intent by our WAAP decisions engines, that client will be added to the ThreatDB.\n Enabling -Threat Mesh- means that requests that come to an application from an IP that is in the ThreatDB, will be automatically blocked by the load balancer.",
                     "title": "Use Threat Mesh",
-                    "format": "boolean",
                     "x-displayname": "Use Threat Mesh"
                 },
                 "user_domains": {
@@ -5631,7 +5697,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " F5XC managed certificates. If this field is set, the user cannot specifi the TLS certificates",
                     "title": "F5XC Certificates",
-                    "format": "boolean",
                     "x-displayname": "F5XC Certificates"
                 },
                 "waf_type": {
@@ -5901,8 +5966,7 @@ var APISwaggerJSON string = `{
                 "follow_origin_redirect": {
                     "type": "boolean",
                     "description": "x-displayName: \"Follow Origin Redirect\"\nx-example: \"true\"\nx-example: true\nInstructs the CDN to follow redirects from the origin server(s)",
-                    "title": "Follow Origin Redirect",
-                    "format": "boolean"
+                    "title": "Follow Origin Redirect"
                 },
                 "more_origin_options": {
                     "description": "x-displayName: \"Advanced Configuration\"",
@@ -6078,7 +6142,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If true, disables compression when the response contains an etag header. When it is false,\n weak etags will be preserved and the ones that require strong validation will be removed.\n\nExample: - \"true\"-",
                     "title": "disable_on_etag_header",
-                    "format": "boolean",
                     "x-displayname": "Disable On Etag Header",
                     "x-ves-example": "true"
                 },
@@ -6086,7 +6149,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If true, removes accept-encoding from the request headers before dispatching it to the upstream\n so that responses do not get compressed before reaching the filter.\n\nExample: - \"true\"-",
                     "title": "remove_accept_encoding_header",
-                    "format": "boolean",
                     "x-displayname": "Remove Accept-Encoding Header",
                     "x-ves-example": "true"
                 }
@@ -6324,7 +6386,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " x-example : true\n In this mode of proxy, virtual host will resolve the destination endpoint dynamically.\n\n The dynamic resolution is done using a predefined field in the request. This predefined\n field depends on the ProxyType configured on the Virtual Host.\n\n For HTTP traffic, i.e. with ProxyType as HTTP_PROXY or HTTPS_PROXY, virtual host will use the\n \"HOST\" http header from the request and perform DNS resolution to select destination endpoint.\n\n For TCP traffic with SNI, (If the ProxyType is TCP_PROXY_WITH_SNI), virtual host will perform DNS\n resolution using the SNI.\n\n The DNS resolution is performed in the virtual network specified in outside_network_type or\n outside_network\n\n In both modes of operation(either using Host header or SNI), the DNS resolution could return\n multiple addresses. First IPv4 address from such returned list is used as endpoint for the\n request. The DNS response is cached for 60s by default.",
                     "title": "Enable the dynamic resolution of the endpoint",
-                    "format": "boolean",
                     "x-displayname": "Dynamic Endpoint Resolution"
                 }
             }
@@ -6533,26 +6594,22 @@ var APISwaggerJSON string = `{
                 "allow_only_specified_headers": {
                     "type": "boolean",
                     "description": "x-displayName: \"Fail Validation On Unspecified Header\"\nSet to fail validation on request/response with header that is not specified in the OpenAPI specification",
-                    "title": "allow only specified header",
-                    "format": "boolean"
+                    "title": "allow only specified header"
                 },
                 "allow_only_specified_query_params": {
                     "type": "boolean",
                     "description": "x-displayName: \"Fail Validation On Unspecified Query Parameter\"\nSet to fail validation on request with query parameter that is not specified in the OpenAPI specification",
-                    "title": "allow only specified query parameter",
-                    "format": "boolean"
+                    "title": "allow only specified query parameter"
                 },
                 "fail_close": {
                     "type": "boolean",
                     "description": "x-displayName: \"internal failure configuration\"\nSet to fail validation on internal errors",
-                    "title": "fail configuration",
-                    "format": "boolean"
+                    "title": "fail configuration"
                 },
                 "fail_oversized_body_validation": {
                     "type": "boolean",
                     "description": "x-displayName: \"Fail Oversized Body Validation\"\nSet to fail validation on request/response with too long body",
-                    "title": "fail oversized body validation",
-                    "format": "boolean"
+                    "title": "fail oversized body validation"
                 }
             }
         },
@@ -6564,20 +6621,17 @@ var APISwaggerJSON string = `{
                 "disable_byte_range_request": {
                     "type": "boolean",
                     "description": "x-displayName: \"Disable Origin Byte Range Requests\"\nx-example: \"true/false\"\nChoice to enable/disable origin byte range requests towards origin",
-                    "title": "Disable Origin Byte Range Requests",
-                    "format": "boolean"
+                    "title": "Disable Origin Byte Range Requests"
                 },
                 "enable_byte_range_request": {
                     "type": "boolean",
                     "description": "x-displayName: \"Enable Origin Byte Range Requests\"\nx-example: \"true/false\"\nChoice to enable/disable byte range requests towards origin",
-                    "title": "Enable Origin Byte Range Requests",
-                    "format": "boolean"
+                    "title": "Enable Origin Byte Range Requests"
                 },
                 "websocket_proxy": {
                     "type": "boolean",
                     "description": "x-displayName: \"Enable websocket proxy to the origin\"\nOption to enable proxying of websocket connections to the origin server",
-                    "title": "Enable websocket proxy to the origin",
-                    "format": "boolean"
+                    "title": "Enable websocket proxy to the origin"
                 }
             }
         },
@@ -6589,8 +6643,7 @@ var APISwaggerJSON string = `{
                 "add_location": {
                     "type": "boolean",
                     "description": "x-displayName: \"Add Location\"\nx-example: \"true\"\nx-example: true\nAppends header x-volterra-location = \u003cre-site-name\u003e in responses.",
-                    "title": "Add Site information",
-                    "format": "boolean"
+                    "title": "Add Site information"
                 },
                 "header_options": {
                     "description": "x-displayName: \"Header Control\"\nRequest/Response header related options",
@@ -6901,7 +6954,7 @@ var APISwaggerJSON string = `{
         },
         "virtual_hostVirtualHostState": {
             "type": "string",
-            "description": "State of the virtual host\n\n - VIRTUAL_HOST_READY: VIRTUAL_HOST_READY\n\nVirtual host is ready to install\n - VIRTUAL_HOST_PENDING_VERIFICATION: VIRTUAL_HOST_PENDING_VERIFICATION\n\nVirtual host is verfication pending for some or all of its domains\n - VIRTUAL_HOST_VERIFICATION_FAILED: VIRTUAL_HOST_VERIFICATION_FAILED\n\nVirtual host has one or more domains for which verification failed\n - VIRTUAL_HOST_PENDING_DNS_DELEGATION: VIRTUAL_HOST_PENDING_DNS_DELEGATION\n\nVirtual host is pending DNS delegation\n - VIRTUAL_HOST_PENDING_A_RECORD: VIRTUAL_HOST_PENDING_A_RECORD\n\nVirtual host is waiting for one or more A records to be created\n - VIRTUAL_HOST_DNS_A_RECORD_ADDED: VIRTUAL_HOST_DNS_A_RECORD_ADDED\n\nDNS A record has been added for this Virtual host\n - VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION: VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION\n\nInternet facing NLB, is being created on the site/sites belonging to the virtual site\n - VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED: VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED\n\nInternet NLB creation failed on the site/sites. InternetNLBVIPStatus will have more information.",
+            "description": "State of the virtual host\n\n - VIRTUAL_HOST_READY: VIRTUAL_HOST_READY\n\nVirtual host is ready to install\n - VIRTUAL_HOST_PENDING_VERIFICATION: VIRTUAL_HOST_PENDING_VERIFICATION\n\nVirtual host is verfication pending for some or all of its domains\n - VIRTUAL_HOST_VERIFICATION_FAILED: VIRTUAL_HOST_VERIFICATION_FAILED\n\nVirtual host has one or more domains for which verification failed\n - VIRTUAL_HOST_PENDING_DNS_DELEGATION: VIRTUAL_HOST_PENDING_DNS_DELEGATION\n\nVirtual host is pending DNS delegation\n - VIRTUAL_HOST_PENDING_A_RECORD: VIRTUAL_HOST_PENDING_A_RECORD\n\nVirtual host is waiting for one or more A records to be created\n - VIRTUAL_HOST_DNS_A_RECORD_ADDED: VIRTUAL_HOST_DNS_A_RECORD_ADDED\n\nDNS A record has been added for this Virtual host\n - VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION: VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION\n\nInternet facing NLB, is being created on the site/sites belonging to the virtual site\n - VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED: VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED\n\nInternet NLB creation failed on the site/sites. InternetNLBVIPStatus will have more information.\n - VIRTUAL_HOST_PENDING_AAAA_RECORD: VIRTUAL_HOST_PENDING_AAAA_RECORD\n\nVirtual host is waiting for one or more AAAA records to be created\n - VIRTUAL_HOST_DNS_AAAA_RECORD_ADDED: VIRTUAL_HOST_DNS_AAAA_RECORD_ADDED\n\nDNS AAAA record has been added for this Virtual host\n - VIRTUAL_HOST_PENDING_DUALSTACK_RECORDS: VIRTUAL_HOST_PENDING_DUALSTACK_RECORDS\n\nVirtual host is waiting for one or more Dualstack records to be created\n - VIRTUAL_HOST_DNS_DUALSTACK_RECORDS_ADDED: VIRTUAL_HOST_DNS_DUALSTACK_RECORDS_ADDED\n\nDNS Dualstack records has been added for this Virtual host",
             "title": "VirtualHostState",
             "enum": [
                 "VIRTUAL_HOST_READY",
@@ -6911,7 +6964,11 @@ var APISwaggerJSON string = `{
                 "VIRTUAL_HOST_PENDING_A_RECORD",
                 "VIRTUAL_HOST_DNS_A_RECORD_ADDED",
                 "VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION",
-                "VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED"
+                "VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED",
+                "VIRTUAL_HOST_PENDING_AAAA_RECORD",
+                "VIRTUAL_HOST_DNS_AAAA_RECORD_ADDED",
+                "VIRTUAL_HOST_PENDING_DUALSTACK_RECORDS",
+                "VIRTUAL_HOST_DNS_DUALSTACK_RECORDS_ADDED"
             ],
             "default": "VIRTUAL_HOST_READY",
             "x-displayname": "Virtual Host State",
@@ -6973,6 +7030,15 @@ var APISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.ip": "true"
                     }
+                },
+                "ipv6_address": {
+                    "type": "string",
+                    "description": " IPv6 address associated with virtual host\n\nValidation Rules:\n  ves.io.schema.rules.string.ipv6: true\n",
+                    "title": "IPv6 address",
+                    "x-displayname": "IPv6 Address",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.ipv6": "true"
+                    }
                 }
             }
         },
@@ -6990,19 +7056,5 @@ var APISwaggerJSON string = `{
         }
     },
     "x-displayname": "",
-    "x-stream-definitions": {
-        "crudapiObjectListRsp": {
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/runtimeStreamError"
-                },
-                "result": {
-                    "$ref": "#/definitions/crudapiObjectListRsp"
-                }
-            },
-            "title": "Stream result of crudapiObjectListRsp",
-            "type": "object"
-        }
-    },
     "x-ves-proto-file": "ves.io/schema/virtual_host/crudapi/api.proto"
 }`

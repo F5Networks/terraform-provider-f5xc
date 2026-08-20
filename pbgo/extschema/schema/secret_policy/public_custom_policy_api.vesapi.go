@@ -579,10 +579,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "A Secret Policy defines who gets access to a secret.\nA secret_policy object consists of an unordered list of predicates and a list of secret policy rules.\nThe predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate.\nAny predicates that are not specified in a policy are implicitly considered to be true.\nThe rules in the policy are also evaluated against the input fields.\nThey are treated as an ordered or unordered list depending on the value of the rule combining algorithm.\nA policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched.\n\nIf the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified.\nIf the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action.\nIf it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -648,6 +645,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -739,6 +742,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -838,6 +847,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1044,6 +1059,27 @@ var CustomAPISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaErrorCode": {
             "type": "string",
             "description": "Union of all possible error-codes from system\n\n - EOK: No error\n - EPERMS: Permissions error\n - EBADINPUT: Input is not correct\n - ENOTFOUND: Not found\n - EEXISTS: Already exists\n - EUNKNOWN: Unknown/catchall error\n - ESERIALIZE: Error in serializing/de-serializing\n - EINTERNAL: Server error\n - EPARTIAL: Partial error",
@@ -1244,7 +1280,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -1449,7 +1484,6 @@ var CustomAPISwaggerJSON string = `{
                 "allow_f5xc": {
                     "type": "boolean",
                     "description": " if allow_f5xc is set to true, it allows relevant F5XC infrastructure services to decrypt the secret encrypted using this policy.\n\nExample: - \"true\"-",
-                    "format": "boolean",
                     "x-displayname": "Allow F5XC",
                     "x-ves-example": "true"
                 },
@@ -1475,7 +1509,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "marked_for_delete is set when the secret policy object is marked for delete, based on this value\nsecret policy marked for delete will be automatically deleted after deletion_time",
                     "title": "Marked For Delete",
-                    "format": "boolean",
                     "x-displayname": "Marked For Delete"
                 },
                 "rule_list": {
@@ -1600,7 +1633,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates secret_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {

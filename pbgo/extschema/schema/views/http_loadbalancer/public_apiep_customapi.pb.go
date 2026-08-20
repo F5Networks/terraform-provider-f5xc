@@ -21,6 +21,13 @@ package http_loadbalancer
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -35,12 +42,6 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host_dns_info"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -2416,10 +2417,7 @@ func (m *SwaggerSpecReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -2501,10 +2499,7 @@ func (m *SwaggerSpecRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -2618,10 +2613,7 @@ func (m *GetAPIEndpointsForGroupsReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -2741,10 +2733,7 @@ func (m *GetAPIEndpointsForGroupsRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -3051,10 +3040,7 @@ func (m *APIGroupsApiep) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -3221,10 +3207,7 @@ func (m *GetAPIEndpointsSchemaUpdatesReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -3342,10 +3325,7 @@ func (m *GetAPIEndpointsSchemaUpdatesResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -3493,10 +3473,7 @@ func (m *UpdateAPIEndpointsSchemasReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -3580,10 +3557,7 @@ func (m *UpdateAPIEndpointsSchemasResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicApiepCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicApiepCustomapi
 			}
 			if (iNdEx + skippy) > l {

@@ -294,10 +294,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "\nHTTP Monitor defines an HTTP synthetic monitor.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -364,6 +361,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -445,6 +448,27 @@ var CustomAPISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -569,7 +593,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -798,7 +821,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -833,7 +855,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -884,7 +905,7 @@ var CustomAPISwaggerJSON string = `{
             "properties": {
                 "regions": {
                     "type": "array",
-                    "description": " A specific source location within AWS\n\nExample: - \"us-east-1\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "description": " A specific source location within AWS\n\nExample: - \"us-east-1\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.not_empty: true\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "AWS Regions",
                     "items": {
                         "type": "string"
@@ -894,8 +915,8 @@ var CustomAPISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.not_empty": "true"
+                        "ves.io.schema.rules.repeated.items.string.not_empty": "true",
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -998,7 +1019,7 @@ var CustomAPISwaggerJSON string = `{
             "properties": {
                 "regions": {
                     "type": "array",
-                    "description": " A specific source location within F5 Distributed Cloud\n\nExample: - \"ves-io-us\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "description": " A specific source location within F5 Distributed Cloud\n\nExample: - \"ves-io-us\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.not_empty: true\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "F5 Distributed Cloud Regions",
                     "items": {
                         "type": "string"
@@ -1008,8 +1029,8 @@ var CustomAPISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.not_empty": "true"
+                        "ves.io.schema.rules.repeated.items.string.not_empty": "true",
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -1179,7 +1200,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Controls if the monitor will follow redirects while determining health\n\nExample: - \"false\"-",
                     "title": "follow_redirects",
-                    "format": "boolean",
                     "x-displayname": "Follow Redirects",
                     "x-ves-example": "false"
                 },
@@ -1206,7 +1226,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Controls if an SSL error will result in a change of health status\n\nExample: - \"false\"-",
                     "title": "ignore_cert_errors",
-                    "format": "boolean",
                     "x-displayname": "Ignore Cert Errors",
                     "x-ves-example": "false"
                 },

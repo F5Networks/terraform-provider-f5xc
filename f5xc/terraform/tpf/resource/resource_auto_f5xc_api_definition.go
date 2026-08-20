@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -20,19 +21,23 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -43,7 +48,6 @@ import (
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	ves_io_schema_views_api_definition "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/api_definition"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCApiDefinition defines the resource implementation.
@@ -51,29 +55,29 @@ type ResourceF5XCApiDefinition struct {
 	client *client.APIClient
 }
 
-type ApiDefinitionViewsApiOperation struct {
+type ApiDefApiOperation struct {
 	Method types.List   `tfsdk:"method"`
 	Path   types.String `tfsdk:"path"`
 }
 
-type ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice struct {
-	StrictSchemaOrigin types.Bool `tfsdk:"strict_schema_origin"`
+type ApiDefSchemaUpdatesStrategyChoice struct {
 	MixedSchemaOrigin  types.Bool `tfsdk:"mixed_schema_origin"`
+	StrictSchemaOrigin types.Bool `tfsdk:"strict_schema_origin"`
 }
 
 // ResourceF5XCApiDefinitionModel describes the resource data model.
 type ResourceF5XCApiDefinitionModel struct {
-	Uid                         types.String   `tfsdk:"uid"`
-	Labels                      types.Map      `tfsdk:"labels"`
 	Annotations                 types.Map      `tfsdk:"annotations"`
 	Description                 types.String   `tfsdk:"description"`
+	Labels                      types.Map      `tfsdk:"labels"`
 	Name                        types.String   `tfsdk:"name"`
 	Namespace                   types.String   `tfsdk:"namespace"`
+	Uid                         types.String   `tfsdk:"uid"`
+	ApiInventoryExclusionList   types.List     `tfsdk:"api_inventory_exclusion_list"`
+	ApiInventoryInclusionList   types.List     `tfsdk:"api_inventory_inclusion_list"`
 	NonApiEndpoints             types.List     `tfsdk:"non_api_endpoints"`
 	SchemaUpdatesStrategyChoice types.Object   `tfsdk:"schema_updates_strategy_choice"`
 	SwaggerSpecs                types.List     `tfsdk:"swagger_specs"`
-	ApiInventoryInclusionList   types.List     `tfsdk:"api_inventory_inclusion_list"`
-	ApiInventoryExclusionList   types.List     `tfsdk:"api_inventory_exclusion_list"`
 	Timeouts                    timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -87,8 +91,26 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for ArrayOfPointerField --> ApiInventoryExclusionList
+var ApiDefinitionApiInventoryExclusionListModelAttributeMap = map[string]attr.Type{
+
+	"method": types.ListType{
+		ElemType: types.StringType,
+	},
+	"path": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> ApiInventoryInclusionList
+var ApiDefinitionApiInventoryInclusionListModelAttributeMap = map[string]attr.Type{
+
+	"method": types.ListType{
+		ElemType: types.StringType,
+	},
+	"path": types.StringType,
+}
+
 // Attribute map for ArrayOfPointerField --> NonApiEndpoints
-var ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap = map[string]attr.Type{
+var ApiDefinitionNonApiEndpointsModelAttributeMap = map[string]attr.Type{
 
 	"method": types.ListType{
 		ElemType: types.StringType,
@@ -99,26 +121,8 @@ var ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap = map[string]attr.Typ
 // Attribute map for RequiredOneOfField --> SchemaUpdatesStrategy
 var ApiDefinitionSchemaUpdatesStrategyModelAttributeMap = map[string]attr.Type{
 
-	"strict_schema_origin": types.BoolType,
 	"mixed_schema_origin":  types.BoolType,
-}
-
-// Attribute map for ArrayOfPointerField --> ApiInventoryInclusionList
-var ApiDefinitionApiInventoryInclusionListObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"method": types.ListType{
-		ElemType: types.StringType,
-	},
-	"path": types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> ApiInventoryExclusionList
-var ApiDefinitionApiInventoryExclusionListObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"path": types.StringType,
-	"method": types.ListType{
-		ElemType: types.StringType,
-	},
+	"strict_schema_origin": types.BoolType,
 }
 
 func NewResourceF5XCApiDefinition() resource.Resource {
@@ -132,13 +136,69 @@ func (r *ResourceF5XCApiDefinition) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "ApiDefinition resource",
-		Description:         "ApiDefinition resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a api_definition This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_definition) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a api_definition This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_definition) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"shared", "user"}...),
+				},
+			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -146,97 +206,133 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
+			"api_inventory_exclusion_list": schema.ListNestedAttribute{
+				Description:         "api_inventory_exclusion_list List of API Endpoints excluded from the API Inventory.",
+				MarkdownDescription: "api_inventory_exclusion_list List of API Endpoints excluded from the API Inventory.",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
+				Computed:            false,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(5000),
+					listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
 				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"non_api_endpoints": schema.ListNestedAttribute{
-				Description:         "non_api_endpoints List of Non-API Endpoints.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"method": schema.ListAttribute{
 							Description:         "method Method to match the input request API method against.",
-							MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"ANY\", \"HEAD\", \"DELETE\", \"TRACE\", \"GET\", \"POST\", \"PUT\", \"CONNECT\", \"OPTIONS\", \"PATCH\", \"COPY\"]`",
+							MarkdownDescription: "method Method to match the input request API method against.<br>**Allowed Values (choose one):** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']`",
 							ElementType:         types.StringType,
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
 							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "HEAD", "DELETE", "TRACE", "GET", "POST", "PUT", "CONNECT", "OPTIONS", "PATCH", "COPY"}...)),
+								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}...)),
 								listvalidator.SizeAtMost(1),
 							},
 						},
 						"path": schema.StringAttribute{
 							Description:         "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
-							MarkdownDescription: "",
+							MarkdownDescription: "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
+							Validators: []validator.String{
+								bytesvalidator.BytesBetween(1, 1024),
+							},
+						},
+					},
+				},
+			},
+			"api_inventory_inclusion_list": schema.ListNestedAttribute{
+				Description:         "api_inventory_inclusion_list List of API Endpoints included in the API Inventory. Typically, discovered API endpoints are added to the API Inventory using this list.",
+				MarkdownDescription: "api_inventory_inclusion_list List of API Endpoints included in the API Inventory. Typically, discovered API endpoints are added to the API Inventory using this list.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(5000),
+					listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"method": schema.ListAttribute{
+							Description:         "method Method to match the input request API method against.",
+							MarkdownDescription: "method Method to match the input request API method against.<br>**Allowed Values (choose one):** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']`",
+							ElementType:         types.StringType,
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.List{
+								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}...)),
+								listvalidator.SizeAtMost(1),
+							},
+						},
+						"path": schema.StringAttribute{
+							Description:         "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
+							MarkdownDescription: "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								bytesvalidator.BytesBetween(1, 1024),
+							},
+						},
+					},
+				},
+			},
+			"non_api_endpoints": schema.ListNestedAttribute{
+				Description:         "non_api_endpoints List of Non-API Endpoints.",
+				MarkdownDescription: "non_api_endpoints List of Non-API Endpoints.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(5000),
+					listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"method": schema.ListAttribute{
+							Description:         "method Method to match the input request API method against.",
+							MarkdownDescription: "method Method to match the input request API method against.<br>**Allowed Values (choose one):** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']`",
+							ElementType:         types.StringType,
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.List{
+								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}...)),
+								listvalidator.SizeAtMost(1),
+							},
+						},
+						"path": schema.StringAttribute{
+							Description:         "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
+							MarkdownDescription: "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								bytesvalidator.BytesBetween(1, 1024),
+							},
 						},
 					},
 				},
 			},
 			"schema_updates_strategy_choice": schema.SingleNestedAttribute{
 				Description:         "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.",
-				MarkdownDescription: "",
+				MarkdownDescription: "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"strict_schema_origin",
+					exactlyoneofvalidator.RequiredExactlyOneOf(
 						"mixed_schema_origin",
+						"strict_schema_origin",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"strict_schema_origin": schema.BoolAttribute{
-						Description:         "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint",
-						MarkdownDescription: "",
+					"mixed_schema_origin": schema.BoolAttribute{
+						Description:         "mixed_schema_origin The schema can be updated from all associated LBs",
+						MarkdownDescription: "mixed_schema_origin The schema can be updated from all associated LBs",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -244,9 +340,9 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 							boolvalidator.Equals(true),
 						},
 					},
-					"mixed_schema_origin": schema.BoolAttribute{
-						Description:         "mixed_schema_origin The schema can be updated from all associated LBs",
-						MarkdownDescription: "",
+					"strict_schema_origin": schema.BoolAttribute{
+						Description:         "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint",
+						MarkdownDescription: "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -258,78 +354,24 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 			},
 			"swagger_specs": schema.ListAttribute{
 				Description:         "swagger_specs Define your application API by single or multiple OpenAPI files. 1. Upload your OpenAPI files via Web App & API Protection-> Files-> Swagger Files. 2. Select from the list of uploaded files. Notice file versions. If OpenAPI file is updated, need to select a new version here to redefine the API.",
-				MarkdownDescription: "",
+				MarkdownDescription: "swagger_specs Define your application API by single or multiple OpenAPI files. 1. Upload your OpenAPI files via Web App & API Protection-> Files-> Swagger Files. 2. Select from the list of uploaded files. Notice file versions. If OpenAPI file is updated, need to select a new version here to redefine the API.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(20),
-				},
-			},
-			"api_inventory_inclusion_list": schema.ListNestedAttribute{
-				Description:         "api_inventory_inclusion_list List of API Endpoints included in the API Inventory. Typically, discovered API endpoints are added to the API Inventory using this list.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"method": schema.ListAttribute{
-							Description:         "method Method to match the input request API method against.",
-							MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"DELETE\", \"TRACE\", \"GET\", \"POST\", \"PUT\", \"CONNECT\", \"OPTIONS\", \"PATCH\", \"COPY\", \"ANY\", \"HEAD\"]`",
-							ElementType:         types.StringType,
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DELETE", "TRACE", "GET", "POST", "PUT", "CONNECT", "OPTIONS", "PATCH", "COPY", "ANY", "HEAD"}...)),
-								listvalidator.SizeAtMost(1),
-							},
-						},
-						"path": schema.StringAttribute{
-							Description:         "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-					},
-				},
-			},
-			"api_inventory_exclusion_list": schema.ListNestedAttribute{
-				Description:         "api_inventory_exclusion_list List of API Endpoints excluded from the API Inventory.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"path": schema.StringAttribute{
-							Description:         "path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-						"method": schema.ListAttribute{
-							Description:         "method Method to match the input request API method against.",
-							MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"ANY\", \"HEAD\", \"DELETE\", \"TRACE\", \"GET\", \"POST\", \"PUT\", \"CONNECT\", \"OPTIONS\", \"PATCH\", \"COPY\"]`",
-							ElementType:         types.StringType,
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "HEAD", "DELETE", "TRACE", "GET", "POST", "PUT", "CONNECT", "OPTIONS", "PATCH", "COPY"}...)),
-								listvalidator.SizeAtMost(1),
-							},
-						},
-					},
+					listvalidator.ValueStringsAre(bytesvalidator.BytesAtMost(512)),
+					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+						regexp.MustCompile(`/api/object_store/namespaces/([a-z]([-a-z0-9]*[a-z0-9])?)/stored_objects/swagger/([a-z]([-a-z0-9]*[a-z0-9])?)/(v|V)[0-9]+(-[0-9]{2}){3}$`),
+						"must match pattern `/api/object_store/namespaces/([a-z]([-a-z0-9]*[a-z0-9])?)/stored_objects/swagger/([a-z]([-a-z0-9]*[a-z0-9])?)/(v|V)[0-9]+(-[0-9]{2}){3}$`",
+					)),
+					listvalidator.UniqueValues(),
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -435,7 +477,7 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -446,6 +488,20 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -459,9 +515,109 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 	}
 
 	{
+		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryExclusionList
+		if !data.ApiInventoryExclusionList.IsNull() && !data.ApiInventoryExclusionList.IsUnknown() {
+			var apiInventoryExclusionListElements []ApiDefApiOperation
+			response.Diagnostics.Append(data.ApiInventoryExclusionList.ElementsAs(ctx, &apiInventoryExclusionListElements, false)...)
+
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			apiInventoryExclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryExclusionListElements))
+
+			for i, apiInventoryExclusionListElement := range apiInventoryExclusionListElements {
+				apiInventoryExclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
+
+				// resource modelToSpecNested RequiredEnumField --> Method
+				if !apiInventoryExclusionListElement.Method.IsNull() && !apiInventoryExclusionListElement.Method.IsUnknown() && len(apiInventoryExclusionListElement.Method.Elements()) > 0 {
+					var methodTfStrings []types.String
+					diags = apiInventoryExclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					if len(methodTfStrings) > 0 {
+						valStr := methodTfStrings[0].ValueString()
+
+						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
+							apiInventoryExclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
+						} else {
+							response.Diagnostics.AddError(
+								"Invalid Enum Value",
+								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
+							)
+							return
+						}
+					}
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Path
+				if !apiInventoryExclusionListElement.Path.IsNull() && !apiInventoryExclusionListElement.Path.IsUnknown() {
+					apiInventoryExclusionListSpec[i].Path = string(apiInventoryExclusionListElement.Path.ValueString())
+				}
+
+			}
+
+			spec.ApiInventoryExclusionList = apiInventoryExclusionListSpec
+		}
+	}
+
+	{
+		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryInclusionList
+		if !data.ApiInventoryInclusionList.IsNull() && !data.ApiInventoryInclusionList.IsUnknown() {
+			var apiInventoryInclusionListElements []ApiDefApiOperation
+			response.Diagnostics.Append(data.ApiInventoryInclusionList.ElementsAs(ctx, &apiInventoryInclusionListElements, false)...)
+
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			apiInventoryInclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryInclusionListElements))
+
+			for i, apiInventoryInclusionListElement := range apiInventoryInclusionListElements {
+				apiInventoryInclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
+
+				// resource modelToSpecNested RequiredEnumField --> Method
+				if !apiInventoryInclusionListElement.Method.IsNull() && !apiInventoryInclusionListElement.Method.IsUnknown() && len(apiInventoryInclusionListElement.Method.Elements()) > 0 {
+					var methodTfStrings []types.String
+					diags = apiInventoryInclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					if len(methodTfStrings) > 0 {
+						valStr := methodTfStrings[0].ValueString()
+
+						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
+							apiInventoryInclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
+						} else {
+							response.Diagnostics.AddError(
+								"Invalid Enum Value",
+								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
+							)
+							return
+						}
+					}
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Path
+				if !apiInventoryInclusionListElement.Path.IsNull() && !apiInventoryInclusionListElement.Path.IsUnknown() {
+					apiInventoryInclusionListSpec[i].Path = string(apiInventoryInclusionListElement.Path.ValueString())
+				}
+
+			}
+
+			spec.ApiInventoryInclusionList = apiInventoryInclusionListSpec
+		}
+	}
+
+	{
 		// resource modelToSpecRoot ArrayOfPointerField --> NonApiEndpoints
 		if !data.NonApiEndpoints.IsNull() && !data.NonApiEndpoints.IsUnknown() {
-			var nonApiEndpointsElements []ApiDefinitionViewsApiOperation
+			var nonApiEndpointsElements []ApiDefApiOperation
 			response.Diagnostics.Append(data.NonApiEndpoints.ElementsAs(ctx, &nonApiEndpointsElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -510,17 +666,10 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 
 	// resource modelToSpecRoot RequiredOneOfField --> SchemaUpdatesStrategy
 	if !data.SchemaUpdatesStrategyChoice.IsNull() && !data.SchemaUpdatesStrategyChoice.IsUnknown() {
-		schemaUpdatesStrategyChoiceModel := ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice{}
+		schemaUpdatesStrategyChoiceModel := ApiDefSchemaUpdatesStrategyChoice{}
 		response.Diagnostics.Append(data.SchemaUpdatesStrategyChoice.As(ctx, &schemaUpdatesStrategyChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> StrictSchemaOrigin
-		if !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsNull() && !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsUnknown() {
-			strictSchemaOriginSpecBool := &ves_io_schema_views_api_definition.CreateSpecType_StrictSchemaOrigin{}
-			strictSchemaOriginSpecBool.StrictSchemaOrigin = &ves_io_schema.Empty{}
-			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> MixedSchemaOrigin
@@ -530,123 +679,37 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			spec.SchemaUpdatesStrategy = mixedSchemaOriginSpecBool
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> StrictSchemaOrigin
+		if !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsNull() && !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsUnknown() {
+			strictSchemaOriginSpecBool := &ves_io_schema_views_api_definition.CreateSpecType_StrictSchemaOrigin{}
+			strictSchemaOriginSpecBool.StrictSchemaOrigin = &ves_io_schema.Empty{}
+			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
+		}
+
 	}
 
 	{
 		// resource modelToSpecRoot ArrayOfStringField--> SwaggerSpecs
 		if !data.SwaggerSpecs.IsNull() && !data.SwaggerSpecs.IsUnknown() {
 			elements := make([]string, 0, len(data.SwaggerSpecs.Elements()))
-			diags := data.SwaggerSpecs.ElementsAs(ctx, &elements, false)
-			response.Diagnostics.Append(diags...)
+			swaggerSpecsElementsDiags := data.SwaggerSpecs.ElementsAs(ctx, &elements, false)
+			response.Diagnostics.Append(swaggerSpecsElementsDiags...)
 			spec.SwaggerSpecs = elements
 		}
 	}
 
-	{
-		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryInclusionList
-		if !data.ApiInventoryInclusionList.IsNull() && !data.ApiInventoryInclusionList.IsUnknown() {
-			var apiInventoryInclusionListElements []ApiDefinitionViewsApiOperation
-			response.Diagnostics.Append(data.ApiInventoryInclusionList.ElementsAs(ctx, &apiInventoryInclusionListElements, false)...)
-
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			apiInventoryInclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryInclusionListElements))
-
-			for i, apiInventoryInclusionListElement := range apiInventoryInclusionListElements {
-				apiInventoryInclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
-
-				// resource modelToSpecNested RequiredEnumField --> Method
-				if !apiInventoryInclusionListElement.Method.IsNull() && !apiInventoryInclusionListElement.Method.IsUnknown() && len(apiInventoryInclusionListElement.Method.Elements()) > 0 {
-					var methodTfStrings []types.String
-					diags = apiInventoryInclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					if len(methodTfStrings) > 0 {
-						valStr := methodTfStrings[0].ValueString()
-
-						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
-							apiInventoryInclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
-						} else {
-							response.Diagnostics.AddError(
-								"Invalid Enum Value",
-								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
-							)
-							return
-						}
-					}
-				}
-
-				// resource modelToSpecNested RequiredStringField --> Path
-				if !apiInventoryInclusionListElement.Path.IsNull() && !apiInventoryInclusionListElement.Path.IsUnknown() {
-					apiInventoryInclusionListSpec[i].Path = string(apiInventoryInclusionListElement.Path.ValueString())
-				}
-
-			}
-
-			spec.ApiInventoryInclusionList = apiInventoryInclusionListSpec
-		}
-	}
-
-	{
-		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryExclusionList
-		if !data.ApiInventoryExclusionList.IsNull() && !data.ApiInventoryExclusionList.IsUnknown() {
-			var apiInventoryExclusionListElements []ApiDefinitionViewsApiOperation
-			response.Diagnostics.Append(data.ApiInventoryExclusionList.ElementsAs(ctx, &apiInventoryExclusionListElements, false)...)
-
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			apiInventoryExclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryExclusionListElements))
-
-			for i, apiInventoryExclusionListElement := range apiInventoryExclusionListElements {
-				apiInventoryExclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
-
-				// resource modelToSpecNested RequiredStringField --> Path
-				if !apiInventoryExclusionListElement.Path.IsNull() && !apiInventoryExclusionListElement.Path.IsUnknown() {
-					apiInventoryExclusionListSpec[i].Path = string(apiInventoryExclusionListElement.Path.ValueString())
-				}
-
-				// resource modelToSpecNested RequiredEnumField --> Method
-				if !apiInventoryExclusionListElement.Method.IsNull() && !apiInventoryExclusionListElement.Method.IsUnknown() && len(apiInventoryExclusionListElement.Method.Elements()) > 0 {
-					var methodTfStrings []types.String
-					diags = apiInventoryExclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					if len(methodTfStrings) > 0 {
-						valStr := methodTfStrings[0].ValueString()
-
-						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
-							apiInventoryExclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
-						} else {
-							response.Diagnostics.AddError(
-								"Invalid Enum Value",
-								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
-							)
-							return
-						}
-					}
-				}
-
-			}
-
-			spec.ApiInventoryExclusionList = apiInventoryExclusionListSpec
-		}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_views_api_definition.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -675,89 +738,100 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
 		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
 		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -765,56 +839,193 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
-	if len(specData.NonApiEndpoints) > 0 {
-		nonApiEndpointsElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.NonApiEndpoints))
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-		for _, nonApiEndpointsElement := range specData.NonApiEndpoints {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
+	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryExclusionList
+	if len(specData.GetApiInventoryExclusionList()) > 0 {
+		apiInventoryExclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryExclusionList()))
+		for _, apiInventoryExclusionListElement := range specData.GetApiInventoryExclusionList() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
 
 			// resource specToModelNested RequiredEnumField --> Method
-			if nonApiEndpointsElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(nonApiEndpointsElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
+			{
+				if apiInventoryExclusionListElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(apiInventoryExclusionListElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
 				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
+			}
+
+			// resource specToModelNested RequiredStringField --> Path
+			if apiInventoryExclusionListElement.GetPath() != "" {
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
 			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+				// Empty string, set to null
+				apiDefApiOperationModel.Path = types.StringNull()
+			}
+
+			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefApiOperationModel)
+		}
+
+		{
+			apiInventoryExclusionListList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionApiInventoryExclusionListModelAttributeMap,
+				apiInventoryExclusionListElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ApiInventoryExclusionList = apiInventoryExclusionListList
+		}
+	} else {
+		var apiInventoryExclusionListObjectType = basetypes.ObjectType{
+			AttrTypes: ApiDefinitionApiInventoryExclusionListModelAttributeMap,
+		}
+		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
+		var priorValApiInventoryExclusionList types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_exclusion_list"), &priorValApiInventoryExclusionList)
+		if !priorValApiInventoryExclusionList.IsNull() && !priorValApiInventoryExclusionList.IsUnknown() {
+			data.ApiInventoryExclusionList = priorValApiInventoryExclusionList
+		} else {
+			data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
+		}
+
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
+	if len(specData.GetApiInventoryInclusionList()) > 0 {
+		apiInventoryInclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryInclusionList()))
+		for _, apiInventoryInclusionListElement := range specData.GetApiInventoryInclusionList() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
+
+			// resource specToModelNested RequiredEnumField --> Method
+			{
+				if apiInventoryInclusionListElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(apiInventoryInclusionListElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
+				}
+			}
+
+			// resource specToModelNested RequiredStringField --> Path
+			if apiInventoryInclusionListElement.GetPath() != "" {
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
+			} else {
+				// Empty string, set to null
+				apiDefApiOperationModel.Path = types.StringNull()
+			}
+
+			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefApiOperationModel)
+		}
+
+		{
+			apiInventoryInclusionListList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionApiInventoryInclusionListModelAttributeMap,
+				apiInventoryInclusionListElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ApiInventoryInclusionList = apiInventoryInclusionListList
+		}
+	} else {
+		var apiInventoryInclusionListObjectType = basetypes.ObjectType{
+			AttrTypes: ApiDefinitionApiInventoryInclusionListModelAttributeMap,
+		}
+		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
+		var priorValApiInventoryInclusionList types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_inclusion_list"), &priorValApiInventoryInclusionList)
+		if !priorValApiInventoryInclusionList.IsNull() && !priorValApiInventoryInclusionList.IsUnknown() {
+			data.ApiInventoryInclusionList = priorValApiInventoryInclusionList
+		} else {
+			data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
+		}
+
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
+	if len(specData.GetNonApiEndpoints()) > 0 {
+		nonApiEndpointsElements := make([]ApiDefApiOperation, 0, len(specData.GetNonApiEndpoints()))
+		for _, nonApiEndpointsElement := range specData.GetNonApiEndpoints() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
+
+			// resource specToModelNested RequiredEnumField --> Method
+			{
+				if nonApiEndpointsElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(nonApiEndpointsElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
+				}
 			}
 
 			// resource specToModelNested RequiredStringField --> Path
 			if nonApiEndpointsElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
+				apiDefApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
 			} else {
 				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
+				apiDefApiOperationModel.Path = types.StringNull()
 			}
 
-			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefinitionViewsApiOperationModel)
+			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefApiOperationModel)
 		}
 
-		nonApiEndpointsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap,
-			nonApiEndpointsElements,
-		)
+		{
+			nonApiEndpointsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionNonApiEndpointsModelAttributeMap,
+				nonApiEndpointsElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.NonApiEndpoints = nonApiEndpointsList
 		}
-
-		data.NonApiEndpoints = nonApiEndpointsList
 	} else {
 		var nonApiEndpointsObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap,
+			AttrTypes: ApiDefinitionNonApiEndpointsModelAttributeMap,
 		}
 		nullNonApiEndpointsList := basetypes.NewListNull(nonApiEndpointsObjectType)
-		data.NonApiEndpoints = nullNonApiEndpointsList
+		var priorValNonApiEndpoints types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("non_api_endpoints"), &priorValNonApiEndpoints)
+		if !priorValNonApiEndpoints.IsNull() && !priorValNonApiEndpoints.IsUnknown() {
+			data.NonApiEndpoints = priorValNonApiEndpoints
+		} else {
+			data.NonApiEndpoints = nullNonApiEndpointsList
+		}
+
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
@@ -826,18 +1037,9 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 		schemaUpdatesStrategyChoiceChoices := specData.GetSchemaUpdatesStrategy()
 
 		// The model struct that will be populated by the nested template.
-		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice{}
+		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefSchemaUpdatesStrategyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> StrictSchemaOrigin
-		_, isStrictSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_StrictSchemaOrigin)
-
-		if isStrictSchemaOrigin {
-			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolValue(true)
-		} else {
-			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> MixedSchemaOrigin
 		_, isMixedSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_MixedSchemaOrigin)
@@ -848,138 +1050,49 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			schemaUpdatesStrategyChoiceChoicesModel.MixedSchemaOrigin = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		schemaUpdatesStrategyChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			ApiDefinitionSchemaUpdatesStrategyModelAttributeMap,
-			schemaUpdatesStrategyChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> StrictSchemaOrigin
+		_, isStrictSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_StrictSchemaOrigin)
+
+		if isStrictSchemaOrigin {
+			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolValue(true)
+		} else {
+			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.SchemaUpdatesStrategyChoice = schemaUpdatesStrategyChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			schemaUpdatesStrategyChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				ApiDefinitionSchemaUpdatesStrategyModelAttributeMap,
+				schemaUpdatesStrategyChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.SchemaUpdatesStrategyChoice = schemaUpdatesStrategyChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
 	}
 
-	// resource specToModelRoot ArrayOfStringField --> SwaggerSpecs
-	if len(specData.GetSwaggerSpecs()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetSwaggerSpecs())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.SwaggerSpecs = listValue
-	} else {
-		data.SwaggerSpecs = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
-	if len(specData.ApiInventoryInclusionList) > 0 {
-		apiInventoryInclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.ApiInventoryInclusionList))
-
-		for _, apiInventoryInclusionListElement := range specData.ApiInventoryInclusionList {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
-
-			// resource specToModelNested RequiredEnumField --> Method
-			if apiInventoryInclusionListElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(apiInventoryInclusionListElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
-			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+	// resource specToModelRootOld ArrayOfStringField --> SwaggerSpecs
+	{
+		if len(specData.GetSwaggerSpecs()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetSwaggerSpecs())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
-
-			// resource specToModelNested RequiredStringField --> Path
-			if apiInventoryInclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
-			} else {
-				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
-			}
-
-			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefinitionViewsApiOperationModel)
+			data.SwaggerSpecs = listValue
+		} else {
+			data.SwaggerSpecs = types.ListNull(types.StringType)
 		}
-
-		apiInventoryInclusionListList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionApiInventoryInclusionListObjectRefModelAttributeMap,
-			apiInventoryInclusionListElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.ApiInventoryInclusionList = apiInventoryInclusionListList
-	} else {
-		var apiInventoryInclusionListObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionApiInventoryInclusionListObjectRefModelAttributeMap,
-		}
-		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
-		data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryExclusionList
-	if len(specData.ApiInventoryExclusionList) > 0 {
-		apiInventoryExclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.ApiInventoryExclusionList))
-
-		for _, apiInventoryExclusionListElement := range specData.ApiInventoryExclusionList {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
-
-			// resource specToModelNested RequiredStringField --> Path
-			if apiInventoryExclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
-			} else {
-				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredEnumField --> Method
-			if apiInventoryExclusionListElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(apiInventoryExclusionListElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
-			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
-			}
-
-			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefinitionViewsApiOperationModel)
-		}
-
-		apiInventoryExclusionListList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionApiInventoryExclusionListObjectRefModelAttributeMap,
-			apiInventoryExclusionListElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.ApiInventoryExclusionList = apiInventoryExclusionListList
-	} else {
-		var apiInventoryExclusionListObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionApiInventoryExclusionListObjectRefModelAttributeMap,
-		}
-		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
-		data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1045,105 +1158,101 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1151,56 +1260,193 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
-	if len(specData.NonApiEndpoints) > 0 {
-		nonApiEndpointsElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.NonApiEndpoints))
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-		for _, nonApiEndpointsElement := range specData.NonApiEndpoints {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
+	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryExclusionList
+	if len(specData.GetApiInventoryExclusionList()) > 0 {
+		apiInventoryExclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryExclusionList()))
+		for _, apiInventoryExclusionListElement := range specData.GetApiInventoryExclusionList() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
 
 			// resource specToModelNested RequiredEnumField --> Method
-			if nonApiEndpointsElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(nonApiEndpointsElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
+			{
+				if apiInventoryExclusionListElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(apiInventoryExclusionListElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
 				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
+			}
+
+			// resource specToModelNested RequiredStringField --> Path
+			if apiInventoryExclusionListElement.GetPath() != "" {
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
 			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+				// Empty string, set to null
+				apiDefApiOperationModel.Path = types.StringNull()
+			}
+
+			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefApiOperationModel)
+		}
+
+		{
+			apiInventoryExclusionListList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionApiInventoryExclusionListModelAttributeMap,
+				apiInventoryExclusionListElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ApiInventoryExclusionList = apiInventoryExclusionListList
+		}
+	} else {
+		var apiInventoryExclusionListObjectType = basetypes.ObjectType{
+			AttrTypes: ApiDefinitionApiInventoryExclusionListModelAttributeMap,
+		}
+		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
+		var priorValApiInventoryExclusionList types.List
+		_ = request.State.GetAttribute(ctx, path.Root("api_inventory_exclusion_list"), &priorValApiInventoryExclusionList)
+		if !priorValApiInventoryExclusionList.IsNull() && !priorValApiInventoryExclusionList.IsUnknown() {
+			data.ApiInventoryExclusionList = priorValApiInventoryExclusionList
+		} else {
+			data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
+		}
+
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
+	if len(specData.GetApiInventoryInclusionList()) > 0 {
+		apiInventoryInclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryInclusionList()))
+		for _, apiInventoryInclusionListElement := range specData.GetApiInventoryInclusionList() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
+
+			// resource specToModelNested RequiredEnumField --> Method
+			{
+				if apiInventoryInclusionListElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(apiInventoryInclusionListElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
+				}
+			}
+
+			// resource specToModelNested RequiredStringField --> Path
+			if apiInventoryInclusionListElement.GetPath() != "" {
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
+			} else {
+				// Empty string, set to null
+				apiDefApiOperationModel.Path = types.StringNull()
+			}
+
+			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefApiOperationModel)
+		}
+
+		{
+			apiInventoryInclusionListList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionApiInventoryInclusionListModelAttributeMap,
+				apiInventoryInclusionListElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ApiInventoryInclusionList = apiInventoryInclusionListList
+		}
+	} else {
+		var apiInventoryInclusionListObjectType = basetypes.ObjectType{
+			AttrTypes: ApiDefinitionApiInventoryInclusionListModelAttributeMap,
+		}
+		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
+		var priorValApiInventoryInclusionList types.List
+		_ = request.State.GetAttribute(ctx, path.Root("api_inventory_inclusion_list"), &priorValApiInventoryInclusionList)
+		if !priorValApiInventoryInclusionList.IsNull() && !priorValApiInventoryInclusionList.IsUnknown() {
+			data.ApiInventoryInclusionList = priorValApiInventoryInclusionList
+		} else {
+			data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
+		}
+
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
+	if len(specData.GetNonApiEndpoints()) > 0 {
+		nonApiEndpointsElements := make([]ApiDefApiOperation, 0, len(specData.GetNonApiEndpoints()))
+		for _, nonApiEndpointsElement := range specData.GetNonApiEndpoints() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
+
+			// resource specToModelNested RequiredEnumField --> Method
+			{
+				if nonApiEndpointsElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(nonApiEndpointsElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
+				}
 			}
 
 			// resource specToModelNested RequiredStringField --> Path
 			if nonApiEndpointsElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
+				apiDefApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
 			} else {
 				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
+				apiDefApiOperationModel.Path = types.StringNull()
 			}
 
-			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefinitionViewsApiOperationModel)
+			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefApiOperationModel)
 		}
 
-		nonApiEndpointsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap,
-			nonApiEndpointsElements,
-		)
+		{
+			nonApiEndpointsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionNonApiEndpointsModelAttributeMap,
+				nonApiEndpointsElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.NonApiEndpoints = nonApiEndpointsList
 		}
-
-		data.NonApiEndpoints = nonApiEndpointsList
 	} else {
 		var nonApiEndpointsObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap,
+			AttrTypes: ApiDefinitionNonApiEndpointsModelAttributeMap,
 		}
 		nullNonApiEndpointsList := basetypes.NewListNull(nonApiEndpointsObjectType)
-		data.NonApiEndpoints = nullNonApiEndpointsList
+		var priorValNonApiEndpoints types.List
+		_ = request.State.GetAttribute(ctx, path.Root("non_api_endpoints"), &priorValNonApiEndpoints)
+		if !priorValNonApiEndpoints.IsNull() && !priorValNonApiEndpoints.IsUnknown() {
+			data.NonApiEndpoints = priorValNonApiEndpoints
+		} else {
+			data.NonApiEndpoints = nullNonApiEndpointsList
+		}
+
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
@@ -1212,18 +1458,9 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 		schemaUpdatesStrategyChoiceChoices := specData.GetSchemaUpdatesStrategy()
 
 		// The model struct that will be populated by the nested template.
-		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice{}
+		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefSchemaUpdatesStrategyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> StrictSchemaOrigin
-		_, isStrictSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_StrictSchemaOrigin)
-
-		if isStrictSchemaOrigin {
-			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolValue(true)
-		} else {
-			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> MixedSchemaOrigin
 		_, isMixedSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_MixedSchemaOrigin)
@@ -1234,138 +1471,49 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 			schemaUpdatesStrategyChoiceChoicesModel.MixedSchemaOrigin = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		schemaUpdatesStrategyChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			ApiDefinitionSchemaUpdatesStrategyModelAttributeMap,
-			schemaUpdatesStrategyChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> StrictSchemaOrigin
+		_, isStrictSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_StrictSchemaOrigin)
+
+		if isStrictSchemaOrigin {
+			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolValue(true)
+		} else {
+			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.SchemaUpdatesStrategyChoice = schemaUpdatesStrategyChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			schemaUpdatesStrategyChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				ApiDefinitionSchemaUpdatesStrategyModelAttributeMap,
+				schemaUpdatesStrategyChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.SchemaUpdatesStrategyChoice = schemaUpdatesStrategyChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
 	}
 
-	// resource specToModelRoot ArrayOfStringField --> SwaggerSpecs
-	if len(specData.GetSwaggerSpecs()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetSwaggerSpecs())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.SwaggerSpecs = listValue
-	} else {
-		data.SwaggerSpecs = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
-	if len(specData.ApiInventoryInclusionList) > 0 {
-		apiInventoryInclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.ApiInventoryInclusionList))
-
-		for _, apiInventoryInclusionListElement := range specData.ApiInventoryInclusionList {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
-
-			// resource specToModelNested RequiredEnumField --> Method
-			if apiInventoryInclusionListElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(apiInventoryInclusionListElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
-			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+	// resource specToModelRootOld ArrayOfStringField --> SwaggerSpecs
+	{
+		if len(specData.GetSwaggerSpecs()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetSwaggerSpecs())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
-
-			// resource specToModelNested RequiredStringField --> Path
-			if apiInventoryInclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
-			} else {
-				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
-			}
-
-			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefinitionViewsApiOperationModel)
+			data.SwaggerSpecs = listValue
+		} else {
+			data.SwaggerSpecs = types.ListNull(types.StringType)
 		}
-
-		apiInventoryInclusionListList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionApiInventoryInclusionListObjectRefModelAttributeMap,
-			apiInventoryInclusionListElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.ApiInventoryInclusionList = apiInventoryInclusionListList
-	} else {
-		var apiInventoryInclusionListObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionApiInventoryInclusionListObjectRefModelAttributeMap,
-		}
-		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
-		data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryExclusionList
-	if len(specData.ApiInventoryExclusionList) > 0 {
-		apiInventoryExclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.ApiInventoryExclusionList))
-
-		for _, apiInventoryExclusionListElement := range specData.ApiInventoryExclusionList {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
-
-			// resource specToModelNested RequiredStringField --> Path
-			if apiInventoryExclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
-			} else {
-				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredEnumField --> Method
-			if apiInventoryExclusionListElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(apiInventoryExclusionListElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
-			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
-			}
-
-			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefinitionViewsApiOperationModel)
-		}
-
-		apiInventoryExclusionListList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionApiInventoryExclusionListObjectRefModelAttributeMap,
-			apiInventoryExclusionListElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.ApiInventoryExclusionList = apiInventoryExclusionListList
-	} else {
-		var apiInventoryExclusionListObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionApiInventoryExclusionListObjectRefModelAttributeMap,
-		}
-		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
-		data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1385,6 +1533,25 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCApiDefinitionModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1421,7 +1588,7 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1432,6 +1599,20 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
 	}
 
 	// resource modelToMetaRoot RequiredStringField --> Name
@@ -1445,9 +1626,109 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 	}
 
 	{
+		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryExclusionList
+		if !data.ApiInventoryExclusionList.IsNull() && !data.ApiInventoryExclusionList.IsUnknown() {
+			var apiInventoryExclusionListElements []ApiDefApiOperation
+			response.Diagnostics.Append(data.ApiInventoryExclusionList.ElementsAs(ctx, &apiInventoryExclusionListElements, false)...)
+
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			apiInventoryExclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryExclusionListElements))
+
+			for i, apiInventoryExclusionListElement := range apiInventoryExclusionListElements {
+				apiInventoryExclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
+
+				// resource modelToSpecNested RequiredEnumField --> Method
+				if !apiInventoryExclusionListElement.Method.IsNull() && !apiInventoryExclusionListElement.Method.IsUnknown() && len(apiInventoryExclusionListElement.Method.Elements()) > 0 {
+					var methodTfStrings []types.String
+					diags = apiInventoryExclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					if len(methodTfStrings) > 0 {
+						valStr := methodTfStrings[0].ValueString()
+
+						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
+							apiInventoryExclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
+						} else {
+							response.Diagnostics.AddError(
+								"Invalid Enum Value",
+								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
+							)
+							return
+						}
+					}
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Path
+				if !apiInventoryExclusionListElement.Path.IsNull() && !apiInventoryExclusionListElement.Path.IsUnknown() {
+					apiInventoryExclusionListSpec[i].Path = string(apiInventoryExclusionListElement.Path.ValueString())
+				}
+
+			}
+
+			spec.ApiInventoryExclusionList = apiInventoryExclusionListSpec
+		}
+	}
+
+	{
+		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryInclusionList
+		if !data.ApiInventoryInclusionList.IsNull() && !data.ApiInventoryInclusionList.IsUnknown() {
+			var apiInventoryInclusionListElements []ApiDefApiOperation
+			response.Diagnostics.Append(data.ApiInventoryInclusionList.ElementsAs(ctx, &apiInventoryInclusionListElements, false)...)
+
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			apiInventoryInclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryInclusionListElements))
+
+			for i, apiInventoryInclusionListElement := range apiInventoryInclusionListElements {
+				apiInventoryInclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
+
+				// resource modelToSpecNested RequiredEnumField --> Method
+				if !apiInventoryInclusionListElement.Method.IsNull() && !apiInventoryInclusionListElement.Method.IsUnknown() && len(apiInventoryInclusionListElement.Method.Elements()) > 0 {
+					var methodTfStrings []types.String
+					diags = apiInventoryInclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					if len(methodTfStrings) > 0 {
+						valStr := methodTfStrings[0].ValueString()
+
+						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
+							apiInventoryInclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
+						} else {
+							response.Diagnostics.AddError(
+								"Invalid Enum Value",
+								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
+							)
+							return
+						}
+					}
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Path
+				if !apiInventoryInclusionListElement.Path.IsNull() && !apiInventoryInclusionListElement.Path.IsUnknown() {
+					apiInventoryInclusionListSpec[i].Path = string(apiInventoryInclusionListElement.Path.ValueString())
+				}
+
+			}
+
+			spec.ApiInventoryInclusionList = apiInventoryInclusionListSpec
+		}
+	}
+
+	{
 		// resource modelToSpecRoot ArrayOfPointerField --> NonApiEndpoints
 		if !data.NonApiEndpoints.IsNull() && !data.NonApiEndpoints.IsUnknown() {
-			var nonApiEndpointsElements []ApiDefinitionViewsApiOperation
+			var nonApiEndpointsElements []ApiDefApiOperation
 			response.Diagnostics.Append(data.NonApiEndpoints.ElementsAs(ctx, &nonApiEndpointsElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -1496,17 +1777,10 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 
 	// resource modelToSpecRoot RequiredOneOfField --> SchemaUpdatesStrategy
 	if !data.SchemaUpdatesStrategyChoice.IsNull() && !data.SchemaUpdatesStrategyChoice.IsUnknown() {
-		schemaUpdatesStrategyChoiceModel := ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice{}
+		schemaUpdatesStrategyChoiceModel := ApiDefSchemaUpdatesStrategyChoice{}
 		response.Diagnostics.Append(data.SchemaUpdatesStrategyChoice.As(ctx, &schemaUpdatesStrategyChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> StrictSchemaOrigin
-		if !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsNull() && !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsUnknown() {
-			strictSchemaOriginSpecBool := &ves_io_schema_views_api_definition.ReplaceSpecType_StrictSchemaOrigin{}
-			strictSchemaOriginSpecBool.StrictSchemaOrigin = &ves_io_schema.Empty{}
-			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> MixedSchemaOrigin
@@ -1516,116 +1790,30 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			spec.SchemaUpdatesStrategy = mixedSchemaOriginSpecBool
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> StrictSchemaOrigin
+		if !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsNull() && !schemaUpdatesStrategyChoiceModel.StrictSchemaOrigin.IsUnknown() {
+			strictSchemaOriginSpecBool := &ves_io_schema_views_api_definition.ReplaceSpecType_StrictSchemaOrigin{}
+			strictSchemaOriginSpecBool.StrictSchemaOrigin = &ves_io_schema.Empty{}
+			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
+		}
+
 	}
 
 	{
 		// resource modelToSpecRoot ArrayOfStringField--> SwaggerSpecs
 		if !data.SwaggerSpecs.IsNull() && !data.SwaggerSpecs.IsUnknown() {
 			elements := make([]string, 0, len(data.SwaggerSpecs.Elements()))
-			diags := data.SwaggerSpecs.ElementsAs(ctx, &elements, false)
-			response.Diagnostics.Append(diags...)
+			swaggerSpecsElementsDiags := data.SwaggerSpecs.ElementsAs(ctx, &elements, false)
+			response.Diagnostics.Append(swaggerSpecsElementsDiags...)
 			spec.SwaggerSpecs = elements
 		}
 	}
 
-	{
-		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryInclusionList
-		if !data.ApiInventoryInclusionList.IsNull() && !data.ApiInventoryInclusionList.IsUnknown() {
-			var apiInventoryInclusionListElements []ApiDefinitionViewsApiOperation
-			response.Diagnostics.Append(data.ApiInventoryInclusionList.ElementsAs(ctx, &apiInventoryInclusionListElements, false)...)
-
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			apiInventoryInclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryInclusionListElements))
-
-			for i, apiInventoryInclusionListElement := range apiInventoryInclusionListElements {
-				apiInventoryInclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
-
-				// resource modelToSpecNested RequiredEnumField --> Method
-				if !apiInventoryInclusionListElement.Method.IsNull() && !apiInventoryInclusionListElement.Method.IsUnknown() && len(apiInventoryInclusionListElement.Method.Elements()) > 0 {
-					var methodTfStrings []types.String
-					diags = apiInventoryInclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					if len(methodTfStrings) > 0 {
-						valStr := methodTfStrings[0].ValueString()
-
-						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
-							apiInventoryInclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
-						} else {
-							response.Diagnostics.AddError(
-								"Invalid Enum Value",
-								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
-							)
-							return
-						}
-					}
-				}
-
-				// resource modelToSpecNested RequiredStringField --> Path
-				if !apiInventoryInclusionListElement.Path.IsNull() && !apiInventoryInclusionListElement.Path.IsUnknown() {
-					apiInventoryInclusionListSpec[i].Path = string(apiInventoryInclusionListElement.Path.ValueString())
-				}
-
-			}
-
-			spec.ApiInventoryInclusionList = apiInventoryInclusionListSpec
-		}
-	}
-
-	{
-		// resource modelToSpecRoot ArrayOfPointerField --> ApiInventoryExclusionList
-		if !data.ApiInventoryExclusionList.IsNull() && !data.ApiInventoryExclusionList.IsUnknown() {
-			var apiInventoryExclusionListElements []ApiDefinitionViewsApiOperation
-			response.Diagnostics.Append(data.ApiInventoryExclusionList.ElementsAs(ctx, &apiInventoryExclusionListElements, false)...)
-
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			apiInventoryExclusionListSpec := make([]*ves_io_schema_views.ApiOperation, len(apiInventoryExclusionListElements))
-
-			for i, apiInventoryExclusionListElement := range apiInventoryExclusionListElements {
-				apiInventoryExclusionListSpec[i] = &ves_io_schema_views.ApiOperation{}
-
-				// resource modelToSpecNested RequiredStringField --> Path
-				if !apiInventoryExclusionListElement.Path.IsNull() && !apiInventoryExclusionListElement.Path.IsUnknown() {
-					apiInventoryExclusionListSpec[i].Path = string(apiInventoryExclusionListElement.Path.ValueString())
-				}
-
-				// resource modelToSpecNested RequiredEnumField --> Method
-				if !apiInventoryExclusionListElement.Method.IsNull() && !apiInventoryExclusionListElement.Method.IsUnknown() && len(apiInventoryExclusionListElement.Method.Elements()) > 0 {
-					var methodTfStrings []types.String
-					diags = apiInventoryExclusionListElement.Method.ElementsAs(ctx, &methodTfStrings, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					if len(methodTfStrings) > 0 {
-						valStr := methodTfStrings[0].ValueString()
-
-						if v, ok := ves_io_schema.HttpMethod_value[valStr]; ok {
-							apiInventoryExclusionListSpec[i].Method = ves_io_schema.HttpMethod(v)
-						} else {
-							response.Diagnostics.AddError(
-								"Invalid Enum Value",
-								fmt.Sprintf("Value '%s' is not valid for enum Method", valStr),
-							)
-							return
-						}
-					}
-				}
-
-			}
-
-			spec.ApiInventoryExclusionList = apiInventoryExclusionListSpec
-		}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1662,105 +1850,100 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1768,56 +1951,193 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
-	if len(specData.NonApiEndpoints) > 0 {
-		nonApiEndpointsElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.NonApiEndpoints))
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-		for _, nonApiEndpointsElement := range specData.NonApiEndpoints {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
+	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryExclusionList
+	if len(specData.GetApiInventoryExclusionList()) > 0 {
+		apiInventoryExclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryExclusionList()))
+		for _, apiInventoryExclusionListElement := range specData.GetApiInventoryExclusionList() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
 
 			// resource specToModelNested RequiredEnumField --> Method
-			if nonApiEndpointsElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(nonApiEndpointsElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
+			{
+				if apiInventoryExclusionListElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(apiInventoryExclusionListElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
 				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
+			}
+
+			// resource specToModelNested RequiredStringField --> Path
+			if apiInventoryExclusionListElement.GetPath() != "" {
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
 			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
+				// Empty string, set to null
+				apiDefApiOperationModel.Path = types.StringNull()
+			}
+
+			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefApiOperationModel)
+		}
+
+		{
+			apiInventoryExclusionListList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionApiInventoryExclusionListModelAttributeMap,
+				apiInventoryExclusionListElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ApiInventoryExclusionList = apiInventoryExclusionListList
+		}
+	} else {
+		var apiInventoryExclusionListObjectType = basetypes.ObjectType{
+			AttrTypes: ApiDefinitionApiInventoryExclusionListModelAttributeMap,
+		}
+		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
+		var priorValApiInventoryExclusionList types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_exclusion_list"), &priorValApiInventoryExclusionList)
+		if !priorValApiInventoryExclusionList.IsNull() && !priorValApiInventoryExclusionList.IsUnknown() {
+			data.ApiInventoryExclusionList = priorValApiInventoryExclusionList
+		} else {
+			data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
+		}
+
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
+	if len(specData.GetApiInventoryInclusionList()) > 0 {
+		apiInventoryInclusionListElements := make([]ApiDefApiOperation, 0, len(specData.GetApiInventoryInclusionList()))
+		for _, apiInventoryInclusionListElement := range specData.GetApiInventoryInclusionList() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
+
+			// resource specToModelNested RequiredEnumField --> Method
+			{
+				if apiInventoryInclusionListElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(apiInventoryInclusionListElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
+				}
+			}
+
+			// resource specToModelNested RequiredStringField --> Path
+			if apiInventoryInclusionListElement.GetPath() != "" {
+				apiDefApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
+			} else {
+				// Empty string, set to null
+				apiDefApiOperationModel.Path = types.StringNull()
+			}
+
+			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefApiOperationModel)
+		}
+
+		{
+			apiInventoryInclusionListList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionApiInventoryInclusionListModelAttributeMap,
+				apiInventoryInclusionListElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ApiInventoryInclusionList = apiInventoryInclusionListList
+		}
+	} else {
+		var apiInventoryInclusionListObjectType = basetypes.ObjectType{
+			AttrTypes: ApiDefinitionApiInventoryInclusionListModelAttributeMap,
+		}
+		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
+		var priorValApiInventoryInclusionList types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_inclusion_list"), &priorValApiInventoryInclusionList)
+		if !priorValApiInventoryInclusionList.IsNull() && !priorValApiInventoryInclusionList.IsUnknown() {
+			data.ApiInventoryInclusionList = priorValApiInventoryInclusionList
+		} else {
+			data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
+		}
+
+	}
+
+	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
+	if len(specData.GetNonApiEndpoints()) > 0 {
+		nonApiEndpointsElements := make([]ApiDefApiOperation, 0, len(specData.GetNonApiEndpoints()))
+		for _, nonApiEndpointsElement := range specData.GetNonApiEndpoints() {
+			apiDefApiOperationModel := ApiDefApiOperation{}
+
+			// resource specToModelNested RequiredEnumField --> Method
+			{
+				if nonApiEndpointsElement.GetMethod().String() != "" {
+					stringValue := types.StringValue(nonApiEndpointsElement.GetMethod().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDefApiOperationModel.Method = listValue
+				} else {
+					apiDefApiOperationModel.Method = types.ListNull(types.StringType)
+				}
 			}
 
 			// resource specToModelNested RequiredStringField --> Path
 			if nonApiEndpointsElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
+				apiDefApiOperationModel.Path = types.StringValue(nonApiEndpointsElement.GetPath())
 			} else {
 				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
+				apiDefApiOperationModel.Path = types.StringNull()
 			}
 
-			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefinitionViewsApiOperationModel)
+			nonApiEndpointsElements = append(nonApiEndpointsElements, apiDefApiOperationModel)
 		}
 
-		nonApiEndpointsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap,
-			nonApiEndpointsElements,
-		)
+		{
+			nonApiEndpointsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDefinitionNonApiEndpointsModelAttributeMap,
+				nonApiEndpointsElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.NonApiEndpoints = nonApiEndpointsList
 		}
-
-		data.NonApiEndpoints = nonApiEndpointsList
 	} else {
 		var nonApiEndpointsObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionNonApiEndpointsObjectRefModelAttributeMap,
+			AttrTypes: ApiDefinitionNonApiEndpointsModelAttributeMap,
 		}
 		nullNonApiEndpointsList := basetypes.NewListNull(nonApiEndpointsObjectType)
-		data.NonApiEndpoints = nullNonApiEndpointsList
+		var priorValNonApiEndpoints types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("non_api_endpoints"), &priorValNonApiEndpoints)
+		if !priorValNonApiEndpoints.IsNull() && !priorValNonApiEndpoints.IsUnknown() {
+			data.NonApiEndpoints = priorValNonApiEndpoints
+		} else {
+			data.NonApiEndpoints = nullNonApiEndpointsList
+		}
+
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
@@ -1829,18 +2149,9 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		schemaUpdatesStrategyChoiceChoices := specData.GetSchemaUpdatesStrategy()
 
 		// The model struct that will be populated by the nested template.
-		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefinitionGlobalSpecTypeSchemaUpdatesStrategyChoice{}
+		var schemaUpdatesStrategyChoiceChoicesModel = &ApiDefSchemaUpdatesStrategyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> StrictSchemaOrigin
-		_, isStrictSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_StrictSchemaOrigin)
-
-		if isStrictSchemaOrigin {
-			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolValue(true)
-		} else {
-			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> MixedSchemaOrigin
 		_, isMixedSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_MixedSchemaOrigin)
@@ -1851,138 +2162,75 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			schemaUpdatesStrategyChoiceChoicesModel.MixedSchemaOrigin = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		schemaUpdatesStrategyChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			ApiDefinitionSchemaUpdatesStrategyModelAttributeMap,
-			schemaUpdatesStrategyChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> StrictSchemaOrigin
+		_, isStrictSchemaOrigin := schemaUpdatesStrategyChoiceChoices.(*ves_io_schema_views_api_definition.GlobalSpecType_StrictSchemaOrigin)
+
+		if isStrictSchemaOrigin {
+			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolValue(true)
+		} else {
+			schemaUpdatesStrategyChoiceChoicesModel.StrictSchemaOrigin = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.SchemaUpdatesStrategyChoice = schemaUpdatesStrategyChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			schemaUpdatesStrategyChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				ApiDefinitionSchemaUpdatesStrategyModelAttributeMap,
+				schemaUpdatesStrategyChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.SchemaUpdatesStrategyChoice = schemaUpdatesStrategyChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
 	}
 
-	// resource specToModelRoot ArrayOfStringField --> SwaggerSpecs
-	if len(specData.GetSwaggerSpecs()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetSwaggerSpecs())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	// resource specToModelRootOld ArrayOfStringField --> SwaggerSpecs
+	{
+		if len(specData.GetSwaggerSpecs()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetSwaggerSpecs())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.SwaggerSpecs = listValue
+		} else {
+			data.SwaggerSpecs = types.ListNull(types.StringType)
 		}
-		data.SwaggerSpecs = listValue
-	} else {
-		data.SwaggerSpecs = types.ListNull(types.StringType)
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
-	if len(specData.ApiInventoryInclusionList) > 0 {
-		apiInventoryInclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.ApiInventoryInclusionList))
-
-		for _, apiInventoryInclusionListElement := range specData.ApiInventoryInclusionList {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
-
-			// resource specToModelNested RequiredEnumField --> Method
-			if apiInventoryInclusionListElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(apiInventoryInclusionListElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
-			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
-			}
-
-			// resource specToModelNested RequiredStringField --> Path
-			if apiInventoryInclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryInclusionListElement.GetPath())
-			} else {
-				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
-			}
-
-			apiInventoryInclusionListElements = append(apiInventoryInclusionListElements, apiDefinitionViewsApiOperationModel)
-		}
-
-		apiInventoryInclusionListList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionApiInventoryInclusionListObjectRefModelAttributeMap,
-			apiInventoryInclusionListElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.ApiInventoryInclusionList = apiInventoryInclusionListList
-	} else {
-		var apiInventoryInclusionListObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionApiInventoryInclusionListObjectRefModelAttributeMap,
-		}
-		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
-		data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
+		data.Annotations = mergedMap
 	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryExclusionList
-	if len(specData.ApiInventoryExclusionList) > 0 {
-		apiInventoryExclusionListElements := make([]ApiDefinitionViewsApiOperation, 0, len(specData.ApiInventoryExclusionList))
-
-		for _, apiInventoryExclusionListElement := range specData.ApiInventoryExclusionList {
-			apiDefinitionViewsApiOperationModel := ApiDefinitionViewsApiOperation{}
-
-			// resource specToModelNested RequiredStringField --> Path
-			if apiInventoryExclusionListElement.GetPath() != "" {
-				apiDefinitionViewsApiOperationModel.Path = types.StringValue(apiInventoryExclusionListElement.GetPath())
-			} else {
-				// Empty string, set to null
-				apiDefinitionViewsApiOperationModel.Path = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredEnumField --> Method
-			if apiInventoryExclusionListElement.GetMethod().String() != "" {
-				stringValue := types.StringValue(apiInventoryExclusionListElement.GetMethod().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				apiDefinitionViewsApiOperationModel.Method = listValue
-			} else {
-				apiDefinitionViewsApiOperationModel.Method = types.ListNull(types.StringType)
-			}
-
-			apiInventoryExclusionListElements = append(apiInventoryExclusionListElements, apiDefinitionViewsApiOperationModel)
-		}
-
-		apiInventoryExclusionListList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDefinitionApiInventoryExclusionListObjectRefModelAttributeMap,
-			apiInventoryExclusionListElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.ApiInventoryExclusionList = apiInventoryExclusionListList
-	} else {
-		var apiInventoryExclusionListObjectType = basetypes.ObjectType{
-			AttrTypes: ApiDefinitionApiInventoryExclusionListObjectRefModelAttributeMap,
-		}
-		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
-		data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -2019,9 +2267,8 @@ func (r *ResourceF5XCApiDefinition) Delete(ctx context.Context, request resource
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -2036,19 +2283,32 @@ func (r *ResourceF5XCApiDefinition) Delete(ctx context.Context, request resource
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCApiDefinition) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

@@ -21,19 +21,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -44,7 +48,6 @@ import (
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_site_mesh_group "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/site_mesh_group"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCSiteMeshGroup defines the resource implementation.
@@ -52,68 +55,68 @@ type ResourceF5XCSiteMeshGroup struct {
 	client *client.APIClient
 }
 
-type SiteMeshGroupGlobalSpecTypeMeshChoice struct {
-	SpokeMesh types.Object `tfsdk:"spoke_mesh"`
-	FullMesh  types.Object `tfsdk:"full_mesh"`
-	HubMesh   types.Object `tfsdk:"hub_mesh"`
-}
-
-type SiteMeshGroupGlobalSpecTypeSpokeMesh struct {
-	HubMeshGroup       types.Object `tfsdk:"hub_mesh_group"`
-	SpokeHubMeshChoice types.Object `tfsdk:"spoke_hub_mesh_choice"`
-}
-
-type SiteMeshGroupSpokeMeshGroupTypeSpokeHubMeshChoice struct {
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
-	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
-}
-
-type SiteMeshGroupGlobalSpecTypeFullMesh struct {
-	FullMeshChoice types.Object `tfsdk:"full_mesh_choice"`
-}
-
-type SiteMeshGroupFullMeshGroupTypeFullMeshChoice struct {
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
-	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
-}
-
-type SiteMeshGroupGlobalSpecTypeHubMesh struct {
-	HubFullMeshChoice types.Object `tfsdk:"hub_full_mesh_choice"`
-}
-
-type SiteMeshGroupHubFullMeshGroupTypeHubFullMeshChoice struct {
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
-	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
-}
-
-type SiteMeshGroupGlobalSpecTypeReFallbackChoice struct {
-	EnableReFallback  types.Bool `tfsdk:"enable_re_fallback"`
-	DisableReFallback types.Bool `tfsdk:"disable_re_fallback"`
-}
-
-type SiteMeshGroupGlobalSpecTypeBfdChoice struct {
+type SiteMeshGroupBfdChoice struct {
 	BfdDisabled types.Bool   `tfsdk:"bfd_disabled"`
 	BfdEnabled  types.Object `tfsdk:"bfd_enabled"`
 }
 
-type SiteMeshGroupGlobalSpecTypeBfdEnabled struct {
-	TransmitIntervalMilliseconds types.Int64 `tfsdk:"transmit_interval_milliseconds"`
-	ReceiveIntervalMilliseconds  types.Int64 `tfsdk:"receive_interval_milliseconds"`
+type SiteMeshGroupBfdEnabled struct {
 	Multiplier                   types.Int64 `tfsdk:"multiplier"`
+	ReceiveIntervalMilliseconds  types.Int64 `tfsdk:"receive_interval_milliseconds"`
+	TransmitIntervalMilliseconds types.Int64 `tfsdk:"transmit_interval_milliseconds"`
+}
+
+type SiteMeshGroupMeshChoice struct {
+	FullMesh  types.Object `tfsdk:"full_mesh"`
+	HubMesh   types.Object `tfsdk:"hub_mesh"`
+	SpokeMesh types.Object `tfsdk:"spoke_mesh"`
+}
+
+type SiteMeshGroupFullMesh struct {
+	FullMeshChoice types.Object `tfsdk:"full_mesh_choice"`
+}
+
+type SiteMeshGroupFullMeshChoice struct {
+	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
+	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
+}
+
+type SiteMeshGroupHubMesh struct {
+	HubFullMeshChoice types.Object `tfsdk:"hub_full_mesh_choice"`
+}
+
+type SiteMeshGroupHubFullMeshChoice struct {
+	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
+	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
+}
+
+type SiteMeshGroupSpokeMesh struct {
+	HubMeshGroup       types.Object `tfsdk:"hub_mesh_group"`
+	SpokeHubMeshChoice types.Object `tfsdk:"spoke_hub_mesh_choice"`
+}
+
+type SiteMeshGroupSpokeHubMeshChoice struct {
+	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
+	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
+}
+
+type SiteMeshGroupReFallbackChoice struct {
+	DisableReFallback types.Bool `tfsdk:"disable_re_fallback"`
+	EnableReFallback  types.Bool `tfsdk:"enable_re_fallback"`
 }
 
 // ResourceF5XCSiteMeshGroupModel describes the resource data model.
 type ResourceF5XCSiteMeshGroupModel struct {
+	Annotations      types.Map      `tfsdk:"annotations"`
+	Description      types.String   `tfsdk:"description"`
+	Labels           types.Map      `tfsdk:"labels"`
 	Name             types.String   `tfsdk:"name"`
 	Namespace        types.String   `tfsdk:"namespace"`
 	Uid              types.String   `tfsdk:"uid"`
-	Labels           types.Map      `tfsdk:"labels"`
-	Annotations      types.Map      `tfsdk:"annotations"`
-	Description      types.String   `tfsdk:"description"`
-	VirtualSite      types.List     `tfsdk:"virtual_site"`
+	BfdChoice        types.Object   `tfsdk:"bfd_choice"`
 	MeshChoice       types.Object   `tfsdk:"mesh_choice"`
 	ReFallbackChoice types.Object   `tfsdk:"re_fallback_choice"`
-	BfdChoice        types.Object   `tfsdk:"bfd_choice"`
+	VirtualSite      types.List     `tfsdk:"virtual_site"`
 	Timeouts         timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -127,54 +130,35 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> VirtualSite
-var SiteMeshGroupVirtualSiteObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> BfdChoice
+var SiteMeshGroupBfdChoiceModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
+	"bfd_disabled": types.BoolType,
+	"bfd_enabled": types.ObjectType{
+		AttrTypes: SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BfdEnabled
+var SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap = map[string]attr.Type{
+
+	"multiplier":                     types.Int64Type,
+	"receive_interval_milliseconds":  types.Int64Type,
+	"transmit_interval_milliseconds": types.Int64Type,
 }
 
 // Attribute map for OneOfField --> MeshChoice
 var SiteMeshGroupMeshChoiceModelAttributeMap = map[string]attr.Type{
 
-	"spoke_mesh": types.ObjectType{
-		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap,
-	},
 	"full_mesh": types.ObjectType{
 		AttrTypes: SiteMeshGroupMeshChoiceFullMeshModelAttributeMap,
 	},
 	"hub_mesh": types.ObjectType{
 		AttrTypes: SiteMeshGroupMeshChoiceHubMeshModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> SpokeMesh
-var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
-	"hub_mesh_group": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"tenant":    types.StringType,
-			"namespace": types.StringType,
-			"name":      types.StringType},
+	"spoke_mesh": types.ObjectType{
+		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap,
 	},
-	"spoke_hub_mesh_choice": types.ObjectType{
-		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredPointerField --> HubMeshGroup
-var SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for OneOfField --> SpokeHubMeshChoice
-var SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap = map[string]attr.Type{
-
-	"data_plane_mesh":             types.BoolType,
-	"control_and_data_plane_mesh": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> FullMesh
@@ -188,8 +172,8 @@ var SiteMeshGroupMeshChoiceFullMeshModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> FullMeshChoice
 var SiteMeshGroupMeshChoiceFullMeshFullMeshChoiceModelAttributeMap = map[string]attr.Type{
 
-	"data_plane_mesh":             types.BoolType,
 	"control_and_data_plane_mesh": types.BoolType,
+	"data_plane_mesh":             types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> HubMesh
@@ -203,32 +187,51 @@ var SiteMeshGroupMeshChoiceHubMeshModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> HubFullMeshChoice
 var SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap = map[string]attr.Type{
 
-	"data_plane_mesh":             types.BoolType,
 	"control_and_data_plane_mesh": types.BoolType,
+	"data_plane_mesh":             types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> SpokeMesh
+var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
+	"hub_mesh_group": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+	"spoke_hub_mesh_choice": types.ObjectType{
+		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredPointerField --> HubMeshGroup
+var SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for OneOfField --> SpokeHubMeshChoice
+var SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap = map[string]attr.Type{
+
+	"control_and_data_plane_mesh": types.BoolType,
+	"data_plane_mesh":             types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ReFallback
 var SiteMeshGroupReFallbackModelAttributeMap = map[string]attr.Type{
 
-	"enable_re_fallback":  types.BoolType,
 	"disable_re_fallback": types.BoolType,
+	"enable_re_fallback":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> BfdChoice
-var SiteMeshGroupBfdChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> VirtualSite
+var SiteMeshGroupVirtualSiteObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"bfd_disabled": types.BoolType,
-	"bfd_enabled": types.ObjectType{
-		AttrTypes: SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BfdEnabled
-var SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap = map[string]attr.Type{
-
-	"transmit_interval_milliseconds": types.Int64Type,
-	"receive_interval_milliseconds":  types.Int64Type,
-	"multiplier":                     types.Int64Type,
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 func NewResourceF5XCSiteMeshGroup() resource.Resource {
@@ -242,27 +245,69 @@ func (r *ResourceF5XCSiteMeshGroup) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "SiteMeshGroup resource",
-		Description:         "SiteMeshGroup resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a site_mesh_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of site_mesh_group) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a site_mesh_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of site_mesh_group) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"system"}...),
+				},
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -270,186 +315,110 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
+			"bfd_choice": schema.SingleNestedAttribute{
+				Description:         "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
+				MarkdownDescription: "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
+				Required:            true,
+				Optional:            false,
 				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				Validators: []validator.Object{
+					exactlyoneofvalidator.RequiredExactlyOneOf(
+						"bfd_disabled",
+						"bfd_enabled",
+					),
 				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"virtual_site": schema.ListNestedAttribute{
-				Description:         "virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            false,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+				Attributes: map[string]schema.Attribute{
+					"bfd_disabled": schema.BoolAttribute{
+						Description:         "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						MarkdownDescription: "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"bfd_enabled": schema.SingleNestedAttribute{
+						Description:         "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						MarkdownDescription: "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"multiplier": schema.Int64Attribute{
+								Description:         "Multiplier Specify Number of missed packets to bring session down'",
+								MarkdownDescription: "Multiplier Specify Number of missed packets to bring session down'<br>**Default:** `3`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(3),
+								Validators: []validator.Int64{
+									int64validator.Between(2, 255),
+								},
 							},
-						},
-						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							"receive_interval_milliseconds": schema.Int64Attribute{
+								Description:         "Receive Interval in milliseconds BFD receive interval timer, in milliseconds",
+								MarkdownDescription: "Receive Interval in milliseconds BFD receive interval timer, in milliseconds<br>**Default:** `3333`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(3333),
+								Validators: []validator.Int64{
+									int64validator.Between(300, 60000),
+								},
+							},
+							"transmit_interval_milliseconds": schema.Int64Attribute{
+								Description:         "Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds",
+								MarkdownDescription: "Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds<br>**Default:** `3333`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(3333),
+								Validators: []validator.Int64{
+									int64validator.Between(300, 60000),
+								},
+							},
 						},
 					},
 				},
 			},
 			"mesh_choice": schema.SingleNestedAttribute{
 				Description:         "Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh)",
-				MarkdownDescription: "",
+				MarkdownDescription: "Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh)",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
 				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"full_mesh",
 						"hub_mesh",
 						"spoke_mesh",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"spoke_mesh": schema.SingleNestedAttribute{
-						Description:         "spoke Mesh of Type Spoke",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"hub_mesh_group": schema.SingleNestedAttribute{
-								Description:         "hub_mesh_group 'hub_mesh_group' refers to a Site Mesh Group of 'type' Hub. Spoke sites will connect to all the member sites of Hub Site Mesh Group",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"tenant": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            false,
-										Computed:            true,
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
-										},
-									},
-									"namespace": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-									},
-									"name": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-									},
-								},
-							},
-							"spoke_hub_mesh_choice": schema.SingleNestedAttribute{
-								Description:         "Spoke Hub Mesh Choice Choice of data plane, data plane and control plane mesh",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Object{
-									atmostoneofvalidator.AtMostOneOf(
-										"data_plane_mesh",
-										"control_and_data_plane_mesh",
-									),
-								},
-								Attributes: map[string]schema.Attribute{
-									"data_plane_mesh": schema.BoolAttribute{
-										Description:         "Data Plane Mesh Mesh of data plane tunnels to the hub site/s",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
-										},
-									},
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description:         "Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
-										},
-									},
-								},
-							},
-						},
-					},
 					"full_mesh": schema.SingleNestedAttribute{
 						Description:         "full_mesh Full mesh of tunnels are created between all sites",
-						MarkdownDescription: "",
+						MarkdownDescription: "full_mesh Full mesh of tunnels are created between all sites",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"full_mesh_choice": schema.SingleNestedAttribute{
 								Description:         "Full Mesh Choice Choice of data plane, data plane and control plane full mesh",
-								MarkdownDescription: "",
+								MarkdownDescription: "Full Mesh Choice Choice of data plane, data plane and control plane full mesh",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Validators: []validator.Object{
-									atmostoneofvalidator.AtMostOneOf(
-										"data_plane_mesh",
+									exactlyoneofvalidator.ExactlyOneOf(
 										"control_and_data_plane_mesh",
+										"data_plane_mesh",
 									),
 								},
 								Attributes: map[string]schema.Attribute{
-									"data_plane_mesh": schema.BoolAttribute{
-										Description:         "Data Plane Mesh Full Mesh of data plane tunnels across sites",
-										MarkdownDescription: "",
+									"control_and_data_plane_mesh": schema.BoolAttribute{
+										Description:         "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites",
+										MarkdownDescription: "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -457,9 +426,9 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 											boolvalidator.Equals(true),
 										},
 									},
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description:         "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites",
-										MarkdownDescription: "",
+									"data_plane_mesh": schema.BoolAttribute{
+										Description:         "Data Plane Mesh Full Mesh of data plane tunnels across sites",
+										MarkdownDescription: "Data Plane Mesh Full Mesh of data plane tunnels across sites",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -473,27 +442,27 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 					},
 					"hub_mesh": schema.SingleNestedAttribute{
 						Description:         "hub Mesh of Type Hub",
-						MarkdownDescription: "",
+						MarkdownDescription: "hub Mesh of Type Hub",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"hub_full_mesh_choice": schema.SingleNestedAttribute{
 								Description:         "Hub Full Mesh Choice Choice of data plane, data plane and control plane hub full mesh",
-								MarkdownDescription: "",
+								MarkdownDescription: "Hub Full Mesh Choice Choice of data plane, data plane and control plane hub full mesh",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Validators: []validator.Object{
-									atmostoneofvalidator.AtMostOneOf(
-										"data_plane_mesh",
+									exactlyoneofvalidator.ExactlyOneOf(
 										"control_and_data_plane_mesh",
+										"data_plane_mesh",
 									),
 								},
 								Attributes: map[string]schema.Attribute{
-									"data_plane_mesh": schema.BoolAttribute{
-										Description:         "Data Plane Mesh Hub Full Mesh of data plane tunnels across sites",
-										MarkdownDescription: "",
+									"control_and_data_plane_mesh": schema.BoolAttribute{
+										Description:         "Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites",
+										MarkdownDescription: "Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -501,9 +470,86 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 											boolvalidator.Equals(true),
 										},
 									},
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description:         "Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites",
+									"data_plane_mesh": schema.BoolAttribute{
+										Description:         "Data Plane Mesh Hub Full Mesh of data plane tunnels across sites",
+										MarkdownDescription: "Data Plane Mesh Hub Full Mesh of data plane tunnels across sites",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.Bool{
+											boolvalidator.Equals(true),
+										},
+									},
+								},
+							},
+						},
+					},
+					"spoke_mesh": schema.SingleNestedAttribute{
+						Description:         "spoke Mesh of Type Spoke",
+						MarkdownDescription: "spoke Mesh of Type Spoke",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"hub_mesh_group": schema.SingleNestedAttribute{
+								Description:         "hub_mesh_group 'hub_mesh_group' refers to a Site Mesh Group of 'type' Hub. Spoke sites will connect to all the member sites of Hub Site Mesh Group",
+								MarkdownDescription: "hub_mesh_group 'hub_mesh_group' refers to a Site Mesh Group of 'type' Hub. Spoke sites will connect to all the member sites of Hub Site Mesh Group",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description:         "",
 										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+									},
+									"namespace": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+									},
+									"tenant": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            false,
+										Computed:            true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
+									},
+								},
+							},
+							"spoke_hub_mesh_choice": schema.SingleNestedAttribute{
+								Description:         "Spoke Hub Mesh Choice Choice of data plane, data plane and control plane mesh",
+								MarkdownDescription: "Spoke Hub Mesh Choice Choice of data plane, data plane and control plane mesh",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Object{
+									exactlyoneofvalidator.ExactlyOneOf(
+										"control_and_data_plane_mesh",
+										"data_plane_mesh",
+									),
+								},
+								Attributes: map[string]schema.Attribute{
+									"control_and_data_plane_mesh": schema.BoolAttribute{
+										Description:         "Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s",
+										MarkdownDescription: "Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.Bool{
+											boolvalidator.Equals(true),
+										},
+									},
+									"data_plane_mesh": schema.BoolAttribute{
+										Description:         "Data Plane Mesh Mesh of data plane tunnels to the hub site/s",
+										MarkdownDescription: "Data Plane Mesh Mesh of data plane tunnels to the hub site/s",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -519,20 +565,20 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 			},
 			"re_fallback_choice": schema.SingleNestedAttribute{
 				Description:         "RE Fallback Fallback to RE Connectivity when the SMG fails",
-				MarkdownDescription: "",
+				MarkdownDescription: "RE Fallback Fallback to RE Connectivity when the SMG fails",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"enable_re_fallback",
+					exactlyoneofvalidator.RequiredExactlyOneOf(
 						"disable_re_fallback",
+						"enable_re_fallback",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"enable_re_fallback": schema.BoolAttribute{
-						Description:         "enable Enable RE Fallback connectivity when SMG fails",
-						MarkdownDescription: "",
+					"disable_re_fallback": schema.BoolAttribute{
+						Description:         "disable Disable RE Fallback connectivity when SMG fails",
+						MarkdownDescription: "disable Disable RE Fallback connectivity when SMG fails",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -540,9 +586,9 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 							boolvalidator.Equals(true),
 						},
 					},
-					"disable_re_fallback": schema.BoolAttribute{
-						Description:         "disable Disable RE Fallback connectivity when SMG fails",
-						MarkdownDescription: "",
+					"enable_re_fallback": schema.BoolAttribute{
+						Description:         "enable Enable RE Fallback connectivity when SMG fails",
+						MarkdownDescription: "enable Enable RE Fallback connectivity when SMG fails",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -552,68 +598,39 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 					},
 				},
 			},
-			"bfd_choice": schema.SingleNestedAttribute{
-				Description:         "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
+			"virtual_site": schema.ListNestedAttribute{
+				Description:         "virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh.",
+				MarkdownDescription: "virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh.",
+				Required:            false,
+				Optional:            true,
 				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"bfd_disabled",
-						"bfd_enabled",
-					),
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
 				},
-				Attributes: map[string]schema.Attribute{
-					"bfd_disabled": schema.BoolAttribute{
-						Description:         "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
 						},
-					},
-					"bfd_enabled": schema.SingleNestedAttribute{
-						Description:         "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"transmit_interval_milliseconds": schema.Int64Attribute{
-								Description:         "Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds",
-								MarkdownDescription: "<br>**Default:** `3333`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(3333),
-								Validators: []validator.Int64{
-									int64validator.Between(300, 60000),
-								},
-							},
-							"receive_interval_milliseconds": schema.Int64Attribute{
-								Description:         "Receive Interval in milliseconds BFD receive interval timer, in milliseconds",
-								MarkdownDescription: "<br>**Default:** `3333`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(3333),
-								Validators: []validator.Int64{
-									int64validator.Between(300, 60000),
-								},
-							},
-							"multiplier": schema.Int64Attribute{
-								Description:         "Multiplier Specify Number of missed packets to bring session down'",
-								MarkdownDescription: "<br>**Default:** `3`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(3),
-								Validators: []validator.Int64{
-									int64validator.Between(2, 255),
-								},
+						"namespace": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+						},
+						"tenant": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            false,
+							Optional:            false,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
 					},
@@ -621,7 +638,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -721,23 +738,13 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -748,6 +755,237 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
+	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
+		bfdChoiceModel := SiteMeshGroupBfdChoice{}
+		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
+		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
+			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_BfdDisabled{}
+			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
+			spec.BfdChoice = bfdDisabledSpecBool
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
+		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
+			var siteMeshGroupBfdEnabledModel SiteMeshGroupBfdEnabled
+			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupBfdEnabledModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_BfdEnabled{}
+			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
+			spec.BfdChoice = bfdEnabledOneOfSpec
+
+			// resource modelToSpecNested RequiredUintField --> Multiplier
+			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupBfdEnabledModel.Multiplier.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
+
+		}
+
+	}
+
+	// resource modelToSpecRoot OneOfField --> MeshChoice
+	if !data.MeshChoice.IsNull() && !data.MeshChoice.IsUnknown() {
+		meshChoiceModel := SiteMeshGroupMeshChoice{}
+		response.Diagnostics.Append(data.MeshChoice.As(ctx, &meshChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> FullMesh
+		if !meshChoiceModel.FullMesh.IsNull() && !meshChoiceModel.FullMesh.IsUnknown() {
+			var siteMeshGroupFullMeshModel SiteMeshGroupFullMesh
+			response.Diagnostics.Append(meshChoiceModel.FullMesh.As(ctx, &siteMeshGroupFullMeshModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			fullMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_FullMesh{}
+			fullMeshOneOfSpec.FullMesh = &ves_io_schema_site_mesh_group.FullMeshGroupType{}
+			spec.MeshChoice = fullMeshOneOfSpec
+
+			// resource modelToSpecNested OneOfField --> FullMeshChoice
+			if !siteMeshGroupFullMeshModel.FullMeshChoice.IsNull() && !siteMeshGroupFullMeshModel.FullMeshChoice.IsUnknown() {
+				fullMeshFullMeshChoiceModel := SiteMeshGroupFullMeshChoice{}
+				response.Diagnostics.Append(siteMeshGroupFullMeshModel.FullMeshChoice.As(ctx, &fullMeshFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+				if !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
+					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh{}
+					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
+					fullMeshOneOfSpec.FullMesh.FullMeshChoice = controlAndDataPlaneMeshSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
+				if !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
+					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh{}
+					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
+					fullMeshOneOfSpec.FullMesh.FullMeshChoice = dataPlaneMeshSpecBool
+				}
+
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> HubMesh
+		if !meshChoiceModel.HubMesh.IsNull() && !meshChoiceModel.HubMesh.IsUnknown() {
+			var siteMeshGroupHubMeshModel SiteMeshGroupHubMesh
+			response.Diagnostics.Append(meshChoiceModel.HubMesh.As(ctx, &siteMeshGroupHubMeshModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			hubMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_HubMesh{}
+			hubMeshOneOfSpec.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
+			spec.MeshChoice = hubMeshOneOfSpec
+
+			// resource modelToSpecNested OneOfField --> HubFullMeshChoice
+			if !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsNull() && !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsUnknown() {
+				hubMeshHubFullMeshChoiceModel := SiteMeshGroupHubFullMeshChoice{}
+				response.Diagnostics.Append(siteMeshGroupHubMeshModel.HubFullMeshChoice.As(ctx, &hubMeshHubFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+				if !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
+					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh{}
+					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
+					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = controlAndDataPlaneMeshSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
+				if !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
+					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{}
+					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
+					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = dataPlaneMeshSpecBool
+				}
+
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> SpokeMesh
+		if !meshChoiceModel.SpokeMesh.IsNull() && !meshChoiceModel.SpokeMesh.IsUnknown() {
+			var siteMeshGroupSpokeMeshModel SiteMeshGroupSpokeMesh
+			response.Diagnostics.Append(meshChoiceModel.SpokeMesh.As(ctx, &siteMeshGroupSpokeMeshModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			spokeMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_SpokeMesh{}
+			spokeMeshOneOfSpec.SpokeMesh = &ves_io_schema_site_mesh_group.SpokeMeshGroupType{}
+			spec.MeshChoice = spokeMeshOneOfSpec
+
+			// resource modelToSpecNested RequiredPointerField --> HubMeshGroup
+			if !siteMeshGroupSpokeMeshModel.HubMeshGroup.IsNull() && !siteMeshGroupSpokeMeshModel.HubMeshGroup.IsUnknown() {
+				var hubMeshGroupModel ObjectRefTypeModel
+				response.Diagnostics.Append(siteMeshGroupSpokeMeshModel.HubMeshGroup.As(ctx, &hubMeshGroupModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				hubMeshGroupSpec := &ves_io_schema_views.ObjectRefType{}
+				spokeMeshOneOfSpec.SpokeMesh.HubMeshGroup = hubMeshGroupSpec
+
+				// resource modelToSpecNested RequiredStringField --> Name
+				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
+					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
+					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
+				}
+
+			}
+
+			// resource modelToSpecNested OneOfField --> SpokeHubMeshChoice
+			if !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsNull() && !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsUnknown() {
+				spokeMeshSpokeHubMeshChoiceModel := SiteMeshGroupSpokeHubMeshChoice{}
+				response.Diagnostics.Append(siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.As(ctx, &spokeMeshSpokeHubMeshChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+				if !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
+					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh{}
+					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
+					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = controlAndDataPlaneMeshSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
+				if !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsUnknown() {
+					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{}
+					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
+					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = dataPlaneMeshSpecBool
+				}
+
+			}
+
+		}
+
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> ReFallback
+	if !data.ReFallbackChoice.IsNull() && !data.ReFallbackChoice.IsUnknown() {
+		reFallbackChoiceModel := SiteMeshGroupReFallbackChoice{}
+		response.Diagnostics.Append(data.ReFallbackChoice.As(ctx, &reFallbackChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> DisableReFallback
+		if !reFallbackChoiceModel.DisableReFallback.IsNull() && !reFallbackChoiceModel.DisableReFallback.IsUnknown() {
+			disableReFallbackSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_DisableReFallback{}
+			disableReFallbackSpecBool.DisableReFallback = &ves_io_schema.Empty{}
+			spec.ReFallback = disableReFallbackSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> EnableReFallback
+		if !reFallbackChoiceModel.EnableReFallback.IsNull() && !reFallbackChoiceModel.EnableReFallback.IsUnknown() {
+			enableReFallbackSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_EnableReFallback{}
+			enableReFallbackSpecBool.EnableReFallback = &ves_io_schema.Empty{}
+			spec.ReFallback = enableReFallbackSpecBool
+		}
+
 	}
 
 	{
@@ -765,14 +1003,14 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 			for i, virtualSiteElement := range virtualSiteElements {
 				virtualSiteSpec[i] = &ves_io_schema.ObjectRefType{}
 
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !virtualSiteElement.Namespace.IsNull() && !virtualSiteElement.Namespace.IsUnknown() {
-					virtualSiteSpec[i].Namespace = string(virtualSiteElement.Namespace.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Name
 				if !virtualSiteElement.Name.IsNull() && !virtualSiteElement.Name.IsUnknown() {
 					virtualSiteSpec[i].Name = string(virtualSiteElement.Name.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !virtualSiteElement.Namespace.IsNull() && !virtualSiteElement.Namespace.IsUnknown() {
+					virtualSiteSpec[i].Namespace = string(virtualSiteElement.Namespace.ValueString())
 				}
 
 			}
@@ -781,218 +1019,18 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot OneOfField --> MeshChoice
-	if !data.MeshChoice.IsNull() && !data.MeshChoice.IsUnknown() {
-		meshChoiceModel := SiteMeshGroupGlobalSpecTypeMeshChoice{}
-		response.Diagnostics.Append(data.MeshChoice.As(ctx, &meshChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> SpokeMesh
-		if !meshChoiceModel.SpokeMesh.IsNull() && !meshChoiceModel.SpokeMesh.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeSpokeMeshModel SiteMeshGroupGlobalSpecTypeSpokeMesh
-			response.Diagnostics.Append(meshChoiceModel.SpokeMesh.As(ctx, &siteMeshGroupGlobalSpecTypeSpokeMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			spokeMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_SpokeMesh{}
-			spokeMeshOneOfSpec.SpokeMesh = &ves_io_schema_site_mesh_group.SpokeMeshGroupType{}
-			spec.MeshChoice = spokeMeshOneOfSpec
-
-			// resource modelToSpecNested RequiredPointerField --> HubMeshGroup
-			if !siteMeshGroupGlobalSpecTypeSpokeMeshModel.HubMeshGroup.IsNull() && !siteMeshGroupGlobalSpecTypeSpokeMeshModel.HubMeshGroup.IsUnknown() {
-				var hubMeshGroupModel ObjectRefTypeModel
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeSpokeMeshModel.HubMeshGroup.As(ctx, &hubMeshGroupModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				hubMeshGroupSpec := &ves_io_schema_views.ObjectRefType{}
-				spokeMeshOneOfSpec.SpokeMesh.HubMeshGroup = hubMeshGroupSpec
-
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
-					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
-				}
-
-				// resource modelToSpecNested RequiredStringField --> Name
-				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
-					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
-				}
-
-			}
-
-			// resource modelToSpecNested OneOfField --> SpokeHubMeshChoice
-			if !siteMeshGroupGlobalSpecTypeSpokeMeshModel.SpokeHubMeshChoice.IsNull() && !siteMeshGroupGlobalSpecTypeSpokeMeshModel.SpokeHubMeshChoice.IsUnknown() {
-				spokeMeshSpokeHubMeshChoiceModel := SiteMeshGroupSpokeMeshGroupTypeSpokeHubMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeSpokeMeshModel.SpokeHubMeshChoice.As(ctx, &spokeMeshSpokeHubMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = dataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> FullMesh
-		if !meshChoiceModel.FullMesh.IsNull() && !meshChoiceModel.FullMesh.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeFullMeshModel SiteMeshGroupGlobalSpecTypeFullMesh
-			response.Diagnostics.Append(meshChoiceModel.FullMesh.As(ctx, &siteMeshGroupGlobalSpecTypeFullMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			fullMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_FullMesh{}
-			fullMeshOneOfSpec.FullMesh = &ves_io_schema_site_mesh_group.FullMeshGroupType{}
-			spec.MeshChoice = fullMeshOneOfSpec
-
-			// resource modelToSpecNested OneOfField --> FullMeshChoice
-			if !siteMeshGroupGlobalSpecTypeFullMeshModel.FullMeshChoice.IsNull() && !siteMeshGroupGlobalSpecTypeFullMeshModel.FullMeshChoice.IsUnknown() {
-				fullMeshFullMeshChoiceModel := SiteMeshGroupFullMeshGroupTypeFullMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeFullMeshModel.FullMeshChoice.As(ctx, &fullMeshFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					fullMeshOneOfSpec.FullMesh.FullMeshChoice = dataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					fullMeshOneOfSpec.FullMesh.FullMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> HubMesh
-		if !meshChoiceModel.HubMesh.IsNull() && !meshChoiceModel.HubMesh.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeHubMeshModel SiteMeshGroupGlobalSpecTypeHubMesh
-			response.Diagnostics.Append(meshChoiceModel.HubMesh.As(ctx, &siteMeshGroupGlobalSpecTypeHubMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			hubMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_HubMesh{}
-			hubMeshOneOfSpec.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
-			spec.MeshChoice = hubMeshOneOfSpec
-
-			// resource modelToSpecNested OneOfField --> HubFullMeshChoice
-			if !siteMeshGroupGlobalSpecTypeHubMeshModel.HubFullMeshChoice.IsNull() && !siteMeshGroupGlobalSpecTypeHubMeshModel.HubFullMeshChoice.IsUnknown() {
-				hubMeshHubFullMeshChoiceModel := SiteMeshGroupHubFullMeshGroupTypeHubFullMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeHubMeshModel.HubFullMeshChoice.As(ctx, &hubMeshHubFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = dataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-			}
-
-		}
-
-	}
-
-	// resource modelToSpecRoot RequiredOneOfField --> ReFallback
-	if !data.ReFallbackChoice.IsNull() && !data.ReFallbackChoice.IsUnknown() {
-		reFallbackChoiceModel := SiteMeshGroupGlobalSpecTypeReFallbackChoice{}
-		response.Diagnostics.Append(data.ReFallbackChoice.As(ctx, &reFallbackChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> EnableReFallback
-		if !reFallbackChoiceModel.EnableReFallback.IsNull() && !reFallbackChoiceModel.EnableReFallback.IsUnknown() {
-			enableReFallbackSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_EnableReFallback{}
-			enableReFallbackSpecBool.EnableReFallback = &ves_io_schema.Empty{}
-			spec.ReFallback = enableReFallbackSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> DisableReFallback
-		if !reFallbackChoiceModel.DisableReFallback.IsNull() && !reFallbackChoiceModel.DisableReFallback.IsUnknown() {
-			disableReFallbackSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_DisableReFallback{}
-			disableReFallbackSpecBool.DisableReFallback = &ves_io_schema.Empty{}
-			spec.ReFallback = disableReFallbackSpecBool
-		}
-
-	}
-
-	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
-	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
-		bfdChoiceModel := SiteMeshGroupGlobalSpecTypeBfdChoice{}
-		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
-		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
-			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_BfdDisabled{}
-			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
-			spec.BfdChoice = bfdDisabledSpecBool
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
-		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeBfdEnabledModel SiteMeshGroupGlobalSpecTypeBfdEnabled
-			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupGlobalSpecTypeBfdEnabledModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_BfdEnabled{}
-			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
-			spec.BfdChoice = bfdEnabledOneOfSpec
-
-			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> Multiplier
-			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.Multiplier.ValueInt64()))
-
-		}
-
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_site_mesh_group.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -1021,6 +1059,101 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1030,139 +1163,78 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
+	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetBfdChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		bfdChoiceChoices := specData.GetBfdChoice()
+
+		// The model struct that will be populated by the nested template.
+		var bfdChoiceChoicesModel = &SiteMeshGroupBfdChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
+		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
+
+		if isBfdDisabled {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
+		} else {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
 		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
+		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
+		// GlobalSpecType
+		// false
+		{
+			bfdEnabledOptionsWrapper, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
+			bfdEnabledAttributeMap := make(map[string]attr.Value)
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+			if isBfdEnabled && bfdEnabledOptionsWrapper != nil && bfdEnabledOptionsWrapper.BfdEnabled != nil {
+				bfdEnabledElement := bfdEnabledOptionsWrapper.BfdEnabled
 
-	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
-	if len(specData.VirtualSite) > 0 {
-		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.VirtualSite))
+				// resource specToModelNested RequiredUintField --> Multiplier
+				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledElement.GetMultiplier()))
 
-		for _, virtualSiteElement := range specData.VirtualSite {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
+				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetReceiveIntervalMilliseconds()))
 
-			// resource specToModelNested StringField --> Tenant
-			if virtualSiteElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
+				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetTransmitIntervalMilliseconds()))
+
+				bfdEnabledObj, bfdEnabledObjDiags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
+				response.Diagnostics.Append(bfdEnabledObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
 			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
+				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			bfdChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupBfdChoiceModelAttributeMap,
+				bfdChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
 			}
 
-			// resource specToModelNested RequiredStringField --> Namespace
-			if virtualSiteElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if virtualSiteElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
+			// Assign the final object to the root data model.
+			data.BfdChoice = bfdChoiceObj
 		}
-
-		virtualSiteList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
-			virtualSiteElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.VirtualSite = virtualSiteList
 	} else {
-		var virtualSiteObjectType = basetypes.ObjectType{
-			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
-		}
-		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
-		data.VirtualSite = nullVirtualSiteList
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot OneOfField --> MeshChoice
@@ -1174,154 +1246,29 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 		meshChoiceChoices := specData.GetMeshChoice()
 
 		// The model struct that will be populated by the nested template.
-		var meshChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeMeshChoice{}
+		var meshChoiceChoicesModel = &SiteMeshGroupMeshChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
-		// GlobalSpecType
-		// false
-		{
-			spokeMeshOptions, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
-			spokeMeshAttributeMap := make(map[string]attr.Value)
-
-			if isSpokeMesh && spokeMeshOptions != nil {
-
-				// resource specToModelNested RequiredPointerField --> HubMeshGroup
-				if spokeMeshOptions.SpokeMesh.GetHubMeshGroup() != nil {
-					// Create the nested Go struct
-					objectRefTypeModelModel := &ObjectRefTypeModel{}
-					hubMeshGroupElement := spokeMeshOptions.SpokeMesh.GetHubMeshGroup()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested StringField --> Tenant
-					if hubMeshGroupElement.GetTenant() != "" {
-						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Tenant = types.StringNull()
-					}
-
-					// resource specToModelNested RequiredStringField --> Namespace
-					if hubMeshGroupElement.GetNamespace() != "" {
-						objectRefTypeModelModel.Namespace = types.StringValue(hubMeshGroupElement.GetNamespace())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Namespace = types.StringNull()
-					}
-
-					// resource specToModelNested RequiredStringField --> Name
-					if hubMeshGroupElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					spokeMeshAttributeMap["hub_mesh_group"] = objectRefTypeModelModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
-				}
-
-				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
-				if spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					spokeMeshspokeHubMeshChoiceChoices := spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
-				}
-
-				spokeMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				meshChoiceChoicesModel.SpokeMesh = spokeMeshObj
-			} else {
-				meshChoiceChoicesModel.SpokeMesh = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap)
-			}
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> FullMesh
 		// GlobalSpecType
 		// false
 		{
-			fullMeshOptions, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
+			fullMeshOptionsWrapper, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
 			fullMeshAttributeMap := make(map[string]attr.Value)
 
-			if isFullMesh && fullMeshOptions != nil {
+			if isFullMesh && fullMeshOptionsWrapper != nil && fullMeshOptionsWrapper.FullMesh != nil {
+				fullMeshElement := fullMeshOptionsWrapper.FullMesh
 
 				// resource specToModelNested OneOfField --> FullMeshChoice
-				if fullMeshOptions.FullMesh.GetFullMeshChoice() != nil {
+				if fullMeshElement.GetFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					fullMeshfullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					fullMeshfullMeshChoiceChoices := fullMeshOptions.FullMesh.GetFullMeshChoice()
+					fullMeshfullMeshChoiceChoices := fullMeshElement.GetFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh)
@@ -1330,6 +1277,15 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -1351,8 +1307,8 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 					fullMeshAttributeMap["full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceFullMeshFullMeshChoiceModelAttributeMap)
 				}
 
-				fullMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				fullMeshObj, fullMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
+				response.Diagnostics.Append(fullMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1366,29 +1322,21 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 		// GlobalSpecType
 		// false
 		{
-			hubMeshOptions, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
+			hubMeshOptionsWrapper, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
 			hubMeshAttributeMap := make(map[string]attr.Value)
 
-			if isHubMesh && hubMeshOptions != nil {
+			if isHubMesh && hubMeshOptionsWrapper != nil && hubMeshOptionsWrapper.HubMesh != nil {
+				hubMeshElement := hubMeshOptionsWrapper.HubMesh
 
 				// resource specToModelNested OneOfField --> HubFullMeshChoice
-				if hubMeshOptions.HubMesh.GetHubFullMeshChoice() != nil {
+				if hubMeshElement.GetHubFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					hubMeshhubFullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					hubMeshhubFullMeshChoiceChoices := hubMeshOptions.HubMesh.GetHubFullMeshChoice()
+					hubMeshhubFullMeshChoiceChoices := hubMeshElement.GetHubFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh)
@@ -1397,6 +1345,15 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -1418,8 +1375,8 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 					hubMeshAttributeMap["hub_full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap)
 				}
 
-				hubMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				hubMeshObj, hubMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
+				response.Diagnostics.Append(hubMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1429,19 +1386,139 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		meshChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupMeshChoiceModelAttributeMap,
-			meshChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
+		// GlobalSpecType
+		// false
+		{
+			spokeMeshOptionsWrapper, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
+			spokeMeshAttributeMap := make(map[string]attr.Value)
+
+			if isSpokeMesh && spokeMeshOptionsWrapper != nil && spokeMeshOptionsWrapper.SpokeMesh != nil {
+				spokeMeshElement := spokeMeshOptionsWrapper.SpokeMesh
+
+				// resource specToModelNested RequiredPointerField --> HubMeshGroup
+				if spokeMeshElement.GetHubMeshGroup() != nil {
+					// Create the nested Go struct
+					objectRefTypeModelModel := &ObjectRefTypeModel{}
+					hubMeshGroupElement := spokeMeshElement.GetHubMeshGroup()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredStringField --> Name
+					if hubMeshGroupElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
+					}
+
+					// resource specToModelNested RequiredStringField --> Namespace
+					if hubMeshGroupElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(hubMeshGroupElement.GetNamespace())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// resource specToModelNested StringField --> Tenant
+					if hubMeshGroupElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
+					response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					spokeMeshAttributeMap["hub_mesh_group"] = objectRefTypeModelModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
+				}
+
+				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
+				if spokeMeshElement.GetSpokeHubMeshChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					spokeMeshspokeHubMeshChoiceChoices := spokeMeshElement.GetSpokeHubMeshChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
+
+					if isControlAndDataPlaneMesh {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
+						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
+				}
+
+				spokeMeshObj, spokeMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
+				response.Diagnostics.Append(spokeMeshObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				meshChoiceChoicesModel.SpokeMesh = spokeMeshObj
+			} else {
+				meshChoiceChoicesModel.SpokeMesh = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.MeshChoice = meshChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			meshChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupMeshChoiceModelAttributeMap,
+				meshChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.MeshChoice = meshChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.MeshChoice = types.ObjectNull(SiteMeshGroupMeshChoiceModelAttributeMap)
@@ -1456,18 +1533,9 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 		reFallbackChoiceChoices := specData.GetReFallback()
 
 		// The model struct that will be populated by the nested template.
-		var reFallbackChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeReFallbackChoice{}
+		var reFallbackChoiceChoicesModel = &SiteMeshGroupReFallbackChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> EnableReFallback
-		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
-
-		if isEnableReFallback {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
-		} else {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> DisableReFallback
 		_, isDisableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_DisableReFallback)
@@ -1478,91 +1546,97 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 			reFallbackChoiceChoicesModel.DisableReFallback = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reFallbackChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupReFallbackModelAttributeMap,
-			reFallbackChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> EnableReFallback
+		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
+
+		if isEnableReFallback {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
+		} else {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.ReFallbackChoice = reFallbackChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			reFallbackChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupReFallbackModelAttributeMap,
+				reFallbackChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ReFallbackChoice = reFallbackChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetBfdChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		bfdChoiceChoices := specData.GetBfdChoice()
+	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
+	if len(specData.GetVirtualSite()) > 0 {
+		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.GetVirtualSite()))
+		for _, virtualSiteElement := range specData.GetVirtualSite() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-		// The model struct that will be populated by the nested template.
-		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
-		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
-
-		if isBfdDisabled {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
-		} else {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
-		// GlobalSpecType
-		// false
-		{
-			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
-			bfdEnabledAttributeMap := make(map[string]attr.Value)
-
-			if isBfdEnabled && bfdEnabledOptions != nil {
-
-				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
-				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
-				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> Multiplier
-				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
-
-				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			// resource specToModelNested RequiredStringField --> Name
+			if virtualSiteElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
 			} else {
-				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if virtualSiteElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if virtualSiteElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bfdChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupBfdChoiceModelAttributeMap,
-			bfdChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			virtualSiteList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+				virtualSiteElements,
+			)
 
-		// Assign the final object to the root data model.
-		data.BfdChoice = bfdChoiceObj
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.VirtualSite = virtualSiteList
+		}
 	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
+		var virtualSiteObjectType = basetypes.ObjectType{
+			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+		}
+		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
+		var priorValVirtualSite types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("virtual_site"), &priorValVirtualSite)
+		if !priorValVirtualSite.IsNull() && !priorValVirtualSite.IsUnknown() {
+			data.VirtualSite = priorValVirtualSite
+		} else {
+			data.VirtualSite = nullVirtualSiteList
+		}
+
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1628,6 +1702,102 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1637,155 +1807,78 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
+	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetBfdChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		bfdChoiceChoices := specData.GetBfdChoice()
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
+		// The model struct that will be populated by the nested template.
+		var bfdChoiceChoicesModel = &SiteMeshGroupBfdChoice{}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+		// Recursively call the nested template to process the oneof choices.
 
-	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
-	if len(specData.VirtualSite) > 0 {
-		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.VirtualSite))
+		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
+		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
 
-		for _, virtualSiteElement := range specData.VirtualSite {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+		if isBfdDisabled {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
+		} else {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
+		}
 
-			// resource specToModelNested StringField --> Tenant
-			if virtualSiteElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
+		// <no value>
+		// false
+		{
+			bfdEnabledOptionsWrapper, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
+			bfdEnabledAttributeMap := make(map[string]attr.Value)
+
+			if isBfdEnabled && bfdEnabledOptionsWrapper != nil && bfdEnabledOptionsWrapper.BfdEnabled != nil {
+				bfdEnabledElement := bfdEnabledOptionsWrapper.BfdEnabled
+
+				// resource specToModelNested RequiredUintField --> Multiplier
+				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledElement.GetMultiplier()))
+
+				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
+				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetReceiveIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
+				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetTransmitIntervalMilliseconds()))
+
+				bfdEnabledObj, bfdEnabledObjDiags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
+				response.Diagnostics.Append(bfdEnabledObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
 			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
+				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
 			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if virtualSiteElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if virtualSiteElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
 		}
 
-		virtualSiteList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
-			virtualSiteElements,
-		)
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			bfdChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupBfdChoiceModelAttributeMap,
+				bfdChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			// Assign the final object to the root data model.
+			data.BfdChoice = bfdChoiceObj
 		}
-
-		data.VirtualSite = virtualSiteList
 	} else {
-		var virtualSiteObjectType = basetypes.ObjectType{
-			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
-		}
-		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
-		data.VirtualSite = nullVirtualSiteList
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot OneOfField --> MeshChoice
@@ -1797,154 +1890,29 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 		meshChoiceChoices := specData.GetMeshChoice()
 
 		// The model struct that will be populated by the nested template.
-		var meshChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeMeshChoice{}
+		var meshChoiceChoicesModel = &SiteMeshGroupMeshChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
-		// <no value>
-		// false
-		{
-			spokeMeshOptions, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
-			spokeMeshAttributeMap := make(map[string]attr.Value)
-
-			if isSpokeMesh && spokeMeshOptions != nil {
-
-				// resource specToModelNested RequiredPointerField --> HubMeshGroup
-				if spokeMeshOptions.SpokeMesh.GetHubMeshGroup() != nil {
-					// Create the nested Go struct
-					objectRefTypeModelModel := &ObjectRefTypeModel{}
-					hubMeshGroupElement := spokeMeshOptions.SpokeMesh.GetHubMeshGroup()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested StringField --> Tenant
-					if hubMeshGroupElement.GetTenant() != "" {
-						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Tenant = types.StringNull()
-					}
-
-					// resource specToModelNested RequiredStringField --> Namespace
-					if hubMeshGroupElement.GetNamespace() != "" {
-						objectRefTypeModelModel.Namespace = types.StringValue(hubMeshGroupElement.GetNamespace())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Namespace = types.StringNull()
-					}
-
-					// resource specToModelNested RequiredStringField --> Name
-					if hubMeshGroupElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					spokeMeshAttributeMap["hub_mesh_group"] = objectRefTypeModelModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
-				}
-
-				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
-				if spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					spokeMeshspokeHubMeshChoiceChoices := spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
-				}
-
-				spokeMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				meshChoiceChoicesModel.SpokeMesh = spokeMeshObj
-			} else {
-				meshChoiceChoicesModel.SpokeMesh = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap)
-			}
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> FullMesh
 		// <no value>
 		// false
 		{
-			fullMeshOptions, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
+			fullMeshOptionsWrapper, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
 			fullMeshAttributeMap := make(map[string]attr.Value)
 
-			if isFullMesh && fullMeshOptions != nil {
+			if isFullMesh && fullMeshOptionsWrapper != nil && fullMeshOptionsWrapper.FullMesh != nil {
+				fullMeshElement := fullMeshOptionsWrapper.FullMesh
 
 				// resource specToModelNested OneOfField --> FullMeshChoice
-				if fullMeshOptions.FullMesh.GetFullMeshChoice() != nil {
+				if fullMeshElement.GetFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					fullMeshfullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					fullMeshfullMeshChoiceChoices := fullMeshOptions.FullMesh.GetFullMeshChoice()
+					fullMeshfullMeshChoiceChoices := fullMeshElement.GetFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh)
@@ -1953,6 +1921,15 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -1974,8 +1951,8 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 					fullMeshAttributeMap["full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceFullMeshFullMeshChoiceModelAttributeMap)
 				}
 
-				fullMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				fullMeshObj, fullMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
+				response.Diagnostics.Append(fullMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1989,29 +1966,21 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 		// <no value>
 		// false
 		{
-			hubMeshOptions, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
+			hubMeshOptionsWrapper, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
 			hubMeshAttributeMap := make(map[string]attr.Value)
 
-			if isHubMesh && hubMeshOptions != nil {
+			if isHubMesh && hubMeshOptionsWrapper != nil && hubMeshOptionsWrapper.HubMesh != nil {
+				hubMeshElement := hubMeshOptionsWrapper.HubMesh
 
 				// resource specToModelNested OneOfField --> HubFullMeshChoice
-				if hubMeshOptions.HubMesh.GetHubFullMeshChoice() != nil {
+				if hubMeshElement.GetHubFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					hubMeshhubFullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					hubMeshhubFullMeshChoiceChoices := hubMeshOptions.HubMesh.GetHubFullMeshChoice()
+					hubMeshhubFullMeshChoiceChoices := hubMeshElement.GetHubFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh)
@@ -2020,6 +1989,15 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -2041,8 +2019,8 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 					hubMeshAttributeMap["hub_full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap)
 				}
 
-				hubMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				hubMeshObj, hubMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
+				response.Diagnostics.Append(hubMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2052,19 +2030,139 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		meshChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupMeshChoiceModelAttributeMap,
-			meshChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
+		// <no value>
+		// false
+		{
+			spokeMeshOptionsWrapper, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
+			spokeMeshAttributeMap := make(map[string]attr.Value)
+
+			if isSpokeMesh && spokeMeshOptionsWrapper != nil && spokeMeshOptionsWrapper.SpokeMesh != nil {
+				spokeMeshElement := spokeMeshOptionsWrapper.SpokeMesh
+
+				// resource specToModelNested RequiredPointerField --> HubMeshGroup
+				if spokeMeshElement.GetHubMeshGroup() != nil {
+					// Create the nested Go struct
+					objectRefTypeModelModel := &ObjectRefTypeModel{}
+					hubMeshGroupElement := spokeMeshElement.GetHubMeshGroup()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredStringField --> Name
+					if hubMeshGroupElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
+					}
+
+					// resource specToModelNested RequiredStringField --> Namespace
+					if hubMeshGroupElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(hubMeshGroupElement.GetNamespace())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// resource specToModelNested StringField --> Tenant
+					if hubMeshGroupElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
+					response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					spokeMeshAttributeMap["hub_mesh_group"] = objectRefTypeModelModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
+				}
+
+				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
+				if spokeMeshElement.GetSpokeHubMeshChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					spokeMeshspokeHubMeshChoiceChoices := spokeMeshElement.GetSpokeHubMeshChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
+
+					if isControlAndDataPlaneMesh {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
+						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
+				}
+
+				spokeMeshObj, spokeMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
+				response.Diagnostics.Append(spokeMeshObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				meshChoiceChoicesModel.SpokeMesh = spokeMeshObj
+			} else {
+				meshChoiceChoicesModel.SpokeMesh = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.MeshChoice = meshChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			meshChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupMeshChoiceModelAttributeMap,
+				meshChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.MeshChoice = meshChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.MeshChoice = types.ObjectNull(SiteMeshGroupMeshChoiceModelAttributeMap)
@@ -2079,18 +2177,9 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 		reFallbackChoiceChoices := specData.GetReFallback()
 
 		// The model struct that will be populated by the nested template.
-		var reFallbackChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeReFallbackChoice{}
+		var reFallbackChoiceChoicesModel = &SiteMeshGroupReFallbackChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> EnableReFallback
-		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
-
-		if isEnableReFallback {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
-		} else {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> DisableReFallback
 		_, isDisableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_DisableReFallback)
@@ -2101,91 +2190,97 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 			reFallbackChoiceChoicesModel.DisableReFallback = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reFallbackChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupReFallbackModelAttributeMap,
-			reFallbackChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> EnableReFallback
+		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
+
+		if isEnableReFallback {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
+		} else {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.ReFallbackChoice = reFallbackChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			reFallbackChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupReFallbackModelAttributeMap,
+				reFallbackChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ReFallbackChoice = reFallbackChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetBfdChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		bfdChoiceChoices := specData.GetBfdChoice()
+	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
+	if len(specData.GetVirtualSite()) > 0 {
+		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.GetVirtualSite()))
+		for _, virtualSiteElement := range specData.GetVirtualSite() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-		// The model struct that will be populated by the nested template.
-		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
-		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
-
-		if isBfdDisabled {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
-		} else {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
-		// <no value>
-		// false
-		{
-			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
-			bfdEnabledAttributeMap := make(map[string]attr.Value)
-
-			if isBfdEnabled && bfdEnabledOptions != nil {
-
-				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
-				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
-				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> Multiplier
-				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
-
-				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			// resource specToModelNested RequiredStringField --> Name
+			if virtualSiteElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
 			} else {
-				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if virtualSiteElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if virtualSiteElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bfdChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupBfdChoiceModelAttributeMap,
-			bfdChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			virtualSiteList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+				virtualSiteElements,
+			)
 
-		// Assign the final object to the root data model.
-		data.BfdChoice = bfdChoiceObj
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.VirtualSite = virtualSiteList
+		}
 	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
+		var virtualSiteObjectType = basetypes.ObjectType{
+			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+		}
+		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
+		var priorValVirtualSite types.List
+		_ = request.State.GetAttribute(ctx, path.Root("virtual_site"), &priorValVirtualSite)
+		if !priorValVirtualSite.IsNull() && !priorValVirtualSite.IsUnknown() {
+			data.VirtualSite = priorValVirtualSite
+		} else {
+			data.VirtualSite = nullVirtualSiteList
+		}
+
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2205,6 +2300,25 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCSiteMeshGroupModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -2235,23 +2349,13 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -2262,6 +2366,237 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
+	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
+		bfdChoiceModel := SiteMeshGroupBfdChoice{}
+		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
+		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
+			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdDisabled{}
+			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
+			spec.BfdChoice = bfdDisabledSpecBool
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
+		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
+			var siteMeshGroupBfdEnabledModel SiteMeshGroupBfdEnabled
+			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupBfdEnabledModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdEnabled{}
+			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
+			spec.BfdChoice = bfdEnabledOneOfSpec
+
+			// resource modelToSpecNested RequiredUintField --> Multiplier
+			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupBfdEnabledModel.Multiplier.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
+
+		}
+
+	}
+
+	// resource modelToSpecRoot OneOfField --> MeshChoice
+	if !data.MeshChoice.IsNull() && !data.MeshChoice.IsUnknown() {
+		meshChoiceModel := SiteMeshGroupMeshChoice{}
+		response.Diagnostics.Append(data.MeshChoice.As(ctx, &meshChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> FullMesh
+		if !meshChoiceModel.FullMesh.IsNull() && !meshChoiceModel.FullMesh.IsUnknown() {
+			var siteMeshGroupFullMeshModel SiteMeshGroupFullMesh
+			response.Diagnostics.Append(meshChoiceModel.FullMesh.As(ctx, &siteMeshGroupFullMeshModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			fullMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_FullMesh{}
+			fullMeshOneOfSpec.FullMesh = &ves_io_schema_site_mesh_group.FullMeshGroupType{}
+			spec.MeshChoice = fullMeshOneOfSpec
+
+			// resource modelToSpecNested OneOfField --> FullMeshChoice
+			if !siteMeshGroupFullMeshModel.FullMeshChoice.IsNull() && !siteMeshGroupFullMeshModel.FullMeshChoice.IsUnknown() {
+				fullMeshFullMeshChoiceModel := SiteMeshGroupFullMeshChoice{}
+				response.Diagnostics.Append(siteMeshGroupFullMeshModel.FullMeshChoice.As(ctx, &fullMeshFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+				if !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
+					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh{}
+					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
+					fullMeshOneOfSpec.FullMesh.FullMeshChoice = controlAndDataPlaneMeshSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
+				if !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
+					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh{}
+					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
+					fullMeshOneOfSpec.FullMesh.FullMeshChoice = dataPlaneMeshSpecBool
+				}
+
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> HubMesh
+		if !meshChoiceModel.HubMesh.IsNull() && !meshChoiceModel.HubMesh.IsUnknown() {
+			var siteMeshGroupHubMeshModel SiteMeshGroupHubMesh
+			response.Diagnostics.Append(meshChoiceModel.HubMesh.As(ctx, &siteMeshGroupHubMeshModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			hubMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_HubMesh{}
+			hubMeshOneOfSpec.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
+			spec.MeshChoice = hubMeshOneOfSpec
+
+			// resource modelToSpecNested OneOfField --> HubFullMeshChoice
+			if !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsNull() && !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsUnknown() {
+				hubMeshHubFullMeshChoiceModel := SiteMeshGroupHubFullMeshChoice{}
+				response.Diagnostics.Append(siteMeshGroupHubMeshModel.HubFullMeshChoice.As(ctx, &hubMeshHubFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+				if !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
+					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh{}
+					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
+					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = controlAndDataPlaneMeshSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
+				if !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
+					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{}
+					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
+					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = dataPlaneMeshSpecBool
+				}
+
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> SpokeMesh
+		if !meshChoiceModel.SpokeMesh.IsNull() && !meshChoiceModel.SpokeMesh.IsUnknown() {
+			var siteMeshGroupSpokeMeshModel SiteMeshGroupSpokeMesh
+			response.Diagnostics.Append(meshChoiceModel.SpokeMesh.As(ctx, &siteMeshGroupSpokeMeshModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			spokeMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_SpokeMesh{}
+			spokeMeshOneOfSpec.SpokeMesh = &ves_io_schema_site_mesh_group.SpokeMeshGroupType{}
+			spec.MeshChoice = spokeMeshOneOfSpec
+
+			// resource modelToSpecNested RequiredPointerField --> HubMeshGroup
+			if !siteMeshGroupSpokeMeshModel.HubMeshGroup.IsNull() && !siteMeshGroupSpokeMeshModel.HubMeshGroup.IsUnknown() {
+				var hubMeshGroupModel ObjectRefTypeModel
+				response.Diagnostics.Append(siteMeshGroupSpokeMeshModel.HubMeshGroup.As(ctx, &hubMeshGroupModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				hubMeshGroupSpec := &ves_io_schema_views.ObjectRefType{}
+				spokeMeshOneOfSpec.SpokeMesh.HubMeshGroup = hubMeshGroupSpec
+
+				// resource modelToSpecNested RequiredStringField --> Name
+				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
+					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
+					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
+				}
+
+			}
+
+			// resource modelToSpecNested OneOfField --> SpokeHubMeshChoice
+			if !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsNull() && !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsUnknown() {
+				spokeMeshSpokeHubMeshChoiceModel := SiteMeshGroupSpokeHubMeshChoice{}
+				response.Diagnostics.Append(siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.As(ctx, &spokeMeshSpokeHubMeshChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+				if !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
+					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh{}
+					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
+					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = controlAndDataPlaneMeshSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
+				if !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsUnknown() {
+					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{}
+					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
+					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = dataPlaneMeshSpecBool
+				}
+
+			}
+
+		}
+
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> ReFallback
+	if !data.ReFallbackChoice.IsNull() && !data.ReFallbackChoice.IsUnknown() {
+		reFallbackChoiceModel := SiteMeshGroupReFallbackChoice{}
+		response.Diagnostics.Append(data.ReFallbackChoice.As(ctx, &reFallbackChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> DisableReFallback
+		if !reFallbackChoiceModel.DisableReFallback.IsNull() && !reFallbackChoiceModel.DisableReFallback.IsUnknown() {
+			disableReFallbackSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_DisableReFallback{}
+			disableReFallbackSpecBool.DisableReFallback = &ves_io_schema.Empty{}
+			spec.ReFallback = disableReFallbackSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> EnableReFallback
+		if !reFallbackChoiceModel.EnableReFallback.IsNull() && !reFallbackChoiceModel.EnableReFallback.IsUnknown() {
+			enableReFallbackSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_EnableReFallback{}
+			enableReFallbackSpecBool.EnableReFallback = &ves_io_schema.Empty{}
+			spec.ReFallback = enableReFallbackSpecBool
+		}
+
 	}
 
 	{
@@ -2279,14 +2614,14 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			for i, virtualSiteElement := range virtualSiteElements {
 				virtualSiteSpec[i] = &ves_io_schema.ObjectRefType{}
 
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !virtualSiteElement.Namespace.IsNull() && !virtualSiteElement.Namespace.IsUnknown() {
-					virtualSiteSpec[i].Namespace = string(virtualSiteElement.Namespace.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Name
 				if !virtualSiteElement.Name.IsNull() && !virtualSiteElement.Name.IsUnknown() {
 					virtualSiteSpec[i].Name = string(virtualSiteElement.Name.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !virtualSiteElement.Namespace.IsNull() && !virtualSiteElement.Namespace.IsUnknown() {
+					virtualSiteSpec[i].Namespace = string(virtualSiteElement.Namespace.ValueString())
 				}
 
 			}
@@ -2295,211 +2630,11 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot OneOfField --> MeshChoice
-	if !data.MeshChoice.IsNull() && !data.MeshChoice.IsUnknown() {
-		meshChoiceModel := SiteMeshGroupGlobalSpecTypeMeshChoice{}
-		response.Diagnostics.Append(data.MeshChoice.As(ctx, &meshChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> SpokeMesh
-		if !meshChoiceModel.SpokeMesh.IsNull() && !meshChoiceModel.SpokeMesh.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeSpokeMeshModel SiteMeshGroupGlobalSpecTypeSpokeMesh
-			response.Diagnostics.Append(meshChoiceModel.SpokeMesh.As(ctx, &siteMeshGroupGlobalSpecTypeSpokeMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			spokeMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_SpokeMesh{}
-			spokeMeshOneOfSpec.SpokeMesh = &ves_io_schema_site_mesh_group.SpokeMeshGroupType{}
-			spec.MeshChoice = spokeMeshOneOfSpec
-
-			// resource modelToSpecNested RequiredPointerField --> HubMeshGroup
-			if !siteMeshGroupGlobalSpecTypeSpokeMeshModel.HubMeshGroup.IsNull() && !siteMeshGroupGlobalSpecTypeSpokeMeshModel.HubMeshGroup.IsUnknown() {
-				var hubMeshGroupModel ObjectRefTypeModel
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeSpokeMeshModel.HubMeshGroup.As(ctx, &hubMeshGroupModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				hubMeshGroupSpec := &ves_io_schema_views.ObjectRefType{}
-				spokeMeshOneOfSpec.SpokeMesh.HubMeshGroup = hubMeshGroupSpec
-
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
-					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
-				}
-
-				// resource modelToSpecNested RequiredStringField --> Name
-				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
-					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
-				}
-
-			}
-
-			// resource modelToSpecNested OneOfField --> SpokeHubMeshChoice
-			if !siteMeshGroupGlobalSpecTypeSpokeMeshModel.SpokeHubMeshChoice.IsNull() && !siteMeshGroupGlobalSpecTypeSpokeMeshModel.SpokeHubMeshChoice.IsUnknown() {
-				spokeMeshSpokeHubMeshChoiceModel := SiteMeshGroupSpokeMeshGroupTypeSpokeHubMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeSpokeMeshModel.SpokeHubMeshChoice.As(ctx, &spokeMeshSpokeHubMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = dataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> FullMesh
-		if !meshChoiceModel.FullMesh.IsNull() && !meshChoiceModel.FullMesh.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeFullMeshModel SiteMeshGroupGlobalSpecTypeFullMesh
-			response.Diagnostics.Append(meshChoiceModel.FullMesh.As(ctx, &siteMeshGroupGlobalSpecTypeFullMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			fullMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_FullMesh{}
-			fullMeshOneOfSpec.FullMesh = &ves_io_schema_site_mesh_group.FullMeshGroupType{}
-			spec.MeshChoice = fullMeshOneOfSpec
-
-			// resource modelToSpecNested OneOfField --> FullMeshChoice
-			if !siteMeshGroupGlobalSpecTypeFullMeshModel.FullMeshChoice.IsNull() && !siteMeshGroupGlobalSpecTypeFullMeshModel.FullMeshChoice.IsUnknown() {
-				fullMeshFullMeshChoiceModel := SiteMeshGroupFullMeshGroupTypeFullMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeFullMeshModel.FullMeshChoice.As(ctx, &fullMeshFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					fullMeshOneOfSpec.FullMesh.FullMeshChoice = dataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !fullMeshFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					fullMeshOneOfSpec.FullMesh.FullMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> HubMesh
-		if !meshChoiceModel.HubMesh.IsNull() && !meshChoiceModel.HubMesh.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeHubMeshModel SiteMeshGroupGlobalSpecTypeHubMesh
-			response.Diagnostics.Append(meshChoiceModel.HubMesh.As(ctx, &siteMeshGroupGlobalSpecTypeHubMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			hubMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_HubMesh{}
-			hubMeshOneOfSpec.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
-			spec.MeshChoice = hubMeshOneOfSpec
-
-			// resource modelToSpecNested OneOfField --> HubFullMeshChoice
-			if !siteMeshGroupGlobalSpecTypeHubMeshModel.HubFullMeshChoice.IsNull() && !siteMeshGroupGlobalSpecTypeHubMeshModel.HubFullMeshChoice.IsUnknown() {
-				hubMeshHubFullMeshChoiceModel := SiteMeshGroupHubFullMeshGroupTypeHubFullMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupGlobalSpecTypeHubMeshModel.HubFullMeshChoice.As(ctx, &hubMeshHubFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = dataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-			}
-
-		}
-
-	}
-
-	// resource modelToSpecRoot RequiredOneOfField --> ReFallback
-	if !data.ReFallbackChoice.IsNull() && !data.ReFallbackChoice.IsUnknown() {
-		reFallbackChoiceModel := SiteMeshGroupGlobalSpecTypeReFallbackChoice{}
-		response.Diagnostics.Append(data.ReFallbackChoice.As(ctx, &reFallbackChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> EnableReFallback
-		if !reFallbackChoiceModel.EnableReFallback.IsNull() && !reFallbackChoiceModel.EnableReFallback.IsUnknown() {
-			enableReFallbackSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_EnableReFallback{}
-			enableReFallbackSpecBool.EnableReFallback = &ves_io_schema.Empty{}
-			spec.ReFallback = enableReFallbackSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> DisableReFallback
-		if !reFallbackChoiceModel.DisableReFallback.IsNull() && !reFallbackChoiceModel.DisableReFallback.IsUnknown() {
-			disableReFallbackSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_DisableReFallback{}
-			disableReFallbackSpecBool.DisableReFallback = &ves_io_schema.Empty{}
-			spec.ReFallback = disableReFallbackSpecBool
-		}
-
-	}
-
-	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
-	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
-		bfdChoiceModel := SiteMeshGroupGlobalSpecTypeBfdChoice{}
-		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
-		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
-			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdDisabled{}
-			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
-			spec.BfdChoice = bfdDisabledSpecBool
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
-		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeBfdEnabledModel SiteMeshGroupGlobalSpecTypeBfdEnabled
-			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupGlobalSpecTypeBfdEnabledModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdEnabled{}
-			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
-			spec.BfdChoice = bfdEnabledOneOfSpec
-
-			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> Multiplier
-			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.Multiplier.ValueInt64()))
-
-		}
-
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2536,6 +2671,101 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -2545,155 +2775,78 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
+	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetBfdChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		bfdChoiceChoices := specData.GetBfdChoice()
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
+		// The model struct that will be populated by the nested template.
+		var bfdChoiceChoicesModel = &SiteMeshGroupBfdChoice{}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+		// Recursively call the nested template to process the oneof choices.
 
-	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
-	if len(specData.VirtualSite) > 0 {
-		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.VirtualSite))
+		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
+		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
 
-		for _, virtualSiteElement := range specData.VirtualSite {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+		if isBfdDisabled {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
+		} else {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
+		}
 
-			// resource specToModelNested StringField --> Tenant
-			if virtualSiteElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
+		// GlobalSpecType
+		// false
+		{
+			bfdEnabledOptionsWrapper, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
+			bfdEnabledAttributeMap := make(map[string]attr.Value)
+
+			if isBfdEnabled && bfdEnabledOptionsWrapper != nil && bfdEnabledOptionsWrapper.BfdEnabled != nil {
+				bfdEnabledElement := bfdEnabledOptionsWrapper.BfdEnabled
+
+				// resource specToModelNested RequiredUintField --> Multiplier
+				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledElement.GetMultiplier()))
+
+				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
+				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetReceiveIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
+				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetTransmitIntervalMilliseconds()))
+
+				bfdEnabledObj, bfdEnabledObjDiags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
+				response.Diagnostics.Append(bfdEnabledObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
 			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
+				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
 			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if virtualSiteElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if virtualSiteElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
 		}
 
-		virtualSiteList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
-			virtualSiteElements,
-		)
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			bfdChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupBfdChoiceModelAttributeMap,
+				bfdChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			// Assign the final object to the root data model.
+			data.BfdChoice = bfdChoiceObj
 		}
-
-		data.VirtualSite = virtualSiteList
 	} else {
-		var virtualSiteObjectType = basetypes.ObjectType{
-			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
-		}
-		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
-		data.VirtualSite = nullVirtualSiteList
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot OneOfField --> MeshChoice
@@ -2705,154 +2858,29 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		meshChoiceChoices := specData.GetMeshChoice()
 
 		// The model struct that will be populated by the nested template.
-		var meshChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeMeshChoice{}
+		var meshChoiceChoicesModel = &SiteMeshGroupMeshChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
-		// GlobalSpecType
-		// false
-		{
-			spokeMeshOptions, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
-			spokeMeshAttributeMap := make(map[string]attr.Value)
-
-			if isSpokeMesh && spokeMeshOptions != nil {
-
-				// resource specToModelNested RequiredPointerField --> HubMeshGroup
-				if spokeMeshOptions.SpokeMesh.GetHubMeshGroup() != nil {
-					// Create the nested Go struct
-					objectRefTypeModelModel := &ObjectRefTypeModel{}
-					hubMeshGroupElement := spokeMeshOptions.SpokeMesh.GetHubMeshGroup()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested StringField --> Tenant
-					if hubMeshGroupElement.GetTenant() != "" {
-						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Tenant = types.StringNull()
-					}
-
-					// resource specToModelNested RequiredStringField --> Namespace
-					if hubMeshGroupElement.GetNamespace() != "" {
-						objectRefTypeModelModel.Namespace = types.StringValue(hubMeshGroupElement.GetNamespace())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Namespace = types.StringNull()
-					}
-
-					// resource specToModelNested RequiredStringField --> Name
-					if hubMeshGroupElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					spokeMeshAttributeMap["hub_mesh_group"] = objectRefTypeModelModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
-				}
-
-				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
-				if spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					spokeMeshspokeHubMeshChoiceChoices := spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
-				}
-
-				spokeMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				meshChoiceChoicesModel.SpokeMesh = spokeMeshObj
-			} else {
-				meshChoiceChoicesModel.SpokeMesh = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap)
-			}
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> FullMesh
 		// GlobalSpecType
 		// false
 		{
-			fullMeshOptions, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
+			fullMeshOptionsWrapper, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
 			fullMeshAttributeMap := make(map[string]attr.Value)
 
-			if isFullMesh && fullMeshOptions != nil {
+			if isFullMesh && fullMeshOptionsWrapper != nil && fullMeshOptionsWrapper.FullMesh != nil {
+				fullMeshElement := fullMeshOptionsWrapper.FullMesh
 
 				// resource specToModelNested OneOfField --> FullMeshChoice
-				if fullMeshOptions.FullMesh.GetFullMeshChoice() != nil {
+				if fullMeshElement.GetFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					fullMeshfullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					fullMeshfullMeshChoiceChoices := fullMeshOptions.FullMesh.GetFullMeshChoice()
+					fullMeshfullMeshChoiceChoices := fullMeshElement.GetFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh)
@@ -2861,6 +2889,15 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -2882,8 +2919,8 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 					fullMeshAttributeMap["full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceFullMeshFullMeshChoiceModelAttributeMap)
 				}
 
-				fullMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				fullMeshObj, fullMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
+				response.Diagnostics.Append(fullMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2897,29 +2934,21 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		// GlobalSpecType
 		// false
 		{
-			hubMeshOptions, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
+			hubMeshOptionsWrapper, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
 			hubMeshAttributeMap := make(map[string]attr.Value)
 
-			if isHubMesh && hubMeshOptions != nil {
+			if isHubMesh && hubMeshOptionsWrapper != nil && hubMeshOptionsWrapper.HubMesh != nil {
+				hubMeshElement := hubMeshOptionsWrapper.HubMesh
 
 				// resource specToModelNested OneOfField --> HubFullMeshChoice
-				if hubMeshOptions.HubMesh.GetHubFullMeshChoice() != nil {
+				if hubMeshElement.GetHubFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					hubMeshhubFullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					hubMeshhubFullMeshChoiceChoices := hubMeshOptions.HubMesh.GetHubFullMeshChoice()
+					hubMeshhubFullMeshChoiceChoices := hubMeshElement.GetHubFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh)
@@ -2928,6 +2957,15 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -2949,8 +2987,8 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 					hubMeshAttributeMap["hub_full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap)
 				}
 
-				hubMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				hubMeshObj, hubMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
+				response.Diagnostics.Append(hubMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2960,19 +2998,139 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		meshChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupMeshChoiceModelAttributeMap,
-			meshChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
+		// GlobalSpecType
+		// false
+		{
+			spokeMeshOptionsWrapper, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
+			spokeMeshAttributeMap := make(map[string]attr.Value)
+
+			if isSpokeMesh && spokeMeshOptionsWrapper != nil && spokeMeshOptionsWrapper.SpokeMesh != nil {
+				spokeMeshElement := spokeMeshOptionsWrapper.SpokeMesh
+
+				// resource specToModelNested RequiredPointerField --> HubMeshGroup
+				if spokeMeshElement.GetHubMeshGroup() != nil {
+					// Create the nested Go struct
+					objectRefTypeModelModel := &ObjectRefTypeModel{}
+					hubMeshGroupElement := spokeMeshElement.GetHubMeshGroup()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredStringField --> Name
+					if hubMeshGroupElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
+					}
+
+					// resource specToModelNested RequiredStringField --> Namespace
+					if hubMeshGroupElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(hubMeshGroupElement.GetNamespace())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// resource specToModelNested StringField --> Tenant
+					if hubMeshGroupElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					objectRefTypeModelModelObj, objectRefTypeModelModelObjDiags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
+					response.Diagnostics.Append(objectRefTypeModelModelObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					spokeMeshAttributeMap["hub_mesh_group"] = objectRefTypeModelModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
+				}
+
+				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
+				if spokeMeshElement.GetSpokeHubMeshChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					spokeMeshspokeHubMeshChoiceChoices := spokeMeshElement.GetSpokeHubMeshChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
+					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
+
+					if isControlAndDataPlaneMesh {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
+						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
+				}
+
+				spokeMeshObj, spokeMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
+				response.Diagnostics.Append(spokeMeshObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				meshChoiceChoicesModel.SpokeMesh = spokeMeshObj
+			} else {
+				meshChoiceChoicesModel.SpokeMesh = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.MeshChoice = meshChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			meshChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupMeshChoiceModelAttributeMap,
+				meshChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.MeshChoice = meshChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.MeshChoice = types.ObjectNull(SiteMeshGroupMeshChoiceModelAttributeMap)
@@ -2987,18 +3145,9 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		reFallbackChoiceChoices := specData.GetReFallback()
 
 		// The model struct that will be populated by the nested template.
-		var reFallbackChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeReFallbackChoice{}
+		var reFallbackChoiceChoicesModel = &SiteMeshGroupReFallbackChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> EnableReFallback
-		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
-
-		if isEnableReFallback {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
-		} else {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> DisableReFallback
 		_, isDisableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_DisableReFallback)
@@ -3009,91 +3158,123 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			reFallbackChoiceChoicesModel.DisableReFallback = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reFallbackChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupReFallbackModelAttributeMap,
-			reFallbackChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> EnableReFallback
+		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
+
+		if isEnableReFallback {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
+		} else {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.ReFallbackChoice = reFallbackChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			reFallbackChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupReFallbackModelAttributeMap,
+				reFallbackChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ReFallbackChoice = reFallbackChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetBfdChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		bfdChoiceChoices := specData.GetBfdChoice()
+	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
+	if len(specData.GetVirtualSite()) > 0 {
+		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.GetVirtualSite()))
+		for _, virtualSiteElement := range specData.GetVirtualSite() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-		// The model struct that will be populated by the nested template.
-		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
-		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
-
-		if isBfdDisabled {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
-		} else {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
-		// GlobalSpecType
-		// false
-		{
-			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
-			bfdEnabledAttributeMap := make(map[string]attr.Value)
-
-			if isBfdEnabled && bfdEnabledOptions != nil {
-
-				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
-				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
-				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> Multiplier
-				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
-
-				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			// resource specToModelNested RequiredStringField --> Name
+			if virtualSiteElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
 			} else {
-				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if virtualSiteElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if virtualSiteElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bfdChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupBfdChoiceModelAttributeMap,
-			bfdChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
+		{
+			virtualSiteList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+				virtualSiteElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.VirtualSite = virtualSiteList
+		}
+	} else {
+		var virtualSiteObjectType = basetypes.ObjectType{
+			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+		}
+		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
+		var priorValVirtualSite types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("virtual_site"), &priorValVirtualSite)
+		if !priorValVirtualSite.IsNull() && !priorValVirtualSite.IsUnknown() {
+			data.VirtualSite = priorValVirtualSite
+		} else {
+			data.VirtualSite = nullVirtualSiteList
+		}
+
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
 			return
 		}
-
-		// Assign the final object to the root data model.
-		data.BfdChoice = bfdChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -3130,9 +3311,8 @@ func (r *ResourceF5XCSiteMeshGroup) Delete(ctx context.Context, request resource
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -3147,19 +3327,32 @@ func (r *ResourceF5XCSiteMeshGroup) Delete(ctx context.Context, request resource
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCSiteMeshGroup) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

@@ -5,6 +5,12 @@ package service_policy_rule
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
@@ -13,11 +19,6 @@ import (
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -178,14 +179,14 @@ type GlobalSpecType struct {
 	//
 	// x-displayName: "Request Body Matcher"
 	// Predicate for matching the request body string. The criteria for matching the request body is described in MatcherType.
-	// The actual request body value is extracted from the request API as a string.
+	// The actual request body value is extracted from the request API as a string. A request body greater than 64KB will not be evaluated.
 	BodyMatcher *policy.MatcherType `protobuf:"bytes,21,opt,name=body_matcher,json=bodyMatcher,proto3" json:"body_matcher,omitempty"`
 	// arg matchers
 	//
 	// x-displayName: "Argument Matchers"
 	// A list of predicates for all POST args that need to be matched. The criteria for matching each arg are described in individual instances
 	// of ArgMatcherType. The actual arg values are extracted from the request API as a list of strings for each arg selector name.
-	// Note that all specified arg matcher predicates must evaluate to true.
+	// Note that all specified arg matcher predicates must evaluate to true. A request body greater than 64KB will not be evaluated.
 	ArgMatchers []*policy.ArgMatcherType `protobuf:"bytes,18,rep,name=arg_matchers,json=argMatchers,proto3" json:"arg_matchers,omitempty"`
 	// cookie matchers
 	//
@@ -19328,7 +19329,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if skippy < 0 {
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
 						return ErrInvalidLengthTypes
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -19506,10 +19507,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19628,10 +19626,7 @@ func (m *IPThreatCategoryListType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21412,7 +21407,7 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if skippy < 0 {
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
 						return ErrInvalidLengthTypes
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -21554,10 +21549,7 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -23338,7 +23330,7 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if skippy < 0 {
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
 						return ErrInvalidLengthTypes
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -23480,10 +23472,7 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -25264,7 +25253,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if skippy < 0 {
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
 						return ErrInvalidLengthTypes
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -25406,10 +25395,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -26297,10 +26283,7 @@ func (m *ChallengeRuleSpec) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -26913,10 +26896,7 @@ func (m *RateLimiterRuleSpec) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {

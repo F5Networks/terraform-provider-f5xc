@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "\nHTTP Monitor defines an HTTP synthetic monitor.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2233,6 +2260,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -2411,7 +2459,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2475,7 +2522,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -2585,7 +2631,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -2671,7 +2716,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -2860,7 +2904,7 @@ var APISwaggerJSON string = `{
             "properties": {
                 "regions": {
                     "type": "array",
-                    "description": " A specific source location within AWS\n\nExample: - \"us-east-1\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "description": " A specific source location within AWS\n\nExample: - \"us-east-1\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.not_empty: true\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "AWS Regions",
                     "items": {
                         "type": "string"
@@ -2870,8 +2914,8 @@ var APISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.not_empty": "true"
+                        "ves.io.schema.rules.repeated.items.string.not_empty": "true",
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -2974,7 +3018,7 @@ var APISwaggerJSON string = `{
             "properties": {
                 "regions": {
                     "type": "array",
-                    "description": " A specific source location within F5 Distributed Cloud\n\nExample: - \"ves-io-us\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "description": " A specific source location within F5 Distributed Cloud\n\nExample: - \"ves-io-us\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.not_empty: true\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "F5 Distributed Cloud Regions",
                     "items": {
                         "type": "string"
@@ -2984,8 +3028,8 @@ var APISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.not_empty": "true"
+                        "ves.io.schema.rules.repeated.items.string.not_empty": "true",
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -3170,7 +3214,6 @@ var APISwaggerJSON string = `{
                 "follow_redirects": {
                     "type": "boolean",
                     "description": " Controls if the monitor will follow redirects while determining health\n\nExample: - \"false\"-",
-                    "format": "boolean",
                     "x-displayname": "Follow Redirects",
                     "x-ves-example": "false"
                 },
@@ -3193,7 +3236,6 @@ var APISwaggerJSON string = `{
                 "ignore_cert_errors": {
                     "type": "boolean",
                     "description": " Controls if an SSL error will result in a change of health status\n\nExample: - \"false\"-",
-                    "format": "boolean",
                     "x-displayname": "Ignore Cert Errors",
                     "x-ves-example": "false"
                 },
@@ -3375,7 +3417,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -3519,7 +3560,6 @@ var APISwaggerJSON string = `{
                 "follow_redirects": {
                     "type": "boolean",
                     "description": " Controls if the monitor will follow redirects while determining health\n\nExample: - \"false\"-",
-                    "format": "boolean",
                     "x-displayname": "Follow Redirects",
                     "x-ves-example": "false"
                 },
@@ -3542,7 +3582,6 @@ var APISwaggerJSON string = `{
                 "ignore_cert_errors": {
                     "type": "boolean",
                     "description": " Controls if an SSL error will result in a change of health status\n\nExample: - \"false\"-",
-                    "format": "boolean",
                     "x-displayname": "Ignore Cert Errors",
                     "x-ves-example": "false"
                 },
@@ -3794,7 +3833,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates v1_http_monitor is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3926,7 +3964,6 @@ var APISwaggerJSON string = `{
                 "follow_redirects": {
                     "type": "boolean",
                     "description": " Controls if the monitor will follow redirects while determining health\n\nExample: - \"false\"-",
-                    "format": "boolean",
                     "x-displayname": "Follow Redirects",
                     "x-ves-example": "false"
                 },
@@ -3949,7 +3986,6 @@ var APISwaggerJSON string = `{
                 "ignore_cert_errors": {
                     "type": "boolean",
                     "description": " Controls if an SSL error will result in a change of health status\n\nExample: - \"false\"-",
-                    "format": "boolean",
                     "x-displayname": "Ignore Cert Errors",
                     "x-ves-example": "false"
                 },

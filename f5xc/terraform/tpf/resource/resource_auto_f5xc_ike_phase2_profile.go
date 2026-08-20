@@ -21,20 +21,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -45,7 +48,6 @@ import (
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_views_ike_phase1_profile "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/ike_phase1_profile"
 	ves_io_schema_views_ike_phase2_profile "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/ike_phase2_profile"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCIkePhase2Profile defines the resource implementation.
@@ -53,41 +55,41 @@ type ResourceF5XCIkePhase2Profile struct {
 	client *client.APIClient
 }
 
-type IkePhase2ProfileGlobalSpecTypePfsModeChoice struct {
-	DisablePfs types.Bool   `tfsdk:"disable_pfs"`
-	DhGroupSet types.Object `tfsdk:"dh_group_set"`
-}
-
-type IkePhase2ProfileGlobalSpecTypeDhGroupSet struct {
-	DhGroups types.List `tfsdk:"dh_groups"`
-}
-
-type IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice struct {
+type IkePhase2ProfileIkeKeyLifetimeChoice struct {
 	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
-	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
 	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
+	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
 }
 
-type IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours struct {
+type IkePhase2ProfileIkeKeylifetimeHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
+type IkePhase2ProfileIkeKeylifetimeMinutes struct {
 	Duration types.Int64 `tfsdk:"duration"`
+}
+
+type IkePhase2ProfilePfsModeChoice struct {
+	DhGroupSet types.Object `tfsdk:"dh_group_set"`
+	DisablePfs types.Bool   `tfsdk:"disable_pfs"`
+}
+
+type IkePhase2ProfileDhGroupSet struct {
+	DhGroups types.List `tfsdk:"dh_groups"`
 }
 
 // ResourceF5XCIkePhase2ProfileModel describes the resource data model.
 type ResourceF5XCIkePhase2ProfileModel struct {
 	Annotations          types.Map      `tfsdk:"annotations"`
 	Description          types.String   `tfsdk:"description"`
+	Labels               types.Map      `tfsdk:"labels"`
 	Name                 types.String   `tfsdk:"name"`
 	Namespace            types.String   `tfsdk:"namespace"`
 	Uid                  types.String   `tfsdk:"uid"`
-	Labels               types.Map      `tfsdk:"labels"`
-	EncryptionAlgos      types.List     `tfsdk:"encryption_algos"`
 	AuthenticationAlgos  types.List     `tfsdk:"authentication_algos"`
-	PfsModeChoice        types.Object   `tfsdk:"pfs_mode_choice"`
+	EncryptionAlgos      types.List     `tfsdk:"encryption_algos"`
 	IkeKeyLifetimeChoice types.Object   `tfsdk:"ike_key_lifetime_choice"`
+	PfsModeChoice        types.Object   `tfsdk:"pfs_mode_choice"`
 	Timeouts             timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -101,33 +103,16 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for OneOfField --> PfsMode
-var IkePhase2ProfilePfsModeModelAttributeMap = map[string]attr.Type{
-
-	"disable_pfs": types.BoolType,
-	"dh_group_set": types.ObjectType{
-		AttrTypes: IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> DhGroupSet
-var IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap = map[string]attr.Type{
-
-	"dh_groups": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
 // Attribute map for RequiredOneOfField --> IkeKeyLifetime
 var IkePhase2ProfileIkeKeyLifetimeModelAttributeMap = map[string]attr.Type{
 
 	"ike_keylifetime_hours": types.ObjectType{
 		AttrTypes: IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap,
 	},
-	"use_default_keylifetime": types.BoolType,
 	"ike_keylifetime_minutes": types.ObjectType{
 		AttrTypes: IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap,
 	},
+	"use_default_keylifetime": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> IkeKeylifetimeHours
@@ -142,6 +127,23 @@ var IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap = map[s
 	"duration": types.Int64Type,
 }
 
+// Attribute map for OneOfField --> PfsMode
+var IkePhase2ProfilePfsModeModelAttributeMap = map[string]attr.Type{
+
+	"dh_group_set": types.ObjectType{
+		AttrTypes: IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap,
+	},
+	"disable_pfs": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> DhGroupSet
+var IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap = map[string]attr.Type{
+
+	"dh_groups": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 func NewResourceF5XCIkePhase2Profile() resource.Resource {
 	return &ResourceF5XCIkePhase2Profile{}
 }
@@ -153,47 +155,66 @@ func (r *ResourceF5XCIkePhase2Profile) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "IkePhase2Profile resource",
-		Description:         "IkePhase2Profile resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a ike_phase2_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase2_profile) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a ike_phase2_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase2_profile) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
 				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				ElementType:         types.StringType,
 				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
 					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
 					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"description": schema.StringAttribute{
 				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
+				MarkdownDescription: "description Human readable description for the object",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -201,111 +222,54 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"encryption_algos": schema.ListAttribute{
-				Description:         "Encryption Algorithms Choose one or more encryption algorithms.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"AES192_CBC\", \"AES256_CBC\", \"TRIPLE_DES_CBC\", \"AES128_GCM\", \"AES192_GCM\", \"AES256_GCM\", \"ENC_ALG_DEFAULT\", \"AES128_CBC\"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AES256_GCM")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC"}...)),
-				},
-			},
 			"authentication_algos": schema.ListAttribute{
 				Description:         "Authentication Algorithms Choose one or more Authentication Algorithm. Use None option when using the aes-gcm or aes-ccm encryption algorithms.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"AUTH_ALG_DEFAULT\", \"SHA256_HMAC\", \"SHA384_HMAC\", \"SHA512_HMAC\", \"AUTH_ALG_NONE\"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`",
+				MarkdownDescription: "Authentication Algorithms Choose one or more Authentication Algorithm. Use None option when using the aes-gcm or aes-ccm encryption algorithms.<br>**Valid Options:** `['AUTH_ALG_NONE', 'SHA256_HMAC', 'SHA384_HMAC', 'SHA512_HMAC']` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AUTH_ALG_NONE")),
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC", "AUTH_ALG_NONE"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AUTH_ALG_NONE", "SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC"}...)),
 				},
 			},
-			"pfs_mode_choice": schema.SingleNestedAttribute{
-				Description:         "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel",
-				MarkdownDescription: "",
+			"encryption_algos": schema.ListAttribute{
+				Description:         "Encryption Algorithms Choose one or more encryption algorithms.",
+				MarkdownDescription: "Encryption Algorithms Choose one or more encryption algorithms.<br>**Valid Options:** `['AES128_CBC', 'AES128_GCM', 'AES192_CBC', 'AES192_GCM', 'AES256_CBC', 'AES256_GCM', 'TRIPLE_DES_CBC']` (Multiple selection allowed)<br>**Default:** `AES256_GCM`",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"disable_pfs",
-						"dh_group_set",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"disable_pfs": schema.BoolAttribute{
-						Description:         "Disabled Disable PFS for this tunnel",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"dh_group_set": schema.SingleNestedAttribute{
-						Description:         "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"dh_groups": schema.ListAttribute{
-								Description:         "Diffie Hellman Groups Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
-								MarkdownDescription: "<br>**Valid Options:** `[\"DH_GROUP_DEFAULT\", \"DH_GROUP_14\", \"DH_GROUP_15\", \"DH_GROUP_16\", \"DH_GROUP_17\", \"DH_GROUP_20\", \"DH_GROUP_18\", \"DH_GROUP_19\", \"DH_GROUP_21\", \"DH_GROUP_26\"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`",
-								ElementType:         types.StringType,
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("DH_GROUP_19")),
-								Validators: []validator.List{
-									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DH_GROUP_DEFAULT", "DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_20", "DH_GROUP_18", "DH_GROUP_19", "DH_GROUP_21", "DH_GROUP_26"}...)),
-								},
-							},
-						},
-					},
+				Computed:            true,
+				ElementType:         types.StringType,
+				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AES256_GCM")),
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AES128_CBC", "AES128_GCM", "AES192_CBC", "AES192_GCM", "AES256_CBC", "AES256_GCM", "TRIPLE_DES_CBC"}...)),
 				},
 			},
 			"ike_key_lifetime_choice": schema.SingleNestedAttribute{
 				Description:         "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
-				MarkdownDescription: "",
+				MarkdownDescription: "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
+					exactlyoneofvalidator.RequiredExactlyOneOf(
 						"ike_keylifetime_hours",
-						"use_default_keylifetime",
 						"ike_keylifetime_minutes",
+						"use_default_keylifetime",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
 					"ike_keylifetime_hours": schema.SingleNestedAttribute{
 						Description:         "Hours Set IKE Key Lifetime in Hours",
-						MarkdownDescription: "",
+						MarkdownDescription: "Hours Set IKE Key Lifetime in Hours",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"duration": schema.Int64Attribute{
 								Description:         "Duration",
-								MarkdownDescription: "",
+								MarkdownDescription: "Duration",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -315,26 +279,16 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 							},
 						},
 					},
-					"use_default_keylifetime": schema.BoolAttribute{
-						Description:         "Default Use default key lifetime (4Hrs)",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
 					"ike_keylifetime_minutes": schema.SingleNestedAttribute{
 						Description:         "Minutes Set IKE Key Lifetime in minutes",
-						MarkdownDescription: "",
+						MarkdownDescription: "Minutes Set IKE Key Lifetime in minutes",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"duration": schema.Int64Attribute{
 								Description:         "Duration",
-								MarkdownDescription: "",
+								MarkdownDescription: "Duration",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -344,11 +298,67 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 							},
 						},
 					},
+					"use_default_keylifetime": schema.BoolAttribute{
+						Description:         "Default Use default key lifetime (4Hrs)",
+						MarkdownDescription: "Default Use default key lifetime (4Hrs)",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+				},
+			},
+			"pfs_mode_choice": schema.SingleNestedAttribute{
+				Description:         "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel",
+				MarkdownDescription: "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.ExactlyOneOf(
+						"dh_group_set",
+						"disable_pfs",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"dh_group_set": schema.SingleNestedAttribute{
+						Description:         "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
+						MarkdownDescription: "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"dh_groups": schema.ListAttribute{
+								Description:         "Diffie Hellman Groups Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
+								MarkdownDescription: "Diffie Hellman Groups Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.<br>**Valid Options:** `['DH_GROUP_14', 'DH_GROUP_15', 'DH_GROUP_16', 'DH_GROUP_17', 'DH_GROUP_18', 'DH_GROUP_19', 'DH_GROUP_20', 'DH_GROUP_21', 'DH_GROUP_26']` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`",
+								ElementType:         types.StringType,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("DH_GROUP_19")),
+								Validators: []validator.List{
+									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_18", "DH_GROUP_19", "DH_GROUP_20", "DH_GROUP_21", "DH_GROUP_26"}...)),
+								},
+							},
+						},
+					},
+					"disable_pfs": schema.BoolAttribute{
+						Description:         "Disabled Disable PFS for this tunnel",
+						MarkdownDescription: "Disabled Disable PFS for this tunnel",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -454,7 +464,7 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -467,6 +477,20 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -475,31 +499,6 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
-	{
-		// resource modelToSpecRoot RequiredArrayOfEnumField --> EncryptionAlgos
-		// 1. Get raw string elements
-		encryptionAlgosRaw := make([]types.String, 0, len(data.EncryptionAlgos.Elements()))
-		diags = data.EncryptionAlgos.ElementsAs(ctx, &encryptionAlgosRaw, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// 2. Iterate and Convert using Proto Value Map
-		encryptionAlgosSpec := make([]ves_io_schema.EncryptionAlgorithm, 0, len(encryptionAlgosRaw))
-		for _, raw := range encryptionAlgosRaw {
-			if v, ok := ves_io_schema.EncryptionAlgorithm_value[raw.ValueString()]; ok {
-				encryptionAlgosSpec = append(encryptionAlgosSpec, ves_io_schema.EncryptionAlgorithm(v))
-			} else {
-				response.Diagnostics.AddError(
-					"Invalid Enum Value",
-					fmt.Sprintf("Value '%s' is not a valid member for EncryptionAlgos", raw.ValueString()),
-				)
-			}
-		}
-		spec.EncryptionAlgos = encryptionAlgosSpec
 	}
 
 	{
@@ -527,9 +526,34 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		spec.AuthenticationAlgos = authenticationAlgosSpec
 	}
 
+	{
+		// resource modelToSpecRoot RequiredArrayOfEnumField --> EncryptionAlgos
+		// 1. Get raw string elements
+		encryptionAlgosRaw := make([]types.String, 0, len(data.EncryptionAlgos.Elements()))
+		diags = data.EncryptionAlgos.ElementsAs(ctx, &encryptionAlgosRaw, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// 2. Iterate and Convert using Proto Value Map
+		encryptionAlgosSpec := make([]ves_io_schema.EncryptionAlgorithm, 0, len(encryptionAlgosRaw))
+		for _, raw := range encryptionAlgosRaw {
+			if v, ok := ves_io_schema.EncryptionAlgorithm_value[raw.ValueString()]; ok {
+				encryptionAlgosSpec = append(encryptionAlgosSpec, ves_io_schema.EncryptionAlgorithm(v))
+			} else {
+				response.Diagnostics.AddError(
+					"Invalid Enum Value",
+					fmt.Sprintf("Value '%s' is not a valid member for EncryptionAlgos", raw.ValueString()),
+				)
+			}
+		}
+		spec.EncryptionAlgos = encryptionAlgosSpec
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> IkeKeyLifetime
 	if !data.IkeKeyLifetimeChoice.IsNull() && !data.IkeKeyLifetimeChoice.IsUnknown() {
-		ikeKeyLifetimeChoiceModel := IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice{}
+		ikeKeyLifetimeChoiceModel := IkePhase2ProfileIkeKeyLifetimeChoice{}
 		response.Diagnostics.Append(data.IkeKeyLifetimeChoice.As(ctx, &ikeKeyLifetimeChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -537,8 +561,8 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 
 		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
 		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
-			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+			var ikePhase2ProfileIkeKeylifetimeHoursModel IkePhase2ProfileIkeKeylifetimeHours
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -547,8 +571,26 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
 
 			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
-				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			if !ikePhase2ProfileIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileIkeKeylifetimeHoursModel.Duration.IsUnknown() {
+				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsUnknown() {
+			var ikePhase2ProfileIkeKeylifetimeMinutesModel IkePhase2ProfileIkeKeylifetimeMinutes
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.As(ctx, &ikePhase2ProfileIkeKeylifetimeMinutesModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			ikeKeylifetimeMinutesOneOfSpec := &ves_io_schema_views_ike_phase2_profile.CreateSpecType_IkeKeylifetimeMinutes{}
+			ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes = &ves_io_schema_views_ike_phase1_profile.InputMinutes{}
+			spec.IkeKeyLifetime = ikeKeylifetimeMinutesOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase2ProfileIkeKeylifetimeMinutesModel.Duration.IsNull() && !ikePhase2ProfileIkeKeylifetimeMinutesModel.Duration.IsUnknown() {
+				ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes.Duration = uint32(uint32(ikePhase2ProfileIkeKeylifetimeMinutesModel.Duration.ValueInt64()))
 			}
 
 		}
@@ -560,31 +602,73 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			spec.IkeKeyLifetime = useDefaultKeylifetimeSpecBool
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeMinutes
-		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsUnknown() {
-			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutes
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel, basetypes.ObjectAsOptions{})...)
+	}
+
+	// resource modelToSpecRoot OneOfField --> PfsMode
+	if !data.PfsModeChoice.IsNull() && !data.PfsModeChoice.IsUnknown() {
+		pfsModeChoiceModel := IkePhase2ProfilePfsModeChoice{}
+		response.Diagnostics.Append(data.PfsModeChoice.As(ctx, &pfsModeChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> DhGroupSet
+		if !pfsModeChoiceModel.DhGroupSet.IsNull() && !pfsModeChoiceModel.DhGroupSet.IsUnknown() {
+			var ikePhase2ProfileDhGroupSetModel IkePhase2ProfileDhGroupSet
+			response.Diagnostics.Append(pfsModeChoiceModel.DhGroupSet.As(ctx, &ikePhase2ProfileDhGroupSetModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			ikeKeylifetimeMinutesOneOfSpec := &ves_io_schema_views_ike_phase2_profile.CreateSpecType_IkeKeylifetimeMinutes{}
-			ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes = &ves_io_schema_views_ike_phase1_profile.InputMinutes{}
-			spec.IkeKeyLifetime = ikeKeylifetimeMinutesOneOfSpec
+			dhGroupSetOneOfSpec := &ves_io_schema_views_ike_phase2_profile.CreateSpecType_DhGroupSet{}
+			dhGroupSetOneOfSpec.DhGroupSet = &ves_io_schema_views_ike_phase2_profile.DHGroups{}
+			spec.PfsMode = dhGroupSetOneOfSpec
 
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsUnknown() {
-				ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.ValueInt64()))
+			// resource modelToSpecNested RequiredArrayOfEnumField --> DhGroups
+			// 1. Get raw string elements
+			dhGroupsRaw := make([]types.String, 0, len(ikePhase2ProfileDhGroupSetModel.DhGroups.Elements()))
+			diags = ikePhase2ProfileDhGroupSetModel.DhGroups.ElementsAs(ctx, &dhGroupsRaw, false)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+
+			// 2. Iterate and Convert using Proto Value Map
+			dhGroupsSpec := make([]ves_io_schema.DHGroup, 0, len(dhGroupsRaw))
+			for _, raw := range dhGroupsRaw {
+				if v, ok := ves_io_schema.DHGroup_value[raw.ValueString()]; ok {
+					dhGroupsSpec = append(dhGroupsSpec, ves_io_schema.DHGroup(v))
+				} else {
+					response.Diagnostics.AddError(
+						"Invalid Enum Value",
+						fmt.Sprintf("Value '%s' is not a valid member for DhGroups", raw.ValueString()),
+					)
+				}
+			}
+			dhGroupSetOneOfSpec.DhGroupSet.DhGroups = dhGroupsSpec
 
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> DisablePfs
+		if !pfsModeChoiceModel.DisablePfs.IsNull() && !pfsModeChoiceModel.DisablePfs.IsUnknown() {
+			disablePfsSpecBool := &ves_io_schema_views_ike_phase2_profile.CreateSpecType_DisablePfs{}
+			disablePfsSpecBool.DisablePfs = &ves_io_schema.Empty{}
+			spec.PfsMode = disablePfsSpecBool
+		}
+
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_views_ike_phase2_profile.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -614,46 +698,99 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
 		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
 		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -664,157 +801,44 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
+	// resource SpecToModelRoot RequiredArrayOfEnumField --> AuthenticationAlgos
+	{
+		if len(specData.GetAuthenticationAlgos()) > 0 {
+			authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
+			for _, v := range specData.GetAuthenticationAlgos() {
+				if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
+					authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+				}
+			}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.AuthenticationAlgos = listValue
+		} else {
+			data.AuthenticationAlgos = types.ListNull(types.StringType)
 		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
-	if len(specData.GetEncryptionAlgos()) > 0 {
-		encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
-		for _, v := range specData.GetEncryptionAlgos() {
-			if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
-				encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+	{
+		if len(specData.GetEncryptionAlgos()) > 0 {
+			encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
+			for _, v := range specData.GetEncryptionAlgos() {
+				if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
+					encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+				}
 			}
-		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.EncryptionAlgos = listValue
-	} else {
-		data.EncryptionAlgos = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot RequiredArrayOfEnumField --> AuthenticationAlgos
-	if len(specData.GetAuthenticationAlgos()) > 0 {
-		authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
-		for _, v := range specData.GetAuthenticationAlgos() {
-			if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
-				authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
-		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AuthenticationAlgos = listValue
-	} else {
-		data.AuthenticationAlgos = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot OneOfField --> PfsMode
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetPfsMode() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		pfsModeChoiceChoices := specData.GetPfsMode()
-
-		// The model struct that will be populated by the nested template.
-		var pfsModeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypePfsModeChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
-		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
-
-		if isDisablePfs {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+			data.EncryptionAlgos = listValue
 		} else {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
+			data.EncryptionAlgos = types.ListNull(types.StringType)
 		}
-
-		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
-		// GlobalSpecType
-		// false
-		{
-			dhGroupSetOptions, isDhGroupSet := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DhGroupSet)
-			dhGroupSetAttributeMap := make(map[string]attr.Value)
-
-			if isDhGroupSet && dhGroupSetOptions != nil {
-
-				// resource SpecToModelNested RequiredArrayOfEnumField --> DhGroups
-				if len(dhGroupSetOptions.DhGroupSet.GetDhGroups()) > 0 {
-					dhGroupsStrings := make([]string, 0, len(dhGroupSetOptions.DhGroupSet.GetDhGroups()))
-					for _, v := range dhGroupSetOptions.DhGroupSet.GetDhGroups() {
-						if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
-							dhGroupsStrings = append(dhGroupsStrings, strVal)
-						}
-					}
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, dhGroupsStrings)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					dhGroupSetAttributeMap["dh_groups"] = listValue
-				} else {
-					dhGroupSetAttributeMap["dh_groups"] = types.ListNull(types.StringType)
-				}
-
-				dhGroupSetObj, diags := types.ObjectValue(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap, dhGroupSetAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				pfsModeChoiceChoicesModel.DhGroupSet = dhGroupSetObj
-			} else {
-				pfsModeChoiceChoicesModel.DhGroupSet = types.ObjectNull(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap)
-			}
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		pfsModeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase2ProfilePfsModeModelAttributeMap,
-			pfsModeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.PfsModeChoice = pfsModeChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.PfsModeChoice = types.ObjectNull(IkePhase2ProfilePfsModeModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
@@ -826,7 +850,7 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		ikeKeyLifetimeChoiceChoices := specData.GetIkeKeyLifetime()
 
 		// The model struct that will be populated by the nested template.
-		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice{}
+		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileIkeKeyLifetimeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -834,22 +858,47 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		// GlobalSpecType
 		// false
 		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursOptionsWrapper, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
 			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
 
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptionsWrapper != nil && ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours != nil {
+				ikeKeylifetimeHoursElement := ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours
 
 				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursElement.GetDuration()))
 
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ikeKeylifetimeHoursObj, ikeKeylifetimeHoursObjDiags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeHoursObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
 			} else {
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		// GlobalSpecType
+		// false
+		{
+			ikeKeylifetimeMinutesOptionsWrapper, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeMinutes)
+			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptionsWrapper != nil && ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes != nil {
+				ikeKeylifetimeMinutesElement := ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesElement.GetDuration()))
+
+				ikeKeylifetimeMinutesObj, ikeKeylifetimeMinutesObjDiags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeMinutesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
 			}
 		}
 
@@ -862,45 +911,109 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			ikeKeyLifetimeChoiceChoicesModel.UseDefaultKeylifetime = types.BoolNull()
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			ikeKeyLifetimeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase2ProfileIkeKeyLifetimeModelAttributeMap,
+				ikeKeyLifetimeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> PfsMode
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetPfsMode() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		pfsModeChoiceChoices := specData.GetPfsMode()
+
+		// The model struct that will be populated by the nested template.
+		var pfsModeChoiceChoicesModel = &IkePhase2ProfilePfsModeChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
 		// GlobalSpecType
 		// false
 		{
-			ikeKeylifetimeMinutesOptions, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeMinutes)
-			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
+			dhGroupSetOptionsWrapper, isDhGroupSet := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DhGroupSet)
+			dhGroupSetAttributeMap := make(map[string]attr.Value)
 
-			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptions != nil {
+			if isDhGroupSet && dhGroupSetOptionsWrapper != nil && dhGroupSetOptionsWrapper.DhGroupSet != nil {
+				dhGroupSetElement := dhGroupSetOptionsWrapper.DhGroupSet
 
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesOptions.IkeKeylifetimeMinutes.GetDuration()))
+				// resource SpecToModelNested RequiredArrayOfEnumField --> DhGroups
+				{
+					if len(dhGroupSetElement.GetDhGroups()) > 0 {
+						dhGroupsStrings := make([]string, 0, len(dhGroupSetElement.GetDhGroups()))
+						for _, v := range dhGroupSetElement.GetDhGroups() {
+							if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
+								dhGroupsStrings = append(dhGroupsStrings, strVal)
+							}
+						}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, dhGroupsStrings)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						dhGroupSetAttributeMap["dh_groups"] = listValue
+					} else {
+						dhGroupSetAttributeMap["dh_groups"] = types.ListNull(types.StringType)
+					}
+				}
 
-				ikeKeylifetimeMinutesObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
-				response.Diagnostics.Append(diags...)
+				dhGroupSetObj, dhGroupSetObjDiags := types.ObjectValue(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap, dhGroupSetAttributeMap)
+				response.Diagnostics.Append(dhGroupSetObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
+				pfsModeChoiceChoicesModel.DhGroupSet = dhGroupSetObj
 			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
+				pfsModeChoiceChoicesModel.DhGroupSet = types.ObjectNull(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap)
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeKeyLifetimeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase2ProfileIkeKeyLifetimeModelAttributeMap,
-			ikeKeyLifetimeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
+		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
+
+		if isDisablePfs {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+		} else {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			pfsModeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase2ProfilePfsModeModelAttributeMap,
+				pfsModeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.PfsModeChoice = pfsModeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
+		data.PfsModeChoice = types.ObjectNull(IkePhase2ProfilePfsModeModelAttributeMap)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -967,54 +1080,100 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1025,165 +1184,44 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
+	// resource SpecToModelRoot RequiredArrayOfEnumField --> AuthenticationAlgos
+	{
+		if len(specData.GetAuthenticationAlgos()) > 0 {
+			authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
+			for _, v := range specData.GetAuthenticationAlgos() {
+				if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
+					authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+				}
 			}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.AuthenticationAlgos = listValue
+		} else {
+			data.AuthenticationAlgos = types.ListNull(types.StringType)
 		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
-	if len(specData.GetEncryptionAlgos()) > 0 {
-		encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
-		for _, v := range specData.GetEncryptionAlgos() {
-			if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
-				encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+	{
+		if len(specData.GetEncryptionAlgos()) > 0 {
+			encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
+			for _, v := range specData.GetEncryptionAlgos() {
+				if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
+					encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+				}
 			}
-		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.EncryptionAlgos = listValue
-	} else {
-		data.EncryptionAlgos = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot RequiredArrayOfEnumField --> AuthenticationAlgos
-	if len(specData.GetAuthenticationAlgos()) > 0 {
-		authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
-		for _, v := range specData.GetAuthenticationAlgos() {
-			if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
-				authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
-		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AuthenticationAlgos = listValue
-	} else {
-		data.AuthenticationAlgos = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot OneOfField --> PfsMode
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetPfsMode() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		pfsModeChoiceChoices := specData.GetPfsMode()
-
-		// The model struct that will be populated by the nested template.
-		var pfsModeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypePfsModeChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
-		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
-
-		if isDisablePfs {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+			data.EncryptionAlgos = listValue
 		} else {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
+			data.EncryptionAlgos = types.ListNull(types.StringType)
 		}
-
-		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
-		// <no value>
-		// false
-		{
-			dhGroupSetOptions, isDhGroupSet := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DhGroupSet)
-			dhGroupSetAttributeMap := make(map[string]attr.Value)
-
-			if isDhGroupSet && dhGroupSetOptions != nil {
-
-				// resource SpecToModelNested RequiredArrayOfEnumField --> DhGroups
-				if len(dhGroupSetOptions.DhGroupSet.GetDhGroups()) > 0 {
-					dhGroupsStrings := make([]string, 0, len(dhGroupSetOptions.DhGroupSet.GetDhGroups()))
-					for _, v := range dhGroupSetOptions.DhGroupSet.GetDhGroups() {
-						if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
-							dhGroupsStrings = append(dhGroupsStrings, strVal)
-						}
-					}
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, dhGroupsStrings)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					dhGroupSetAttributeMap["dh_groups"] = listValue
-				} else {
-					dhGroupSetAttributeMap["dh_groups"] = types.ListNull(types.StringType)
-				}
-
-				dhGroupSetObj, diags := types.ObjectValue(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap, dhGroupSetAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				pfsModeChoiceChoicesModel.DhGroupSet = dhGroupSetObj
-			} else {
-				pfsModeChoiceChoicesModel.DhGroupSet = types.ObjectNull(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap)
-			}
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		pfsModeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase2ProfilePfsModeModelAttributeMap,
-			pfsModeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.PfsModeChoice = pfsModeChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.PfsModeChoice = types.ObjectNull(IkePhase2ProfilePfsModeModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
@@ -1195,7 +1233,7 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 		ikeKeyLifetimeChoiceChoices := specData.GetIkeKeyLifetime()
 
 		// The model struct that will be populated by the nested template.
-		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice{}
+		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileIkeKeyLifetimeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1203,22 +1241,47 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 		// <no value>
 		// false
 		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursOptionsWrapper, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
 			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
 
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptionsWrapper != nil && ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours != nil {
+				ikeKeylifetimeHoursElement := ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours
 
 				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursElement.GetDuration()))
 
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ikeKeylifetimeHoursObj, ikeKeylifetimeHoursObjDiags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeHoursObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
 			} else {
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		// <no value>
+		// false
+		{
+			ikeKeylifetimeMinutesOptionsWrapper, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeMinutes)
+			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptionsWrapper != nil && ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes != nil {
+				ikeKeylifetimeMinutesElement := ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesElement.GetDuration()))
+
+				ikeKeylifetimeMinutesObj, ikeKeylifetimeMinutesObjDiags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeMinutesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
 			}
 		}
 
@@ -1231,45 +1294,109 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 			ikeKeyLifetimeChoiceChoicesModel.UseDefaultKeylifetime = types.BoolNull()
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			ikeKeyLifetimeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase2ProfileIkeKeyLifetimeModelAttributeMap,
+				ikeKeyLifetimeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> PfsMode
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetPfsMode() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		pfsModeChoiceChoices := specData.GetPfsMode()
+
+		// The model struct that will be populated by the nested template.
+		var pfsModeChoiceChoicesModel = &IkePhase2ProfilePfsModeChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
 		// <no value>
 		// false
 		{
-			ikeKeylifetimeMinutesOptions, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeMinutes)
-			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
+			dhGroupSetOptionsWrapper, isDhGroupSet := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DhGroupSet)
+			dhGroupSetAttributeMap := make(map[string]attr.Value)
 
-			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptions != nil {
+			if isDhGroupSet && dhGroupSetOptionsWrapper != nil && dhGroupSetOptionsWrapper.DhGroupSet != nil {
+				dhGroupSetElement := dhGroupSetOptionsWrapper.DhGroupSet
 
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesOptions.IkeKeylifetimeMinutes.GetDuration()))
+				// resource SpecToModelNested RequiredArrayOfEnumField --> DhGroups
+				{
+					if len(dhGroupSetElement.GetDhGroups()) > 0 {
+						dhGroupsStrings := make([]string, 0, len(dhGroupSetElement.GetDhGroups()))
+						for _, v := range dhGroupSetElement.GetDhGroups() {
+							if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
+								dhGroupsStrings = append(dhGroupsStrings, strVal)
+							}
+						}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, dhGroupsStrings)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						dhGroupSetAttributeMap["dh_groups"] = listValue
+					} else {
+						dhGroupSetAttributeMap["dh_groups"] = types.ListNull(types.StringType)
+					}
+				}
 
-				ikeKeylifetimeMinutesObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
-				response.Diagnostics.Append(diags...)
+				dhGroupSetObj, dhGroupSetObjDiags := types.ObjectValue(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap, dhGroupSetAttributeMap)
+				response.Diagnostics.Append(dhGroupSetObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
+				pfsModeChoiceChoicesModel.DhGroupSet = dhGroupSetObj
 			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
+				pfsModeChoiceChoicesModel.DhGroupSet = types.ObjectNull(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap)
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeKeyLifetimeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase2ProfileIkeKeyLifetimeModelAttributeMap,
-			ikeKeyLifetimeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
+		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
+
+		if isDisablePfs {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+		} else {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			pfsModeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase2ProfilePfsModeModelAttributeMap,
+				pfsModeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.PfsModeChoice = pfsModeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
+		data.PfsModeChoice = types.ObjectNull(IkePhase2ProfilePfsModeModelAttributeMap)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1289,6 +1416,25 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCIkePhase2ProfileModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1325,7 +1471,7 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1338,6 +1484,20 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -1346,31 +1506,6 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
-	{
-		// resource modelToSpecRoot RequiredArrayOfEnumField --> EncryptionAlgos
-		// 1. Get raw string elements
-		encryptionAlgosRaw := make([]types.String, 0, len(data.EncryptionAlgos.Elements()))
-		diags = data.EncryptionAlgos.ElementsAs(ctx, &encryptionAlgosRaw, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// 2. Iterate and Convert using Proto Value Map
-		encryptionAlgosSpec := make([]ves_io_schema.EncryptionAlgorithm, 0, len(encryptionAlgosRaw))
-		for _, raw := range encryptionAlgosRaw {
-			if v, ok := ves_io_schema.EncryptionAlgorithm_value[raw.ValueString()]; ok {
-				encryptionAlgosSpec = append(encryptionAlgosSpec, ves_io_schema.EncryptionAlgorithm(v))
-			} else {
-				response.Diagnostics.AddError(
-					"Invalid Enum Value",
-					fmt.Sprintf("Value '%s' is not a valid member for EncryptionAlgos", raw.ValueString()),
-				)
-			}
-		}
-		spec.EncryptionAlgos = encryptionAlgosSpec
 	}
 
 	{
@@ -1398,9 +1533,34 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		spec.AuthenticationAlgos = authenticationAlgosSpec
 	}
 
+	{
+		// resource modelToSpecRoot RequiredArrayOfEnumField --> EncryptionAlgos
+		// 1. Get raw string elements
+		encryptionAlgosRaw := make([]types.String, 0, len(data.EncryptionAlgos.Elements()))
+		diags = data.EncryptionAlgos.ElementsAs(ctx, &encryptionAlgosRaw, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// 2. Iterate and Convert using Proto Value Map
+		encryptionAlgosSpec := make([]ves_io_schema.EncryptionAlgorithm, 0, len(encryptionAlgosRaw))
+		for _, raw := range encryptionAlgosRaw {
+			if v, ok := ves_io_schema.EncryptionAlgorithm_value[raw.ValueString()]; ok {
+				encryptionAlgosSpec = append(encryptionAlgosSpec, ves_io_schema.EncryptionAlgorithm(v))
+			} else {
+				response.Diagnostics.AddError(
+					"Invalid Enum Value",
+					fmt.Sprintf("Value '%s' is not a valid member for EncryptionAlgos", raw.ValueString()),
+				)
+			}
+		}
+		spec.EncryptionAlgos = encryptionAlgosSpec
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> IkeKeyLifetime
 	if !data.IkeKeyLifetimeChoice.IsNull() && !data.IkeKeyLifetimeChoice.IsUnknown() {
-		ikeKeyLifetimeChoiceModel := IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice{}
+		ikeKeyLifetimeChoiceModel := IkePhase2ProfileIkeKeyLifetimeChoice{}
 		response.Diagnostics.Append(data.IkeKeyLifetimeChoice.As(ctx, &ikeKeyLifetimeChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -1408,8 +1568,8 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 
 		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
 		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
-			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+			var ikePhase2ProfileIkeKeylifetimeHoursModel IkePhase2ProfileIkeKeylifetimeHours
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1418,8 +1578,26 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
 
 			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
-				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			if !ikePhase2ProfileIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileIkeKeylifetimeHoursModel.Duration.IsUnknown() {
+				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsUnknown() {
+			var ikePhase2ProfileIkeKeylifetimeMinutesModel IkePhase2ProfileIkeKeylifetimeMinutes
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.As(ctx, &ikePhase2ProfileIkeKeylifetimeMinutesModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			ikeKeylifetimeMinutesOneOfSpec := &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_IkeKeylifetimeMinutes{}
+			ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes = &ves_io_schema_views_ike_phase1_profile.InputMinutes{}
+			spec.IkeKeyLifetime = ikeKeylifetimeMinutesOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase2ProfileIkeKeylifetimeMinutesModel.Duration.IsNull() && !ikePhase2ProfileIkeKeylifetimeMinutesModel.Duration.IsUnknown() {
+				ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes.Duration = uint32(uint32(ikePhase2ProfileIkeKeylifetimeMinutesModel.Duration.ValueInt64()))
 			}
 
 		}
@@ -1431,24 +1609,66 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			spec.IkeKeyLifetime = useDefaultKeylifetimeSpecBool
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeMinutes
-		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.IsUnknown() {
-			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutes
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeMinutes.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel, basetypes.ObjectAsOptions{})...)
+	}
+
+	// resource modelToSpecRoot OneOfField --> PfsMode
+	if !data.PfsModeChoice.IsNull() && !data.PfsModeChoice.IsUnknown() {
+		pfsModeChoiceModel := IkePhase2ProfilePfsModeChoice{}
+		response.Diagnostics.Append(data.PfsModeChoice.As(ctx, &pfsModeChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> DhGroupSet
+		if !pfsModeChoiceModel.DhGroupSet.IsNull() && !pfsModeChoiceModel.DhGroupSet.IsUnknown() {
+			var ikePhase2ProfileDhGroupSetModel IkePhase2ProfileDhGroupSet
+			response.Diagnostics.Append(pfsModeChoiceModel.DhGroupSet.As(ctx, &ikePhase2ProfileDhGroupSetModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			ikeKeylifetimeMinutesOneOfSpec := &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_IkeKeylifetimeMinutes{}
-			ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes = &ves_io_schema_views_ike_phase1_profile.InputMinutes{}
-			spec.IkeKeyLifetime = ikeKeylifetimeMinutesOneOfSpec
+			dhGroupSetOneOfSpec := &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_DhGroupSet{}
+			dhGroupSetOneOfSpec.DhGroupSet = &ves_io_schema_views_ike_phase2_profile.DHGroups{}
+			spec.PfsMode = dhGroupSetOneOfSpec
 
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsUnknown() {
-				ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.ValueInt64()))
+			// resource modelToSpecNested RequiredArrayOfEnumField --> DhGroups
+			// 1. Get raw string elements
+			dhGroupsRaw := make([]types.String, 0, len(ikePhase2ProfileDhGroupSetModel.DhGroups.Elements()))
+			diags = ikePhase2ProfileDhGroupSetModel.DhGroups.ElementsAs(ctx, &dhGroupsRaw, false)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+
+			// 2. Iterate and Convert using Proto Value Map
+			dhGroupsSpec := make([]ves_io_schema.DHGroup, 0, len(dhGroupsRaw))
+			for _, raw := range dhGroupsRaw {
+				if v, ok := ves_io_schema.DHGroup_value[raw.ValueString()]; ok {
+					dhGroupsSpec = append(dhGroupsSpec, ves_io_schema.DHGroup(v))
+				} else {
+					response.Diagnostics.AddError(
+						"Invalid Enum Value",
+						fmt.Sprintf("Value '%s' is not a valid member for DhGroups", raw.ValueString()),
+					)
+				}
+			}
+			dhGroupSetOneOfSpec.DhGroupSet.DhGroups = dhGroupsSpec
 
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> DisablePfs
+		if !pfsModeChoiceModel.DisablePfs.IsNull() && !pfsModeChoiceModel.DisablePfs.IsUnknown() {
+			disablePfsSpecBool := &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_DisablePfs{}
+			disablePfsSpecBool.DisablePfs = &ves_io_schema.Empty{}
+			spec.PfsMode = disablePfsSpecBool
+		}
+
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1486,54 +1706,99 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1544,165 +1809,44 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
+	// resource SpecToModelRoot RequiredArrayOfEnumField --> AuthenticationAlgos
+	{
+		if len(specData.GetAuthenticationAlgos()) > 0 {
+			authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
+			for _, v := range specData.GetAuthenticationAlgos() {
+				if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
+					authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+				}
 			}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.AuthenticationAlgos = listValue
+		} else {
+			data.AuthenticationAlgos = types.ListNull(types.StringType)
 		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
-	if len(specData.GetEncryptionAlgos()) > 0 {
-		encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
-		for _, v := range specData.GetEncryptionAlgos() {
-			if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
-				encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+	{
+		if len(specData.GetEncryptionAlgos()) > 0 {
+			encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
+			for _, v := range specData.GetEncryptionAlgos() {
+				if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
+					encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+				}
 			}
-		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.EncryptionAlgos = listValue
-	} else {
-		data.EncryptionAlgos = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot RequiredArrayOfEnumField --> AuthenticationAlgos
-	if len(specData.GetAuthenticationAlgos()) > 0 {
-		authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
-		for _, v := range specData.GetAuthenticationAlgos() {
-			if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
-				authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
-		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AuthenticationAlgos = listValue
-	} else {
-		data.AuthenticationAlgos = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot OneOfField --> PfsMode
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetPfsMode() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		pfsModeChoiceChoices := specData.GetPfsMode()
-
-		// The model struct that will be populated by the nested template.
-		var pfsModeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypePfsModeChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
-		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
-
-		if isDisablePfs {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+			data.EncryptionAlgos = listValue
 		} else {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
+			data.EncryptionAlgos = types.ListNull(types.StringType)
 		}
-
-		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
-		// GlobalSpecType
-		// false
-		{
-			dhGroupSetOptions, isDhGroupSet := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DhGroupSet)
-			dhGroupSetAttributeMap := make(map[string]attr.Value)
-
-			if isDhGroupSet && dhGroupSetOptions != nil {
-
-				// resource SpecToModelNested RequiredArrayOfEnumField --> DhGroups
-				if len(dhGroupSetOptions.DhGroupSet.GetDhGroups()) > 0 {
-					dhGroupsStrings := make([]string, 0, len(dhGroupSetOptions.DhGroupSet.GetDhGroups()))
-					for _, v := range dhGroupSetOptions.DhGroupSet.GetDhGroups() {
-						if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
-							dhGroupsStrings = append(dhGroupsStrings, strVal)
-						}
-					}
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, dhGroupsStrings)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					dhGroupSetAttributeMap["dh_groups"] = listValue
-				} else {
-					dhGroupSetAttributeMap["dh_groups"] = types.ListNull(types.StringType)
-				}
-
-				dhGroupSetObj, diags := types.ObjectValue(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap, dhGroupSetAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				pfsModeChoiceChoicesModel.DhGroupSet = dhGroupSetObj
-			} else {
-				pfsModeChoiceChoicesModel.DhGroupSet = types.ObjectNull(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap)
-			}
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		pfsModeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase2ProfilePfsModeModelAttributeMap,
-			pfsModeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.PfsModeChoice = pfsModeChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.PfsModeChoice = types.ObjectNull(IkePhase2ProfilePfsModeModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
@@ -1714,7 +1858,7 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		ikeKeyLifetimeChoiceChoices := specData.GetIkeKeyLifetime()
 
 		// The model struct that will be populated by the nested template.
-		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice{}
+		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileIkeKeyLifetimeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1722,22 +1866,47 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		// GlobalSpecType
 		// false
 		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursOptionsWrapper, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
 			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
 
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptionsWrapper != nil && ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours != nil {
+				ikeKeylifetimeHoursElement := ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours
 
 				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursElement.GetDuration()))
 
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ikeKeylifetimeHoursObj, ikeKeylifetimeHoursObjDiags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeHoursObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
 			} else {
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		// GlobalSpecType
+		// false
+		{
+			ikeKeylifetimeMinutesOptionsWrapper, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeMinutes)
+			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptionsWrapper != nil && ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes != nil {
+				ikeKeylifetimeMinutesElement := ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesElement.GetDuration()))
+
+				ikeKeylifetimeMinutesObj, ikeKeylifetimeMinutesObjDiags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeMinutesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
 			}
 		}
 
@@ -1750,45 +1919,135 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			ikeKeyLifetimeChoiceChoicesModel.UseDefaultKeylifetime = types.BoolNull()
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			ikeKeyLifetimeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase2ProfileIkeKeyLifetimeModelAttributeMap,
+				ikeKeyLifetimeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
+		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> PfsMode
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetPfsMode() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		pfsModeChoiceChoices := specData.GetPfsMode()
+
+		// The model struct that will be populated by the nested template.
+		var pfsModeChoiceChoicesModel = &IkePhase2ProfilePfsModeChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
 		// GlobalSpecType
 		// false
 		{
-			ikeKeylifetimeMinutesOptions, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeMinutes)
-			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
+			dhGroupSetOptionsWrapper, isDhGroupSet := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DhGroupSet)
+			dhGroupSetAttributeMap := make(map[string]attr.Value)
 
-			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptions != nil {
+			if isDhGroupSet && dhGroupSetOptionsWrapper != nil && dhGroupSetOptionsWrapper.DhGroupSet != nil {
+				dhGroupSetElement := dhGroupSetOptionsWrapper.DhGroupSet
 
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesOptions.IkeKeylifetimeMinutes.GetDuration()))
+				// resource SpecToModelNested RequiredArrayOfEnumField --> DhGroups
+				{
+					if len(dhGroupSetElement.GetDhGroups()) > 0 {
+						dhGroupsStrings := make([]string, 0, len(dhGroupSetElement.GetDhGroups()))
+						for _, v := range dhGroupSetElement.GetDhGroups() {
+							if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
+								dhGroupsStrings = append(dhGroupsStrings, strVal)
+							}
+						}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, dhGroupsStrings)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						dhGroupSetAttributeMap["dh_groups"] = listValue
+					} else {
+						dhGroupSetAttributeMap["dh_groups"] = types.ListNull(types.StringType)
+					}
+				}
 
-				ikeKeylifetimeMinutesObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
-				response.Diagnostics.Append(diags...)
+				dhGroupSetObj, dhGroupSetObjDiags := types.ObjectValue(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap, dhGroupSetAttributeMap)
+				response.Diagnostics.Append(dhGroupSetObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
+				pfsModeChoiceChoicesModel.DhGroupSet = dhGroupSetObj
 			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
+				pfsModeChoiceChoicesModel.DhGroupSet = types.ObjectNull(IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap)
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeKeyLifetimeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase2ProfileIkeKeyLifetimeModelAttributeMap,
-			ikeKeyLifetimeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
+		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
+
+		if isDisablePfs {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+		} else {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			pfsModeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase2ProfilePfsModeModelAttributeMap,
+				pfsModeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.PfsModeChoice = pfsModeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
+		data.PfsModeChoice = types.ObjectNull(IkePhase2ProfilePfsModeModelAttributeMap)
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -1825,9 +2084,8 @@ func (r *ResourceF5XCIkePhase2Profile) Delete(ctx context.Context, request resou
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -1842,19 +2100,32 @@ func (r *ResourceF5XCIkePhase2Profile) Delete(ctx context.Context, request resou
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCIkePhase2Profile) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

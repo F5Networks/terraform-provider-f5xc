@@ -1241,10 +1241,7 @@ var APISwaggerJSON string = `{
         "description": "Configures Bot Endpoint Policy",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1311,6 +1308,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1411,6 +1414,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1527,6 +1536,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1742,9 +1757,12 @@ var APISwaggerJSON string = `{
                 },
                 "name": {
                     "type": "string",
-                    "description": " The name of the cookie.",
+                    "description": " The name of the cookie.\n\nValidation Rules:\n  ves.io.schema.rules.string.cookie_name: true\n",
                     "title": "Cookie Name",
-                    "x-displayname": "Name"
+                    "x-displayname": "Name",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.cookie_name": "true"
+                    }
                 }
             }
         },
@@ -1807,13 +1825,11 @@ var APISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "title": "Case sensitive",
-                    "format": "boolean",
                     "x-displayname": "Case Sensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "operator": {
@@ -1850,14 +1866,12 @@ var APISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "description": "x-displayName: \"Case Sensitive\"",
-                    "title": "Case sensitive",
-                    "format": "boolean"
+                    "title": "Case sensitive"
                 },
                 "not_value": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"",
-                    "title": "Negation",
-                    "format": "boolean"
+                    "title": "Negation"
                 },
                 "value": {
                     "type": "string",
@@ -1942,12 +1956,13 @@ var APISwaggerJSON string = `{
                 },
                 "name": {
                     "type": "string",
-                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.cookie_name: true\n",
                     "title": "Operator Name",
                     "x-displayname": "Cookie Name",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.cookie_name": "true"
                     }
                 }
             }
@@ -1983,6 +1998,23 @@ var APISwaggerJSON string = `{
                     "title": "use ANY operator",
                     "$ref": "#/definitions/bot_defenseCookieOperator",
                     "x-displayname": "ANY"
+                }
+            }
+        },
+        "bot_defenseCosseBotInfraWithDeliveredVersion": {
+            "type": "object",
+            "description": "x-displayName: \"CoSSE Bot Infrastructure with Delivered version\"\nCoSSE Bot Infra Name with its delivered version",
+            "title": "CoSSE Bot Infrastructure with Delivered Version",
+            "properties": {
+                "cosse_bot_infra_name": {
+                    "type": "string",
+                    "description": "x-displayName: \"CoSSE Bot Infra name\"\nx-example: \"cosse-cluster-1\"\nThe cosse cluster id delivered this policy",
+                    "title": "CoSSE Bot Infra Name"
+                },
+                "delivered_version": {
+                    "type": "string",
+                    "description": "x-displayName: \"Delivered Version\"\nx-example: \"1.0\"\nThe version of policy delivered to cluster\nThe version format should be X.0",
+                    "title": "Delivered Version"
                 }
             }
         },
@@ -2092,12 +2124,13 @@ var APISwaggerJSON string = `{
             "properties": {
                 "header_name": {
                     "type": "string",
-                    "description": " Enter the Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Enter the Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.http_header_field: true\n",
                     "title": "Header Name",
                     "x-displayname": "Header",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.http_header_field": "true"
                     }
                 },
                 "header_value": {
@@ -2146,12 +2179,13 @@ var APISwaggerJSON string = `{
                 },
                 "name": {
                     "type": "string",
-                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.http_header_field: true\n",
                     "title": "Operator Name",
                     "x-displayname": "Name",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.http_header_field": "true"
                     }
                 },
                 "not_present_header": {
@@ -2292,14 +2326,12 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " case insensitive checker",
                     "title": "Check case insensitive",
-                    "format": "boolean",
                     "x-displayname": "Case-Insensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "description": " not checker",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "value": {
@@ -2317,6 +2349,46 @@ var APISwaggerJSON string = `{
                     }
                 }
             }
+        },
+        "bot_defenseMobileConfigFetchPaths": {
+            "type": "object",
+            "description": "Android and iOS mobile SDK config fetch paths.",
+            "title": "Mobile Config Fetch Paths",
+            "x-displayname": "Mobile Config Fetch Paths",
+            "x-ves-proto-message": "ves.io.schema.shape.bot_defense.MobileConfigFetchPaths",
+            "properties": {
+                "path_android": {
+                    "type": "string",
+                    "description": " Android mobile client will fetch F5 Client mobile configuration SDK from this path.\n This path must not conflict with any other website/mobile/application paths.\n\nExample: - \"/somepath\"-",
+                    "title": "Android Mobile Config Fetch Path",
+                    "x-displayname": "Android Mobile Config Fetch Path",
+                    "x-ves-example": "/somepath"
+                },
+                "path_ios": {
+                    "type": "string",
+                    "description": " iOS mobile client will fetch F5 Client mobile configuration SDK from this path.\n This path must not conflict with any other website/mobile/application paths.\n\nExample: - \"/somepath\"-",
+                    "title": "iOS Mobile Config Fetch Path",
+                    "x-displayname": "iOS Mobile Config Fetch Path",
+                    "x-ves-example": "/somepath"
+                },
+                "unavailable_text": {
+                    "type": "string",
+                    "description": " Certain mobile policies rely on older mobile components.",
+                    "title": "Unavailable Text",
+                    "x-displayname": "Unavailable"
+                }
+            }
+        },
+        "bot_defenseMobileConfigFetchStatus": {
+            "type": "string",
+            "description": "x-displayName: \"Mobile Config Fetch Status\"\nInternal status for mobile config fetch paths availability.\n\n - NOT_FETCHED: Default - not fetched yet.\n - FETCHED_NOT_AVAILABLE: Status fetched but paths are not available.\n - FETCHED_AND_AVAILABLE: Status fetched and paths are available.",
+            "title": "Mobile Config Fetch Status",
+            "enum": [
+                "NOT_FETCHED",
+                "FETCHED_NOT_AVAILABLE",
+                "FETCHED_AND_AVAILABLE"
+            ],
+            "default": "NOT_FETCHED"
         },
         "bot_defenseNegationOperator": {
             "type": "string",
@@ -2364,14 +2436,12 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " case insensitive checker",
                     "title": "Check case insensitive",
-                    "format": "boolean",
                     "x-displayname": "Case-Insensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "description": " not checker",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "value": {
@@ -2430,7 +2500,7 @@ var APISwaggerJSON string = `{
             "description": "Configures Endpoint Policy Content",
             "title": "Endpoint Policy Content",
             "x-displayname": "Protected Endpoint",
-            "x-ves-displayorder": "4,1",
+            "x-ves-displayorder": "4,5,6,1",
             "x-ves-oneof-field-endpoint_type_choice": "[\"protected_mobile_endpoints\",\"protected_web_endpoints\"]",
             "x-ves-proto-message": "ves.io.schema.shape.bot_defense.ProtectedEndpoints",
             "properties": {
@@ -2440,6 +2510,12 @@ var APISwaggerJSON string = `{
                     "title": "JavaScript Download Path",
                     "x-displayname": "Web Client JavaScript Path",
                     "x-ves-example": "/common.js?single"
+                },
+                "mobile_config_fetch_paths": {
+                    "description": " Android and iOS mobile SDK config fetch paths.",
+                    "title": "Mobile Config Fetch Paths",
+                    "$ref": "#/definitions/bot_defenseMobileConfigFetchPaths",
+                    "x-displayname": "Mobile Config Fetch Paths"
                 },
                 "protected_mobile_endpoints": {
                     "description": "Exclusive with [protected_web_endpoints]\n Protected Mobile Endpoints List",
@@ -2452,6 +2528,12 @@ var APISwaggerJSON string = `{
                     "title": "Protected Web Endpoint Version",
                     "$ref": "#/definitions/bot_defenseProtectedWebEndpointList",
                     "x-displayname": "Web"
+                },
+                "telemetry_prefix": {
+                    "type": "string",
+                    "description": " Defines a set of headers used to detect signals based on telemetry prefix",
+                    "title": "Telemetry Prefix",
+                    "x-displayname": "Telemetry Prefix"
                 }
             }
         },
@@ -2976,13 +3058,11 @@ var APISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "title": "Case sensitive",
-                    "format": "boolean",
                     "x-displayname": "Case Sensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "operator": {
@@ -3019,14 +3099,12 @@ var APISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "description": "x-displayName: \"Case Sensitive\"",
-                    "title": "Case sensitive",
-                    "format": "boolean"
+                    "title": "Case sensitive"
                 },
                 "not_value": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"",
-                    "title": "Negation",
-                    "format": "boolean"
+                    "title": "Negation"
                 },
                 "value": {
                     "type": "string",
@@ -3234,13 +3312,11 @@ var APISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "title": "Case sensitive",
-                    "format": "boolean",
                     "x-displayname": "Case Sensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "operator": {
@@ -3277,14 +3353,12 @@ var APISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "description": "x-displayName: \"Case Sensitive\"",
-                    "title": "Case sensitive",
-                    "format": "boolean"
+                    "title": "Case sensitive"
                 },
                 "not_value": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"",
-                    "title": "Negation",
-                    "format": "boolean"
+                    "title": "Negation"
                 },
                 "value": {
                     "type": "string",
@@ -3330,12 +3404,13 @@ var APISwaggerJSON string = `{
                 },
                 "name": {
                     "type": "string",
-                    "description": " Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.http_header_field: true\n",
                     "title": "Header Name",
                     "x-displayname": "Header Name",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.http_header_field": "true"
                     }
                 }
             }
@@ -3830,7 +3905,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates bot_endpoint_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -4023,6 +4097,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -5098,7 +5193,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -5164,7 +5258,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -5250,7 +5343,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

@@ -13,20 +13,25 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/golang/protobuf/descriptor"
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
+// Suppress "imported and not used" errors
 var _ codes.Code
 var _ io.Reader
 var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
+var _ = descriptor.ForMessage
+var _ = metadata.Join
 
 func request_CustomDataK8SAPI_NamespaceList_0(ctx context.Context, marshaler runtime.Marshaler, client CustomDataK8SAPIClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq NamespaceListRequest
@@ -196,7 +201,10 @@ func local_request_CustomDataK8SAPI_PodList_0(ctx context.Context, marshaler run
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_PodList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_PodList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -341,7 +349,10 @@ func local_request_CustomDataK8SAPI_PersistentVolumeClaimList_0(ctx context.Cont
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_PersistentVolumeClaimList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_PersistentVolumeClaimList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -540,7 +551,10 @@ func local_request_CustomDataK8SAPI_ServiceList_0(ctx context.Context, marshaler
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_ServiceList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_ServiceList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -685,7 +699,10 @@ func local_request_CustomDataK8SAPI_EndpointsList_0(ctx context.Context, marshal
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_EndpointsList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_EndpointsList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -830,7 +847,10 @@ func local_request_CustomDataK8SAPI_ConfigMapList_0(ctx context.Context, marshal
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_ConfigMapList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_ConfigMapList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -975,7 +995,10 @@ func local_request_CustomDataK8SAPI_SecretList_0(ctx context.Context, marshaler 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_SecretList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_SecretList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1120,7 +1143,10 @@ func local_request_CustomDataK8SAPI_DeploymentList_0(ctx context.Context, marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_DeploymentList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_DeploymentList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1265,7 +1291,10 @@ func local_request_CustomDataK8SAPI_DaemonSetList_0(ctx context.Context, marshal
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_DaemonSetList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_DaemonSetList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1410,7 +1439,10 @@ func local_request_CustomDataK8SAPI_StatefulSetList_0(ctx context.Context, marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_StatefulSetList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_StatefulSetList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1555,7 +1587,10 @@ func local_request_CustomDataK8SAPI_ReplicaSetList_0(ctx context.Context, marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_ReplicaSetList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_ReplicaSetList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1700,7 +1735,10 @@ func local_request_CustomDataK8SAPI_JobList_0(ctx context.Context, marshaler run
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_JobList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_JobList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1845,7 +1883,10 @@ func local_request_CustomDataK8SAPI_CronJobList_0(ctx context.Context, marshaler
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "site", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_CustomDataK8SAPI_CronJobList_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CustomDataK8SAPI_CronJobList_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -2257,11 +2298,14 @@ func local_request_CustomDataK8SAPI_PodsMetrics_1(ctx context.Context, marshaler
 // RegisterCustomDataK8SAPIHandlerServer registers the http handlers for service CustomDataK8SAPI to "mux".
 // UnaryRPC     :call CustomDataK8SAPIServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCustomDataK8SAPIHandlerFromEndpoint instead.
 func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.ServeMux, server CustomDataK8SAPIServer) error {
 
 	mux.Handle("GET", pattern_CustomDataK8SAPI_NamespaceList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2269,6 +2313,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_NamespaceList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2282,6 +2327,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_NodeList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2289,6 +2336,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_NodeList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2302,6 +2350,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_PodList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2309,6 +2359,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_PodList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2322,6 +2373,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_PodList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2329,6 +2382,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_PodList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2342,6 +2396,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_PersistentVolumeClaimList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2349,6 +2405,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_PersistentVolumeClaimList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2362,6 +2419,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_PersistentVolumeClaimList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2369,6 +2428,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_PersistentVolumeClaimList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2382,6 +2442,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_PersistentVolumeList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2389,6 +2451,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_PersistentVolumeList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2402,6 +2465,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_ServiceList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2409,6 +2474,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_ServiceList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2422,6 +2488,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_ServiceList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2429,6 +2497,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_ServiceList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2442,6 +2511,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_EndpointsList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2449,6 +2520,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_EndpointsList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2462,6 +2534,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_EndpointsList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2469,6 +2543,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_EndpointsList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2482,6 +2557,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_ConfigMapList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2489,6 +2566,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_ConfigMapList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2502,6 +2580,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_ConfigMapList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2509,6 +2589,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_ConfigMapList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2522,6 +2603,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_SecretList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2529,6 +2612,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_SecretList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2542,6 +2626,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_SecretList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2549,6 +2635,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_SecretList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2562,6 +2649,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_DeploymentList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2569,6 +2658,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_DeploymentList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2582,6 +2672,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_DeploymentList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2589,6 +2681,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_DeploymentList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2602,6 +2695,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_DaemonSetList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2609,6 +2704,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_DaemonSetList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2622,6 +2718,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_DaemonSetList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2629,6 +2727,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_DaemonSetList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2642,6 +2741,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_StatefulSetList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2649,6 +2750,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_StatefulSetList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2662,6 +2764,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_StatefulSetList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2669,6 +2773,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_StatefulSetList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2682,6 +2787,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_ReplicaSetList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2689,6 +2796,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_ReplicaSetList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2702,6 +2810,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_ReplicaSetList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2709,6 +2819,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_ReplicaSetList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2722,6 +2833,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_JobList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2729,6 +2842,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_JobList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2742,6 +2856,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_JobList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2749,6 +2865,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_JobList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2762,6 +2879,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_CronJobList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2769,6 +2888,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_CronJobList_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2782,6 +2902,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("GET", pattern_CustomDataK8SAPI_CronJobList_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2789,6 +2911,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_CronJobList_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2802,6 +2925,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("POST", pattern_CustomDataK8SAPI_VirtualMachineInstancesMetrics_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2809,6 +2934,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_VirtualMachineInstancesMetrics_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2822,6 +2948,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("POST", pattern_CustomDataK8SAPI_VirtualMachineInstancesMetrics_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2829,6 +2957,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_VirtualMachineInstancesMetrics_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2842,6 +2971,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("POST", pattern_CustomDataK8SAPI_PodsMetrics_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2849,6 +2980,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_PodsMetrics_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2862,6 +2994,8 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 	mux.Handle("POST", pattern_CustomDataK8SAPI_PodsMetrics_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
 		if err != nil {
@@ -2869,6 +3003,7 @@ func RegisterCustomDataK8SAPIHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		resp, md, err := local_request_CustomDataK8SAPI_PodsMetrics_1(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)

@@ -31,12 +31,12 @@ type DataSourceF5XCServicePolicySet struct {
 
 // DataSourceF5XCServicePolicySetModel describes the resource data model.
 type DataSourceF5XCServicePolicySetModel struct {
+	Annotations types.Map      `tfsdk:"annotations"`
 	Description types.String   `tfsdk:"description"`
+	Labels      types.Map      `tfsdk:"labels"`
 	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
-	Labels      types.Map      `tfsdk:"labels"`
-	Annotations types.Map      `tfsdk:"annotations"`
 	Policies    types.List     `tfsdk:"policies"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
@@ -46,8 +46,8 @@ type DataSourceF5XCServicePolicySetModel struct {
 var ServicePolicySetPoliciesObjectRefModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -64,15 +64,29 @@ func (d *DataSourceF5XCServicePolicySet) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCServicePolicySet) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "ServicePolicySet data source",
-		Description:         "ServicePolicySet data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a service_policy_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of service_policy_set) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a service_policy_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of service_policy_set) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -92,20 +106,6 @@ func (r *DataSourceF5XCServicePolicySet) Schema(ctx context.Context, request dat
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"policies": schema.ListNestedAttribute{
 				Description: "policies An ordered list of references to service_policy objects.",
 				Required:    false,
@@ -119,13 +119,13 @@ func (r *DataSourceF5XCServicePolicySet) Schema(ctx context.Context, request dat
 							Optional:    false,
 							Computed:    true,
 						},
-						"tenant": schema.StringAttribute{
+						"namespace": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
 						},
-						"namespace": schema.StringAttribute{
+						"tenant": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -181,15 +181,14 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_service_policy_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -204,36 +203,6 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -253,11 +222,41 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> Policies
-	if len(specData.Policies) > 0 {
-		policiesElements := make([]ObjectRefTypeModel, 0, len(specData.Policies))
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
 
-		for _, policiesElement := range specData.Policies {
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot ArrayOfPointerField --> Policies
+	if len(specData.GetPolicies()) > 0 {
+		policiesElements := make([]ObjectRefTypeModel, 0, len(specData.GetPolicies()))
+
+		for _, policiesElement := range specData.GetPolicies() {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
 			// data specToModelNested RequiredStringField --> Name
@@ -268,14 +267,6 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
-			// data specToModelNested StringField --> Tenant
-			if policiesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(policiesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
 			// data specToModelNested RequiredStringField --> Namespace
 			if policiesElement.GetNamespace() != "" {
 				objectRefTypeModelModel.Namespace = types.StringValue(policiesElement.GetNamespace())
@@ -284,21 +275,31 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 				objectRefTypeModelModel.Namespace = types.StringNull()
 			}
 
+			// data specToModelNested StringField --> Tenant
+			if policiesElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(policiesElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
 			policiesElements = append(policiesElements, objectRefTypeModelModel)
 		}
 
-		policiesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ServicePolicySetPoliciesObjectRefModelAttributeMap,
-			policiesElements,
-		)
+		{
+			policiesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ServicePolicySetPoliciesObjectRefModelAttributeMap,
+				policiesElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.Policies = policiesList
 		}
-
-		data.Policies = policiesList
 	} else {
 		var policiesObjectType = basetypes.ObjectType{
 			AttrTypes: ServicePolicySetPoliciesObjectRefModelAttributeMap,
@@ -308,7 +309,7 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

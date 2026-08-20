@@ -8,6 +8,12 @@ package api_inventory
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
@@ -18,11 +24,6 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/api_definition"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1664,10 +1665,7 @@ func (m *GetPathSuggestionsReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -1817,10 +1815,7 @@ func (m *UpdateApiDefinitionRefReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -1870,10 +1865,7 @@ func (m *UpdateApiDefinitionRefResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -2327,10 +2319,7 @@ func (m *UpdateApiInventoryListsReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -2380,10 +2369,7 @@ func (m *UpdateApiInventoryListsResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {

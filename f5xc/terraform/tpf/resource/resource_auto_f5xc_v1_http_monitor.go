@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -25,20 +26,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -49,7 +54,6 @@ import (
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_observability_synthetic_monitor "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/observability/synthetic_monitor"
 	ves_io_schema_observability_synthetic_monitor_v1_http_monitor "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/observability/synthetic_monitor/v1_http_monitor"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCV1HttpMonitor defines the resource implementation.
@@ -57,124 +61,124 @@ type ResourceF5XCV1HttpMonitor struct {
 	client *client.APIClient
 }
 
-type V1HttpMonitorCreateSpecTypeMethodChoice struct {
-	Put     types.Object `tfsdk:"put"`
+type V1HttpMonitorSrcExternal struct {
+	SourceChoice types.Object `tfsdk:"source_choice"`
+}
+
+type V1HttpMonitorSrcChoice struct {
+	Aws  types.Object `tfsdk:"aws"`
+	F5Xc types.Object `tfsdk:"f5xc"`
+}
+
+type V1HttpMonitorAws struct {
+	Regions types.List `tfsdk:"regions"`
+}
+
+type V1HttpMonitorF5Xc struct {
+	Regions types.List `tfsdk:"regions"`
+}
+
+type V1HttpMonitorHealthPolicy struct {
+	DynamicThresholdPolicyChoice   types.Object `tfsdk:"dynamic_threshold_policy_choice"`
+	StaticMaxThresholdPolicyChoice types.Object `tfsdk:"static_max_threshold_policy_choice"`
+	StaticMinThresholdPolicyChoice types.Object `tfsdk:"static_min_threshold_policy_choice"`
+}
+
+type V1HttpMonitorDynamicThresholdPolicyChoice struct {
+	DynamicThreshold         types.Object `tfsdk:"dynamic_threshold"`
+	DynamicThresholdDisabled types.Bool   `tfsdk:"dynamic_threshold_disabled"`
+}
+
+type V1HttpMonitorDynamicThreshold struct {
+	EvalPeriod types.List `tfsdk:"eval_period"`
+	StdDevVal  types.List `tfsdk:"std_dev_val"`
+}
+
+type V1HttpMonitorStaticMaxThresholdPolicyChoice struct {
+	StaticMaxThreshold         types.Object `tfsdk:"static_max_threshold"`
+	StaticMaxThresholdDisabled types.Bool   `tfsdk:"static_max_threshold_disabled"`
+}
+
+type V1HttpMonitorStaticMaxThreshold struct {
+	EvalPeriod      types.List  `tfsdk:"eval_period"`
+	MaxResponseTime types.Int64 `tfsdk:"max_response_time"`
+}
+
+type V1HttpMonitorStaticMinThresholdPolicyChoice struct {
+	StaticMinThreshold         types.Object `tfsdk:"static_min_threshold"`
+	StaticMinThresholdDisabled types.Bool   `tfsdk:"static_min_threshold_disabled"`
+}
+
+type V1HttpMonitorStaticMinThreshold struct {
+	EvalPeriod      types.List  `tfsdk:"eval_period"`
+	MinResponseTime types.Int64 `tfsdk:"min_response_time"`
+}
+
+type V1HttpMonitorIntervalChoice struct {
+	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
+	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
+	Interval_1Day    types.Bool `tfsdk:"interval_1_day"`
+	Interval_1Hour   types.Bool `tfsdk:"interval_1_hour"`
+	Interval_1Min    types.Bool `tfsdk:"interval_1_min"`
+	Interval_30Mins  types.Bool `tfsdk:"interval_30_mins"`
+	Interval_30Secs  types.Bool `tfsdk:"interval_30_secs"`
+	Interval_5Mins   types.Bool `tfsdk:"interval_5_mins"`
+	Interval_6Hours  types.Bool `tfsdk:"interval_6_hours"`
+}
+
+type V1HttpMonitorMethodChoice struct {
 	Delete  types.Object `tfsdk:"delete"`
 	Get     types.Bool   `tfsdk:"get"`
 	Head    types.Bool   `tfsdk:"head"`
 	Options types.Bool   `tfsdk:"options"`
 	Patch   types.Object `tfsdk:"patch"`
 	Post    types.Object `tfsdk:"post"`
+	Put     types.Object `tfsdk:"put"`
 }
 
-type V1HttpMonitorCreateSpecTypePut struct {
+type V1HttpMonitorDelete struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorCreateSpecTypeDelete struct {
+type V1HttpMonitorPatch struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorCreateSpecTypePatch struct {
+type V1HttpMonitorPost struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorCreateSpecTypePost struct {
+type V1HttpMonitorPut struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorV1HttpMonitorHTTPMonitorHeader struct {
-	Value types.String `tfsdk:"value"`
+type V1HttpMonitorHTTPMonitorHeader struct {
 	Key   types.String `tfsdk:"key"`
-}
-
-type V1HttpMonitorSyntheticMonitorSourceExternal struct {
-	SourceChoice types.Object `tfsdk:"source_choice"`
-}
-
-type V1HttpMonitorSourceExternalSourceChoice struct {
-	Aws  types.Object `tfsdk:"aws"`
-	F5Xc types.Object `tfsdk:"f5xc"`
-}
-
-type V1HttpMonitorSourceExternalAws struct {
-	Regions types.List `tfsdk:"regions"`
-}
-
-type V1HttpMonitorSourceExternalF5Xc struct {
-	Regions types.List `tfsdk:"regions"`
-}
-
-type V1HttpMonitorSyntheticMonitorHealthPolicy struct {
-	DynamicThresholdPolicyChoice   types.Object `tfsdk:"dynamic_threshold_policy_choice"`
-	StaticMaxThresholdPolicyChoice types.Object `tfsdk:"static_max_threshold_policy_choice"`
-	StaticMinThresholdPolicyChoice types.Object `tfsdk:"static_min_threshold_policy_choice"`
-}
-
-type V1HttpMonitorHealthPolicyDynamicThresholdPolicyChoice struct {
-	DynamicThresholdDisabled types.Bool   `tfsdk:"dynamic_threshold_disabled"`
-	DynamicThreshold         types.Object `tfsdk:"dynamic_threshold"`
-}
-
-type V1HttpMonitorHealthPolicyDynamicThreshold struct {
-	EvalPeriod types.List `tfsdk:"eval_period"`
-	StdDevVal  types.List `tfsdk:"std_dev_val"`
-}
-
-type V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyChoice struct {
-	StaticMaxThresholdDisabled types.Bool   `tfsdk:"static_max_threshold_disabled"`
-	StaticMaxThreshold         types.Object `tfsdk:"static_max_threshold"`
-}
-
-type V1HttpMonitorHealthPolicyStaticMaxThreshold struct {
-	MaxResponseTime types.Int64 `tfsdk:"max_response_time"`
-	EvalPeriod      types.List  `tfsdk:"eval_period"`
-}
-
-type V1HttpMonitorHealthPolicyStaticMinThresholdPolicyChoice struct {
-	StaticMinThresholdDisabled types.Bool   `tfsdk:"static_min_threshold_disabled"`
-	StaticMinThreshold         types.Object `tfsdk:"static_min_threshold"`
-}
-
-type V1HttpMonitorHealthPolicyStaticMinThreshold struct {
-	MinResponseTime types.Int64 `tfsdk:"min_response_time"`
-	EvalPeriod      types.List  `tfsdk:"eval_period"`
-}
-
-type V1HttpMonitorCreateSpecTypeIntervalChoice struct {
-	Interval_1Day    types.Bool `tfsdk:"interval_1_day"`
-	Interval_30Secs  types.Bool `tfsdk:"interval_30_secs"`
-	Interval_5Mins   types.Bool `tfsdk:"interval_5_mins"`
-	Interval_6Hours  types.Bool `tfsdk:"interval_6_hours"`
-	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
-	Interval_1Hour   types.Bool `tfsdk:"interval_1_hour"`
-	Interval_30Mins  types.Bool `tfsdk:"interval_30_mins"`
-	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
-	Interval_1Min    types.Bool `tfsdk:"interval_1_min"`
+	Value types.String `tfsdk:"value"`
 }
 
 // ResourceF5XCV1HttpMonitorModel describes the resource data model.
 type ResourceF5XCV1HttpMonitorModel struct {
-	Uid                     types.String   `tfsdk:"uid"`
-	Labels                  types.Map      `tfsdk:"labels"`
 	Annotations             types.Map      `tfsdk:"annotations"`
 	Description             types.String   `tfsdk:"description"`
+	Labels                  types.Map      `tfsdk:"labels"`
 	Name                    types.String   `tfsdk:"name"`
 	Namespace               types.String   `tfsdk:"namespace"`
+	Uid                     types.String   `tfsdk:"uid"`
+	ExternalSources         types.List     `tfsdk:"external_sources"`
+	FollowRedirects         types.Bool     `tfsdk:"follow_redirects"`
+	HealthPolicy            types.Object   `tfsdk:"health_policy"`
+	IgnoreCertErrors        types.Bool     `tfsdk:"ignore_cert_errors"`
+	IntervalChoice          types.Object   `tfsdk:"interval_choice"`
 	MethodChoice            types.Object   `tfsdk:"method_choice"`
-	RequestHeaders          types.List     `tfsdk:"request_headers"`
 	OnFailureCount          types.Int64    `tfsdk:"on_failure_count"`
 	Receive                 types.String   `tfsdk:"receive"`
-	FollowRedirects         types.Bool     `tfsdk:"follow_redirects"`
-	ResponseTimeout         types.Int64    `tfsdk:"response_timeout"`
-	ExternalSources         types.List     `tfsdk:"external_sources"`
-	Url                     types.String   `tfsdk:"url"`
-	IgnoreCertErrors        types.Bool     `tfsdk:"ignore_cert_errors"`
-	SourceCriticalThreshold types.Int64    `tfsdk:"source_critical_threshold"`
-	SniHost                 types.String   `tfsdk:"sni_host"`
+	RequestHeaders          types.List     `tfsdk:"request_headers"`
 	ResponseCodes           types.List     `tfsdk:"response_codes"`
-	HealthPolicy            types.Object   `tfsdk:"health_policy"`
-	IntervalChoice          types.Object   `tfsdk:"interval_choice"`
+	ResponseTimeout         types.Int64    `tfsdk:"response_timeout"`
+	SniHost                 types.String   `tfsdk:"sni_host"`
+	SourceCriticalThreshold types.Int64    `tfsdk:"source_critical_threshold"`
+	Url                     types.String   `tfsdk:"url"`
 	Timeouts                timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -188,57 +192,6 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> Method
-var V1HttpMonitorMethodModelAttributeMap = map[string]attr.Type{
-
-	"put": types.ObjectType{
-		AttrTypes: V1HttpMonitorMethodPutModelAttributeMap,
-	},
-	"delete": types.ObjectType{
-		AttrTypes: V1HttpMonitorMethodDeleteModelAttributeMap,
-	},
-	"get":     types.BoolType,
-	"head":    types.BoolType,
-	"options": types.BoolType,
-	"patch": types.ObjectType{
-		AttrTypes: V1HttpMonitorMethodPatchModelAttributeMap,
-	},
-	"post": types.ObjectType{
-		AttrTypes: V1HttpMonitorMethodPostModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Put
-var V1HttpMonitorMethodPutModelAttributeMap = map[string]attr.Type{
-
-	"request_body": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Delete
-var V1HttpMonitorMethodDeleteModelAttributeMap = map[string]attr.Type{
-
-	"request_body": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Patch
-var V1HttpMonitorMethodPatchModelAttributeMap = map[string]attr.Type{
-
-	"request_body": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Post
-var V1HttpMonitorMethodPostModelAttributeMap = map[string]attr.Type{
-
-	"request_body": types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> RequestHeaders
-var V1HttpMonitorRequestHeadersModelAttributeMap = map[string]attr.Type{
-
-	"value": types.StringType,
-	"key":   types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> ExternalSources
 var V1HttpMonitorExternalSourcesModelAttributeMap = map[string]attr.Type{
 
@@ -291,10 +244,10 @@ var V1HttpMonitorHealthPolicyModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> DynamicThresholdPolicy
 var V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
-	"dynamic_threshold_disabled": types.BoolType,
 	"dynamic_threshold": types.ObjectType{
 		AttrTypes: V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap,
 	},
+	"dynamic_threshold_disabled": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> DynamicThreshold
@@ -311,51 +264,102 @@ var V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttribut
 // Attribute map for RequiredOneOfField --> StaticMaxThresholdPolicy
 var V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
-	"static_max_threshold_disabled": types.BoolType,
 	"static_max_threshold": types.ObjectType{
 		AttrTypes: V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap,
 	},
+	"static_max_threshold_disabled": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> StaticMaxThreshold
 var V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap = map[string]attr.Type{
 
-	"max_response_time": types.Int64Type,
 	"eval_period": types.ListType{
 		ElemType: types.StringType,
 	},
+	"max_response_time": types.Int64Type,
 }
 
 // Attribute map for RequiredOneOfField --> StaticMinThresholdPolicy
 var V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
-	"static_min_threshold_disabled": types.BoolType,
 	"static_min_threshold": types.ObjectType{
 		AttrTypes: V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap,
 	},
+	"static_min_threshold_disabled": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> StaticMinThreshold
 var V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap = map[string]attr.Type{
 
-	"min_response_time": types.Int64Type,
 	"eval_period": types.ListType{
 		ElemType: types.StringType,
 	},
+	"min_response_time": types.Int64Type,
 }
 
 // Attribute map for RequiredOneOfField --> IntervalChoice
 var V1HttpMonitorIntervalChoiceModelAttributeMap = map[string]attr.Type{
 
+	"interval_12_hours": types.BoolType,
+	"interval_15_mins":  types.BoolType,
 	"interval_1_day":    types.BoolType,
+	"interval_1_hour":   types.BoolType,
+	"interval_1_min":    types.BoolType,
+	"interval_30_mins":  types.BoolType,
 	"interval_30_secs":  types.BoolType,
 	"interval_5_mins":   types.BoolType,
 	"interval_6_hours":  types.BoolType,
-	"interval_15_mins":  types.BoolType,
-	"interval_1_hour":   types.BoolType,
-	"interval_30_mins":  types.BoolType,
-	"interval_12_hours": types.BoolType,
-	"interval_1_min":    types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> Method
+var V1HttpMonitorMethodModelAttributeMap = map[string]attr.Type{
+
+	"delete": types.ObjectType{
+		AttrTypes: V1HttpMonitorMethodDeleteModelAttributeMap,
+	},
+	"get":     types.BoolType,
+	"head":    types.BoolType,
+	"options": types.BoolType,
+	"patch": types.ObjectType{
+		AttrTypes: V1HttpMonitorMethodPatchModelAttributeMap,
+	},
+	"post": types.ObjectType{
+		AttrTypes: V1HttpMonitorMethodPostModelAttributeMap,
+	},
+	"put": types.ObjectType{
+		AttrTypes: V1HttpMonitorMethodPutModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Delete
+var V1HttpMonitorMethodDeleteModelAttributeMap = map[string]attr.Type{
+
+	"request_body": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Patch
+var V1HttpMonitorMethodPatchModelAttributeMap = map[string]attr.Type{
+
+	"request_body": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Post
+var V1HttpMonitorMethodPostModelAttributeMap = map[string]attr.Type{
+
+	"request_body": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Put
+var V1HttpMonitorMethodPutModelAttributeMap = map[string]attr.Type{
+
+	"request_body": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> RequestHeaders
+var V1HttpMonitorRequestHeadersModelAttributeMap = map[string]attr.Type{
+
+	"key":   types.StringType,
+	"value": types.StringType,
 }
 
 func NewResourceF5XCV1HttpMonitor() resource.Resource {
@@ -369,13 +373,66 @@ func (r *ResourceF5XCV1HttpMonitor) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "V1HttpMonitor resource",
-		Description:         "V1HttpMonitor resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a v1_http_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_http_monitor) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a v1_http_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_http_monitor) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -383,98 +440,417 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+			"external_sources": schema.ListNestedAttribute{
+				Description:         "External Sources Internet facing monitor sources",
+				MarkdownDescription: "External Sources Internet facing monitor sources",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"method_choice": schema.SingleNestedAttribute{
-				Description:         "method Must select POST, PATCH, PUT, or DELETE to enable Body Content",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"patch",
-						"post",
-						"put",
-						"delete",
-						"get",
-						"head",
-						"options",
-					),
+				Validators: []validator.List{
+					listvalidator.SizeBetween(1, 8),
+					listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
 				},
-				Attributes: map[string]schema.Attribute{
-					"put": schema.SingleNestedAttribute{
-						Description:         "PUT PUT method",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"request_body": schema.StringAttribute{
-								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(65535)`",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.String{
-									stringvalidator.LengthAtMost(65535),
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"source_choice": schema.SingleNestedAttribute{
+							Description:         "Source Choice A data plane source for execution of monitors",
+							MarkdownDescription: "Source Choice A data plane source for execution of monitors",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.Object{
+								exactlyoneofvalidator.RequiredExactlyOneOf(
+									"aws",
+									"f5xc",
+								),
+							},
+							Attributes: map[string]schema.Attribute{
+								"aws": schema.SingleNestedAttribute{
+									Description:         "AWS Region Amazon Web Services",
+									MarkdownDescription: "AWS Region Amazon Web Services",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Attributes: map[string]schema.Attribute{
+										"regions": schema.ListAttribute{
+											Description:         "AWS Regions A specific source location within AWS",
+											MarkdownDescription: "AWS Regions A specific source location within AWS",
+											ElementType:         types.StringType,
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.List{
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"eu-north-1", "us-west-1", "us-east-2", "ap-northeast-1", "ca-central-1"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
+												listvalidator.UniqueValues(),
+											},
+										},
+									},
+								},
+								"f5xc": schema.SingleNestedAttribute{
+									Description:         "F5 Distributed Cloud F5 Distributed Cloud",
+									MarkdownDescription: "F5 Distributed Cloud F5 Distributed Cloud",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Attributes: map[string]schema.Attribute{
+										"regions": schema.ListAttribute{
+											Description:         "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
+											MarkdownDescription: "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
+											ElementType:         types.StringType,
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.List{
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ves-io-newyork", "ves-io-paris", "ves-io-sanjose"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
+												listvalidator.UniqueValues(),
+											},
+										},
+									},
 								},
 							},
 						},
 					},
+				},
+			},
+			"follow_redirects": schema.BoolAttribute{
+				Description:         "follow_redirects Controls if the monitor will follow redirects while determining health",
+				MarkdownDescription: "follow_redirects Controls if the monitor will follow redirects while determining health<br>**Default:** `false`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
+			"health_policy": schema.SingleNestedAttribute{
+				Description:         "health_policy",
+				MarkdownDescription: "health_policy",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Attributes: map[string]schema.Attribute{
+					"dynamic_threshold_policy_choice": schema.SingleNestedAttribute{
+						Description:         "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.",
+						MarkdownDescription: "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.Object{
+							exactlyoneofvalidator.RequiredExactlyOneOf(
+								"dynamic_threshold",
+								"dynamic_threshold_disabled",
+							),
+						},
+						Attributes: map[string]schema.Attribute{
+							"dynamic_threshold": schema.SingleNestedAttribute{
+								Description:         "dynamic_threshold",
+								MarkdownDescription: "dynamic_threshold",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"eval_period": schema.ListAttribute{
+										Description:         "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
+										MarkdownDescription: "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`",
+										ElementType:         types.StringType,
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.List{
+											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"}...)),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+									"std_dev_val": schema.ListAttribute{
+										Description:         "std_dev_val The number of standard deviations response time value must exceed before the monitor turns critical.",
+										MarkdownDescription: "std_dev_val The number of standard deviations response time value must exceed before the monitor turns critical.<br>**Allowed Values (choose one):** `['STD_DEV_VAL_3', 'STD_DEV_VAL_4', 'STD_DEV_VAL_5', 'STD_DEV_VAL_6']`",
+										ElementType:         types.StringType,
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.List{
+											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"STD_DEV_VAL_3", "STD_DEV_VAL_4", "STD_DEV_VAL_5", "STD_DEV_VAL_6"}...)),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+								},
+							},
+							"dynamic_threshold_disabled": schema.BoolAttribute{
+								Description:         "dynamic_threshold_disabled",
+								MarkdownDescription: "dynamic_threshold_disabled",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+						},
+					},
+					"static_max_threshold_policy_choice": schema.SingleNestedAttribute{
+						Description:         "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.",
+						MarkdownDescription: "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.Object{
+							exactlyoneofvalidator.RequiredExactlyOneOf(
+								"static_max_threshold",
+								"static_max_threshold_disabled",
+							),
+						},
+						Attributes: map[string]schema.Attribute{
+							"static_max_threshold": schema.SingleNestedAttribute{
+								Description:         "static_max_threshold",
+								MarkdownDescription: "static_max_threshold",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"eval_period": schema.ListAttribute{
+										Description:         "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
+										MarkdownDescription: "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`",
+										ElementType:         types.StringType,
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.List{
+											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"}...)),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+									"max_response_time": schema.Int64Attribute{
+										Description:         "max_response_time The maximum response time value that must be exceeded before the monitor turns critical.",
+										MarkdownDescription: "max_response_time The maximum response time value that must be exceeded before the monitor turns critical.<br>**Default:** `1000`",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Default:             int64default.StaticInt64(1000),
+										Validators: []validator.Int64{
+											int64validator.Between(10, 10000),
+										},
+									},
+								},
+							},
+							"static_max_threshold_disabled": schema.BoolAttribute{
+								Description:         "static_max_threshold_disabled",
+								MarkdownDescription: "static_max_threshold_disabled",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+						},
+					},
+					"static_min_threshold_policy_choice": schema.SingleNestedAttribute{
+						Description:         "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.",
+						MarkdownDescription: "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.Object{
+							exactlyoneofvalidator.RequiredExactlyOneOf(
+								"static_min_threshold",
+								"static_min_threshold_disabled",
+							),
+						},
+						Attributes: map[string]schema.Attribute{
+							"static_min_threshold": schema.SingleNestedAttribute{
+								Description:         "static_max_threshold",
+								MarkdownDescription: "static_max_threshold",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"eval_period": schema.ListAttribute{
+										Description:         "eval_period The duration that the response time value must fall below the set threshold before the monitor turns critical.",
+										MarkdownDescription: "eval_period The duration that the response time value must fall below the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`",
+										ElementType:         types.StringType,
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.List{
+											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"}...)),
+											listvalidator.SizeAtMost(1),
+										},
+									},
+									"min_response_time": schema.Int64Attribute{
+										Description:         "min_response_time The minimum value that response time must fall below before the monitor turns critical.",
+										MarkdownDescription: "min_response_time The minimum value that response time must fall below before the monitor turns critical.<br>**Default:** `50`",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Default:             int64default.StaticInt64(50),
+										Validators: []validator.Int64{
+											int64validator.Between(0, 250),
+										},
+									},
+								},
+							},
+							"static_min_threshold_disabled": schema.BoolAttribute{
+								Description:         "static_min_threshold_disabled",
+								MarkdownDescription: "static_min_threshold_disabled",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+						},
+					},
+				},
+			},
+			"ignore_cert_errors": schema.BoolAttribute{
+				Description:         "ignore_cert_errors Controls if an SSL error will result in a change of health status",
+				MarkdownDescription: "ignore_cert_errors Controls if an SSL error will result in a change of health status<br>**Default:** `false`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
+			"interval_choice": schema.SingleNestedAttribute{
+				Description:         "interval How often the monitor will run from each source location",
+				MarkdownDescription: "interval How often the monitor will run from each source location",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.RequiredExactlyOneOf(
+						"interval_12_hours",
+						"interval_15_mins",
+						"interval_1_day",
+						"interval_1_hour",
+						"interval_1_min",
+						"interval_30_mins",
+						"interval_30_secs",
+						"interval_5_mins",
+						"interval_6_hours",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"interval_12_hours": schema.BoolAttribute{
+						Description:         "12 hours",
+						MarkdownDescription: "12 hours",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_15_mins": schema.BoolAttribute{
+						Description:         "15 minutes",
+						MarkdownDescription: "15 minutes",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_1_day": schema.BoolAttribute{
+						Description:         "1 day",
+						MarkdownDescription: "1 day",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_1_hour": schema.BoolAttribute{
+						Description:         "1 hour",
+						MarkdownDescription: "1 hour",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_1_min": schema.BoolAttribute{
+						Description:         "1 minute",
+						MarkdownDescription: "1 minute",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_30_mins": schema.BoolAttribute{
+						Description:         "30 minutes",
+						MarkdownDescription: "30 minutes",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_30_secs": schema.BoolAttribute{
+						Description:         "30 seconds",
+						MarkdownDescription: "30 seconds",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_5_mins": schema.BoolAttribute{
+						Description:         "5 minutes",
+						MarkdownDescription: "5 minutes",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_6_hours": schema.BoolAttribute{
+						Description:         "6 hours",
+						MarkdownDescription: "6 hours",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+				},
+			},
+			"method_choice": schema.SingleNestedAttribute{
+				Description:         "method Must select POST, PATCH, PUT, or DELETE to enable Body Content",
+				MarkdownDescription: "method Must select POST, PATCH, PUT, or DELETE to enable Body Content",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.RequiredExactlyOneOf(
+						"delete",
+						"get",
+						"head",
+						"options",
+						"patch",
+						"post",
+						"put",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
 					"delete": schema.SingleNestedAttribute{
 						Description:         "DELETE DELETE method",
-						MarkdownDescription: "",
+						MarkdownDescription: "DELETE DELETE method",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"request_body": schema.StringAttribute{
 								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(65535)`",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -486,7 +862,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"get": schema.BoolAttribute{
 						Description:         "GET GET method",
-						MarkdownDescription: "",
+						MarkdownDescription: "GET GET method",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -496,7 +872,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"head": schema.BoolAttribute{
 						Description:         "HEAD HEAD method",
-						MarkdownDescription: "",
+						MarkdownDescription: "HEAD HEAD method",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -506,7 +882,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"options": schema.BoolAttribute{
 						Description:         "OPTIONS OPTIONS method",
-						MarkdownDescription: "",
+						MarkdownDescription: "OPTIONS OPTIONS method",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -516,14 +892,14 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"patch": schema.SingleNestedAttribute{
 						Description:         "PATCH PATCH method",
-						MarkdownDescription: "",
+						MarkdownDescription: "PATCH PATCH method",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"request_body": schema.StringAttribute{
 								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(65535)`",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -535,14 +911,33 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"post": schema.SingleNestedAttribute{
 						Description:         "POST POST method",
-						MarkdownDescription: "",
+						MarkdownDescription: "POST POST method",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"request_body": schema.StringAttribute{
 								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(65535)`",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.String{
+									stringvalidator.LengthAtMost(65535),
+								},
+							},
+						},
+					},
+					"put": schema.SingleNestedAttribute{
+						Description:         "PUT PUT method",
+						MarkdownDescription: "PUT PUT method",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"request_body": schema.StringAttribute{
+								Description:         "content Ensure appropriate request headers are added based on the content type added here",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -554,40 +949,9 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 				},
 			},
-			"request_headers": schema.ListNestedAttribute{
-				Description:         "request_headers",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"value": schema.StringAttribute{
-							Description:         "Value",
-							MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(8192)`",
-							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.LengthAtMost(8192),
-							},
-						},
-						"key": schema.StringAttribute{
-							Description:         "Key",
-							MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.LengthAtMost(2048),
-							},
-						},
-					},
-				},
-			},
 			"on_failure_count": schema.Int64Attribute{
 				Description:         "on_failure_count The number of times a monitor must fail before the global monitor changes health",
-				MarkdownDescription: "<br>**Default:** `2`",
+				MarkdownDescription: "on_failure_count The number of times a monitor must fail before the global monitor changes health<br>**Default:** `2`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -598,7 +962,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 			},
 			"receive": schema.StringAttribute{
 				Description:         "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.",
-				MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
+				MarkdownDescription: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.<br>**Validation:** `Length LengthAtMost(2048)`",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -606,17 +970,60 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					stringvalidator.LengthAtMost(2048),
 				},
 			},
-			"follow_redirects": schema.BoolAttribute{
-				Description:         "follow_redirects Controls if the monitor will follow redirects while determining health",
-				MarkdownDescription: "<br>**Default:** `false`",
+			"request_headers": schema.ListNestedAttribute{
+				Description:         "request_headers",
+				MarkdownDescription: "request_headers",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(false),
+				Computed:            false,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"key": schema.StringAttribute{
+							Description:         "Key",
+							MarkdownDescription: "Key<br>**Validation:** `Length LengthAtMost(2048)`",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.LengthAtMost(2048),
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+\-.^_`+"`"+`|~]+$`),
+									"must be a valid HTTP header field name",
+								),
+							},
+						},
+						"value": schema.StringAttribute{
+							Description:         "Value",
+							MarkdownDescription: "Value<br>**Validation:** `Length LengthAtMost(8192)`",
+							Required:            false,
+							Optional:            true,
+							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.LengthAtMost(8192),
+							},
+						},
+					},
+				},
+			},
+			"response_codes": schema.ListAttribute{
+				Description:         "response_codes HTTP response codes which will result in a healthy monitor. Use '*' as a wildcard character.",
+				MarkdownDescription: "response_codes HTTP response codes which will result in a healthy monitor. Use '*' as a wildcard character.",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				ElementType:         types.StringType,
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
+					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[1-5*][0-9*]{2}$`),
+						"must match pattern `^[1-5*][0-9*]{2}$`",
+					)),
+					listvalidator.UniqueValues(),
+				},
 			},
 			"response_timeout": schema.Int64Attribute{
 				Description:         "response_timeout The amount of time in milliseconds before the monitor considers a pending request to be a failure",
-				MarkdownDescription: "<br>**Default:** `10000`",
+				MarkdownDescription: "response_timeout The amount of time in milliseconds before the monitor considers a pending request to be a failure<br>**Default:** `10000`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -625,87 +1032,23 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					int64validator.Between(10, 60000),
 				},
 			},
-			"external_sources": schema.ListNestedAttribute{
-				Description:         "External Sources Internet facing monitor sources",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"source_choice": schema.SingleNestedAttribute{
-							Description:         "Source Choice A data plane source for execution of monitors",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.Object{
-								atmostoneofvalidator.AtMostOneOf(
-									"aws",
-									"f5xc",
-								),
-							},
-							Attributes: map[string]schema.Attribute{
-								"aws": schema.SingleNestedAttribute{
-									Description:         "AWS Region Amazon Web Services",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Attributes: map[string]schema.Attribute{
-										"regions": schema.ListAttribute{
-											Description:         "AWS Regions A specific source location within AWS",
-											MarkdownDescription: "",
-											ElementType:         types.StringType,
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-										},
-									},
-								},
-								"f5xc": schema.SingleNestedAttribute{
-									Description:         "F5 Distributed Cloud F5 Distributed Cloud",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Attributes: map[string]schema.Attribute{
-										"regions": schema.ListAttribute{
-											Description:         "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
-											MarkdownDescription: "",
-											ElementType:         types.StringType,
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			"url": schema.StringAttribute{
-				Description:         "url",
-				MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(2048),
-				},
-			},
-			"ignore_cert_errors": schema.BoolAttribute{
-				Description:         "ignore_cert_errors Controls if an SSL error will result in a change of health status",
-				MarkdownDescription: "<br>**Default:** `false`",
+			"sni_host": schema.StringAttribute{
+				Description:         "SNI Host Override A string value which will override the default SNI host",
+				MarkdownDescription: "SNI Host Override A string value which will override the default SNI host<br>**Validation:** `Length LengthAtMost(253)`",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(false),
+				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(253),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$`),
+						"must be a valid hostname (RFC 1034)",
+					),
+				},
 			},
 			"source_critical_threshold": schema.Int64Attribute{
 				Description:         "source_critical_threshold The number of provider-regions a monitor must fail from before the global monitor changes health",
-				MarkdownDescription: "<br>**Default:** `1`",
+				MarkdownDescription: "source_critical_threshold The number of provider-regions a monitor must fail from before the global monitor changes health<br>**Default:** `1`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -714,320 +1057,23 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					int64validator.Between(1, 256),
 				},
 			},
-			"sni_host": schema.StringAttribute{
-				Description:         "SNI Host Override A string value which will override the default SNI host",
-				MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(253)`",
-				Required:            false,
-				Optional:            true,
+			"url": schema.StringAttribute{
+				Description:         "url",
+				MarkdownDescription: "url<br>**Validation:** `Length LengthAtMost(2048)`",
+				Required:            true,
+				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.LengthAtMost(253),
-				},
-			},
-			"response_codes": schema.ListAttribute{
-				Description:         "response_codes HTTP response codes which will result in a healthy monitor. Use '*' as a wildcard character.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				ElementType:         types.StringType,
-			},
-			"health_policy": schema.SingleNestedAttribute{
-				Description:         "health_policy",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Attributes: map[string]schema.Attribute{
-					"dynamic_threshold_policy_choice": schema.SingleNestedAttribute{
-						Description:         "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
-								"dynamic_threshold_disabled",
-								"dynamic_threshold",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"dynamic_threshold_disabled": schema.BoolAttribute{
-								Description:         "dynamic_threshold_disabled",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"dynamic_threshold": schema.SingleNestedAttribute{
-								Description:         "dynamic_threshold",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"eval_period": schema.ListAttribute{
-										Description:         "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
-										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_5_MINS\", \"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\", \"EVAL_PERIOD_3_MINS\"]`",
-										ElementType:         types.StringType,
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS"}...)),
-											listvalidator.SizeAtMost(1),
-										},
-									},
-									"std_dev_val": schema.ListAttribute{
-										Description:         "std_dev_val The number of standard deviations response time value must exceed before the monitor turns critical.",
-										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"STD_DEV_VAL_5\", \"STD_DEV_VAL_6\", \"STD_DEV_VAL_3\", \"STD_DEV_VAL_4\"]`",
-										ElementType:         types.StringType,
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"STD_DEV_VAL_5", "STD_DEV_VAL_6", "STD_DEV_VAL_3", "STD_DEV_VAL_4"}...)),
-											listvalidator.SizeAtMost(1),
-										},
-									},
-								},
-							},
-						},
-					},
-					"static_max_threshold_policy_choice": schema.SingleNestedAttribute{
-						Description:         "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
-								"static_max_threshold_disabled",
-								"static_max_threshold",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"static_max_threshold_disabled": schema.BoolAttribute{
-								Description:         "static_max_threshold_disabled",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"static_max_threshold": schema.SingleNestedAttribute{
-								Description:         "static_max_threshold",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"max_response_time": schema.Int64Attribute{
-										Description:         "max_response_time The maximum response time value that must be exceeded before the monitor turns critical.",
-										MarkdownDescription: "<br>**Default:** `1000`",
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Default:             int64default.StaticInt64(1000),
-										Validators: []validator.Int64{
-											int64validator.Between(10, 10000),
-										},
-									},
-									"eval_period": schema.ListAttribute{
-										Description:         "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
-										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\", \"EVAL_PERIOD_3_MINS\", \"EVAL_PERIOD_5_MINS\"]`",
-										ElementType:         types.StringType,
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"}...)),
-											listvalidator.SizeAtMost(1),
-										},
-									},
-								},
-							},
-						},
-					},
-					"static_min_threshold_policy_choice": schema.SingleNestedAttribute{
-						Description:         "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
-								"static_min_threshold_disabled",
-								"static_min_threshold",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"static_min_threshold_disabled": schema.BoolAttribute{
-								Description:         "static_min_threshold_disabled",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"static_min_threshold": schema.SingleNestedAttribute{
-								Description:         "static_max_threshold",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"min_response_time": schema.Int64Attribute{
-										Description:         "min_response_time The minimum value that response time must fall below before the monitor turns critical.",
-										MarkdownDescription: "<br>**Default:** `50`",
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Default:             int64default.StaticInt64(50),
-										Validators: []validator.Int64{
-											int64validator.Between(0, 250),
-										},
-									},
-									"eval_period": schema.ListAttribute{
-										Description:         "eval_period The duration that the response time value must fall below the set threshold before the monitor turns critical.",
-										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_3_MINS\", \"EVAL_PERIOD_5_MINS\", \"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\"]`",
-										ElementType:         types.StringType,
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"}...)),
-											listvalidator.SizeAtMost(1),
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			"interval_choice": schema.SingleNestedAttribute{
-				Description:         "interval How often the monitor will run from each source location",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"interval_12_hours",
-						"interval_1_min",
-						"interval_15_mins",
-						"interval_1_hour",
-						"interval_1_day",
-						"interval_30_secs",
-						"interval_5_mins",
-						"interval_30_mins",
-						"interval_6_hours",
+					stringvalidator.LengthAtMost(2048),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]+$`),
+						"must be a valid absolute URI (RFC 3986)",
 					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"interval_1_day": schema.BoolAttribute{
-						Description:         "1 day",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_30_secs": schema.BoolAttribute{
-						Description:         "30 seconds",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_5_mins": schema.BoolAttribute{
-						Description:         "5 minutes",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_6_hours": schema.BoolAttribute{
-						Description:         "6 hours",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_15_mins": schema.BoolAttribute{
-						Description:         "15 minutes",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_1_hour": schema.BoolAttribute{
-						Description:         "1 hour",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_30_mins": schema.BoolAttribute{
-						Description:         "30 minutes",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_12_hours": schema.BoolAttribute{
-						Description:         "12 hours",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_1_min": schema.BoolAttribute{
-						Description:         "1 minute",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -1133,7 +1179,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1146,6 +1192,20 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -1156,36 +1216,386 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	{
+		// resource modelToSpecRoot RequiredArrayOfPointerField --> ExternalSources
+		var externalSourcesElementsModelToSpec []V1HttpMonitorSrcExternal
+		response.Diagnostics.Append(data.ExternalSources.ElementsAs(ctx, &externalSourcesElementsModelToSpec, false)...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		externalSourcesSpec := make([]*ves_io_schema_observability_synthetic_monitor.SourceExternal, len(externalSourcesElementsModelToSpec))
+
+		for i, externalSourcesElement := range externalSourcesElementsModelToSpec {
+			externalSourcesSpec[i] = &ves_io_schema_observability_synthetic_monitor.SourceExternal{}
+
+			// resource modelToSpecNested RequiredOneOfField --> SourceChoice
+			if !externalSourcesElement.SourceChoice.IsNull() && !externalSourcesElement.SourceChoice.IsUnknown() {
+				externalSourcesSourceChoiceModel := V1HttpMonitorSrcChoice{}
+				response.Diagnostics.Append(externalSourcesElement.SourceChoice.As(ctx, &externalSourcesSourceChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Aws
+				if !externalSourcesSourceChoiceModel.Aws.IsNull() && !externalSourcesSourceChoiceModel.Aws.IsUnknown() {
+					var v1HttpMonitorAwsModel V1HttpMonitorAws
+					response.Diagnostics.Append(externalSourcesSourceChoiceModel.Aws.As(ctx, &v1HttpMonitorAwsModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					awsOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws{}
+					awsOneOfSpec.Aws = &ves_io_schema_observability_synthetic_monitor.AWSRegionsExternal{}
+					externalSourcesSpec[i].SourceChoice = awsOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
+					{
+						elements := make([]string, 0, len(v1HttpMonitorAwsModel.Regions.Elements()))
+						diags = v1HttpMonitorAwsModel.Regions.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						awsOneOfSpec.Aws.Regions = elements
+					}
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
+				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
+					var v1HttpMonitorF5XcModel V1HttpMonitorF5Xc
+					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1HttpMonitorF5XcModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
+					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
+					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
+					{
+						elements := make([]string, 0, len(v1HttpMonitorF5XcModel.Regions.Elements()))
+						diags = v1HttpMonitorF5XcModel.Regions.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						f5xcOneOfSpec.F5Xc.Regions = elements
+					}
+
+				}
+
+			}
+
+		}
+
+		spec.ExternalSources = externalSourcesSpec
+	}
+
+	// resource modelToSpecRoot Bool Field --> FollowRedirects
+	if !data.FollowRedirects.IsNull() && !data.FollowRedirects.IsUnknown() {
+		spec.FollowRedirects = bool(data.FollowRedirects.ValueBool())
+	}
+
+	{
+		// resource modelToSpecRoot PointerField --> HealthPolicy
+		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
+			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
+			spec.HealthPolicy = healthPolicySpec
+			var healthPolicyModel V1HttpMonitorHealthPolicy
+
+			// Populate the nested model from the main data model
+			diags.Append(data.HealthPolicy.As(ctx, &healthPolicyModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
+			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
+				healthPolicyDynamicThresholdPolicyChoiceModel := V1HttpMonitorDynamicThresholdPolicyChoice{}
+				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> DynamicThreshold
+				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsUnknown() {
+					var v1HttpMonitorDynamicThresholdModel V1HttpMonitorDynamicThreshold
+					response.Diagnostics.Append(healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.As(ctx, &v1HttpMonitorDynamicThresholdModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					dynamicThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold{}
+					dynamicThresholdOneOfSpec.DynamicThreshold = &ves_io_schema_observability_synthetic_monitor.DynamicThreshold{}
+					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdOneOfSpec
+
+					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
+					if !v1HttpMonitorDynamicThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorDynamicThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorDynamicThresholdModel.EvalPeriod.Elements()) > 0 {
+						var evalPeriodTfStrings []types.String
+						diags = v1HttpMonitorDynamicThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(evalPeriodTfStrings) > 0 {
+							valStr := evalPeriodTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
+								dynamicThresholdOneOfSpec.DynamicThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
+								)
+								return
+							}
+						}
+					}
+
+					// resource modelToSpecNested RequiredEnumField --> StdDevVal
+					if !v1HttpMonitorDynamicThresholdModel.StdDevVal.IsNull() && !v1HttpMonitorDynamicThresholdModel.StdDevVal.IsUnknown() && len(v1HttpMonitorDynamicThresholdModel.StdDevVal.Elements()) > 0 {
+						var stdDevValTfStrings []types.String
+						diags = v1HttpMonitorDynamicThresholdModel.StdDevVal.ElementsAs(ctx, &stdDevValTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(stdDevValTfStrings) > 0 {
+							valStr := stdDevValTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.StdDevVal_value[valStr]; ok {
+								dynamicThresholdOneOfSpec.DynamicThreshold.StdDevVal = ves_io_schema_observability_synthetic_monitor.StdDevVal(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum StdDevVal", valStr),
+								)
+								return
+							}
+						}
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
+				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsUnknown() {
+					dynamicThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{}
+					dynamicThresholdDisabledSpecBool.DynamicThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdDisabledSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
+			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
+				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1HttpMonitorStaticMaxThresholdPolicyChoice{}
+				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> StaticMaxThreshold
+				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsUnknown() {
+					var v1HttpMonitorStaticMaxThresholdModel V1HttpMonitorStaticMaxThreshold
+					response.Diagnostics.Append(healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.As(ctx, &v1HttpMonitorStaticMaxThresholdModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					staticMaxThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold{}
+					staticMaxThresholdOneOfSpec.StaticMaxThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMaxThreshold{}
+					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdOneOfSpec
+
+					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
+					if !v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.Elements()) > 0 {
+						var evalPeriodTfStrings []types.String
+						diags = v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(evalPeriodTfStrings) > 0 {
+							valStr := evalPeriodTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
+								staticMaxThresholdOneOfSpec.StaticMaxThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
+								)
+								return
+							}
+						}
+					}
+
+					// resource modelToSpecNested RequiredUintField --> MaxResponseTime
+					staticMaxThresholdOneOfSpec.StaticMaxThreshold.MaxResponseTime = uint32(uint32(v1HttpMonitorStaticMaxThresholdModel.MaxResponseTime.ValueInt64()))
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
+					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
+					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
+			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
+				healthPolicyStaticMinThresholdPolicyChoiceModel := V1HttpMonitorStaticMinThresholdPolicyChoice{}
+				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> StaticMinThreshold
+				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsUnknown() {
+					var v1HttpMonitorStaticMinThresholdModel V1HttpMonitorStaticMinThreshold
+					response.Diagnostics.Append(healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.As(ctx, &v1HttpMonitorStaticMinThresholdModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					staticMinThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold{}
+					staticMinThresholdOneOfSpec.StaticMinThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMinThreshold{}
+					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdOneOfSpec
+
+					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
+					if !v1HttpMonitorStaticMinThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorStaticMinThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorStaticMinThresholdModel.EvalPeriod.Elements()) > 0 {
+						var evalPeriodTfStrings []types.String
+						diags = v1HttpMonitorStaticMinThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(evalPeriodTfStrings) > 0 {
+							valStr := evalPeriodTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
+								staticMinThresholdOneOfSpec.StaticMinThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
+								)
+								return
+							}
+						}
+					}
+
+					// resource modelToSpecNested RequiredUintField --> MinResponseTime
+					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1HttpMonitorStaticMinThresholdModel.MinResponseTime.ValueInt64()))
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
+				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsUnknown() {
+					staticMinThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{}
+					staticMinThresholdDisabledSpecBool.StaticMinThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdDisabledSpecBool
+				}
+
+			}
+
+		}
+	}
+
+	// resource modelToSpecRoot Bool Field --> IgnoreCertErrors
+	if !data.IgnoreCertErrors.IsNull() && !data.IgnoreCertErrors.IsUnknown() {
+		spec.IgnoreCertErrors = bool(data.IgnoreCertErrors.ValueBool())
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
+	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
+		intervalChoiceModel := V1HttpMonitorIntervalChoice{}
+		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
+		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
+			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_12Hours{}
+			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval12HoursSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
+		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
+			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_15Mins{}
+			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval15MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Day
+		if !intervalChoiceModel.Interval_1Day.IsNull() && !intervalChoiceModel.Interval_1Day.IsUnknown() {
+			interval1DaySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Day{}
+			interval1DaySpecBool.Interval_1Day = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1DaySpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
+		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
+			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Hour{}
+			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1HourSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Min
+		if !intervalChoiceModel.Interval_1Min.IsNull() && !intervalChoiceModel.Interval_1Min.IsUnknown() {
+			interval1MinSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Min{}
+			interval1MinSpecBool.Interval_1Min = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1MinSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Mins
+		if !intervalChoiceModel.Interval_30Mins.IsNull() && !intervalChoiceModel.Interval_30Mins.IsUnknown() {
+			interval30MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Mins{}
+			interval30MinsSpecBool.Interval_30Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval30MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
+		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
+			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Secs{}
+			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval30SecsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
+		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
+			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_5Mins{}
+			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval5MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
+		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
+			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_6Hours{}
+			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval6HoursSpecBool
+		}
+
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> Method
 	if !data.MethodChoice.IsNull() && !data.MethodChoice.IsUnknown() {
-		methodChoiceModel := V1HttpMonitorCreateSpecTypeMethodChoice{}
+		methodChoiceModel := V1HttpMonitorMethodChoice{}
 		response.Diagnostics.Append(data.MethodChoice.As(ctx, &methodChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> Put
-		if !methodChoiceModel.Put.IsNull() && !methodChoiceModel.Put.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypePutModel V1HttpMonitorCreateSpecTypePut
-			response.Diagnostics.Append(methodChoiceModel.Put.As(ctx, &v1HttpMonitorCreateSpecTypePutModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			putOneOfSpec := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put{}
-			putOneOfSpec.Put = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.RequestBody{}
-			spec.Method = putOneOfSpec
-
-			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypePutModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypePutModel.RequestBody.IsUnknown() {
-				putOneOfSpec.Put.RequestBody = string(v1HttpMonitorCreateSpecTypePutModel.RequestBody.ValueString())
-			}
-
-		}
-
 		// resource modelToSpecNested PointerOfOneOfField --> Delete
 		if !methodChoiceModel.Delete.IsNull() && !methodChoiceModel.Delete.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypeDeleteModel V1HttpMonitorCreateSpecTypeDelete
-			response.Diagnostics.Append(methodChoiceModel.Delete.As(ctx, &v1HttpMonitorCreateSpecTypeDeleteModel, basetypes.ObjectAsOptions{})...)
+			var v1HttpMonitorDeleteModel V1HttpMonitorDelete
+			response.Diagnostics.Append(methodChoiceModel.Delete.As(ctx, &v1HttpMonitorDeleteModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1194,8 +1604,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			spec.Method = deleteOneOfSpec
 
 			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypeDeleteModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypeDeleteModel.RequestBody.IsUnknown() {
-				deleteOneOfSpec.Delete.RequestBody = string(v1HttpMonitorCreateSpecTypeDeleteModel.RequestBody.ValueString())
+			if !v1HttpMonitorDeleteModel.RequestBody.IsNull() && !v1HttpMonitorDeleteModel.RequestBody.IsUnknown() {
+				deleteOneOfSpec.Delete.RequestBody = string(v1HttpMonitorDeleteModel.RequestBody.ValueString())
 			}
 
 		}
@@ -1223,8 +1633,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 
 		// resource modelToSpecNested PointerOfOneOfField --> Patch
 		if !methodChoiceModel.Patch.IsNull() && !methodChoiceModel.Patch.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypePatchModel V1HttpMonitorCreateSpecTypePatch
-			response.Diagnostics.Append(methodChoiceModel.Patch.As(ctx, &v1HttpMonitorCreateSpecTypePatchModel, basetypes.ObjectAsOptions{})...)
+			var v1HttpMonitorPatchModel V1HttpMonitorPatch
+			response.Diagnostics.Append(methodChoiceModel.Patch.As(ctx, &v1HttpMonitorPatchModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1233,16 +1643,16 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			spec.Method = patchOneOfSpec
 
 			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypePatchModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypePatchModel.RequestBody.IsUnknown() {
-				patchOneOfSpec.Patch.RequestBody = string(v1HttpMonitorCreateSpecTypePatchModel.RequestBody.ValueString())
+			if !v1HttpMonitorPatchModel.RequestBody.IsNull() && !v1HttpMonitorPatchModel.RequestBody.IsUnknown() {
+				patchOneOfSpec.Patch.RequestBody = string(v1HttpMonitorPatchModel.RequestBody.ValueString())
 			}
 
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> Post
 		if !methodChoiceModel.Post.IsNull() && !methodChoiceModel.Post.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypePostModel V1HttpMonitorCreateSpecTypePost
-			response.Diagnostics.Append(methodChoiceModel.Post.As(ctx, &v1HttpMonitorCreateSpecTypePostModel, basetypes.ObjectAsOptions{})...)
+			var v1HttpMonitorPostModel V1HttpMonitorPost
+			response.Diagnostics.Append(methodChoiceModel.Post.As(ctx, &v1HttpMonitorPostModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1251,18 +1661,44 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			spec.Method = postOneOfSpec
 
 			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypePostModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypePostModel.RequestBody.IsUnknown() {
-				postOneOfSpec.Post.RequestBody = string(v1HttpMonitorCreateSpecTypePostModel.RequestBody.ValueString())
+			if !v1HttpMonitorPostModel.RequestBody.IsNull() && !v1HttpMonitorPostModel.RequestBody.IsUnknown() {
+				postOneOfSpec.Post.RequestBody = string(v1HttpMonitorPostModel.RequestBody.ValueString())
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> Put
+		if !methodChoiceModel.Put.IsNull() && !methodChoiceModel.Put.IsUnknown() {
+			var v1HttpMonitorPutModel V1HttpMonitorPut
+			response.Diagnostics.Append(methodChoiceModel.Put.As(ctx, &v1HttpMonitorPutModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			putOneOfSpec := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put{}
+			putOneOfSpec.Put = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.RequestBody{}
+			spec.Method = putOneOfSpec
+
+			// resource modelToSpecNested StringField --> RequestBody
+			if !v1HttpMonitorPutModel.RequestBody.IsNull() && !v1HttpMonitorPutModel.RequestBody.IsUnknown() {
+				putOneOfSpec.Put.RequestBody = string(v1HttpMonitorPutModel.RequestBody.ValueString())
 			}
 
 		}
 
 	}
 
+	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
+	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
+
+	// resource modelToSpecRoot StringField --> Receive
+	if !data.Receive.IsNull() && !data.Receive.IsUnknown() {
+		spec.Receive = string(data.Receive.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> RequestHeaders
 		if !data.RequestHeaders.IsNull() && !data.RequestHeaders.IsUnknown() {
-			var requestHeadersElements []V1HttpMonitorV1HttpMonitorHTTPMonitorHeader
+			var requestHeadersElements []V1HttpMonitorHTTPMonitorHeader
 			response.Diagnostics.Append(data.RequestHeaders.ElementsAs(ctx, &requestHeadersElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -1274,126 +1710,20 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			for i, requestHeadersElement := range requestHeadersElements {
 				requestHeadersSpec[i] = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.HTTPMonitorHeader{}
 
-				// resource modelToSpecNested StringField --> Value
-				if !requestHeadersElement.Value.IsNull() && !requestHeadersElement.Value.IsUnknown() {
-					requestHeadersSpec[i].Value = string(requestHeadersElement.Value.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Key
 				if !requestHeadersElement.Key.IsNull() && !requestHeadersElement.Key.IsUnknown() {
 					requestHeadersSpec[i].Key = string(requestHeadersElement.Key.ValueString())
+				}
+
+				// resource modelToSpecNested StringField --> Value
+				if !requestHeadersElement.Value.IsNull() && !requestHeadersElement.Value.IsUnknown() {
+					requestHeadersSpec[i].Value = string(requestHeadersElement.Value.ValueString())
 				}
 
 			}
 
 			spec.RequestHeaders = requestHeadersSpec
 		}
-	}
-
-	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
-	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
-
-	// resource modelToSpecRoot StringField --> Receive
-	if !data.Receive.IsNull() && !data.Receive.IsUnknown() {
-		spec.Receive = string(data.Receive.ValueString())
-	}
-
-	// resource modelToSpecRoot Bool Field --> FollowRedirects
-	if !data.FollowRedirects.IsNull() && !data.FollowRedirects.IsUnknown() {
-		spec.FollowRedirects = bool(data.FollowRedirects.ValueBool())
-	}
-
-	// resource modelToSpecRoot UintField --> ResponseTimeout
-	if !data.ResponseTimeout.IsNull() && !data.ResponseTimeout.IsUnknown() {
-		spec.ResponseTimeout = uint32(data.ResponseTimeout.ValueInt64())
-	}
-
-	{
-		// resource modelToSpecRoot RequiredArrayOfPointerField --> ExternalSources
-		var externalSourcesElementsModelToSpec []V1HttpMonitorSyntheticMonitorSourceExternal
-		response.Diagnostics.Append(data.ExternalSources.ElementsAs(ctx, &externalSourcesElementsModelToSpec, false)...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		externalSourcesSpec := make([]*ves_io_schema_observability_synthetic_monitor.SourceExternal, len(externalSourcesElementsModelToSpec))
-
-		for i, externalSourcesElement := range externalSourcesElementsModelToSpec {
-			externalSourcesSpec[i] = &ves_io_schema_observability_synthetic_monitor.SourceExternal{}
-
-			// resource modelToSpecNested RequiredOneOfField --> SourceChoice
-			if !externalSourcesElement.SourceChoice.IsNull() && !externalSourcesElement.SourceChoice.IsUnknown() {
-				externalSourcesSourceChoiceModel := V1HttpMonitorSourceExternalSourceChoice{}
-				response.Diagnostics.Append(externalSourcesElement.SourceChoice.As(ctx, &externalSourcesSourceChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> Aws
-				if !externalSourcesSourceChoiceModel.Aws.IsNull() && !externalSourcesSourceChoiceModel.Aws.IsUnknown() {
-					var v1HttpMonitorSourceExternalAwsModel V1HttpMonitorSourceExternalAws
-					response.Diagnostics.Append(externalSourcesSourceChoiceModel.Aws.As(ctx, &v1HttpMonitorSourceExternalAwsModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					awsOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws{}
-					awsOneOfSpec.Aws = &ves_io_schema_observability_synthetic_monitor.AWSRegionsExternal{}
-					externalSourcesSpec[i].SourceChoice = awsOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
-					elements := make([]string, 0, len(v1HttpMonitorSourceExternalAwsModel.Regions.Elements()))
-					diags = v1HttpMonitorSourceExternalAwsModel.Regions.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					awsOneOfSpec.Aws.Regions = elements
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
-				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
-					var v1HttpMonitorSourceExternalF5XcModel V1HttpMonitorSourceExternalF5Xc
-					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1HttpMonitorSourceExternalF5XcModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
-					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
-					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
-					elements := make([]string, 0, len(v1HttpMonitorSourceExternalF5XcModel.Regions.Elements()))
-					diags = v1HttpMonitorSourceExternalF5XcModel.Regions.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec.F5Xc.Regions = elements
-
-				}
-
-			}
-
-		}
-
-		spec.ExternalSources = externalSourcesSpec
-	}
-
-	// resource modelToSpecRoot RequiredStringField --> Url
-	spec.Url = string(data.Url.ValueString())
-
-	// resource modelToSpecRoot Bool Field --> IgnoreCertErrors
-	if !data.IgnoreCertErrors.IsNull() && !data.IgnoreCertErrors.IsUnknown() {
-		spec.IgnoreCertErrors = bool(data.IgnoreCertErrors.ValueBool())
-	}
-
-	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
-	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
-
-	// resource modelToSpecRoot StringField --> SniHost
-	if !data.SniHost.IsNull() && !data.SniHost.IsUnknown() {
-		spec.SniHost = string(data.SniHost.ValueString())
 	}
 
 	{
@@ -1407,293 +1737,34 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		spec.ResponseCodes = elements
 	}
 
-	{
-		// resource modelToSpecRoot PointerField --> HealthPolicy
-		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
-			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
-			spec.HealthPolicy = healthPolicySpec
-			var healthPolicyModel V1HttpMonitorSyntheticMonitorHealthPolicy
-
-			// Populate the nested model from the main data model
-			diags.Append(data.HealthPolicy.As(ctx, &healthPolicyModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
-			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
-				healthPolicyDynamicThresholdPolicyChoiceModel := V1HttpMonitorHealthPolicyDynamicThresholdPolicyChoice{}
-				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
-				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsUnknown() {
-					dynamicThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{}
-					dynamicThresholdDisabledSpecBool.DynamicThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdDisabledSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> DynamicThreshold
-				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsUnknown() {
-					var v1HttpMonitorHealthPolicyDynamicThresholdModel V1HttpMonitorHealthPolicyDynamicThreshold
-					response.Diagnostics.Append(healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.As(ctx, &v1HttpMonitorHealthPolicyDynamicThresholdModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					dynamicThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold{}
-					dynamicThresholdOneOfSpec.DynamicThreshold = &ves_io_schema_observability_synthetic_monitor.DynamicThreshold{}
-					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdOneOfSpec
-
-					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
-					if !v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.Elements()) > 0 {
-						var evalPeriodTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(evalPeriodTfStrings) > 0 {
-							valStr := evalPeriodTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
-								dynamicThresholdOneOfSpec.DynamicThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
-								)
-								return
-							}
-						}
-					}
-
-					// resource modelToSpecNested RequiredEnumField --> StdDevVal
-					if !v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.IsNull() && !v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.IsUnknown() && len(v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.Elements()) > 0 {
-						var stdDevValTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.ElementsAs(ctx, &stdDevValTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(stdDevValTfStrings) > 0 {
-							valStr := stdDevValTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.StdDevVal_value[valStr]; ok {
-								dynamicThresholdOneOfSpec.DynamicThreshold.StdDevVal = ves_io_schema_observability_synthetic_monitor.StdDevVal(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum StdDevVal", valStr),
-								)
-								return
-							}
-						}
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
-			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
-				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyChoice{}
-				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
-					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
-					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> StaticMaxThreshold
-				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsUnknown() {
-					var v1HttpMonitorHealthPolicyStaticMaxThresholdModel V1HttpMonitorHealthPolicyStaticMaxThreshold
-					response.Diagnostics.Append(healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.As(ctx, &v1HttpMonitorHealthPolicyStaticMaxThresholdModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					staticMaxThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold{}
-					staticMaxThresholdOneOfSpec.StaticMaxThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMaxThreshold{}
-					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdOneOfSpec
-
-					// resource modelToSpecNested RequiredUintField --> MaxResponseTime
-					staticMaxThresholdOneOfSpec.StaticMaxThreshold.MaxResponseTime = uint32(uint32(v1HttpMonitorHealthPolicyStaticMaxThresholdModel.MaxResponseTime.ValueInt64()))
-
-					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
-					if !v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.Elements()) > 0 {
-						var evalPeriodTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(evalPeriodTfStrings) > 0 {
-							valStr := evalPeriodTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
-								staticMaxThresholdOneOfSpec.StaticMaxThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
-								)
-								return
-							}
-						}
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
-			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
-				healthPolicyStaticMinThresholdPolicyChoiceModel := V1HttpMonitorHealthPolicyStaticMinThresholdPolicyChoice{}
-				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
-				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsUnknown() {
-					staticMinThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{}
-					staticMinThresholdDisabledSpecBool.StaticMinThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdDisabledSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> StaticMinThreshold
-				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsUnknown() {
-					var v1HttpMonitorHealthPolicyStaticMinThresholdModel V1HttpMonitorHealthPolicyStaticMinThreshold
-					response.Diagnostics.Append(healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.As(ctx, &v1HttpMonitorHealthPolicyStaticMinThresholdModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					staticMinThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold{}
-					staticMinThresholdOneOfSpec.StaticMinThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMinThreshold{}
-					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdOneOfSpec
-
-					// resource modelToSpecNested RequiredUintField --> MinResponseTime
-					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1HttpMonitorHealthPolicyStaticMinThresholdModel.MinResponseTime.ValueInt64()))
-
-					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
-					if !v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.Elements()) > 0 {
-						var evalPeriodTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(evalPeriodTfStrings) > 0 {
-							valStr := evalPeriodTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
-								staticMinThresholdOneOfSpec.StaticMinThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
-								)
-								return
-							}
-						}
-					}
-
-				}
-
-			}
-
-		}
+	// resource modelToSpecRoot UintField --> ResponseTimeout
+	if !data.ResponseTimeout.IsNull() && !data.ResponseTimeout.IsUnknown() {
+		spec.ResponseTimeout = uint32(data.ResponseTimeout.ValueInt64())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
-	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
-		intervalChoiceModel := V1HttpMonitorCreateSpecTypeIntervalChoice{}
-		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
+	// resource modelToSpecRoot StringField --> SniHost
+	if !data.SniHost.IsNull() && !data.SniHost.IsUnknown() {
+		spec.SniHost = string(data.SniHost.ValueString())
+	}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Day
-		if !intervalChoiceModel.Interval_1Day.IsNull() && !intervalChoiceModel.Interval_1Day.IsUnknown() {
-			interval1DaySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Day{}
-			interval1DaySpecBool.Interval_1Day = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1DaySpecBool
-		}
+	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
+	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
-		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
-			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Secs{}
-			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval30SecsSpecBool
-		}
+	// resource modelToSpecRoot RequiredStringField --> Url
+	spec.Url = string(data.Url.ValueString())
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
-		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
-			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_5Mins{}
-			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval5MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
-		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
-			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_6Hours{}
-			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval6HoursSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
-		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
-			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_15Mins{}
-			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval15MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
-		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
-			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Hour{}
-			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1HourSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Mins
-		if !intervalChoiceModel.Interval_30Mins.IsNull() && !intervalChoiceModel.Interval_30Mins.IsUnknown() {
-			interval30MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Mins{}
-			interval30MinsSpecBool.Interval_30Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval30MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
-		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
-			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_12Hours{}
-			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval12HoursSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Min
-		if !intervalChoiceModel.Interval_1Min.IsNull() && !intervalChoiceModel.Interval_1Min.IsUnknown() {
-			interval1MinSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Min{}
-			interval1MinSpecBool.Interval_1Min = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1MinSpecBool
-		}
-
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -1712,42 +1783,76 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		)
 		return
 	}
+	// For is-create-spec-case resources: marshal the full GetResponse proto (callRsp.ProtoMsg)
+	// to JSON and extract spec.gc_spec. This is needed because GetObjSpec() returns a SpecType
+	// whose GcSpec may be empty when the API response encodes the spec fields directly under
+	// "spec" (e.g. "spec.re_acl") rather than under "spec.gc_spec".
+	var createRspRawSpecMap map[string]interface{}
+	if callRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, callRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// For is-create-spec-case resources the API returns spec fields directly
+				// under "object.spec" (no "gc_spec" wrapper). Take object.spec directly.
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						createRspRawSpecMap = specMap
+					}
+				}
+				// Also try "spec" directly: CreateResponse returns spec without an "object" wrapper,
+				// so fullRspMap["object"] is nil for create responses.
+				if createRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						createRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
 
 	// Write back the response to the model
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
-		var buf bytes.Buffer
-		marshaler := &jsonpb.Marshaler{
-			OrigName: true,
-		}
 
+	if createRspRawSpecMap != nil {
+		rawSpecMap = createRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal create spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal createRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+
+		var buf bytes.Buffer
+		marshaler := &jsonpb.Marshaler{OrigName: true}
 		specMsg, ok := interface{}(objSpec).(proto.Message)
 		if !ok {
 			response.Diagnostics.AddError("Internal Error", "objSpec is not a proto message")
 			return
 		}
-
 		if err := marshaler.Marshal(&buf, specMsg); err != nil {
 			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal: %s", err))
 			return
 		}
-
 		if err := json.Unmarshal(buf.Bytes(), &rawSpecMap); err != nil {
-			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to marshal: %s", err))
+			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to unmarshal spec map: %s", err))
 			return
 		}
-
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
-
 		specBytes := buf.Bytes()
 		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
 			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
 				specBytes = gcSpecBytes
 			}
 		}
-
 		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
@@ -1760,95 +1865,842 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
 		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
 		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
+	{
+		externalSourcesElementsSpectToModel := make([]V1HttpMonitorSrcExternal, 0, len(specData.GetExternalSources()))
+		for _, externalSourcesElement := range specData.GetExternalSources() {
+			v1HttpMonitorSrcExternalModel := V1HttpMonitorSrcExternal{}
+
+			// resource specToModelNested RequiredOneOfField --> SourceChoice
+			// CreateSpecType
+			// CreateSpecType: GetSourceChoice() returns the oneof interface value.
+			if externalSourcesElement.GetSourceChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				externalSourcessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				externalSourcessourceChoiceChoices := externalSourcesElement.GetSourceChoice()
+
+				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested PointerOfOneOfField --> Aws
+				// CreateSpecType
+				// true
+				{
+					awsOptionsWrapper, isAws := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws)
+					awsAttributeMap := make(map[string]attr.Value)
+
+					if isAws && awsOptionsWrapper != nil && awsOptionsWrapper.Aws != nil {
+						awsElement := awsOptionsWrapper.Aws
+
+						// resource specToModelNested RequiredArrayOfStringField --> Regions
+						{
+							if len(awsElement.GetRegions()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, awsElement.GetRegions())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								awsAttributeMap["regions"] = listValue
+							} else {
+								awsAttributeMap["regions"] = types.ListNull(types.StringType)
+							}
+						}
+
+						awsObj, awsObjDiags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap, awsAttributeMap)
+						response.Diagnostics.Append(awsObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
+					} else {
+						externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
+					}
+				}
+
+				// resource specToModelNested PointerOfOneOfField --> F5Xc
+				// CreateSpecType
+				// true
+				{
+					f5xcOptionsWrapper, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
+					f5xcAttributeMap := make(map[string]attr.Value)
+
+					if isF5Xc && f5xcOptionsWrapper != nil && f5xcOptionsWrapper.F5Xc != nil {
+						f5xcElement := f5xcOptionsWrapper.F5Xc
+
+						// resource specToModelNested RequiredArrayOfStringField --> Regions
+						{
+							if len(f5xcElement.GetRegions()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, f5xcElement.GetRegions())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								f5xcAttributeMap["regions"] = listValue
+							} else {
+								f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
+							}
+						}
+
+						f5xcObj, f5xcObjDiags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
+						response.Diagnostics.Append(f5xcObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
+					} else {
+						externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
+					}
+				}
+
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, externalSourcessourceChoiceChoicesObjDiags := types.ObjectValue(
+					V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					externalSourcessourceChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(externalSourcessourceChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				v1HttpMonitorSrcExternalModel.SourceChoice = finalObj
+			} else {
+				v1HttpMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
+			}
+
+			externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSrcExternalModel)
+		}
+
+		externalSourcesList, listDiags := utils.GoStructSliceToListValue(
+			ctx,
+			V1HttpMonitorExternalSourcesModelAttributeMap,
+			externalSourcesElementsSpectToModel,
+		)
+
+		response.Diagnostics.Append(listDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.ExternalSources = externalSourcesList
+	}
+
+	// resource SpecToModelRoot BoolField --> FollowRedirects
+	data.FollowRedirects = types.BoolValue(specData.GetFollowRedirects())
+
+	// resource SpecToModelRoot PointerField --> HealthPolicy
+	if specData.GetHealthPolicy() != nil {
+		var v1HttpMonitorHealthPolicyModel = &V1HttpMonitorHealthPolicy{}
+		healthPolicyElement := specData.GetHealthPolicy()
+
+		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicydynamicThresholdPolicyChoiceChoices := healthPolicyElement.GetDynamicThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> DynamicThreshold
+			// CreateSpecType
+			// true
+			{
+				dynamicThresholdOptionsWrapper, isDynamicThreshold := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold)
+				dynamicThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isDynamicThreshold && dynamicThresholdOptionsWrapper != nil && dynamicThresholdOptionsWrapper.DynamicThreshold != nil {
+					dynamicThresholdElement := dynamicThresholdOptionsWrapper.DynamicThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if dynamicThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(dynamicThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							dynamicThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							dynamicThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredEnumField --> StdDevVal
+					{
+						if dynamicThresholdElement.GetStdDevVal().String() != "" {
+							stringValue := types.StringValue(dynamicThresholdElement.GetStdDevVal().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							dynamicThresholdAttributeMap["std_dev_val"] = listValue
+						} else {
+							dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
+						}
+					}
+
+					dynamicThresholdObj, dynamicThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap, dynamicThresholdAttributeMap)
+					response.Diagnostics.Append(dynamicThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = dynamicThresholdObj
+				} else {
+					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
+			var dynamicThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["dynamic_threshold_disabled"]; found {
+					dynamicThresholdDisabledInMap = true
+				}
+			}
+
+			if !dynamicThresholdDisabledInMap {
+				if _, found := rawSpecMap["dynamic_threshold_disabled"]; found {
+					dynamicThresholdDisabledInMap = true
+				}
+			}
+
+			_, isDynamicThresholdDisabledForBool := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled)
+			if dynamicThresholdDisabledInMap || isDynamicThresholdDisabledForBool {
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+		}
+
+		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicystaticMaxThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMaxThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
+			// CreateSpecType
+			// true
+			{
+				staticMaxThresholdOptionsWrapper, isStaticMaxThreshold := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold)
+				staticMaxThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isStaticMaxThreshold && staticMaxThresholdOptionsWrapper != nil && staticMaxThresholdOptionsWrapper.StaticMaxThreshold != nil {
+					staticMaxThresholdElement := staticMaxThresholdOptionsWrapper.StaticMaxThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if staticMaxThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(staticMaxThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							staticMaxThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							staticMaxThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredUintField --> MaxResponseTime
+					staticMaxThresholdAttributeMap["max_response_time"] = types.Int64Value(int64(staticMaxThresholdElement.GetMaxResponseTime()))
+
+					staticMaxThresholdObj, staticMaxThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap, staticMaxThresholdAttributeMap)
+					response.Diagnostics.Append(staticMaxThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = staticMaxThresholdObj
+				} else {
+					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+			var staticMaxThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMaxThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			_, isStaticMaxThresholdDisabledForBool := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled)
+			if staticMaxThresholdDisabledInMap || isStaticMaxThresholdDisabledForBool {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+		}
+
+		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicystaticMinThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMinThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> StaticMinThreshold
+			// CreateSpecType
+			// true
+			{
+				staticMinThresholdOptionsWrapper, isStaticMinThreshold := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold)
+				staticMinThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isStaticMinThreshold && staticMinThresholdOptionsWrapper != nil && staticMinThresholdOptionsWrapper.StaticMinThreshold != nil {
+					staticMinThresholdElement := staticMinThresholdOptionsWrapper.StaticMinThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if staticMinThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(staticMinThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							staticMinThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredUintField --> MinResponseTime
+					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdElement.GetMinResponseTime()))
+
+					staticMinThresholdObj, staticMinThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
+					response.Diagnostics.Append(staticMinThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = staticMinThresholdObj
+				} else {
+					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
+			var staticMinThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_min_threshold_disabled"]; found {
+					staticMinThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMinThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_min_threshold_disabled"]; found {
+					staticMinThresholdDisabledInMap = true
+				}
+			}
+
+			_, isStaticMinThresholdDisabledForBool := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled)
+			if staticMinThresholdDisabledInMap || isStaticMinThresholdDisabledForBool {
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+		}
+
+		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
+			ctx,
+			V1HttpMonitorHealthPolicyModelAttributeMap,
+			v1HttpMonitorHealthPolicyModel,
+		)
+		response.Diagnostics.Append(healthPolicyDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.HealthPolicy = healthPolicyObj
+	} else {
+		data.HealthPolicy = types.ObjectNull(V1HttpMonitorHealthPolicyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
+	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
+
+	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// true
+	// false
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofIntervalChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["interval_12_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_6_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		}
+	}
+
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofIntervalChoicePresent {
+		if _, ok := rawSpecMap["interval_12_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		}
+	}
+
+	if oneofIntervalChoicePresent {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
+		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
+		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
+		// PointerOfOneOfField type-assertions can still find the correct choice.
+		var intervalChoiceChoices interface{}
+		if v := rawSpecMap["interval_choice"]; v != nil {
+			intervalChoiceChoices = v
+		} else {
+			intervalChoiceChoices = specData.GetIntervalChoice()
+		}
+
+		// The model struct that will be populated by the nested template.
+		var intervalChoiceChoicesModel = &V1HttpMonitorIntervalChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
+		var interval12HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if !interval12HoursInMap {
+			if _, found := rawSpecMap["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		_, isInterval_12HoursForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_12Hours)
+		if interval12HoursInMap || isInterval_12HoursForBool {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
+		var interval15MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if !interval15MinsInMap {
+			if _, found := rawSpecMap["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		_, isInterval_15MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_15Mins)
+		if interval15MinsInMap || isInterval_15MinsForBool {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
+		var interval1DayInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_day"]; found {
+				interval1DayInMap = true
+			}
+		}
+
+		if !interval1DayInMap {
+			if _, found := rawSpecMap["interval_1_day"]; found {
+				interval1DayInMap = true
+			}
+		}
+
+		_, isInterval_1DayForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Day)
+		if interval1DayInMap || isInterval_1DayForBool {
+			intervalChoiceChoicesModel.Interval_1Day = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
+		var interval1HourInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if !interval1HourInMap {
+			if _, found := rawSpecMap["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		_, isInterval_1HourForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Hour)
+		if interval1HourInMap || isInterval_1HourForBool {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
+		var interval1MinInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		if !interval1MinInMap {
+			if _, found := rawSpecMap["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		_, isInterval_1MinForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Min)
+		if interval1MinInMap || isInterval_1MinForBool {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
+		var interval30MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		if !interval30MinsInMap {
+			if _, found := rawSpecMap["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		_, isInterval_30MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Mins)
+		if interval30MinsInMap || isInterval_30MinsForBool {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
+		var interval30SecsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		if !interval30SecsInMap {
+			if _, found := rawSpecMap["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		_, isInterval_30SecsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Secs)
+		if interval30SecsInMap || isInterval_30SecsForBool {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
+		var interval5MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if !interval5MinsInMap {
+			if _, found := rawSpecMap["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		_, isInterval_5MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_5Mins)
+		if interval5MinsInMap || isInterval_5MinsForBool {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
+		var interval6HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if !interval6HoursInMap {
+			if _, found := rawSpecMap["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		_, isInterval_6HoursForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_6Hours)
+		if interval6HoursInMap || isInterval_6HoursForBool {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			intervalChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				V1HttpMonitorIntervalChoiceModelAttributeMap,
+				intervalChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IntervalChoice = intervalChoiceObj
+		}
+	} else {
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> Method
 	// true
@@ -1861,13 +2713,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["patch"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["delete"]; ok {
+		if _, ok := gcSpec["delete"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["get"]; ok {
 			oneofMethodPresent = true
@@ -1875,18 +2721,18 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["options"]; ok {
 			oneofMethodPresent = true
+		} else if _, ok := gcSpec["patch"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["put"]; ok {
+			oneofMethodPresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofMethodPresent {
-		if _, ok := rawSpecMap["patch"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["delete"]; ok {
+		if _, ok := rawSpecMap["delete"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["get"]; ok {
 			oneofMethodPresent = true
@@ -1894,65 +2740,54 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["options"]; ok {
 			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["patch"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["put"]; ok {
+			oneofMethodPresent = true
 		}
 	}
 
 	if oneofMethodPresent {
-		// For custom JSON resolution with complex pointer types, get the choice from the raw spec map.
-		methodChoiceChoices := rawSpecMap["method"]
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
+		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
+		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
+		// PointerOfOneOfField type-assertions can still find the correct choice.
+		var methodChoiceChoices interface{}
+		if v := rawSpecMap["method"]; v != nil {
+			methodChoiceChoices = v
+		} else {
+			methodChoiceChoices = specData.GetMethod()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var methodChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeMethodChoice{}
+		var methodChoiceChoicesModel = &V1HttpMonitorMethodChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> Put
-		// CreateSpecType
-		// true
-		{
-			putOptions, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put)
-			putAttributeMap := make(map[string]attr.Value)
-
-			if isPut && putOptions != nil {
-
-				// resource specToModelNested StringField --> RequestBody
-				if putOptions.Put.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putOptions.Put.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
-
-				putObj, diags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				methodChoiceChoicesModel.Put = putObj
-			} else {
-				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
-			}
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> Delete
 		// CreateSpecType
 		// true
 		{
-			deleteOptions, isDelete := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Delete)
+			deleteOptionsWrapper, isDelete := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Delete)
 			deleteAttributeMap := make(map[string]attr.Value)
 
-			if isDelete && deleteOptions != nil {
+			if isDelete && deleteOptionsWrapper != nil && deleteOptionsWrapper.Delete != nil {
+				deleteElement := deleteOptionsWrapper.Delete
 
 				// resource specToModelNested StringField --> RequestBody
-				if deleteOptions.Delete.GetRequestBody() != "" {
-					deleteAttributeMap["request_body"] = types.StringValue(deleteOptions.Delete.GetRequestBody())
+				if deleteElement.GetRequestBody() != "" {
+					deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					deleteAttributeMap["request_body"] = types.StringNull()
 				}
 
-				deleteObj, diags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
-				response.Diagnostics.Append(diags...)
+				deleteObj, deleteObjDiags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
+				response.Diagnostics.Append(deleteObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1977,7 +2812,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			}
 		}
 
-		if getInMap || specData.GetGet() != nil {
+		_, isGetForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Get)
+		if getInMap || isGetForBool {
 			methodChoiceChoicesModel.Get = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Get = types.BoolNull()
@@ -1998,7 +2834,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			}
 		}
 
-		if headInMap || specData.GetHead() != nil {
+		_, isHeadForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Head)
+		if headInMap || isHeadForBool {
 			methodChoiceChoicesModel.Head = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Head = types.BoolNull()
@@ -2019,7 +2856,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			}
 		}
 
-		if optionsInMap || specData.GetOptions() != nil {
+		_, isOptionsForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Options)
+		if optionsInMap || isOptionsForBool {
 			methodChoiceChoicesModel.Options = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Options = types.BoolNull()
@@ -2029,21 +2867,22 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		// CreateSpecType
 		// true
 		{
-			patchOptions, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Patch)
+			patchOptionsWrapper, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Patch)
 			patchAttributeMap := make(map[string]attr.Value)
 
-			if isPatch && patchOptions != nil {
+			if isPatch && patchOptionsWrapper != nil && patchOptionsWrapper.Patch != nil {
+				patchElement := patchOptionsWrapper.Patch
 
 				// resource specToModelNested StringField --> RequestBody
-				if patchOptions.Patch.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchOptions.Patch.GetRequestBody())
+				if patchElement.GetRequestBody() != "" {
+					patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					patchAttributeMap["request_body"] = types.StringNull()
 				}
 
-				patchObj, diags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
-				response.Diagnostics.Append(diags...)
+				patchObj, patchObjDiags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
+				response.Diagnostics.Append(patchObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2057,21 +2896,22 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		// CreateSpecType
 		// true
 		{
-			postOptions, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Post)
+			postOptionsWrapper, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Post)
 			postAttributeMap := make(map[string]attr.Value)
 
-			if isPost && postOptions != nil {
+			if isPost && postOptionsWrapper != nil && postOptionsWrapper.Post != nil {
+				postElement := postOptionsWrapper.Post
 
 				// resource specToModelNested StringField --> RequestBody
-				if postOptions.Post.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postOptions.Post.GetRequestBody())
+				if postElement.GetRequestBody() != "" {
+					postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					postAttributeMap["request_body"] = types.StringNull()
 				}
 
-				postObj, diags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
-				response.Diagnostics.Append(diags...)
+				postObj, postObjDiags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
+				response.Diagnostics.Append(postObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2081,68 +2921,53 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		methodChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorMethodModelAttributeMap,
-			methodChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested PointerOfOneOfField --> Put
+		// CreateSpecType
+		// true
+		{
+			putOptionsWrapper, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put)
+			putAttributeMap := make(map[string]attr.Value)
+
+			if isPut && putOptionsWrapper != nil && putOptionsWrapper.Put != nil {
+				putElement := putOptionsWrapper.Put
+
+				// resource specToModelNested StringField --> RequestBody
+				if putElement.GetRequestBody() != "" {
+					putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
+				} else {
+					// Empty string, set to null
+					putAttributeMap["request_body"] = types.StringNull()
+				}
+
+				putObj, putObjDiags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
+				response.Diagnostics.Append(putObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				methodChoiceChoicesModel.Put = putObj
+			} else {
+				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.MethodChoice = methodChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			methodChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				V1HttpMonitorMethodModelAttributeMap,
+				methodChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.MethodChoice = methodChoiceObj
+		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
 		data.MethodChoice = types.ObjectNull(V1HttpMonitorMethodModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
-	if len(specData.RequestHeaders) > 0 {
-		requestHeadersElements := make([]V1HttpMonitorV1HttpMonitorHTTPMonitorHeader, 0, len(specData.RequestHeaders))
-
-		for _, requestHeadersElement := range specData.RequestHeaders {
-			v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorV1HttpMonitorHTTPMonitorHeader{}
-
-			// resource specToModelNested StringField --> Value
-			if requestHeadersElement.GetValue() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Key
-			if requestHeadersElement.GetKey() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
-			}
-
-			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel)
-		}
-
-		requestHeadersList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			V1HttpMonitorRequestHeadersModelAttributeMap,
-			requestHeadersElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.RequestHeaders = requestHeadersList
-	} else {
-		var requestHeadersObjectType = basetypes.ObjectType{
-			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
-		}
-		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
-		data.RequestHeaders = nullRequestHeadersList
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -2159,8 +2984,73 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		data.Receive = types.StringNull()
 	}
 
-	// resource SpecToModelRoot BoolField --> FollowRedirects
-	data.FollowRedirects = types.BoolValue(specData.GetFollowRedirects())
+	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
+	if len(specData.GetRequestHeaders()) > 0 {
+		requestHeadersElements := make([]V1HttpMonitorHTTPMonitorHeader, 0, len(specData.GetRequestHeaders()))
+		for _, requestHeadersElement := range specData.GetRequestHeaders() {
+			v1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorHTTPMonitorHeader{}
+
+			// resource specToModelNested RequiredStringField --> Key
+			if requestHeadersElement.GetKey() != "" {
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Value
+			if requestHeadersElement.GetValue() != "" {
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
+			}
+
+			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorHTTPMonitorHeaderModel)
+		}
+
+		{
+			requestHeadersList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				V1HttpMonitorRequestHeadersModelAttributeMap,
+				requestHeadersElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.RequestHeaders = requestHeadersList
+		}
+	} else {
+		var requestHeadersObjectType = basetypes.ObjectType{
+			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
+		}
+		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
+		var priorValRequestHeaders types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("request_headers"), &priorValRequestHeaders)
+		if !priorValRequestHeaders.IsNull() && !priorValRequestHeaders.IsUnknown() {
+			data.RequestHeaders = priorValRequestHeaders
+		} else {
+			data.RequestHeaders = nullRequestHeadersList
+		}
+
+	}
+
+	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
+	{
+		if len(specData.GetResponseCodes()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.ResponseCodes = listValue
+		} else {
+			data.ResponseCodes = types.ListNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot UintField --> ResponseTimeout
 	responseTimeoutValue := specData.GetResponseTimeout()
@@ -2168,139 +3058,6 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		data.ResponseTimeout = types.Int64Value(int64(responseTimeoutValue))
 	} else {
 		data.ResponseTimeout = types.Int64Null()
-	}
-
-	// resource SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
-	externalSourcesElementsSpectToModel := make([]V1HttpMonitorSyntheticMonitorSourceExternal, 0, len(specData.ExternalSources))
-
-	for _, externalSourcesElement := range specData.ExternalSources {
-		v1HttpMonitorSyntheticMonitorSourceExternalModel := V1HttpMonitorSyntheticMonitorSourceExternal{}
-
-		// resource specToModelNested RequiredOneOfField --> SourceChoice
-		// CreateSpecType
-		// CreateSpecType: GetSourceChoice() returns the oneof interface value.
-		if externalSourcesElement.GetSourceChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			externalSourcessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			externalSourcessourceChoiceChoices := externalSourcesElement.GetSourceChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested PointerOfOneOfField --> Aws
-			// CreateSpecType
-			// true
-			{
-				awsOptions, isAws := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws)
-				awsAttributeMap := make(map[string]attr.Value)
-
-				if isAws && awsOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(awsOptions.Aws.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, awsOptions.Aws.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						awsAttributeMap["regions"] = listValue
-					} else {
-						awsAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					awsObj, diags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap, awsAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> F5Xc
-			// CreateSpecType
-			// true
-			{
-				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
-				f5xcAttributeMap := make(map[string]attr.Value)
-
-				if isF5Xc && f5xcOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						f5xcAttributeMap["regions"] = listValue
-					} else {
-						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					f5xcObj, diags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, externalSourcessourceChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				externalSourcessourceChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(externalSourcessourceChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
-		}
-
-		externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSyntheticMonitorSourceExternalModel)
-	}
-
-	externalSourcesList, diags := utils.GoStructSliceToListValue(
-		ctx,
-		V1HttpMonitorExternalSourcesModelAttributeMap,
-		externalSourcesElementsSpectToModel,
-	)
-
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
-		return
-	}
-
-	data.ExternalSources = externalSourcesList
-
-	// resource SpecToModelRoot RequiredStringField --> Url
-	if specData.GetUrl() != "" {
-		data.Url = types.StringValue(specData.GetUrl())
-	} else {
-		// Empty string, set to null
-		data.Url = types.StringNull()
-	}
-
-	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
-	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
-
-	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
-	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
-	if sourceCriticalThresholdValue > 0 {
-		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
 	}
 
 	// resource SpecToModelRoot StringField --> SniHost
@@ -2311,579 +3068,18 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		data.SniHost = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
-	if len(specData.GetResponseCodes()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.ResponseCodes = listValue
+	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
+	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
+	if sourceCriticalThresholdValue > 0 {
+		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
+	}
+
+	// resource SpecToModelRoot RequiredStringField --> Url
+	if specData.GetUrl() != "" {
+		data.Url = types.StringValue(specData.GetUrl())
 	} else {
-		data.ResponseCodes = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot PointerField --> HealthPolicy
-	if specData.GetHealthPolicy() != nil {
-		var v1HttpMonitorSyntheticMonitorHealthPolicyModel = &V1HttpMonitorSyntheticMonitorHealthPolicy{}
-		healthPolicyElement := specData.GetHealthPolicy()
-
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
-		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicydynamicThresholdPolicyChoiceChoices := healthPolicyElement.GetDynamicThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
-			var dynamicThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["dynamic_threshold_disabled"]; found {
-					dynamicThresholdDisabledInMap = true
-				}
-			}
-
-			if !dynamicThresholdDisabledInMap {
-				if _, found := rawSpecMap["dynamic_threshold_disabled"]; found {
-					dynamicThresholdDisabledInMap = true
-				}
-			}
-
-			if dynamicThresholdDisabledInMap || healthPolicyElement.GetDynamicThresholdDisabled() != nil {
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> DynamicThreshold
-			// CreateSpecType
-			// true
-			{
-				dynamicThresholdOptions, isDynamicThreshold := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold)
-				dynamicThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isDynamicThreshold && dynamicThresholdOptions != nil {
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dynamicThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						dynamicThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					// resource specToModelNested RequiredEnumField --> StdDevVal
-					if dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String() != "" {
-						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dynamicThresholdAttributeMap["std_dev_val"] = listValue
-					} else {
-						dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
-					}
-
-					dynamicThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap, dynamicThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = dynamicThresholdObj
-				} else {
-					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
-		}
-
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
-		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicystaticMaxThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMaxThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-			var staticMaxThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMaxThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
-			// CreateSpecType
-			// true
-			{
-				staticMaxThresholdOptions, isStaticMaxThreshold := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold)
-				staticMaxThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isStaticMaxThreshold && staticMaxThresholdOptions != nil {
-
-					// resource specToModelNested RequiredUintField --> MaxResponseTime
-					staticMaxThresholdAttributeMap["max_response_time"] = types.Int64Value(int64(staticMaxThresholdOptions.StaticMaxThreshold.GetMaxResponseTime()))
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if staticMaxThresholdOptions.StaticMaxThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(staticMaxThresholdOptions.StaticMaxThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticMaxThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						staticMaxThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					staticMaxThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap, staticMaxThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = staticMaxThresholdObj
-				} else {
-					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
-		}
-
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
-		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicystaticMinThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMinThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
-			var staticMinThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_min_threshold_disabled"]; found {
-					staticMinThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMinThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_min_threshold_disabled"]; found {
-					staticMinThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMinThresholdDisabledInMap || healthPolicyElement.GetStaticMinThresholdDisabled() != nil {
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> StaticMinThreshold
-			// CreateSpecType
-			// true
-			{
-				staticMinThresholdOptions, isStaticMinThreshold := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold)
-				staticMinThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isStaticMinThreshold && staticMinThresholdOptions != nil {
-
-					// resource specToModelNested RequiredUintField --> MinResponseTime
-					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticMinThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					staticMinThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = staticMinThresholdObj
-				} else {
-					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
-		}
-
-		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorHealthPolicyModelAttributeMap,
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel,
-		)
-		response.Diagnostics.Append(healthPolicyDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.HealthPolicy = healthPolicyObj
-	} else {
-		data.HealthPolicy = types.ObjectNull(V1HttpMonitorHealthPolicyModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
-	// true
-	// false
-	// This resource uses custom JSON resolution.
-	// The API response for this oneof field can be inconsistent.
-	// We must inspect the raw JSON map to determine which choice is present.
-	// The logic checks for the presence of any of the possible oneof choices.
-	var oneofIntervalChoicePresent bool
-
-	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
-	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_hour"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_6_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		}
-	}
-
-	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
-	if !oneofIntervalChoicePresent {
-		if _, ok := rawSpecMap["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		}
-	}
-
-	if oneofIntervalChoicePresent {
-
-		// The model struct that will be populated by the nested template.
-		var intervalChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeIntervalChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
-		var interval1DayInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_day"]; found {
-				interval1DayInMap = true
-			}
-		}
-
-		if !interval1DayInMap {
-			if _, found := rawSpecMap["interval_1_day"]; found {
-				interval1DayInMap = true
-			}
-		}
-
-		if interval1DayInMap || specData.GetInterval_1Day() != nil {
-			intervalChoiceChoicesModel.Interval_1Day = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
-		var interval30SecsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if !interval30SecsInMap {
-			if _, found := rawSpecMap["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
-		var interval5MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if !interval5MinsInMap {
-			if _, found := rawSpecMap["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
-		var interval6HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if !interval6HoursInMap {
-			if _, found := rawSpecMap["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
-		var interval15MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if !interval15MinsInMap {
-			if _, found := rawSpecMap["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
-		var interval1HourInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_hour"]; found {
-				interval1HourInMap = true
-			}
-		}
-
-		if !interval1HourInMap {
-			if _, found := rawSpecMap["interval_1_hour"]; found {
-				interval1HourInMap = true
-			}
-		}
-
-		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
-		var interval30MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if !interval30MinsInMap {
-			if _, found := rawSpecMap["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if interval30MinsInMap || specData.GetInterval_30Mins() != nil {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
-		var interval12HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if !interval12HoursInMap {
-			if _, found := rawSpecMap["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
-		var interval1MinInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if !interval1MinInMap {
-			if _, found := rawSpecMap["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if interval1MinInMap || specData.GetInterval_1Min() != nil {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		intervalChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorIntervalChoiceModelAttributeMap,
-			intervalChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IntervalChoice = intervalChoiceObj
-	} else {
-		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
+		// Empty string, set to null
+		data.Url = types.StringNull()
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2932,6 +3128,12 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 	opts := []vesapi.CallOpt{
 		vesapi.WithFailIfReferred(),
 	}
+	readGetRspType := strings.Replace(ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -2944,37 +3146,65 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
-		var buf bytes.Buffer
-		marshaler := &jsonpb.Marshaler{
-			OrigName: true,
-		}
 
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+
+		var buf bytes.Buffer
+		marshaler := &jsonpb.Marshaler{OrigName: true}
 		specMsg, ok := interface{}(objSpec).(proto.Message)
 		if !ok {
 			response.Diagnostics.AddError("Internal Error", "objSpec is not a proto message")
 			return
 		}
-
 		if err := marshaler.Marshal(&buf, specMsg); err != nil {
 			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal: %s", err))
 			return
 		}
-
 		if err := json.Unmarshal(buf.Bytes(), &rawSpecMap); err != nil {
-			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to marshal: %s", err))
+			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to unmarshal spec map: %s", err))
 			return
 		}
-
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
-
 		specBytes := buf.Bytes()
 		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
 			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
 				specBytes = gcSpecBytes
 			}
 		}
-
 		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
@@ -2984,113 +3214,846 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
+	{
+		externalSourcesElementsSpectToModel := make([]V1HttpMonitorSrcExternal, 0, len(specData.GetExternalSources()))
+		for _, externalSourcesElement := range specData.GetExternalSources() {
+			v1HttpMonitorSrcExternalModel := V1HttpMonitorSrcExternal{}
+
+			// resource specToModelNested RequiredOneOfField --> SourceChoice
+			// CreateSpecType
+			// CreateSpecType: GetSourceChoice() returns the oneof interface value.
+			if externalSourcesElement.GetSourceChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				externalSourcessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				externalSourcessourceChoiceChoices := externalSourcesElement.GetSourceChoice()
+
+				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested PointerOfOneOfField --> Aws
+				// CreateSpecType
+				// true
+				{
+					awsOptionsWrapper, isAws := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws)
+					awsAttributeMap := make(map[string]attr.Value)
+
+					if isAws && awsOptionsWrapper != nil && awsOptionsWrapper.Aws != nil {
+						awsElement := awsOptionsWrapper.Aws
+
+						// resource specToModelNested RequiredArrayOfStringField --> Regions
+						{
+							if len(awsElement.GetRegions()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, awsElement.GetRegions())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								awsAttributeMap["regions"] = listValue
+							} else {
+								awsAttributeMap["regions"] = types.ListNull(types.StringType)
+							}
+						}
+
+						awsObj, awsObjDiags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap, awsAttributeMap)
+						response.Diagnostics.Append(awsObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
+					} else {
+						externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
+					}
+				}
+
+				// resource specToModelNested PointerOfOneOfField --> F5Xc
+				// CreateSpecType
+				// true
+				{
+					f5xcOptionsWrapper, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
+					f5xcAttributeMap := make(map[string]attr.Value)
+
+					if isF5Xc && f5xcOptionsWrapper != nil && f5xcOptionsWrapper.F5Xc != nil {
+						f5xcElement := f5xcOptionsWrapper.F5Xc
+
+						// resource specToModelNested RequiredArrayOfStringField --> Regions
+						{
+							if len(f5xcElement.GetRegions()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, f5xcElement.GetRegions())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								f5xcAttributeMap["regions"] = listValue
+							} else {
+								f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
+							}
+						}
+
+						f5xcObj, f5xcObjDiags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
+						response.Diagnostics.Append(f5xcObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
+					} else {
+						externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
+					}
+				}
+
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, externalSourcessourceChoiceChoicesObjDiags := types.ObjectValue(
+					V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					externalSourcessourceChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(externalSourcessourceChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				v1HttpMonitorSrcExternalModel.SourceChoice = finalObj
+			} else {
+				v1HttpMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
+			}
+
+			externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSrcExternalModel)
+		}
+
+		externalSourcesList, listDiags := utils.GoStructSliceToListValue(
+			ctx,
+			V1HttpMonitorExternalSourcesModelAttributeMap,
+			externalSourcesElementsSpectToModel,
+		)
+
+		response.Diagnostics.Append(listDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.ExternalSources = externalSourcesList
+	}
+
+	// resource SpecToModelRoot BoolField --> FollowRedirects
+	data.FollowRedirects = types.BoolValue(specData.GetFollowRedirects())
+
+	// resource SpecToModelRoot PointerField --> HealthPolicy
+	if specData.GetHealthPolicy() != nil {
+		var v1HttpMonitorHealthPolicyModel = &V1HttpMonitorHealthPolicy{}
+		healthPolicyElement := specData.GetHealthPolicy()
+
+		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicydynamicThresholdPolicyChoiceChoices := healthPolicyElement.GetDynamicThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> DynamicThreshold
+			// CreateSpecType
+			// true
+			{
+				dynamicThresholdOptionsWrapper, isDynamicThreshold := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold)
+				dynamicThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isDynamicThreshold && dynamicThresholdOptionsWrapper != nil && dynamicThresholdOptionsWrapper.DynamicThreshold != nil {
+					dynamicThresholdElement := dynamicThresholdOptionsWrapper.DynamicThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if dynamicThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(dynamicThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							dynamicThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							dynamicThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredEnumField --> StdDevVal
+					{
+						if dynamicThresholdElement.GetStdDevVal().String() != "" {
+							stringValue := types.StringValue(dynamicThresholdElement.GetStdDevVal().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							dynamicThresholdAttributeMap["std_dev_val"] = listValue
+						} else {
+							dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
+						}
+					}
+
+					dynamicThresholdObj, dynamicThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap, dynamicThresholdAttributeMap)
+					response.Diagnostics.Append(dynamicThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = dynamicThresholdObj
+				} else {
+					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
+			var dynamicThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["dynamic_threshold_disabled"]; found {
+					dynamicThresholdDisabledInMap = true
+				}
+			}
+
+			if !dynamicThresholdDisabledInMap {
+				if _, found := rawSpecMap["dynamic_threshold_disabled"]; found {
+					dynamicThresholdDisabledInMap = true
+				}
+			}
+
+			_, isDynamicThresholdDisabledForBool := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled)
+			if dynamicThresholdDisabledInMap || isDynamicThresholdDisabledForBool {
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+		}
+
+		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicystaticMaxThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMaxThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
+			// CreateSpecType
+			// true
+			{
+				staticMaxThresholdOptionsWrapper, isStaticMaxThreshold := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold)
+				staticMaxThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isStaticMaxThreshold && staticMaxThresholdOptionsWrapper != nil && staticMaxThresholdOptionsWrapper.StaticMaxThreshold != nil {
+					staticMaxThresholdElement := staticMaxThresholdOptionsWrapper.StaticMaxThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if staticMaxThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(staticMaxThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							staticMaxThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							staticMaxThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredUintField --> MaxResponseTime
+					staticMaxThresholdAttributeMap["max_response_time"] = types.Int64Value(int64(staticMaxThresholdElement.GetMaxResponseTime()))
+
+					staticMaxThresholdObj, staticMaxThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap, staticMaxThresholdAttributeMap)
+					response.Diagnostics.Append(staticMaxThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = staticMaxThresholdObj
+				} else {
+					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+			var staticMaxThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMaxThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			_, isStaticMaxThresholdDisabledForBool := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled)
+			if staticMaxThresholdDisabledInMap || isStaticMaxThresholdDisabledForBool {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+		}
+
+		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicystaticMinThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMinThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> StaticMinThreshold
+			// CreateSpecType
+			// true
+			{
+				staticMinThresholdOptionsWrapper, isStaticMinThreshold := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold)
+				staticMinThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isStaticMinThreshold && staticMinThresholdOptionsWrapper != nil && staticMinThresholdOptionsWrapper.StaticMinThreshold != nil {
+					staticMinThresholdElement := staticMinThresholdOptionsWrapper.StaticMinThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if staticMinThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(staticMinThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							staticMinThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredUintField --> MinResponseTime
+					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdElement.GetMinResponseTime()))
+
+					staticMinThresholdObj, staticMinThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
+					response.Diagnostics.Append(staticMinThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = staticMinThresholdObj
+				} else {
+					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
+			var staticMinThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_min_threshold_disabled"]; found {
+					staticMinThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMinThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_min_threshold_disabled"]; found {
+					staticMinThresholdDisabledInMap = true
+				}
+			}
+
+			_, isStaticMinThresholdDisabledForBool := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled)
+			if staticMinThresholdDisabledInMap || isStaticMinThresholdDisabledForBool {
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+		}
+
+		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
+			ctx,
+			V1HttpMonitorHealthPolicyModelAttributeMap,
+			v1HttpMonitorHealthPolicyModel,
+		)
+		response.Diagnostics.Append(healthPolicyDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.HealthPolicy = healthPolicyObj
+	} else {
+		data.HealthPolicy = types.ObjectNull(V1HttpMonitorHealthPolicyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
+	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
+
+	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// true
+	// false
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofIntervalChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["interval_12_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_6_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		}
+	}
+
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofIntervalChoicePresent {
+		if _, ok := rawSpecMap["interval_12_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		}
+	}
+
+	if oneofIntervalChoicePresent {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
+		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
+		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
+		// PointerOfOneOfField type-assertions can still find the correct choice.
+		var intervalChoiceChoices interface{}
+		if v := rawSpecMap["interval_choice"]; v != nil {
+			intervalChoiceChoices = v
+		} else {
+			intervalChoiceChoices = specData.GetIntervalChoice()
+		}
+
+		// The model struct that will be populated by the nested template.
+		var intervalChoiceChoicesModel = &V1HttpMonitorIntervalChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
+		var interval12HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if !interval12HoursInMap {
+			if _, found := rawSpecMap["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		_, isInterval_12HoursForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_12Hours)
+		if interval12HoursInMap || isInterval_12HoursForBool {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
+		var interval15MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if !interval15MinsInMap {
+			if _, found := rawSpecMap["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		_, isInterval_15MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_15Mins)
+		if interval15MinsInMap || isInterval_15MinsForBool {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
+		var interval1DayInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_day"]; found {
+				interval1DayInMap = true
+			}
+		}
+
+		if !interval1DayInMap {
+			if _, found := rawSpecMap["interval_1_day"]; found {
+				interval1DayInMap = true
+			}
+		}
+
+		_, isInterval_1DayForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Day)
+		if interval1DayInMap || isInterval_1DayForBool {
+			intervalChoiceChoicesModel.Interval_1Day = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
+		var interval1HourInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if !interval1HourInMap {
+			if _, found := rawSpecMap["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		_, isInterval_1HourForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Hour)
+		if interval1HourInMap || isInterval_1HourForBool {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
+		var interval1MinInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		if !interval1MinInMap {
+			if _, found := rawSpecMap["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		_, isInterval_1MinForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Min)
+		if interval1MinInMap || isInterval_1MinForBool {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
+		var interval30MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		if !interval30MinsInMap {
+			if _, found := rawSpecMap["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		_, isInterval_30MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Mins)
+		if interval30MinsInMap || isInterval_30MinsForBool {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
+		var interval30SecsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		if !interval30SecsInMap {
+			if _, found := rawSpecMap["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		_, isInterval_30SecsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Secs)
+		if interval30SecsInMap || isInterval_30SecsForBool {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
+		var interval5MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if !interval5MinsInMap {
+			if _, found := rawSpecMap["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		_, isInterval_5MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_5Mins)
+		if interval5MinsInMap || isInterval_5MinsForBool {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
+		var interval6HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if !interval6HoursInMap {
+			if _, found := rawSpecMap["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		_, isInterval_6HoursForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_6Hours)
+		if interval6HoursInMap || isInterval_6HoursForBool {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			intervalChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				V1HttpMonitorIntervalChoiceModelAttributeMap,
+				intervalChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IntervalChoice = intervalChoiceObj
+		}
+	} else {
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> Method
 	// true
@@ -3103,13 +4066,7 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["patch"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["delete"]; ok {
+		if _, ok := gcSpec["delete"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["get"]; ok {
 			oneofMethodPresent = true
@@ -3117,18 +4074,18 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["options"]; ok {
 			oneofMethodPresent = true
+		} else if _, ok := gcSpec["patch"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["put"]; ok {
+			oneofMethodPresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofMethodPresent {
-		if _, ok := rawSpecMap["patch"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["delete"]; ok {
+		if _, ok := rawSpecMap["delete"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["get"]; ok {
 			oneofMethodPresent = true
@@ -3136,65 +4093,54 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["options"]; ok {
 			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["patch"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["put"]; ok {
+			oneofMethodPresent = true
 		}
 	}
 
 	if oneofMethodPresent {
-		// For custom JSON resolution with complex pointer types, get the choice from the raw spec map.
-		methodChoiceChoices := rawSpecMap["method"]
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
+		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
+		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
+		// PointerOfOneOfField type-assertions can still find the correct choice.
+		var methodChoiceChoices interface{}
+		if v := rawSpecMap["method"]; v != nil {
+			methodChoiceChoices = v
+		} else {
+			methodChoiceChoices = specData.GetMethod()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var methodChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeMethodChoice{}
+		var methodChoiceChoicesModel = &V1HttpMonitorMethodChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> Put
-		// CreateSpecType
-		// true
-		{
-			putOptions, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put)
-			putAttributeMap := make(map[string]attr.Value)
-
-			if isPut && putOptions != nil {
-
-				// resource specToModelNested StringField --> RequestBody
-				if putOptions.Put.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putOptions.Put.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
-
-				putObj, diags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				methodChoiceChoicesModel.Put = putObj
-			} else {
-				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
-			}
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> Delete
 		// CreateSpecType
 		// true
 		{
-			deleteOptions, isDelete := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Delete)
+			deleteOptionsWrapper, isDelete := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Delete)
 			deleteAttributeMap := make(map[string]attr.Value)
 
-			if isDelete && deleteOptions != nil {
+			if isDelete && deleteOptionsWrapper != nil && deleteOptionsWrapper.Delete != nil {
+				deleteElement := deleteOptionsWrapper.Delete
 
 				// resource specToModelNested StringField --> RequestBody
-				if deleteOptions.Delete.GetRequestBody() != "" {
-					deleteAttributeMap["request_body"] = types.StringValue(deleteOptions.Delete.GetRequestBody())
+				if deleteElement.GetRequestBody() != "" {
+					deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					deleteAttributeMap["request_body"] = types.StringNull()
 				}
 
-				deleteObj, diags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
-				response.Diagnostics.Append(diags...)
+				deleteObj, deleteObjDiags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
+				response.Diagnostics.Append(deleteObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3219,7 +4165,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			}
 		}
 
-		if getInMap || specData.GetGet() != nil {
+		_, isGetForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Get)
+		if getInMap || isGetForBool {
 			methodChoiceChoicesModel.Get = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Get = types.BoolNull()
@@ -3240,7 +4187,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			}
 		}
 
-		if headInMap || specData.GetHead() != nil {
+		_, isHeadForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Head)
+		if headInMap || isHeadForBool {
 			methodChoiceChoicesModel.Head = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Head = types.BoolNull()
@@ -3261,7 +4209,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			}
 		}
 
-		if optionsInMap || specData.GetOptions() != nil {
+		_, isOptionsForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Options)
+		if optionsInMap || isOptionsForBool {
 			methodChoiceChoicesModel.Options = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Options = types.BoolNull()
@@ -3271,21 +4220,22 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		// CreateSpecType
 		// true
 		{
-			patchOptions, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Patch)
+			patchOptionsWrapper, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Patch)
 			patchAttributeMap := make(map[string]attr.Value)
 
-			if isPatch && patchOptions != nil {
+			if isPatch && patchOptionsWrapper != nil && patchOptionsWrapper.Patch != nil {
+				patchElement := patchOptionsWrapper.Patch
 
 				// resource specToModelNested StringField --> RequestBody
-				if patchOptions.Patch.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchOptions.Patch.GetRequestBody())
+				if patchElement.GetRequestBody() != "" {
+					patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					patchAttributeMap["request_body"] = types.StringNull()
 				}
 
-				patchObj, diags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
-				response.Diagnostics.Append(diags...)
+				patchObj, patchObjDiags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
+				response.Diagnostics.Append(patchObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3299,21 +4249,22 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		// CreateSpecType
 		// true
 		{
-			postOptions, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Post)
+			postOptionsWrapper, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Post)
 			postAttributeMap := make(map[string]attr.Value)
 
-			if isPost && postOptions != nil {
+			if isPost && postOptionsWrapper != nil && postOptionsWrapper.Post != nil {
+				postElement := postOptionsWrapper.Post
 
 				// resource specToModelNested StringField --> RequestBody
-				if postOptions.Post.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postOptions.Post.GetRequestBody())
+				if postElement.GetRequestBody() != "" {
+					postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					postAttributeMap["request_body"] = types.StringNull()
 				}
 
-				postObj, diags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
-				response.Diagnostics.Append(diags...)
+				postObj, postObjDiags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
+				response.Diagnostics.Append(postObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3323,68 +4274,53 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		methodChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorMethodModelAttributeMap,
-			methodChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested PointerOfOneOfField --> Put
+		// CreateSpecType
+		// true
+		{
+			putOptionsWrapper, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put)
+			putAttributeMap := make(map[string]attr.Value)
+
+			if isPut && putOptionsWrapper != nil && putOptionsWrapper.Put != nil {
+				putElement := putOptionsWrapper.Put
+
+				// resource specToModelNested StringField --> RequestBody
+				if putElement.GetRequestBody() != "" {
+					putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
+				} else {
+					// Empty string, set to null
+					putAttributeMap["request_body"] = types.StringNull()
+				}
+
+				putObj, putObjDiags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
+				response.Diagnostics.Append(putObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				methodChoiceChoicesModel.Put = putObj
+			} else {
+				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.MethodChoice = methodChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			methodChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				V1HttpMonitorMethodModelAttributeMap,
+				methodChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.MethodChoice = methodChoiceObj
+		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
 		data.MethodChoice = types.ObjectNull(V1HttpMonitorMethodModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
-	if len(specData.RequestHeaders) > 0 {
-		requestHeadersElements := make([]V1HttpMonitorV1HttpMonitorHTTPMonitorHeader, 0, len(specData.RequestHeaders))
-
-		for _, requestHeadersElement := range specData.RequestHeaders {
-			v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorV1HttpMonitorHTTPMonitorHeader{}
-
-			// resource specToModelNested StringField --> Value
-			if requestHeadersElement.GetValue() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Key
-			if requestHeadersElement.GetKey() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
-			}
-
-			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel)
-		}
-
-		requestHeadersList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			V1HttpMonitorRequestHeadersModelAttributeMap,
-			requestHeadersElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.RequestHeaders = requestHeadersList
-	} else {
-		var requestHeadersObjectType = basetypes.ObjectType{
-			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
-		}
-		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
-		data.RequestHeaders = nullRequestHeadersList
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -3401,8 +4337,73 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		data.Receive = types.StringNull()
 	}
 
-	// resource SpecToModelRoot BoolField --> FollowRedirects
-	data.FollowRedirects = types.BoolValue(specData.GetFollowRedirects())
+	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
+	if len(specData.GetRequestHeaders()) > 0 {
+		requestHeadersElements := make([]V1HttpMonitorHTTPMonitorHeader, 0, len(specData.GetRequestHeaders()))
+		for _, requestHeadersElement := range specData.GetRequestHeaders() {
+			v1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorHTTPMonitorHeader{}
+
+			// resource specToModelNested RequiredStringField --> Key
+			if requestHeadersElement.GetKey() != "" {
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Value
+			if requestHeadersElement.GetValue() != "" {
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
+			}
+
+			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorHTTPMonitorHeaderModel)
+		}
+
+		{
+			requestHeadersList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				V1HttpMonitorRequestHeadersModelAttributeMap,
+				requestHeadersElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.RequestHeaders = requestHeadersList
+		}
+	} else {
+		var requestHeadersObjectType = basetypes.ObjectType{
+			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
+		}
+		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
+		var priorValRequestHeaders types.List
+		_ = request.State.GetAttribute(ctx, path.Root("request_headers"), &priorValRequestHeaders)
+		if !priorValRequestHeaders.IsNull() && !priorValRequestHeaders.IsUnknown() {
+			data.RequestHeaders = priorValRequestHeaders
+		} else {
+			data.RequestHeaders = nullRequestHeadersList
+		}
+
+	}
+
+	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
+	{
+		if len(specData.GetResponseCodes()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.ResponseCodes = listValue
+		} else {
+			data.ResponseCodes = types.ListNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot UintField --> ResponseTimeout
 	responseTimeoutValue := specData.GetResponseTimeout()
@@ -3410,139 +4411,6 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		data.ResponseTimeout = types.Int64Value(int64(responseTimeoutValue))
 	} else {
 		data.ResponseTimeout = types.Int64Null()
-	}
-
-	// resource SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
-	externalSourcesElementsSpectToModel := make([]V1HttpMonitorSyntheticMonitorSourceExternal, 0, len(specData.ExternalSources))
-
-	for _, externalSourcesElement := range specData.ExternalSources {
-		v1HttpMonitorSyntheticMonitorSourceExternalModel := V1HttpMonitorSyntheticMonitorSourceExternal{}
-
-		// resource specToModelNested RequiredOneOfField --> SourceChoice
-		// CreateSpecType
-		// CreateSpecType: GetSourceChoice() returns the oneof interface value.
-		if externalSourcesElement.GetSourceChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			externalSourcessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			externalSourcessourceChoiceChoices := externalSourcesElement.GetSourceChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested PointerOfOneOfField --> Aws
-			// CreateSpecType
-			// true
-			{
-				awsOptions, isAws := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws)
-				awsAttributeMap := make(map[string]attr.Value)
-
-				if isAws && awsOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(awsOptions.Aws.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, awsOptions.Aws.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						awsAttributeMap["regions"] = listValue
-					} else {
-						awsAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					awsObj, diags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap, awsAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> F5Xc
-			// CreateSpecType
-			// true
-			{
-				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
-				f5xcAttributeMap := make(map[string]attr.Value)
-
-				if isF5Xc && f5xcOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						f5xcAttributeMap["regions"] = listValue
-					} else {
-						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					f5xcObj, diags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, externalSourcessourceChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				externalSourcessourceChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(externalSourcessourceChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
-		}
-
-		externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSyntheticMonitorSourceExternalModel)
-	}
-
-	externalSourcesList, diags := utils.GoStructSliceToListValue(
-		ctx,
-		V1HttpMonitorExternalSourcesModelAttributeMap,
-		externalSourcesElementsSpectToModel,
-	)
-
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
-		return
-	}
-
-	data.ExternalSources = externalSourcesList
-
-	// resource SpecToModelRoot RequiredStringField --> Url
-	if specData.GetUrl() != "" {
-		data.Url = types.StringValue(specData.GetUrl())
-	} else {
-		// Empty string, set to null
-		data.Url = types.StringNull()
-	}
-
-	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
-	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
-
-	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
-	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
-	if sourceCriticalThresholdValue > 0 {
-		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
 	}
 
 	// resource SpecToModelRoot StringField --> SniHost
@@ -3553,579 +4421,18 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		data.SniHost = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
-	if len(specData.GetResponseCodes()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.ResponseCodes = listValue
+	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
+	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
+	if sourceCriticalThresholdValue > 0 {
+		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
+	}
+
+	// resource SpecToModelRoot RequiredStringField --> Url
+	if specData.GetUrl() != "" {
+		data.Url = types.StringValue(specData.GetUrl())
 	} else {
-		data.ResponseCodes = types.ListNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot PointerField --> HealthPolicy
-	if specData.GetHealthPolicy() != nil {
-		var v1HttpMonitorSyntheticMonitorHealthPolicyModel = &V1HttpMonitorSyntheticMonitorHealthPolicy{}
-		healthPolicyElement := specData.GetHealthPolicy()
-
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
-		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicydynamicThresholdPolicyChoiceChoices := healthPolicyElement.GetDynamicThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
-			var dynamicThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["dynamic_threshold_disabled"]; found {
-					dynamicThresholdDisabledInMap = true
-				}
-			}
-
-			if !dynamicThresholdDisabledInMap {
-				if _, found := rawSpecMap["dynamic_threshold_disabled"]; found {
-					dynamicThresholdDisabledInMap = true
-				}
-			}
-
-			if dynamicThresholdDisabledInMap || healthPolicyElement.GetDynamicThresholdDisabled() != nil {
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> DynamicThreshold
-			// CreateSpecType
-			// true
-			{
-				dynamicThresholdOptions, isDynamicThreshold := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold)
-				dynamicThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isDynamicThreshold && dynamicThresholdOptions != nil {
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dynamicThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						dynamicThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					// resource specToModelNested RequiredEnumField --> StdDevVal
-					if dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String() != "" {
-						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dynamicThresholdAttributeMap["std_dev_val"] = listValue
-					} else {
-						dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
-					}
-
-					dynamicThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap, dynamicThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = dynamicThresholdObj
-				} else {
-					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
-		}
-
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
-		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicystaticMaxThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMaxThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-			var staticMaxThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMaxThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
-			// CreateSpecType
-			// true
-			{
-				staticMaxThresholdOptions, isStaticMaxThreshold := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold)
-				staticMaxThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isStaticMaxThreshold && staticMaxThresholdOptions != nil {
-
-					// resource specToModelNested RequiredUintField --> MaxResponseTime
-					staticMaxThresholdAttributeMap["max_response_time"] = types.Int64Value(int64(staticMaxThresholdOptions.StaticMaxThreshold.GetMaxResponseTime()))
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if staticMaxThresholdOptions.StaticMaxThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(staticMaxThresholdOptions.StaticMaxThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticMaxThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						staticMaxThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					staticMaxThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap, staticMaxThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = staticMaxThresholdObj
-				} else {
-					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
-		}
-
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
-		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicystaticMinThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMinThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
-			var staticMinThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_min_threshold_disabled"]; found {
-					staticMinThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMinThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_min_threshold_disabled"]; found {
-					staticMinThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMinThresholdDisabledInMap || healthPolicyElement.GetStaticMinThresholdDisabled() != nil {
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> StaticMinThreshold
-			// CreateSpecType
-			// true
-			{
-				staticMinThresholdOptions, isStaticMinThreshold := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold)
-				staticMinThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isStaticMinThreshold && staticMinThresholdOptions != nil {
-
-					// resource specToModelNested RequiredUintField --> MinResponseTime
-					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticMinThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					staticMinThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = staticMinThresholdObj
-				} else {
-					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
-		}
-
-		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorHealthPolicyModelAttributeMap,
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel,
-		)
-		response.Diagnostics.Append(healthPolicyDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.HealthPolicy = healthPolicyObj
-	} else {
-		data.HealthPolicy = types.ObjectNull(V1HttpMonitorHealthPolicyModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
-	// true
-	// false
-	// This resource uses custom JSON resolution.
-	// The API response for this oneof field can be inconsistent.
-	// We must inspect the raw JSON map to determine which choice is present.
-	// The logic checks for the presence of any of the possible oneof choices.
-	var oneofIntervalChoicePresent bool
-
-	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
-	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_hour"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_6_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		}
-	}
-
-	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
-	if !oneofIntervalChoicePresent {
-		if _, ok := rawSpecMap["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		}
-	}
-
-	if oneofIntervalChoicePresent {
-
-		// The model struct that will be populated by the nested template.
-		var intervalChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeIntervalChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
-		var interval1DayInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_day"]; found {
-				interval1DayInMap = true
-			}
-		}
-
-		if !interval1DayInMap {
-			if _, found := rawSpecMap["interval_1_day"]; found {
-				interval1DayInMap = true
-			}
-		}
-
-		if interval1DayInMap || specData.GetInterval_1Day() != nil {
-			intervalChoiceChoicesModel.Interval_1Day = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
-		var interval30SecsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if !interval30SecsInMap {
-			if _, found := rawSpecMap["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
-		var interval5MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if !interval5MinsInMap {
-			if _, found := rawSpecMap["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
-		var interval6HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if !interval6HoursInMap {
-			if _, found := rawSpecMap["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
-		var interval15MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if !interval15MinsInMap {
-			if _, found := rawSpecMap["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
-		var interval1HourInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_hour"]; found {
-				interval1HourInMap = true
-			}
-		}
-
-		if !interval1HourInMap {
-			if _, found := rawSpecMap["interval_1_hour"]; found {
-				interval1HourInMap = true
-			}
-		}
-
-		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
-		var interval30MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if !interval30MinsInMap {
-			if _, found := rawSpecMap["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if interval30MinsInMap || specData.GetInterval_30Mins() != nil {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
-		var interval12HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if !interval12HoursInMap {
-			if _, found := rawSpecMap["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
-		var interval1MinInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if !interval1MinInMap {
-			if _, found := rawSpecMap["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if interval1MinInMap || specData.GetInterval_1Min() != nil {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		intervalChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorIntervalChoiceModelAttributeMap,
-			intervalChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IntervalChoice = intervalChoiceObj
-	} else {
-		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
+		// Empty string, set to null
+		data.Url = types.StringNull()
 	}
 
 	if response.Diagnostics.HasError() {
@@ -4145,6 +4452,25 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCV1HttpMonitorModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -4181,7 +4507,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -4194,6 +4520,20 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -4204,36 +4544,386 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	{
+		// resource modelToSpecRoot RequiredArrayOfPointerField --> ExternalSources
+		var externalSourcesElementsModelToSpec []V1HttpMonitorSrcExternal
+		response.Diagnostics.Append(data.ExternalSources.ElementsAs(ctx, &externalSourcesElementsModelToSpec, false)...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		externalSourcesSpec := make([]*ves_io_schema_observability_synthetic_monitor.SourceExternal, len(externalSourcesElementsModelToSpec))
+
+		for i, externalSourcesElement := range externalSourcesElementsModelToSpec {
+			externalSourcesSpec[i] = &ves_io_schema_observability_synthetic_monitor.SourceExternal{}
+
+			// resource modelToSpecNested RequiredOneOfField --> SourceChoice
+			if !externalSourcesElement.SourceChoice.IsNull() && !externalSourcesElement.SourceChoice.IsUnknown() {
+				externalSourcesSourceChoiceModel := V1HttpMonitorSrcChoice{}
+				response.Diagnostics.Append(externalSourcesElement.SourceChoice.As(ctx, &externalSourcesSourceChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Aws
+				if !externalSourcesSourceChoiceModel.Aws.IsNull() && !externalSourcesSourceChoiceModel.Aws.IsUnknown() {
+					var v1HttpMonitorAwsModel V1HttpMonitorAws
+					response.Diagnostics.Append(externalSourcesSourceChoiceModel.Aws.As(ctx, &v1HttpMonitorAwsModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					awsOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws{}
+					awsOneOfSpec.Aws = &ves_io_schema_observability_synthetic_monitor.AWSRegionsExternal{}
+					externalSourcesSpec[i].SourceChoice = awsOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
+					{
+						elements := make([]string, 0, len(v1HttpMonitorAwsModel.Regions.Elements()))
+						diags = v1HttpMonitorAwsModel.Regions.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						awsOneOfSpec.Aws.Regions = elements
+					}
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
+				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
+					var v1HttpMonitorF5XcModel V1HttpMonitorF5Xc
+					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1HttpMonitorF5XcModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
+					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
+					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
+					{
+						elements := make([]string, 0, len(v1HttpMonitorF5XcModel.Regions.Elements()))
+						diags = v1HttpMonitorF5XcModel.Regions.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						f5xcOneOfSpec.F5Xc.Regions = elements
+					}
+
+				}
+
+			}
+
+		}
+
+		spec.ExternalSources = externalSourcesSpec
+	}
+
+	// resource modelToSpecRoot Bool Field --> FollowRedirects
+	if !data.FollowRedirects.IsNull() && !data.FollowRedirects.IsUnknown() {
+		spec.FollowRedirects = bool(data.FollowRedirects.ValueBool())
+	}
+
+	{
+		// resource modelToSpecRoot PointerField --> HealthPolicy
+		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
+			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
+			spec.HealthPolicy = healthPolicySpec
+			var healthPolicyModel V1HttpMonitorHealthPolicy
+
+			// Populate the nested model from the main data model
+			diags.Append(data.HealthPolicy.As(ctx, &healthPolicyModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
+			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
+				healthPolicyDynamicThresholdPolicyChoiceModel := V1HttpMonitorDynamicThresholdPolicyChoice{}
+				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> DynamicThreshold
+				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsUnknown() {
+					var v1HttpMonitorDynamicThresholdModel V1HttpMonitorDynamicThreshold
+					response.Diagnostics.Append(healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.As(ctx, &v1HttpMonitorDynamicThresholdModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					dynamicThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold{}
+					dynamicThresholdOneOfSpec.DynamicThreshold = &ves_io_schema_observability_synthetic_monitor.DynamicThreshold{}
+					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdOneOfSpec
+
+					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
+					if !v1HttpMonitorDynamicThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorDynamicThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorDynamicThresholdModel.EvalPeriod.Elements()) > 0 {
+						var evalPeriodTfStrings []types.String
+						diags = v1HttpMonitorDynamicThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(evalPeriodTfStrings) > 0 {
+							valStr := evalPeriodTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
+								dynamicThresholdOneOfSpec.DynamicThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
+								)
+								return
+							}
+						}
+					}
+
+					// resource modelToSpecNested RequiredEnumField --> StdDevVal
+					if !v1HttpMonitorDynamicThresholdModel.StdDevVal.IsNull() && !v1HttpMonitorDynamicThresholdModel.StdDevVal.IsUnknown() && len(v1HttpMonitorDynamicThresholdModel.StdDevVal.Elements()) > 0 {
+						var stdDevValTfStrings []types.String
+						diags = v1HttpMonitorDynamicThresholdModel.StdDevVal.ElementsAs(ctx, &stdDevValTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(stdDevValTfStrings) > 0 {
+							valStr := stdDevValTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.StdDevVal_value[valStr]; ok {
+								dynamicThresholdOneOfSpec.DynamicThreshold.StdDevVal = ves_io_schema_observability_synthetic_monitor.StdDevVal(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum StdDevVal", valStr),
+								)
+								return
+							}
+						}
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
+				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsUnknown() {
+					dynamicThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{}
+					dynamicThresholdDisabledSpecBool.DynamicThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdDisabledSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
+			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
+				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1HttpMonitorStaticMaxThresholdPolicyChoice{}
+				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> StaticMaxThreshold
+				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsUnknown() {
+					var v1HttpMonitorStaticMaxThresholdModel V1HttpMonitorStaticMaxThreshold
+					response.Diagnostics.Append(healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.As(ctx, &v1HttpMonitorStaticMaxThresholdModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					staticMaxThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold{}
+					staticMaxThresholdOneOfSpec.StaticMaxThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMaxThreshold{}
+					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdOneOfSpec
+
+					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
+					if !v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.Elements()) > 0 {
+						var evalPeriodTfStrings []types.String
+						diags = v1HttpMonitorStaticMaxThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(evalPeriodTfStrings) > 0 {
+							valStr := evalPeriodTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
+								staticMaxThresholdOneOfSpec.StaticMaxThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
+								)
+								return
+							}
+						}
+					}
+
+					// resource modelToSpecNested RequiredUintField --> MaxResponseTime
+					staticMaxThresholdOneOfSpec.StaticMaxThreshold.MaxResponseTime = uint32(uint32(v1HttpMonitorStaticMaxThresholdModel.MaxResponseTime.ValueInt64()))
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
+					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
+					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
+			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
+				healthPolicyStaticMinThresholdPolicyChoiceModel := V1HttpMonitorStaticMinThresholdPolicyChoice{}
+				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> StaticMinThreshold
+				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsUnknown() {
+					var v1HttpMonitorStaticMinThresholdModel V1HttpMonitorStaticMinThreshold
+					response.Diagnostics.Append(healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.As(ctx, &v1HttpMonitorStaticMinThresholdModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					staticMinThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold{}
+					staticMinThresholdOneOfSpec.StaticMinThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMinThreshold{}
+					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdOneOfSpec
+
+					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
+					if !v1HttpMonitorStaticMinThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorStaticMinThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorStaticMinThresholdModel.EvalPeriod.Elements()) > 0 {
+						var evalPeriodTfStrings []types.String
+						diags = v1HttpMonitorStaticMinThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						if len(evalPeriodTfStrings) > 0 {
+							valStr := evalPeriodTfStrings[0].ValueString()
+
+							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
+								staticMinThresholdOneOfSpec.StaticMinThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
+							} else {
+								response.Diagnostics.AddError(
+									"Invalid Enum Value",
+									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
+								)
+								return
+							}
+						}
+					}
+
+					// resource modelToSpecNested RequiredUintField --> MinResponseTime
+					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1HttpMonitorStaticMinThresholdModel.MinResponseTime.ValueInt64()))
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
+				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsUnknown() {
+					staticMinThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{}
+					staticMinThresholdDisabledSpecBool.StaticMinThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdDisabledSpecBool
+				}
+
+			}
+
+		}
+	}
+
+	// resource modelToSpecRoot Bool Field --> IgnoreCertErrors
+	if !data.IgnoreCertErrors.IsNull() && !data.IgnoreCertErrors.IsUnknown() {
+		spec.IgnoreCertErrors = bool(data.IgnoreCertErrors.ValueBool())
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
+	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
+		intervalChoiceModel := V1HttpMonitorIntervalChoice{}
+		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
+		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
+			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_12Hours{}
+			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval12HoursSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
+		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
+			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_15Mins{}
+			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval15MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Day
+		if !intervalChoiceModel.Interval_1Day.IsNull() && !intervalChoiceModel.Interval_1Day.IsUnknown() {
+			interval1DaySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_1Day{}
+			interval1DaySpecBool.Interval_1Day = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1DaySpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
+		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
+			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_1Hour{}
+			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1HourSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Min
+		if !intervalChoiceModel.Interval_1Min.IsNull() && !intervalChoiceModel.Interval_1Min.IsUnknown() {
+			interval1MinSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_1Min{}
+			interval1MinSpecBool.Interval_1Min = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1MinSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Mins
+		if !intervalChoiceModel.Interval_30Mins.IsNull() && !intervalChoiceModel.Interval_30Mins.IsUnknown() {
+			interval30MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_30Mins{}
+			interval30MinsSpecBool.Interval_30Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval30MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
+		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
+			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_30Secs{}
+			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval30SecsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
+		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
+			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_5Mins{}
+			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval5MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
+		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
+			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_6Hours{}
+			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval6HoursSpecBool
+		}
+
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> Method
 	if !data.MethodChoice.IsNull() && !data.MethodChoice.IsUnknown() {
-		methodChoiceModel := V1HttpMonitorCreateSpecTypeMethodChoice{}
+		methodChoiceModel := V1HttpMonitorMethodChoice{}
 		response.Diagnostics.Append(data.MethodChoice.As(ctx, &methodChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> Put
-		if !methodChoiceModel.Put.IsNull() && !methodChoiceModel.Put.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypePutModel V1HttpMonitorCreateSpecTypePut
-			response.Diagnostics.Append(methodChoiceModel.Put.As(ctx, &v1HttpMonitorCreateSpecTypePutModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			putOneOfSpec := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Put{}
-			putOneOfSpec.Put = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.RequestBody{}
-			spec.Method = putOneOfSpec
-
-			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypePutModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypePutModel.RequestBody.IsUnknown() {
-				putOneOfSpec.Put.RequestBody = string(v1HttpMonitorCreateSpecTypePutModel.RequestBody.ValueString())
-			}
-
-		}
-
 		// resource modelToSpecNested PointerOfOneOfField --> Delete
 		if !methodChoiceModel.Delete.IsNull() && !methodChoiceModel.Delete.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypeDeleteModel V1HttpMonitorCreateSpecTypeDelete
-			response.Diagnostics.Append(methodChoiceModel.Delete.As(ctx, &v1HttpMonitorCreateSpecTypeDeleteModel, basetypes.ObjectAsOptions{})...)
+			var v1HttpMonitorDeleteModel V1HttpMonitorDelete
+			response.Diagnostics.Append(methodChoiceModel.Delete.As(ctx, &v1HttpMonitorDeleteModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -4242,8 +4932,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			spec.Method = deleteOneOfSpec
 
 			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypeDeleteModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypeDeleteModel.RequestBody.IsUnknown() {
-				deleteOneOfSpec.Delete.RequestBody = string(v1HttpMonitorCreateSpecTypeDeleteModel.RequestBody.ValueString())
+			if !v1HttpMonitorDeleteModel.RequestBody.IsNull() && !v1HttpMonitorDeleteModel.RequestBody.IsUnknown() {
+				deleteOneOfSpec.Delete.RequestBody = string(v1HttpMonitorDeleteModel.RequestBody.ValueString())
 			}
 
 		}
@@ -4271,8 +4961,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 
 		// resource modelToSpecNested PointerOfOneOfField --> Patch
 		if !methodChoiceModel.Patch.IsNull() && !methodChoiceModel.Patch.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypePatchModel V1HttpMonitorCreateSpecTypePatch
-			response.Diagnostics.Append(methodChoiceModel.Patch.As(ctx, &v1HttpMonitorCreateSpecTypePatchModel, basetypes.ObjectAsOptions{})...)
+			var v1HttpMonitorPatchModel V1HttpMonitorPatch
+			response.Diagnostics.Append(methodChoiceModel.Patch.As(ctx, &v1HttpMonitorPatchModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -4281,16 +4971,16 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			spec.Method = patchOneOfSpec
 
 			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypePatchModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypePatchModel.RequestBody.IsUnknown() {
-				patchOneOfSpec.Patch.RequestBody = string(v1HttpMonitorCreateSpecTypePatchModel.RequestBody.ValueString())
+			if !v1HttpMonitorPatchModel.RequestBody.IsNull() && !v1HttpMonitorPatchModel.RequestBody.IsUnknown() {
+				patchOneOfSpec.Patch.RequestBody = string(v1HttpMonitorPatchModel.RequestBody.ValueString())
 			}
 
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> Post
 		if !methodChoiceModel.Post.IsNull() && !methodChoiceModel.Post.IsUnknown() {
-			var v1HttpMonitorCreateSpecTypePostModel V1HttpMonitorCreateSpecTypePost
-			response.Diagnostics.Append(methodChoiceModel.Post.As(ctx, &v1HttpMonitorCreateSpecTypePostModel, basetypes.ObjectAsOptions{})...)
+			var v1HttpMonitorPostModel V1HttpMonitorPost
+			response.Diagnostics.Append(methodChoiceModel.Post.As(ctx, &v1HttpMonitorPostModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -4299,18 +4989,44 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			spec.Method = postOneOfSpec
 
 			// resource modelToSpecNested StringField --> RequestBody
-			if !v1HttpMonitorCreateSpecTypePostModel.RequestBody.IsNull() && !v1HttpMonitorCreateSpecTypePostModel.RequestBody.IsUnknown() {
-				postOneOfSpec.Post.RequestBody = string(v1HttpMonitorCreateSpecTypePostModel.RequestBody.ValueString())
+			if !v1HttpMonitorPostModel.RequestBody.IsNull() && !v1HttpMonitorPostModel.RequestBody.IsUnknown() {
+				postOneOfSpec.Post.RequestBody = string(v1HttpMonitorPostModel.RequestBody.ValueString())
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> Put
+		if !methodChoiceModel.Put.IsNull() && !methodChoiceModel.Put.IsUnknown() {
+			var v1HttpMonitorPutModel V1HttpMonitorPut
+			response.Diagnostics.Append(methodChoiceModel.Put.As(ctx, &v1HttpMonitorPutModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			putOneOfSpec := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Put{}
+			putOneOfSpec.Put = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.RequestBody{}
+			spec.Method = putOneOfSpec
+
+			// resource modelToSpecNested StringField --> RequestBody
+			if !v1HttpMonitorPutModel.RequestBody.IsNull() && !v1HttpMonitorPutModel.RequestBody.IsUnknown() {
+				putOneOfSpec.Put.RequestBody = string(v1HttpMonitorPutModel.RequestBody.ValueString())
 			}
 
 		}
 
 	}
 
+	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
+	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
+
+	// resource modelToSpecRoot StringField --> Receive
+	if !data.Receive.IsNull() && !data.Receive.IsUnknown() {
+		spec.Receive = string(data.Receive.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> RequestHeaders
 		if !data.RequestHeaders.IsNull() && !data.RequestHeaders.IsUnknown() {
-			var requestHeadersElements []V1HttpMonitorV1HttpMonitorHTTPMonitorHeader
+			var requestHeadersElements []V1HttpMonitorHTTPMonitorHeader
 			response.Diagnostics.Append(data.RequestHeaders.ElementsAs(ctx, &requestHeadersElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -4322,126 +5038,20 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			for i, requestHeadersElement := range requestHeadersElements {
 				requestHeadersSpec[i] = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.HTTPMonitorHeader{}
 
-				// resource modelToSpecNested StringField --> Value
-				if !requestHeadersElement.Value.IsNull() && !requestHeadersElement.Value.IsUnknown() {
-					requestHeadersSpec[i].Value = string(requestHeadersElement.Value.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Key
 				if !requestHeadersElement.Key.IsNull() && !requestHeadersElement.Key.IsUnknown() {
 					requestHeadersSpec[i].Key = string(requestHeadersElement.Key.ValueString())
+				}
+
+				// resource modelToSpecNested StringField --> Value
+				if !requestHeadersElement.Value.IsNull() && !requestHeadersElement.Value.IsUnknown() {
+					requestHeadersSpec[i].Value = string(requestHeadersElement.Value.ValueString())
 				}
 
 			}
 
 			spec.RequestHeaders = requestHeadersSpec
 		}
-	}
-
-	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
-	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
-
-	// resource modelToSpecRoot StringField --> Receive
-	if !data.Receive.IsNull() && !data.Receive.IsUnknown() {
-		spec.Receive = string(data.Receive.ValueString())
-	}
-
-	// resource modelToSpecRoot Bool Field --> FollowRedirects
-	if !data.FollowRedirects.IsNull() && !data.FollowRedirects.IsUnknown() {
-		spec.FollowRedirects = bool(data.FollowRedirects.ValueBool())
-	}
-
-	// resource modelToSpecRoot UintField --> ResponseTimeout
-	if !data.ResponseTimeout.IsNull() && !data.ResponseTimeout.IsUnknown() {
-		spec.ResponseTimeout = uint32(data.ResponseTimeout.ValueInt64())
-	}
-
-	{
-		// resource modelToSpecRoot RequiredArrayOfPointerField --> ExternalSources
-		var externalSourcesElementsModelToSpec []V1HttpMonitorSyntheticMonitorSourceExternal
-		response.Diagnostics.Append(data.ExternalSources.ElementsAs(ctx, &externalSourcesElementsModelToSpec, false)...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		externalSourcesSpec := make([]*ves_io_schema_observability_synthetic_monitor.SourceExternal, len(externalSourcesElementsModelToSpec))
-
-		for i, externalSourcesElement := range externalSourcesElementsModelToSpec {
-			externalSourcesSpec[i] = &ves_io_schema_observability_synthetic_monitor.SourceExternal{}
-
-			// resource modelToSpecNested RequiredOneOfField --> SourceChoice
-			if !externalSourcesElement.SourceChoice.IsNull() && !externalSourcesElement.SourceChoice.IsUnknown() {
-				externalSourcesSourceChoiceModel := V1HttpMonitorSourceExternalSourceChoice{}
-				response.Diagnostics.Append(externalSourcesElement.SourceChoice.As(ctx, &externalSourcesSourceChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> Aws
-				if !externalSourcesSourceChoiceModel.Aws.IsNull() && !externalSourcesSourceChoiceModel.Aws.IsUnknown() {
-					var v1HttpMonitorSourceExternalAwsModel V1HttpMonitorSourceExternalAws
-					response.Diagnostics.Append(externalSourcesSourceChoiceModel.Aws.As(ctx, &v1HttpMonitorSourceExternalAwsModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					awsOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws{}
-					awsOneOfSpec.Aws = &ves_io_schema_observability_synthetic_monitor.AWSRegionsExternal{}
-					externalSourcesSpec[i].SourceChoice = awsOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
-					elements := make([]string, 0, len(v1HttpMonitorSourceExternalAwsModel.Regions.Elements()))
-					diags = v1HttpMonitorSourceExternalAwsModel.Regions.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					awsOneOfSpec.Aws.Regions = elements
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
-				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
-					var v1HttpMonitorSourceExternalF5XcModel V1HttpMonitorSourceExternalF5Xc
-					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1HttpMonitorSourceExternalF5XcModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
-					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
-					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
-					elements := make([]string, 0, len(v1HttpMonitorSourceExternalF5XcModel.Regions.Elements()))
-					diags = v1HttpMonitorSourceExternalF5XcModel.Regions.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec.F5Xc.Regions = elements
-
-				}
-
-			}
-
-		}
-
-		spec.ExternalSources = externalSourcesSpec
-	}
-
-	// resource modelToSpecRoot RequiredStringField --> Url
-	spec.Url = string(data.Url.ValueString())
-
-	// resource modelToSpecRoot Bool Field --> IgnoreCertErrors
-	if !data.IgnoreCertErrors.IsNull() && !data.IgnoreCertErrors.IsUnknown() {
-		spec.IgnoreCertErrors = bool(data.IgnoreCertErrors.ValueBool())
-	}
-
-	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
-	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
-
-	// resource modelToSpecRoot StringField --> SniHost
-	if !data.SniHost.IsNull() && !data.SniHost.IsUnknown() {
-		spec.SniHost = string(data.SniHost.ValueString())
 	}
 
 	{
@@ -4455,286 +5065,27 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		spec.ResponseCodes = elements
 	}
 
-	{
-		// resource modelToSpecRoot PointerField --> HealthPolicy
-		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
-			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
-			spec.HealthPolicy = healthPolicySpec
-			var healthPolicyModel V1HttpMonitorSyntheticMonitorHealthPolicy
-
-			// Populate the nested model from the main data model
-			diags.Append(data.HealthPolicy.As(ctx, &healthPolicyModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
-			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
-				healthPolicyDynamicThresholdPolicyChoiceModel := V1HttpMonitorHealthPolicyDynamicThresholdPolicyChoice{}
-				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
-				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThresholdDisabled.IsUnknown() {
-					dynamicThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{}
-					dynamicThresholdDisabledSpecBool.DynamicThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdDisabledSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> DynamicThreshold
-				if !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsNull() && !healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.IsUnknown() {
-					var v1HttpMonitorHealthPolicyDynamicThresholdModel V1HttpMonitorHealthPolicyDynamicThreshold
-					response.Diagnostics.Append(healthPolicyDynamicThresholdPolicyChoiceModel.DynamicThreshold.As(ctx, &v1HttpMonitorHealthPolicyDynamicThresholdModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					dynamicThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold{}
-					dynamicThresholdOneOfSpec.DynamicThreshold = &ves_io_schema_observability_synthetic_monitor.DynamicThreshold{}
-					healthPolicySpec.DynamicThresholdPolicy = dynamicThresholdOneOfSpec
-
-					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
-					if !v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.Elements()) > 0 {
-						var evalPeriodTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyDynamicThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(evalPeriodTfStrings) > 0 {
-							valStr := evalPeriodTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
-								dynamicThresholdOneOfSpec.DynamicThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
-								)
-								return
-							}
-						}
-					}
-
-					// resource modelToSpecNested RequiredEnumField --> StdDevVal
-					if !v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.IsNull() && !v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.IsUnknown() && len(v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.Elements()) > 0 {
-						var stdDevValTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyDynamicThresholdModel.StdDevVal.ElementsAs(ctx, &stdDevValTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(stdDevValTfStrings) > 0 {
-							valStr := stdDevValTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.StdDevVal_value[valStr]; ok {
-								dynamicThresholdOneOfSpec.DynamicThreshold.StdDevVal = ves_io_schema_observability_synthetic_monitor.StdDevVal(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum StdDevVal", valStr),
-								)
-								return
-							}
-						}
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
-			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
-				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyChoice{}
-				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
-					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
-					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> StaticMaxThreshold
-				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsUnknown() {
-					var v1HttpMonitorHealthPolicyStaticMaxThresholdModel V1HttpMonitorHealthPolicyStaticMaxThreshold
-					response.Diagnostics.Append(healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.As(ctx, &v1HttpMonitorHealthPolicyStaticMaxThresholdModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					staticMaxThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold{}
-					staticMaxThresholdOneOfSpec.StaticMaxThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMaxThreshold{}
-					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdOneOfSpec
-
-					// resource modelToSpecNested RequiredUintField --> MaxResponseTime
-					staticMaxThresholdOneOfSpec.StaticMaxThreshold.MaxResponseTime = uint32(uint32(v1HttpMonitorHealthPolicyStaticMaxThresholdModel.MaxResponseTime.ValueInt64()))
-
-					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
-					if !v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.Elements()) > 0 {
-						var evalPeriodTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyStaticMaxThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(evalPeriodTfStrings) > 0 {
-							valStr := evalPeriodTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
-								staticMaxThresholdOneOfSpec.StaticMaxThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
-								)
-								return
-							}
-						}
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
-			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
-				healthPolicyStaticMinThresholdPolicyChoiceModel := V1HttpMonitorHealthPolicyStaticMinThresholdPolicyChoice{}
-				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
-				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThresholdDisabled.IsUnknown() {
-					staticMinThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{}
-					staticMinThresholdDisabledSpecBool.StaticMinThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdDisabledSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> StaticMinThreshold
-				if !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsNull() && !healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.IsUnknown() {
-					var v1HttpMonitorHealthPolicyStaticMinThresholdModel V1HttpMonitorHealthPolicyStaticMinThreshold
-					response.Diagnostics.Append(healthPolicyStaticMinThresholdPolicyChoiceModel.StaticMinThreshold.As(ctx, &v1HttpMonitorHealthPolicyStaticMinThresholdModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					staticMinThresholdOneOfSpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold{}
-					staticMinThresholdOneOfSpec.StaticMinThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMinThreshold{}
-					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdOneOfSpec
-
-					// resource modelToSpecNested RequiredUintField --> MinResponseTime
-					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1HttpMonitorHealthPolicyStaticMinThresholdModel.MinResponseTime.ValueInt64()))
-
-					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
-					if !v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsNull() && !v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsUnknown() && len(v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.Elements()) > 0 {
-						var evalPeriodTfStrings []types.String
-						diags = v1HttpMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.ElementsAs(ctx, &evalPeriodTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(evalPeriodTfStrings) > 0 {
-							valStr := evalPeriodTfStrings[0].ValueString()
-
-							if v, ok := ves_io_schema_observability_synthetic_monitor.EvalPeriod_value[valStr]; ok {
-								staticMinThresholdOneOfSpec.StaticMinThreshold.EvalPeriod = ves_io_schema_observability_synthetic_monitor.EvalPeriod(v)
-							} else {
-								response.Diagnostics.AddError(
-									"Invalid Enum Value",
-									fmt.Sprintf("Value '%s' is not valid for enum EvalPeriod", valStr),
-								)
-								return
-							}
-						}
-					}
-
-				}
-
-			}
-
-		}
+	// resource modelToSpecRoot UintField --> ResponseTimeout
+	if !data.ResponseTimeout.IsNull() && !data.ResponseTimeout.IsUnknown() {
+		spec.ResponseTimeout = uint32(data.ResponseTimeout.ValueInt64())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
-	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
-		intervalChoiceModel := V1HttpMonitorCreateSpecTypeIntervalChoice{}
-		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
+	// resource modelToSpecRoot StringField --> SniHost
+	if !data.SniHost.IsNull() && !data.SniHost.IsUnknown() {
+		spec.SniHost = string(data.SniHost.ValueString())
+	}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Day
-		if !intervalChoiceModel.Interval_1Day.IsNull() && !intervalChoiceModel.Interval_1Day.IsUnknown() {
-			interval1DaySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_1Day{}
-			interval1DaySpecBool.Interval_1Day = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1DaySpecBool
-		}
+	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
+	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
-		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
-			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_30Secs{}
-			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval30SecsSpecBool
-		}
+	// resource modelToSpecRoot RequiredStringField --> Url
+	spec.Url = string(data.Url.ValueString())
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
-		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
-			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_5Mins{}
-			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval5MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
-		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
-			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_6Hours{}
-			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval6HoursSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
-		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
-			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_15Mins{}
-			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval15MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
-		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
-			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_1Hour{}
-			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1HourSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Mins
-		if !intervalChoiceModel.Interval_30Mins.IsNull() && !intervalChoiceModel.Interval_30Mins.IsUnknown() {
-			interval30MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_30Mins{}
-			interval30MinsSpecBool.Interval_30Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval30MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
-		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
-			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_12Hours{}
-			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval12HoursSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Min
-		if !intervalChoiceModel.Interval_1Min.IsNull() && !intervalChoiceModel.Interval_1Min.IsUnknown() {
-			interval1MinSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_1Min{}
-			interval1MinSpecBool.Interval_1Min = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1MinSpecBool
-		}
-
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -4753,6 +5104,12 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		)
 		return
 	}
+	updateGetRspType := strings.Replace(ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, "Object", "GetResponse", 1)
+	updateGetProtoMsgType := proto.MessageType(updateGetRspType).Elem()
+	updateCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
@@ -4764,39 +5121,67 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	}
 	// Write back the response to the model
 	metaData := httpResp.GetObjMetadata()
-	var specData ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType
+	var specData ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
-		var buf bytes.Buffer
-		marshaler := &jsonpb.Marshaler{
-			OrigName: true,
-		}
 
+	var updateRspRawSpecMap map[string]interface{}
+	if updateCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, updateCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						updateRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if updateRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						updateRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if updateRspRawSpecMap != nil {
+		rawSpecMap = updateRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal update spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal updateRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+
+		var buf bytes.Buffer
+		marshaler := &jsonpb.Marshaler{OrigName: true}
 		specMsg, ok := interface{}(objSpec).(proto.Message)
 		if !ok {
 			response.Diagnostics.AddError("Internal Error", "objSpec is not a proto message")
 			return
 		}
-
 		if err := marshaler.Marshal(&buf, specMsg); err != nil {
 			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal: %s", err))
 			return
 		}
-
 		if err := json.Unmarshal(buf.Bytes(), &rawSpecMap); err != nil {
-			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to marshal: %s", err))
+			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to unmarshal spec map: %s", err))
 			return
 		}
-
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
-
 		specBytes := buf.Bytes()
 		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
 			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
 				specBytes = gcSpecBytes
 			}
 		}
-
 		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
@@ -4806,113 +5191,846 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
+	{
+		externalSourcesElementsSpectToModel := make([]V1HttpMonitorSrcExternal, 0, len(specData.GetExternalSources()))
+		for _, externalSourcesElement := range specData.GetExternalSources() {
+			v1HttpMonitorSrcExternalModel := V1HttpMonitorSrcExternal{}
+
+			// resource specToModelNested RequiredOneOfField --> SourceChoice
+			// CreateSpecType
+			// CreateSpecType: GetSourceChoice() returns the oneof interface value.
+			if externalSourcesElement.GetSourceChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				externalSourcessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				externalSourcessourceChoiceChoices := externalSourcesElement.GetSourceChoice()
+
+				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested PointerOfOneOfField --> Aws
+				// CreateSpecType
+				// true
+				{
+					awsOptionsWrapper, isAws := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws)
+					awsAttributeMap := make(map[string]attr.Value)
+
+					if isAws && awsOptionsWrapper != nil && awsOptionsWrapper.Aws != nil {
+						awsElement := awsOptionsWrapper.Aws
+
+						// resource specToModelNested RequiredArrayOfStringField --> Regions
+						{
+							if len(awsElement.GetRegions()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, awsElement.GetRegions())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								awsAttributeMap["regions"] = listValue
+							} else {
+								awsAttributeMap["regions"] = types.ListNull(types.StringType)
+							}
+						}
+
+						awsObj, awsObjDiags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap, awsAttributeMap)
+						response.Diagnostics.Append(awsObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
+					} else {
+						externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
+					}
+				}
+
+				// resource specToModelNested PointerOfOneOfField --> F5Xc
+				// CreateSpecType
+				// true
+				{
+					f5xcOptionsWrapper, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
+					f5xcAttributeMap := make(map[string]attr.Value)
+
+					if isF5Xc && f5xcOptionsWrapper != nil && f5xcOptionsWrapper.F5Xc != nil {
+						f5xcElement := f5xcOptionsWrapper.F5Xc
+
+						// resource specToModelNested RequiredArrayOfStringField --> Regions
+						{
+							if len(f5xcElement.GetRegions()) > 0 {
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, f5xcElement.GetRegions())
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								f5xcAttributeMap["regions"] = listValue
+							} else {
+								f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
+							}
+						}
+
+						f5xcObj, f5xcObjDiags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
+						response.Diagnostics.Append(f5xcObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
+					} else {
+						externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
+					}
+				}
+
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, externalSourcessourceChoiceChoicesObjDiags := types.ObjectValue(
+					V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					externalSourcessourceChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(externalSourcessourceChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				v1HttpMonitorSrcExternalModel.SourceChoice = finalObj
+			} else {
+				v1HttpMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
+			}
+
+			externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSrcExternalModel)
+		}
+
+		externalSourcesList, listDiags := utils.GoStructSliceToListValue(
+			ctx,
+			V1HttpMonitorExternalSourcesModelAttributeMap,
+			externalSourcesElementsSpectToModel,
+		)
+
+		response.Diagnostics.Append(listDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.ExternalSources = externalSourcesList
+	}
+
+	// resource SpecToModelRoot BoolField --> FollowRedirects
+	data.FollowRedirects = types.BoolValue(specData.GetFollowRedirects())
+
+	// resource SpecToModelRoot PointerField --> HealthPolicy
+	if specData.GetHealthPolicy() != nil {
+		var v1HttpMonitorHealthPolicyModel = &V1HttpMonitorHealthPolicy{}
+		healthPolicyElement := specData.GetHealthPolicy()
+
+		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicydynamicThresholdPolicyChoiceChoices := healthPolicyElement.GetDynamicThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> DynamicThreshold
+			// CreateSpecType
+			// true
+			{
+				dynamicThresholdOptionsWrapper, isDynamicThreshold := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold)
+				dynamicThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isDynamicThreshold && dynamicThresholdOptionsWrapper != nil && dynamicThresholdOptionsWrapper.DynamicThreshold != nil {
+					dynamicThresholdElement := dynamicThresholdOptionsWrapper.DynamicThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if dynamicThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(dynamicThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							dynamicThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							dynamicThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredEnumField --> StdDevVal
+					{
+						if dynamicThresholdElement.GetStdDevVal().String() != "" {
+							stringValue := types.StringValue(dynamicThresholdElement.GetStdDevVal().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							dynamicThresholdAttributeMap["std_dev_val"] = listValue
+						} else {
+							dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
+						}
+					}
+
+					dynamicThresholdObj, dynamicThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap, dynamicThresholdAttributeMap)
+					response.Diagnostics.Append(dynamicThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = dynamicThresholdObj
+				} else {
+					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
+			var dynamicThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["dynamic_threshold_disabled"]; found {
+					dynamicThresholdDisabledInMap = true
+				}
+			}
+
+			if !dynamicThresholdDisabledInMap {
+				if _, found := rawSpecMap["dynamic_threshold_disabled"]; found {
+					dynamicThresholdDisabledInMap = true
+				}
+			}
+
+			_, isDynamicThresholdDisabledForBool := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled)
+			if dynamicThresholdDisabledInMap || isDynamicThresholdDisabledForBool {
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+		}
+
+		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicystaticMaxThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMaxThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
+			// CreateSpecType
+			// true
+			{
+				staticMaxThresholdOptionsWrapper, isStaticMaxThreshold := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold)
+				staticMaxThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isStaticMaxThreshold && staticMaxThresholdOptionsWrapper != nil && staticMaxThresholdOptionsWrapper.StaticMaxThreshold != nil {
+					staticMaxThresholdElement := staticMaxThresholdOptionsWrapper.StaticMaxThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if staticMaxThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(staticMaxThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							staticMaxThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							staticMaxThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredUintField --> MaxResponseTime
+					staticMaxThresholdAttributeMap["max_response_time"] = types.Int64Value(int64(staticMaxThresholdElement.GetMaxResponseTime()))
+
+					staticMaxThresholdObj, staticMaxThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap, staticMaxThresholdAttributeMap)
+					response.Diagnostics.Append(staticMaxThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = staticMaxThresholdObj
+				} else {
+					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+			var staticMaxThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMaxThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			_, isStaticMaxThresholdDisabledForBool := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled)
+			if staticMaxThresholdDisabledInMap || isStaticMaxThresholdDisabledForBool {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+		}
+
+		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
+		// CreateSpecType
+		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
+		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			healthPolicystaticMinThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMinThresholdPolicy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> StaticMinThreshold
+			// CreateSpecType
+			// true
+			{
+				staticMinThresholdOptionsWrapper, isStaticMinThreshold := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold)
+				staticMinThresholdAttributeMap := make(map[string]attr.Value)
+
+				if isStaticMinThreshold && staticMinThresholdOptionsWrapper != nil && staticMinThresholdOptionsWrapper.StaticMinThreshold != nil {
+					staticMinThresholdElement := staticMinThresholdOptionsWrapper.StaticMinThreshold
+
+					// resource specToModelNested RequiredEnumField --> EvalPeriod
+					{
+						if staticMinThresholdElement.GetEvalPeriod().String() != "" {
+							stringValue := types.StringValue(staticMinThresholdElement.GetEvalPeriod().String())
+							stringSlice := []types.String{stringValue}
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							staticMinThresholdAttributeMap["eval_period"] = listValue
+						} else {
+							staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+						}
+					}
+
+					// resource specToModelNested RequiredUintField --> MinResponseTime
+					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdElement.GetMinResponseTime()))
+
+					staticMinThresholdObj, staticMinThresholdObjDiags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
+					response.Diagnostics.Append(staticMinThresholdObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = staticMinThresholdObj
+				} else {
+					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
+			var staticMinThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_min_threshold_disabled"]; found {
+					staticMinThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMinThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_min_threshold_disabled"]; found {
+					staticMinThresholdDisabledInMap = true
+				}
+			}
+
+			_, isStaticMinThresholdDisabledForBool := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled)
+			if staticMinThresholdDisabledInMap || isStaticMinThresholdDisabledForBool {
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
+				V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
+				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
+		} else {
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+		}
+
+		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
+			ctx,
+			V1HttpMonitorHealthPolicyModelAttributeMap,
+			v1HttpMonitorHealthPolicyModel,
+		)
+		response.Diagnostics.Append(healthPolicyDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.HealthPolicy = healthPolicyObj
+	} else {
+		data.HealthPolicy = types.ObjectNull(V1HttpMonitorHealthPolicyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
+	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
+
+	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// true
+	// false
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofIntervalChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["interval_12_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_6_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		}
+	}
+
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofIntervalChoicePresent {
+		if _, ok := rawSpecMap["interval_12_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
+			oneofIntervalChoicePresent = true
+		}
+	}
+
+	if oneofIntervalChoicePresent {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
+		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
+		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
+		// PointerOfOneOfField type-assertions can still find the correct choice.
+		var intervalChoiceChoices interface{}
+		if v := rawSpecMap["interval_choice"]; v != nil {
+			intervalChoiceChoices = v
+		} else {
+			intervalChoiceChoices = specData.GetIntervalChoice()
+		}
+
+		// The model struct that will be populated by the nested template.
+		var intervalChoiceChoicesModel = &V1HttpMonitorIntervalChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
+		var interval12HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if !interval12HoursInMap {
+			if _, found := rawSpecMap["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		_, isInterval_12HoursForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_12Hours)
+		if interval12HoursInMap || isInterval_12HoursForBool {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
+		var interval15MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if !interval15MinsInMap {
+			if _, found := rawSpecMap["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		_, isInterval_15MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_15Mins)
+		if interval15MinsInMap || isInterval_15MinsForBool {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
+		var interval1DayInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_day"]; found {
+				interval1DayInMap = true
+			}
+		}
+
+		if !interval1DayInMap {
+			if _, found := rawSpecMap["interval_1_day"]; found {
+				interval1DayInMap = true
+			}
+		}
+
+		_, isInterval_1DayForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Day)
+		if interval1DayInMap || isInterval_1DayForBool {
+			intervalChoiceChoicesModel.Interval_1Day = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
+		var interval1HourInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if !interval1HourInMap {
+			if _, found := rawSpecMap["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		_, isInterval_1HourForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Hour)
+		if interval1HourInMap || isInterval_1HourForBool {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
+		var interval1MinInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		if !interval1MinInMap {
+			if _, found := rawSpecMap["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		_, isInterval_1MinForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Min)
+		if interval1MinInMap || isInterval_1MinForBool {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
+		var interval30MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		if !interval30MinsInMap {
+			if _, found := rawSpecMap["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		_, isInterval_30MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Mins)
+		if interval30MinsInMap || isInterval_30MinsForBool {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
+		var interval30SecsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		if !interval30SecsInMap {
+			if _, found := rawSpecMap["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		_, isInterval_30SecsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_30Secs)
+		if interval30SecsInMap || isInterval_30SecsForBool {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
+		var interval5MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if !interval5MinsInMap {
+			if _, found := rawSpecMap["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		_, isInterval_5MinsForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_5Mins)
+		if interval5MinsInMap || isInterval_5MinsForBool {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
+		var interval6HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if !interval6HoursInMap {
+			if _, found := rawSpecMap["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		_, isInterval_6HoursForBool := intervalChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_6Hours)
+		if interval6HoursInMap || isInterval_6HoursForBool {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			intervalChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				V1HttpMonitorIntervalChoiceModelAttributeMap,
+				intervalChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IntervalChoice = intervalChoiceObj
+		}
+	} else {
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> Method
 	// true
@@ -4925,13 +6043,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["patch"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["delete"]; ok {
+		if _, ok := gcSpec["delete"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["get"]; ok {
 			oneofMethodPresent = true
@@ -4939,18 +6051,18 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["options"]; ok {
 			oneofMethodPresent = true
+		} else if _, ok := gcSpec["patch"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["put"]; ok {
+			oneofMethodPresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofMethodPresent {
-		if _, ok := rawSpecMap["patch"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["delete"]; ok {
+		if _, ok := rawSpecMap["delete"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["get"]; ok {
 			oneofMethodPresent = true
@@ -4958,65 +6070,54 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["options"]; ok {
 			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["patch"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["put"]; ok {
+			oneofMethodPresent = true
 		}
 	}
 
 	if oneofMethodPresent {
-		// For custom JSON resolution with complex pointer types, get the choice from the raw spec map.
-		methodChoiceChoices := rawSpecMap["method"]
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
+		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
+		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
+		// PointerOfOneOfField type-assertions can still find the correct choice.
+		var methodChoiceChoices interface{}
+		if v := rawSpecMap["method"]; v != nil {
+			methodChoiceChoices = v
+		} else {
+			methodChoiceChoices = specData.GetMethod()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var methodChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeMethodChoice{}
+		var methodChoiceChoicesModel = &V1HttpMonitorMethodChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested PointerOfOneOfField --> Put
-		// ReplaceSpecType
-		// true
-		{
-			putOptions, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Put)
-			putAttributeMap := make(map[string]attr.Value)
-
-			if isPut && putOptions != nil {
-
-				// resource specToModelNested StringField --> RequestBody
-				if putOptions.Put.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putOptions.Put.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
-
-				putObj, diags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				methodChoiceChoicesModel.Put = putObj
-			} else {
-				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
-			}
-		}
-
 		// resource specToModelNested PointerOfOneOfField --> Delete
-		// ReplaceSpecType
+		// CreateSpecType
 		// true
 		{
-			deleteOptions, isDelete := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Delete)
+			deleteOptionsWrapper, isDelete := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Delete)
 			deleteAttributeMap := make(map[string]attr.Value)
 
-			if isDelete && deleteOptions != nil {
+			if isDelete && deleteOptionsWrapper != nil && deleteOptionsWrapper.Delete != nil {
+				deleteElement := deleteOptionsWrapper.Delete
 
 				// resource specToModelNested StringField --> RequestBody
-				if deleteOptions.Delete.GetRequestBody() != "" {
-					deleteAttributeMap["request_body"] = types.StringValue(deleteOptions.Delete.GetRequestBody())
+				if deleteElement.GetRequestBody() != "" {
+					deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					deleteAttributeMap["request_body"] = types.StringNull()
 				}
 
-				deleteObj, diags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
-				response.Diagnostics.Append(diags...)
+				deleteObj, deleteObjDiags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
+				response.Diagnostics.Append(deleteObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -5041,7 +6142,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			}
 		}
 
-		if getInMap || specData.GetGet() != nil {
+		_, isGetForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Get)
+		if getInMap || isGetForBool {
 			methodChoiceChoicesModel.Get = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Get = types.BoolNull()
@@ -5062,7 +6164,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			}
 		}
 
-		if headInMap || specData.GetHead() != nil {
+		_, isHeadForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Head)
+		if headInMap || isHeadForBool {
 			methodChoiceChoicesModel.Head = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Head = types.BoolNull()
@@ -5083,31 +6186,33 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			}
 		}
 
-		if optionsInMap || specData.GetOptions() != nil {
+		_, isOptionsForBool := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Options)
+		if optionsInMap || isOptionsForBool {
 			methodChoiceChoicesModel.Options = types.BoolValue(true)
 		} else {
 			methodChoiceChoicesModel.Options = types.BoolNull()
 		}
 
 		// resource specToModelNested PointerOfOneOfField --> Patch
-		// ReplaceSpecType
+		// CreateSpecType
 		// true
 		{
-			patchOptions, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Patch)
+			patchOptionsWrapper, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Patch)
 			patchAttributeMap := make(map[string]attr.Value)
 
-			if isPatch && patchOptions != nil {
+			if isPatch && patchOptionsWrapper != nil && patchOptionsWrapper.Patch != nil {
+				patchElement := patchOptionsWrapper.Patch
 
 				// resource specToModelNested StringField --> RequestBody
-				if patchOptions.Patch.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchOptions.Patch.GetRequestBody())
+				if patchElement.GetRequestBody() != "" {
+					patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					patchAttributeMap["request_body"] = types.StringNull()
 				}
 
-				patchObj, diags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
-				response.Diagnostics.Append(diags...)
+				patchObj, patchObjDiags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
+				response.Diagnostics.Append(patchObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -5118,24 +6223,25 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		}
 
 		// resource specToModelNested PointerOfOneOfField --> Post
-		// ReplaceSpecType
+		// CreateSpecType
 		// true
 		{
-			postOptions, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Post)
+			postOptionsWrapper, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Post)
 			postAttributeMap := make(map[string]attr.Value)
 
-			if isPost && postOptions != nil {
+			if isPost && postOptionsWrapper != nil && postOptionsWrapper.Post != nil {
+				postElement := postOptionsWrapper.Post
 
 				// resource specToModelNested StringField --> RequestBody
-				if postOptions.Post.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postOptions.Post.GetRequestBody())
+				if postElement.GetRequestBody() != "" {
+					postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
 				} else {
 					// Empty string, set to null
 					postAttributeMap["request_body"] = types.StringNull()
 				}
 
-				postObj, diags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
-				response.Diagnostics.Append(diags...)
+				postObj, postObjDiags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
+				response.Diagnostics.Append(postObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -5145,68 +6251,53 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		methodChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorMethodModelAttributeMap,
-			methodChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// resource specToModelNested PointerOfOneOfField --> Put
+		// CreateSpecType
+		// true
+		{
+			putOptionsWrapper, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put)
+			putAttributeMap := make(map[string]attr.Value)
+
+			if isPut && putOptionsWrapper != nil && putOptionsWrapper.Put != nil {
+				putElement := putOptionsWrapper.Put
+
+				// resource specToModelNested StringField --> RequestBody
+				if putElement.GetRequestBody() != "" {
+					putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
+				} else {
+					// Empty string, set to null
+					putAttributeMap["request_body"] = types.StringNull()
+				}
+
+				putObj, putObjDiags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
+				response.Diagnostics.Append(putObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				methodChoiceChoicesModel.Put = putObj
+			} else {
+				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.MethodChoice = methodChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			methodChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				V1HttpMonitorMethodModelAttributeMap,
+				methodChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.MethodChoice = methodChoiceObj
+		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
 		data.MethodChoice = types.ObjectNull(V1HttpMonitorMethodModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
-	if len(specData.RequestHeaders) > 0 {
-		requestHeadersElements := make([]V1HttpMonitorV1HttpMonitorHTTPMonitorHeader, 0, len(specData.RequestHeaders))
-
-		for _, requestHeadersElement := range specData.RequestHeaders {
-			v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorV1HttpMonitorHTTPMonitorHeader{}
-
-			// resource specToModelNested StringField --> Value
-			if requestHeadersElement.GetValue() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Key
-			if requestHeadersElement.GetKey() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
-			}
-
-			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel)
-		}
-
-		requestHeadersList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			V1HttpMonitorRequestHeadersModelAttributeMap,
-			requestHeadersElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.RequestHeaders = requestHeadersList
-	} else {
-		var requestHeadersObjectType = basetypes.ObjectType{
-			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
-		}
-		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
-		data.RequestHeaders = nullRequestHeadersList
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -5223,8 +6314,73 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		data.Receive = types.StringNull()
 	}
 
-	// resource SpecToModelRoot BoolField --> FollowRedirects
-	data.FollowRedirects = types.BoolValue(specData.GetFollowRedirects())
+	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
+	if len(specData.GetRequestHeaders()) > 0 {
+		requestHeadersElements := make([]V1HttpMonitorHTTPMonitorHeader, 0, len(specData.GetRequestHeaders()))
+		for _, requestHeadersElement := range specData.GetRequestHeaders() {
+			v1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorHTTPMonitorHeader{}
+
+			// resource specToModelNested RequiredStringField --> Key
+			if requestHeadersElement.GetKey() != "" {
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Value
+			if requestHeadersElement.GetValue() != "" {
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
+			}
+
+			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorHTTPMonitorHeaderModel)
+		}
+
+		{
+			requestHeadersList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				V1HttpMonitorRequestHeadersModelAttributeMap,
+				requestHeadersElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.RequestHeaders = requestHeadersList
+		}
+	} else {
+		var requestHeadersObjectType = basetypes.ObjectType{
+			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
+		}
+		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
+		var priorValRequestHeaders types.List
+		_ = request.State.GetAttribute(ctx, path.Root("request_headers"), &priorValRequestHeaders)
+		if !priorValRequestHeaders.IsNull() && !priorValRequestHeaders.IsUnknown() {
+			data.RequestHeaders = priorValRequestHeaders
+		} else {
+			data.RequestHeaders = nullRequestHeadersList
+		}
+
+	}
+
+	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
+	{
+		if len(specData.GetResponseCodes()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.ResponseCodes = listValue
+		} else {
+			data.ResponseCodes = types.ListNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot UintField --> ResponseTimeout
 	responseTimeoutValue := specData.GetResponseTimeout()
@@ -5232,139 +6388,6 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		data.ResponseTimeout = types.Int64Value(int64(responseTimeoutValue))
 	} else {
 		data.ResponseTimeout = types.Int64Null()
-	}
-
-	// resource SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
-	externalSourcesElementsSpectToModel := make([]V1HttpMonitorSyntheticMonitorSourceExternal, 0, len(specData.ExternalSources))
-
-	for _, externalSourcesElement := range specData.ExternalSources {
-		v1HttpMonitorSyntheticMonitorSourceExternalModel := V1HttpMonitorSyntheticMonitorSourceExternal{}
-
-		// resource specToModelNested RequiredOneOfField --> SourceChoice
-		// ReplaceSpecType
-		// ReplaceSpecType: GetSourceChoice() returns the oneof interface value.
-		if externalSourcesElement.GetSourceChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			externalSourcessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For ReplaceSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			externalSourcessourceChoiceChoices := externalSourcesElement.GetSourceChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested PointerOfOneOfField --> Aws
-			// ReplaceSpecType
-			// true
-			{
-				awsOptions, isAws := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_Aws)
-				awsAttributeMap := make(map[string]attr.Value)
-
-				if isAws && awsOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(awsOptions.Aws.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, awsOptions.Aws.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						awsAttributeMap["regions"] = listValue
-					} else {
-						awsAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					awsObj, diags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap, awsAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
-				}
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> F5Xc
-			// ReplaceSpecType
-			// true
-			{
-				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
-				f5xcAttributeMap := make(map[string]attr.Value)
-
-				if isF5Xc && f5xcOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						f5xcAttributeMap["regions"] = listValue
-					} else {
-						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					f5xcObj, diags := types.ObjectValue(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, externalSourcessourceChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				externalSourcessourceChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(externalSourcessourceChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
-		}
-
-		externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSyntheticMonitorSourceExternalModel)
-	}
-
-	externalSourcesList, diags := utils.GoStructSliceToListValue(
-		ctx,
-		V1HttpMonitorExternalSourcesModelAttributeMap,
-		externalSourcesElementsSpectToModel,
-	)
-
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
-		return
-	}
-
-	data.ExternalSources = externalSourcesList
-
-	// resource SpecToModelRoot RequiredStringField --> Url
-	if specData.GetUrl() != "" {
-		data.Url = types.StringValue(specData.GetUrl())
-	} else {
-		// Empty string, set to null
-		data.Url = types.StringNull()
-	}
-
-	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
-	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
-
-	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
-	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
-	if sourceCriticalThresholdValue > 0 {
-		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
 	}
 
 	// resource SpecToModelRoot StringField --> SniHost
@@ -5375,579 +6398,44 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		data.SniHost = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
-	if len(specData.GetResponseCodes()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
-		response.Diagnostics.Append(diags...)
+	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
+	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
+	if sourceCriticalThresholdValue > 0 {
+		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
+	}
+
+	// resource SpecToModelRoot RequiredStringField --> Url
+	if specData.GetUrl() != "" {
+		data.Url = types.StringValue(specData.GetUrl())
+	} else {
+		// Empty string, set to null
+		data.Url = types.StringNull()
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.ResponseCodes = listValue
-	} else {
-		data.ResponseCodes = types.ListNull(types.StringType)
+		data.Annotations = mergedMap
 	}
-
-	// resource SpecToModelRoot PointerField --> HealthPolicy
-	if specData.GetHealthPolicy() != nil {
-		var v1HttpMonitorSyntheticMonitorHealthPolicyModel = &V1HttpMonitorSyntheticMonitorHealthPolicy{}
-		healthPolicyElement := specData.GetHealthPolicy()
-
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// ReplaceSpecType
-		// ReplaceSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For ReplaceSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicydynamicThresholdPolicyChoiceChoices := healthPolicyElement.GetDynamicThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> DynamicThresholdDisabled
-			var dynamicThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["dynamic_threshold_disabled"]; found {
-					dynamicThresholdDisabledInMap = true
-				}
-			}
-
-			if !dynamicThresholdDisabledInMap {
-				if _, found := rawSpecMap["dynamic_threshold_disabled"]; found {
-					dynamicThresholdDisabledInMap = true
-				}
-			}
-
-			if dynamicThresholdDisabledInMap || healthPolicyElement.GetDynamicThresholdDisabled() != nil {
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> DynamicThreshold
-			// ReplaceSpecType
-			// true
-			{
-				dynamicThresholdOptions, isDynamicThreshold := healthPolicydynamicThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThreshold)
-				dynamicThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isDynamicThreshold && dynamicThresholdOptions != nil {
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dynamicThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						dynamicThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					// resource specToModelNested RequiredEnumField --> StdDevVal
-					if dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String() != "" {
-						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dynamicThresholdAttributeMap["std_dev_val"] = listValue
-					} else {
-						dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
-					}
-
-					dynamicThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap, dynamicThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = dynamicThresholdObj
-				} else {
-					healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap["dynamic_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicydynamicThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicydynamicThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
-		}
-
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// ReplaceSpecType
-		// ReplaceSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For ReplaceSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicystaticMaxThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMaxThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-			var staticMaxThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMaxThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
-			// ReplaceSpecType
-			// true
-			{
-				staticMaxThresholdOptions, isStaticMaxThreshold := healthPolicystaticMaxThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThreshold)
-				staticMaxThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isStaticMaxThreshold && staticMaxThresholdOptions != nil {
-
-					// resource specToModelNested RequiredUintField --> MaxResponseTime
-					staticMaxThresholdAttributeMap["max_response_time"] = types.Int64Value(int64(staticMaxThresholdOptions.StaticMaxThreshold.GetMaxResponseTime()))
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if staticMaxThresholdOptions.StaticMaxThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(staticMaxThresholdOptions.StaticMaxThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticMaxThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						staticMaxThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					staticMaxThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap, staticMaxThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = staticMaxThresholdObj
-				} else {
-					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicystaticMaxThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
-		}
-
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// ReplaceSpecType
-		// ReplaceSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
-		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-			// For ReplaceSpecType the getter returns the oneof interface (not a concrete type).
-			// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-			healthPolicystaticMinThresholdPolicyChoiceChoices := healthPolicyElement.GetStaticMinThresholdPolicy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMinThresholdDisabled
-			var staticMinThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_min_threshold_disabled"]; found {
-					staticMinThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMinThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_min_threshold_disabled"]; found {
-					staticMinThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMinThresholdDisabledInMap || healthPolicyElement.GetStaticMinThresholdDisabled() != nil {
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold_disabled"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> StaticMinThreshold
-			// ReplaceSpecType
-			// true
-			{
-				staticMinThresholdOptions, isStaticMinThreshold := healthPolicystaticMinThresholdPolicyChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThreshold)
-				staticMinThresholdAttributeMap := make(map[string]attr.Value)
-
-				if isStaticMinThreshold && staticMinThresholdOptions != nil {
-
-					// resource specToModelNested RequiredUintField --> MinResponseTime
-					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
-
-					// resource specToModelNested RequiredEnumField --> EvalPeriod
-					if staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String() != "" {
-						stringValue := types.StringValue(staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticMinThresholdAttributeMap["eval_period"] = listValue
-					} else {
-						staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
-					}
-
-					staticMinThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = staticMinThresholdObj
-				} else {
-					healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap["static_min_threshold"] = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags := types.ObjectValue(
-				V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, // The attribute schema for the OneOf choices
-				healthPolicystaticMinThresholdPolicyChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(healthPolicystaticMinThresholdPolicyChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
-		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
-		}
-
-		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorHealthPolicyModelAttributeMap,
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel,
-		)
-		response.Diagnostics.Append(healthPolicyDiags...)
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.HealthPolicy = healthPolicyObj
-	} else {
-		data.HealthPolicy = types.ObjectNull(V1HttpMonitorHealthPolicyModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
-	// true
-	// false
-	// This resource uses custom JSON resolution.
-	// The API response for this oneof field can be inconsistent.
-	// We must inspect the raw JSON map to determine which choice is present.
-	// The logic checks for the presence of any of the possible oneof choices.
-	var oneofIntervalChoicePresent bool
-
-	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
-	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_hour"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_6_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		}
-	}
-
-	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
-	if !oneofIntervalChoicePresent {
-		if _, ok := rawSpecMap["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
-			oneofIntervalChoicePresent = true
-		}
-	}
-
-	if oneofIntervalChoicePresent {
-
-		// The model struct that will be populated by the nested template.
-		var intervalChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeIntervalChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
-		var interval1DayInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_day"]; found {
-				interval1DayInMap = true
-			}
-		}
-
-		if !interval1DayInMap {
-			if _, found := rawSpecMap["interval_1_day"]; found {
-				interval1DayInMap = true
-			}
-		}
-
-		if interval1DayInMap || specData.GetInterval_1Day() != nil {
-			intervalChoiceChoicesModel.Interval_1Day = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
-		var interval30SecsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if !interval30SecsInMap {
-			if _, found := rawSpecMap["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
-		var interval5MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if !interval5MinsInMap {
-			if _, found := rawSpecMap["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
-		var interval6HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if !interval6HoursInMap {
-			if _, found := rawSpecMap["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
-		var interval15MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if !interval15MinsInMap {
-			if _, found := rawSpecMap["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
-		var interval1HourInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_hour"]; found {
-				interval1HourInMap = true
-			}
-		}
-
-		if !interval1HourInMap {
-			if _, found := rawSpecMap["interval_1_hour"]; found {
-				interval1HourInMap = true
-			}
-		}
-
-		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
-		var interval30MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if !interval30MinsInMap {
-			if _, found := rawSpecMap["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if interval30MinsInMap || specData.GetInterval_30Mins() != nil {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
-		var interval12HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if !interval12HoursInMap {
-			if _, found := rawSpecMap["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
-		var interval1MinInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if !interval1MinInMap {
-			if _, found := rawSpecMap["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if interval1MinInMap || specData.GetInterval_1Min() != nil {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		intervalChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1HttpMonitorIntervalChoiceModelAttributeMap,
-			intervalChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IntervalChoice = intervalChoiceObj
-	} else {
-		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -5984,9 +6472,8 @@ func (r *ResourceF5XCV1HttpMonitor) Delete(ctx context.Context, request resource
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -6001,19 +6488,32 @@ func (r *ResourceF5XCV1HttpMonitor) Delete(ctx context.Context, request resource
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCV1HttpMonitor) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

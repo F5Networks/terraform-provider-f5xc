@@ -12,6 +12,13 @@ package plan_transition
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
@@ -22,12 +29,6 @@ import (
 	contact "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/contact"
 	tenant "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/tenant"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1620,10 +1621,7 @@ func (m *InitiatePlanTransitionReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -1725,10 +1723,7 @@ func (m *InitiatePlanTransitionRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -1810,10 +1805,7 @@ func (m *GetPlanTransitionReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -1882,10 +1874,7 @@ func (m *GetPlanTransitionRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {
@@ -2302,10 +2291,7 @@ func (m *TransitionPayload) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApi
 			}
 			if (iNdEx + skippy) > l {

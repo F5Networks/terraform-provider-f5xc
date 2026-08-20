@@ -1423,10 +1423,7 @@ var APISwaggerJSON string = `{
         "title": "ves.io/schema/route/crudapi/api.proto",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1492,6 +1489,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1505,8 +1508,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -1523,8 +1525,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -1591,6 +1592,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1666,6 +1673,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1757,6 +1770,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1805,16 +1824,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -1897,6 +1914,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1931,7 +1954,16 @@ var APISwaggerJSON string = `{
                     "200": {
                         "description": "A successful response.(streaming responses)",
                         "schema": {
-                            "$ref": "#/x-stream-definitions/crudapiObjectListRsp"
+                            "type": "object",
+                            "title": "Stream result of crudapiObjectListRsp",
+                            "properties": {
+                                "error": {
+                                    "$ref": "#/definitions/runtimeStreamError"
+                                },
+                                "result": {
+                                    "$ref": "#/definitions/crudapiObjectListRsp"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -1981,6 +2013,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2029,16 +2067,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2128,6 +2164,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2141,8 +2183,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -2159,8 +2200,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -2235,6 +2275,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2283,16 +2329,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2382,6 +2426,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2456,6 +2506,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2546,6 +2602,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2779,7 +2841,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the result of the match to detect missing header or non-matching value",
                     "title": "invert_match",
-                    "format": "boolean",
                     "x-displayname": "NOT of match"
                 },
                 "name": {
@@ -2802,18 +2863,16 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with [exact regex]\n If true, check for presence of header",
                     "title": "presence",
-                    "format": "boolean",
                     "x-displayname": "Presence"
                 },
                 "regex": {
                     "type": "string",
-                    "description": "Exclusive with [exact presence]\n Regex match of the header value in re2 format\n\nValidation Rules:\n  ves.io.schema.rules.string.max_bytes: 256\n  ves.io.schema.rules.string.not_empty: true\n  ves.io.schema.rules.string.regex: true\n",
+                    "description": "Exclusive with [exact presence]\n Regex match of the header value in re2 format\n\nValidation Rules:\n  ves.io.schema.rules.string.max_bytes: 256\n  ves.io.schema.rules.string.regex: true\n",
                     "title": "regex",
                     "maxLength": 256,
                     "x-displayname": "Regex",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.max_bytes": "256",
-                        "ves.io.schema.rules.string.not_empty": "true",
                         "ves.io.schema.rules.string.regex": "true"
                     }
                 }
@@ -3212,14 +3271,12 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with [cookie header_name]\n Hash based on source IP address\n\nExample: - true-",
                     "title": "Source IP",
-                    "format": "boolean",
                     "x-displayname": "Source IP"
                 },
                 "terminal": {
                     "type": "boolean",
                     "description": " Specify if its a terminal policy\n\nExample: - true-",
                     "title": "terminal",
-                    "format": "boolean",
                     "x-displayname": "Terminal"
                 }
             }
@@ -3410,7 +3467,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with [host_rewrite]\n Indicates that during forwarding, the host header will be swapped with the hostname\n of the upstream host chosen by the cluster\n\nExample: - true-",
                     "title": "Auto Host Rewrite",
-                    "format": "boolean",
                     "x-displayname": "Automatic Host Rewrite"
                 },
                 "buffer_policy": {
@@ -3719,7 +3775,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " disables append of x-volterra-location = \u003cre-site-name\u003e at route level, if it is configured at\n virtual-host level. This configuration is ignored on CE sites.\n\nExample: - true-",
                     "title": "disable_location_add",
-                    "format": "boolean",
                     "x-displayname": "Disable Location Addition"
                 },
                 "inherited_bot_defense_javascript_injection": {
@@ -3927,7 +3982,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with []\n disable service policy at route level, if it is configured at virtual-host level\n\nExample: - true-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 }
             }
@@ -3943,7 +3997,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies that the HTTP client connection to this route is allowed to upgrade to\n a SPDY connection\n\nExample: - true-",
                     "title": "use_spdy",
-                    "format": "boolean",
                     "x-displayname": "Use SPDY"
                 }
             }
@@ -4086,7 +4139,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies that the HTTP client connection to this route is allowed to upgrade to\n a WebSocket connection\n\nExample: - true-",
                     "title": "use_websocket",
-                    "format": "boolean",
                     "x-displayname": "Use Websocket"
                 }
             }
@@ -4102,6 +4154,27 @@ var APISwaggerJSON string = `{
             "default": "EOK",
             "x-displayname": "",
             "x-ves-proto-enum": "ves.io.schema.route.crudapi.ErrorCode"
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "runtimeStreamError": {
             "type": "object",
@@ -4199,7 +4272,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable buffering for a particular route. This is useful when virtual-host\n has buffering, but we need to disable it on a specific route.\n The value of this field is ignored for virtual-host",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "max_request_bytes": {
@@ -4327,7 +4399,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "secret_value": {
@@ -4360,7 +4431,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies whether the resource allows credentials",
                     "title": "allow_credentials",
-                    "format": "boolean",
                     "x-displayname": "Allow Credentials"
                 },
                 "allow_headers": {
@@ -4423,7 +4493,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable the CorsPolicy for a particular route. This is useful when\n virtual-host has CorsPolicy, but we need to disable it on a specific route.\n The value of this field is ignored for virtual-host",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "expose_headers": {
@@ -4573,7 +4642,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be appended? If true, the value is appended to existing values.\n Default value is do not append",
                     "title": "append",
-                    "format": "boolean",
                     "x-displayname": "Append"
                 },
                 "name": {
@@ -4709,7 +4777,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -5134,7 +5201,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "samesite_lax": {
@@ -5230,7 +5296,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -5394,7 +5459,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -5429,7 +5493,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -5616,19 +5679,5 @@ var APISwaggerJSON string = `{
         }
     },
     "x-displayname": "",
-    "x-stream-definitions": {
-        "crudapiObjectListRsp": {
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/runtimeStreamError"
-                },
-                "result": {
-                    "$ref": "#/definitions/crudapiObjectListRsp"
-                }
-            },
-            "title": "Stream result of crudapiObjectListRsp",
-            "type": "object"
-        }
-    },
     "x-ves-proto-file": "ves.io/schema/route/crudapi/api.proto"
 }`

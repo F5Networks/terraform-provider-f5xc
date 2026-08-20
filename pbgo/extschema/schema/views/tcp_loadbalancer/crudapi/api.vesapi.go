@@ -1423,10 +1423,7 @@ var APISwaggerJSON string = `{
         "title": "ves.io/schema/views/tcp_loadbalancer/crudapi/api.proto",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1492,6 +1489,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1505,8 +1508,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -1523,8 +1525,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -1591,6 +1592,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1666,6 +1673,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1757,6 +1770,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1805,16 +1824,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -1897,6 +1914,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1931,7 +1954,16 @@ var APISwaggerJSON string = `{
                     "200": {
                         "description": "A successful response.(streaming responses)",
                         "schema": {
-                            "$ref": "#/x-stream-definitions/crudapiObjectListRsp"
+                            "type": "object",
+                            "title": "Stream result of crudapiObjectListRsp",
+                            "properties": {
+                                "error": {
+                                    "$ref": "#/definitions/runtimeStreamError"
+                                },
+                                "result": {
+                                    "$ref": "#/definitions/crudapiObjectListRsp"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -1981,6 +2013,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2029,16 +2067,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2128,6 +2164,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2141,8 +2183,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -2159,8 +2200,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -2235,6 +2275,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2283,16 +2329,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2382,6 +2426,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2456,6 +2506,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2546,6 +2602,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2811,6 +2873,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3089,7 +3172,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3216,7 +3298,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -3380,7 +3461,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -3415,7 +3495,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -3956,7 +4035,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Client certificate is optional. If the client has provided a certificate,\n the load balancer will verify it. If certification verification fails,\n the connection will be terminated. If the client does not provide a certificate,\n the connection will be accepted.",
                     "title": "client_certificate_optional",
-                    "format": "boolean",
                     "x-displayname": "Client Certificate Optional"
                 },
                 "crl": {
@@ -4476,18 +4554,30 @@ var APISwaggerJSON string = `{
             "title": "WhereType",
             "x-displayname": "Select Where to Advertise",
             "x-ves-displayorder": "4,5",
-            "x-ves-oneof-field-choice": "[\"advertise_on_public\",\"cloud_edge_segment\",\"segment\",\"site\",\"site_segment\",\"virtual_network\",\"virtual_site\",\"virtual_site_segment\",\"virtual_site_with_vip\",\"vk8s_service\"]",
+            "x-ves-oneof-field-choice": "[\"advertise_dualstack_on_public\",\"advertise_on_public\",\"advertise_v6_on_public\",\"cloud_edge_segment\",\"segment\",\"site\",\"site_segment\",\"virtual_network\",\"virtual_site\",\"virtual_site_segment\",\"virtual_site_with_vip\",\"vk8s_service\"]",
             "x-ves-oneof-field-port_choice": "[\"port\",\"port_ranges\",\"use_default_port\"]",
             "x-ves-proto-message": "ves.io.schema.views.WhereType",
             "properties": {
+                "advertise_dualstack_on_public": {
+                    "description": "Exclusive with [advertise_on_public advertise_v6_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise this load balancer with Dualstack VIP on public network",
+                    "title": "Advertise DualStack On Public",
+                    "$ref": "#/definitions/viewsAdvertisePublic",
+                    "x-displayname": "Internet (Specified Dualstack VIP)"
+                },
                 "advertise_on_public": {
-                    "description": "Exclusive with [cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise this load balancer on public network",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_v6_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise this load balancer on public network",
                     "title": "Advertise On Public",
                     "$ref": "#/definitions/viewsAdvertisePublic",
                     "x-displayname": "Internet (Specified VIP)"
                 },
+                "advertise_v6_on_public": {
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise this load balancer with IPv6 VIP on public network",
+                    "title": "Advertise IPv6 On Public",
+                    "$ref": "#/definitions/viewsAdvertisePublic",
+                    "x-displayname": "Internet (Specified IPv6 VIP)"
+                },
                 "cloud_edge_segment": {
-                    "description": "Exclusive with [advertise_on_public segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a segment on a Cloud Edge",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a segment on a Cloud Edge",
                     "title": "Segment on Cloud Edge",
                     "$ref": "#/definitions/viewsWhereCloudEdgeSegment",
                     "x-displayname": "Segment on Cloud Edge"
@@ -4519,19 +4609,19 @@ var APISwaggerJSON string = `{
                     }
                 },
                 "segment": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a segment",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a segment",
                     "title": "Segment",
                     "$ref": "#/definitions/viewsWhereSegment",
                     "x-displayname": "Segment"
                 },
                 "site": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment segment site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a customer site and a given network.",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment segment site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a customer site and a given network.",
                     "title": "Site",
                     "$ref": "#/definitions/viewsWhereSite",
                     "x-displayname": "Site"
                 },
                 "site_segment": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment segment site virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a segment on a site",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment segment site virtual_network virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a segment on a site",
                     "title": "Segment on Site",
                     "$ref": "#/definitions/viewsWhereSiteSegment",
                     "x-displayname": "Segment on Site"
@@ -4543,31 +4633,31 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Use Default Listen Port"
                 },
                 "virtual_network": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment segment site site_segment virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a virtual network",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment segment site site_segment virtual_site virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a virtual network",
                     "title": "Virtual Network",
                     "$ref": "#/definitions/viewsWhereVirtualNetwork",
                     "x-displayname": "Virtual Network"
                 },
                 "virtual_site": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a customer virtual site and a given network.",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site_segment virtual_site_with_vip vk8s_service]\n Advertise on a customer virtual site and a given network.",
                     "title": "Virtual Site",
                     "$ref": "#/definitions/viewsWhereVirtualSite",
                     "x-displayname": "Virtual Site"
                 },
                 "virtual_site_segment": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_with_vip vk8s_service]\n Advertise on a segment on a virtual site",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_with_vip vk8s_service]\n Advertise on a segment on a virtual site",
                     "title": "Segment on Virtual Site",
                     "$ref": "#/definitions/viewsWhereVirtualSiteSegment",
                     "x-displayname": "Segment on Virtual Site"
                 },
                 "virtual_site_with_vip": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment vk8s_service]\n Advertise on a customer virtual site and a given network and IP.",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment vk8s_service]\n Advertise on a customer virtual site and a given network and IP.",
                     "title": "Virtual Site With Specified VIP",
                     "$ref": "#/definitions/viewsWhereVirtualSiteSpecifiedVIP",
                     "x-displayname": "Virtual Site (Specified VIP)"
                 },
                 "vk8s_service": {
-                    "description": "Exclusive with [advertise_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip]\n Advertise on vK8s Service Network on RE.",
+                    "description": "Exclusive with [advertise_dualstack_on_public advertise_on_public advertise_v6_on_public cloud_edge_segment segment site site_segment virtual_network virtual_site virtual_site_segment virtual_site_with_vip]\n Advertise on vK8s Service Network on RE.",
                     "title": "vK8s services network",
                     "$ref": "#/definitions/viewsWhereVK8SService",
                     "x-displayname": "vK8s Service Network on RE"
@@ -4831,16 +4921,16 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Advertise Custom"
                 },
                 "advertise_on_public": {
-                    "description": "Exclusive with [advertise_custom advertise_on_public_default_vip do_not_advertise]\n Advertise this load balancer on public network",
-                    "title": "Advertise On Public",
+                    "description": "Exclusive with [advertise_custom advertise_on_public_default_vip do_not_advertise]\n Advertise this load balancer on specified IPv4 on public network",
+                    "title": "Advertise On Public (Specified IPv4)",
                     "$ref": "#/definitions/viewsAdvertisePublic",
-                    "x-displayname": "Advertise On Public With Specified VIP"
+                    "x-displayname": "Internet (Specified IPv4)"
                 },
                 "advertise_on_public_default_vip": {
-                    "description": "Exclusive with [advertise_custom advertise_on_public do_not_advertise]\n Advertise this load balancer on public network with default VIP",
-                    "title": "Advertise On Public Default VIP",
+                    "description": "Exclusive with [advertise_custom advertise_on_public do_not_advertise]\n Advertise this load balancer on public network with default IPv4 VIP",
+                    "title": "Advertise On Public Default VIP (IPv4)",
                     "$ref": "#/definitions/schemaEmpty",
-                    "x-displayname": "Advertise On Public"
+                    "x-displayname": "Internet (IPv4)"
                 },
                 "auto_cert_info": {
                     "description": " Auto certificate related information",
@@ -4873,7 +4963,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " DNS records for domains will be managed automatically by Volterra.\n This requires the domain to be delegated to F5XC using the Delegated Domain feature.",
                     "title": "Manage DNS Domain",
-                    "format": "boolean",
                     "x-displayname": "Automatically Manage DNS Records"
                 },
                 "do_not_advertise": {
@@ -5205,7 +5294,7 @@ var APISwaggerJSON string = `{
         },
         "virtual_hostVirtualHostState": {
             "type": "string",
-            "description": "State of the virtual host\n\n - VIRTUAL_HOST_READY: VIRTUAL_HOST_READY\n\nVirtual host is ready to install\n - VIRTUAL_HOST_PENDING_VERIFICATION: VIRTUAL_HOST_PENDING_VERIFICATION\n\nVirtual host is verfication pending for some or all of its domains\n - VIRTUAL_HOST_VERIFICATION_FAILED: VIRTUAL_HOST_VERIFICATION_FAILED\n\nVirtual host has one or more domains for which verification failed\n - VIRTUAL_HOST_PENDING_DNS_DELEGATION: VIRTUAL_HOST_PENDING_DNS_DELEGATION\n\nVirtual host is pending DNS delegation\n - VIRTUAL_HOST_PENDING_A_RECORD: VIRTUAL_HOST_PENDING_A_RECORD\n\nVirtual host is waiting for one or more A records to be created\n - VIRTUAL_HOST_DNS_A_RECORD_ADDED: VIRTUAL_HOST_DNS_A_RECORD_ADDED\n\nDNS A record has been added for this Virtual host\n - VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION: VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION\n\nInternet facing NLB, is being created on the site/sites belonging to the virtual site\n - VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED: VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED\n\nInternet NLB creation failed on the site/sites. InternetNLBVIPStatus will have more information.",
+            "description": "State of the virtual host\n\n - VIRTUAL_HOST_READY: VIRTUAL_HOST_READY\n\nVirtual host is ready to install\n - VIRTUAL_HOST_PENDING_VERIFICATION: VIRTUAL_HOST_PENDING_VERIFICATION\n\nVirtual host is verfication pending for some or all of its domains\n - VIRTUAL_HOST_VERIFICATION_FAILED: VIRTUAL_HOST_VERIFICATION_FAILED\n\nVirtual host has one or more domains for which verification failed\n - VIRTUAL_HOST_PENDING_DNS_DELEGATION: VIRTUAL_HOST_PENDING_DNS_DELEGATION\n\nVirtual host is pending DNS delegation\n - VIRTUAL_HOST_PENDING_A_RECORD: VIRTUAL_HOST_PENDING_A_RECORD\n\nVirtual host is waiting for one or more A records to be created\n - VIRTUAL_HOST_DNS_A_RECORD_ADDED: VIRTUAL_HOST_DNS_A_RECORD_ADDED\n\nDNS A record has been added for this Virtual host\n - VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION: VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION\n\nInternet facing NLB, is being created on the site/sites belonging to the virtual site\n - VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED: VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED\n\nInternet NLB creation failed on the site/sites. InternetNLBVIPStatus will have more information.\n - VIRTUAL_HOST_PENDING_AAAA_RECORD: VIRTUAL_HOST_PENDING_AAAA_RECORD\n\nVirtual host is waiting for one or more AAAA records to be created\n - VIRTUAL_HOST_DNS_AAAA_RECORD_ADDED: VIRTUAL_HOST_DNS_AAAA_RECORD_ADDED\n\nDNS AAAA record has been added for this Virtual host\n - VIRTUAL_HOST_PENDING_DUALSTACK_RECORDS: VIRTUAL_HOST_PENDING_DUALSTACK_RECORDS\n\nVirtual host is waiting for one or more Dualstack records to be created\n - VIRTUAL_HOST_DNS_DUALSTACK_RECORDS_ADDED: VIRTUAL_HOST_DNS_DUALSTACK_RECORDS_ADDED\n\nDNS Dualstack records has been added for this Virtual host",
             "title": "VirtualHostState",
             "enum": [
                 "VIRTUAL_HOST_READY",
@@ -5215,7 +5304,11 @@ var APISwaggerJSON string = `{
                 "VIRTUAL_HOST_PENDING_A_RECORD",
                 "VIRTUAL_HOST_DNS_A_RECORD_ADDED",
                 "VIRTUAL_HOST_INTERNET_NLB_PENDING_CREATION",
-                "VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED"
+                "VIRTUAL_HOST_INTERNET_NLB_CREATION_FAILED",
+                "VIRTUAL_HOST_PENDING_AAAA_RECORD",
+                "VIRTUAL_HOST_DNS_AAAA_RECORD_ADDED",
+                "VIRTUAL_HOST_PENDING_DUALSTACK_RECORDS",
+                "VIRTUAL_HOST_DNS_DUALSTACK_RECORDS_ADDED"
             ],
             "default": "VIRTUAL_HOST_READY",
             "x-displayname": "Virtual Host State",
@@ -5236,24 +5329,19 @@ var APISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.ip": "true"
                     }
+                },
+                "ipv6_address": {
+                    "type": "string",
+                    "description": " IPv6 address associated with virtual host\n\nValidation Rules:\n  ves.io.schema.rules.string.ipv6: true\n",
+                    "title": "IPv6 address",
+                    "x-displayname": "IPv6 Address",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.ipv6": "true"
+                    }
                 }
             }
         }
     },
     "x-displayname": "",
-    "x-stream-definitions": {
-        "crudapiObjectListRsp": {
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/runtimeStreamError"
-                },
-                "result": {
-                    "$ref": "#/definitions/crudapiObjectListRsp"
-                }
-            },
-            "title": "Stream result of crudapiObjectListRsp",
-            "type": "object"
-        }
-    },
     "x-ves-proto-file": "ves.io/schema/views/tcp_loadbalancer/crudapi/api.proto"
 }`

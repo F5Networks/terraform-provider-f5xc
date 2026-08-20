@@ -14,8 +14,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"golang.org/x/time/rate"
 )
 
 // ---------------------------------------------------------------------------
@@ -55,9 +53,11 @@ func (m *mockAuthenticator) GetClientData() string {
 type mockRoundTripper struct {
 	response *http.Response
 	err      error
+	lastReq  *http.Request
 }
 
-func (m *mockRoundTripper) RoundTrip(_ *http.Request) (*http.Response, error) {
+func (m *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	m.lastReq = req
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -539,17 +539,24 @@ func TestAddSvcSlugToContextForCustom_SingleSegmentFQN(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// ProviderConfig / ProviderLimiter struct field tests
+// ProviderConfig / ThrottlingConfig struct field tests
 // ---------------------------------------------------------------------------
 
 func TestProviderConfig_Fields(t *testing.T) {
-	pl := &ProviderLimiter{Rate: rate.Limit(10), Burst: 5}
+	throttling := &ThrottlingConfig{
+		MaxRetries:        5,
+		InitialBackoff:    "250ms",
+		MaxBackoff:        "8s",
+		Multiplier:        2.0,
+		JitterRatio:       0.2,
+		RespectRetryAfter: true,
+	}
 	cfg := &ProviderConfig{
 		Url:            "https://tenant.example.com",
 		Test:           false,
 		Vesenv:         true,
 		Timeout:        "30s",
-		Limiter:        pl,
+		Throttling:     throttling,
 		ApiCert:        "/path/to/cert",
 		ApiKey:         "/path/to/key",
 		ApiToken:       "my-api-token",
@@ -564,11 +571,8 @@ func TestProviderConfig_Fields(t *testing.T) {
 	if cfg.Timeout != "30s" {
 		t.Errorf("Timeout = %q", cfg.Timeout)
 	}
-	if cfg.Limiter.Rate != rate.Limit(10) {
-		t.Errorf("Limiter.Rate = %v", cfg.Limiter.Rate)
-	}
-	if cfg.Limiter.Burst != 5 {
-		t.Errorf("Limiter.Burst = %v", cfg.Limiter.Burst)
+	if cfg.Throttling.MaxRetries != 5 {
+		t.Errorf("Throttling.MaxRetries = %d", cfg.Throttling.MaxRetries)
 	}
 	if cfg.ApiToken != "my-api-token" {
 		t.Errorf("ApiToken = %q", cfg.ApiToken)
@@ -579,27 +583,39 @@ func TestProviderConfig_Fields(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// Rate limiter – direct usage tests
+// Throttling policy tests
 // ---------------------------------------------------------------------------
 
-func TestRateLimiter_AllowsRequests(t *testing.T) {
-	// Initialize the global limiter directly (as NewVesAPIClient would do)
-	limiter = rate.NewLimiter(rate.Limit(100), 10)
-
-	if err := limiter.Wait(context.Background()); err != nil {
-		t.Fatalf("limiter.Wait() returned unexpected error: %v", err)
+func TestResolveThrottlingPolicy_Defaults(t *testing.T) {
+	policy, err := resolveThrottlingPolicy(nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if policy.Enabled {
+		t.Fatal("policy.Enabled should default to false when cfg is nil")
+	}
+	if policy.MaxRetries <= 0 {
+		t.Fatalf("policy.MaxRetries should be > 0, got %d", policy.MaxRetries)
 	}
 }
 
-func TestRateLimiter_CancelledContext(t *testing.T) {
-	// A zero-rate limiter with a cancelled context must return an error.
-	limiter = rate.NewLimiter(0, 0)
+func TestResolveThrottlingPolicy_EnabledWhenConfigProvided(t *testing.T) {
+	policy, err := resolveThrottlingPolicy(&ThrottlingConfig{MaxRetries: 10})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !policy.Enabled {
+		t.Fatal("policy.Enabled should be true when config is provided")
+	}
+}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel() // cancel immediately
-
-	if err := limiter.Wait(ctx); err == nil {
-		t.Fatal("expected error for cancelled context with zero-rate limiter, got nil")
+func TestResolveThrottlingPolicy_ZeroMaxRetries(t *testing.T) {
+	policy, err := resolveThrottlingPolicy(&ThrottlingConfig{MaxRetries: 0})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if policy.MaxRetries != 0 {
+		t.Fatalf("policy.MaxRetries should be 0, got %d", policy.MaxRetries)
 	}
 }
 
@@ -690,14 +706,22 @@ func TestNewP12CertAuth_InvalidP12(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestPrismURIRemapperFn_InvalidURL(t *testing.T) {
-	_, err := prismURIRemapperFn("://invalid")
+	policy, policyErr := resolveThrottlingPolicy(nil)
+	if policyErr != nil {
+		t.Fatalf("unexpected policy error: %v", policyErr)
+	}
+	_, err := prismURIRemapperFn("://invalid", policy, newResourceThrottleRegistry())
 	if err == nil {
 		t.Fatal("expected error for invalid URL, got nil")
 	}
 }
 
 func TestPrismURIRemapperFn_ValidURL(t *testing.T) {
-	fn, err := prismURIRemapperFn("https://tenant.example.com/api")
+	policy, policyErr := resolveThrottlingPolicy(nil)
+	if policyErr != nil {
+		t.Fatalf("unexpected policy error: %v", policyErr)
+	}
+	fn, err := prismURIRemapperFn("https://tenant.example.com/api", policy, newResourceThrottleRegistry())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -707,7 +731,11 @@ func TestPrismURIRemapperFn_ValidURL(t *testing.T) {
 }
 
 func TestPrismURIRemapperFn_NoSlugInContext(t *testing.T) {
-	fn, err := prismURIRemapperFn("https://tenant.example.com/api")
+	policy, policyErr := resolveThrottlingPolicy(nil)
+	if policyErr != nil {
+		t.Fatalf("unexpected policy error: %v", policyErr)
+	}
+	fn, err := prismURIRemapperFn("https://tenant.example.com/api", policy, newResourceThrottleRegistry())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -733,7 +761,11 @@ func TestPrismURIRemapperFn_NoSlugInContext(t *testing.T) {
 }
 
 func TestPrismURIRemapperFn_WithSlugInContext(t *testing.T) {
-	fn, err := prismURIRemapperFn("https://tenant.example.com/api")
+	policy, policyErr := resolveThrottlingPolicy(nil)
+	if policyErr != nil {
+		t.Fatalf("unexpected policy error: %v", policyErr)
+	}
+	fn, err := prismURIRemapperFn("https://tenant.example.com/api", policy, newResourceThrottleRegistry())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -760,12 +792,15 @@ func TestPrismURIRemapperFn_WithSlugInContext(t *testing.T) {
 	if resp == nil {
 		t.Fatal("expected non-nil response")
 	}
-	// The URL should have been remapped: "/public" replaced by "/config"
-	if strings.Contains(req.URL.Path, "/public") {
-		t.Errorf("URL path still contains '/public': %s", req.URL.Path)
+	if rt.lastReq == nil {
+		t.Fatal("expected round tripper to capture request")
 	}
-	if !strings.Contains(req.URL.Path, "/config") {
-		t.Errorf("URL path does not contain '/config': %s", req.URL.Path)
+	// The URL should have been remapped: "/public" replaced by "/config"
+	if strings.Contains(rt.lastReq.URL.Path, "/public") {
+		t.Errorf("URL path still contains '/public': %s", rt.lastReq.URL.Path)
+	}
+	if !strings.Contains(rt.lastReq.URL.Path, "/config") {
+		t.Errorf("URL path does not contain '/config': %s", rt.lastReq.URL.Path)
 	}
 }
 
@@ -774,7 +809,11 @@ func TestPrismURIRemapperFn_WithSlugInContext(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestURIRemapperFn_SetsTenantHeader(t *testing.T) {
-	fn := uriRemapperFn("my-tenant")
+	policy, policyErr := resolveThrottlingPolicy(nil)
+	if policyErr != nil {
+		t.Fatalf("unexpected policy error: %v", policyErr)
+	}
+	fn := uriRemapperFn("my-tenant", policy, newResourceThrottleRegistry())
 
 	req, err := http.NewRequest(http.MethodGet, "https://example.com/api/test", nil)
 	if err != nil {
@@ -789,13 +828,20 @@ func TestURIRemapperFn_SetsTenantHeader(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if got := req.Header.Get("X-Volterra-Apigw-Tenant"); got != "my-tenant" {
+	if rt.lastReq == nil {
+		t.Fatal("expected round tripper to capture request")
+	}
+	if got := rt.lastReq.Header.Get("X-Volterra-Apigw-Tenant"); got != "my-tenant" {
 		t.Errorf("X-Volterra-Apigw-Tenant = %q, want %q", got, "my-tenant")
 	}
 }
 
 func TestURIRemapperFn_EmptyTenant(t *testing.T) {
-	fn := uriRemapperFn("")
+	policy, policyErr := resolveThrottlingPolicy(nil)
+	if policyErr != nil {
+		t.Fatalf("unexpected policy error: %v", policyErr)
+	}
+	fn := uriRemapperFn("", policy, newResourceThrottleRegistry())
 
 	req, err := http.NewRequest(http.MethodGet, "https://example.com/api/test", nil)
 	if err != nil {
@@ -810,8 +856,11 @@ func TestURIRemapperFn_EmptyTenant(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+	if rt.lastReq == nil {
+		t.Fatal("expected round tripper to capture request")
+	}
 	// Empty tenant should still set the header (to empty string)
-	if got := req.Header.Get("x-ves-tenant"); got != "" {
+	if got := rt.lastReq.Header.Get("x-ves-tenant"); got != "" {
 		t.Errorf("x-ves-tenant = %q, want empty string", got)
 	}
 }
@@ -826,4 +875,159 @@ func TestAPITokenAuth_ImplementsAuthenticator(t *testing.T) {
 
 func TestP12CertAuth_ImplementsAuthenticator(t *testing.T) {
 	var _ Authenticator = &P12CertAuth{}
+}
+
+func TestResourceThrottleRegistry_SameResourceWaits(t *testing.T) {
+	registry := newResourceThrottleRegistry()
+	registry.publish("http_loadbalancer", 35*time.Millisecond)
+
+	start := time.Now()
+	err := registry.wait(context.Background(), "http_loadbalancer")
+	if err != nil {
+		t.Fatalf("unexpected wait error: %v", err)
+	}
+	if elapsed := time.Since(start); elapsed < 25*time.Millisecond {
+		t.Fatalf("expected wait >= 25ms, got %v", elapsed)
+	}
+}
+
+func TestResourceThrottleRegistry_DifferentResourcesIsolated(t *testing.T) {
+	registry := newResourceThrottleRegistry()
+	registry.publish("http_loadbalancer", 200*time.Millisecond)
+
+	start := time.Now()
+	err := registry.wait(context.Background(), "origin_pool")
+	if err != nil {
+		t.Fatalf("unexpected wait error: %v", err)
+	}
+	if elapsed := time.Since(start); elapsed > 20*time.Millisecond {
+		t.Fatalf("expected isolated resource wait to be near-zero, got %v", elapsed)
+	}
+}
+
+func TestDoRequestWithThrottling_RetriesOn429(t *testing.T) {
+	policy := defaultThrottlingPolicy()
+	policy.Enabled = true
+	policy.InitialBackoff = 1 * time.Millisecond
+	policy.MaxBackoff = 2 * time.Millisecond
+	policy.JitterRatio = 0
+	policy.MaxRetries = 2
+
+	registry := newResourceThrottleRegistry()
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "https://example.com/api/public/namespaces/default/http_loadbalancers", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	attempts := 0
+	resp, err := doRequestWithThrottling(context.Background(), req, "http_loadbalancer", policy, registry, func(_ *http.Request) (*http.Response, error) {
+		attempts++
+		if attempts == 1 {
+			return &http.Response{StatusCode: http.StatusTooManyRequests, Body: io.NopCloser(strings.NewReader("429")), Header: make(http.Header)}, nil
+		}
+		return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("ok")), Header: make(http.Header)}, nil
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 after retry, got %d", resp.StatusCode)
+	}
+	if attempts != 2 {
+		t.Fatalf("expected 2 attempts, got %d", attempts)
+	}
+}
+
+func TestDoRequestWithThrottling_ContextCancelledDuringCooldown(t *testing.T) {
+	policy := defaultThrottlingPolicy()
+	policy.Enabled = true
+	policy.InitialBackoff = 1 * time.Millisecond
+	policy.MaxBackoff = 1 * time.Millisecond
+	policy.JitterRatio = 0
+
+	registry := newResourceThrottleRegistry()
+	registry.publish("http_loadbalancer", 2*time.Second)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://example.com/api/public/namespaces/default/http_loadbalancers", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	_, err = doRequestWithThrottling(ctx, req, "http_loadbalancer", policy, registry, func(_ *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("ok"))}, nil
+	})
+	if err == nil {
+		t.Fatal("expected cancellation error, got nil")
+	}
+}
+
+func TestParseRetryAfterDelay_Seconds(t *testing.T) {
+	resp := &http.Response{Header: make(http.Header)}
+	resp.Header.Set("Retry-After", "3")
+
+	delay, ok := parseRetryAfterDelay(resp)
+	if !ok {
+		t.Fatal("expected Retry-After to parse")
+	}
+	if delay != 3*time.Second {
+		t.Fatalf("expected 3s delay, got %v", delay)
+	}
+}
+
+func TestDoRequestWithThrottling_UsesRetryAfterHeader(t *testing.T) {
+	policy := defaultThrottlingPolicy()
+	policy.Enabled = true
+	policy.InitialBackoff = 1 * time.Millisecond
+	policy.MaxBackoff = 2 * time.Millisecond
+	policy.JitterRatio = 0
+	policy.MaxRetries = 1
+	policy.RespectRetryAfter = true
+
+	registry := newResourceThrottleRegistry()
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "https://example.com/api/public/namespaces/default/http_loadbalancers", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	attempts := 0
+	start := time.Now()
+	_, err = doRequestWithThrottling(context.Background(), req, "http_loadbalancer", policy, registry, func(_ *http.Request) (*http.Response, error) {
+		attempts++
+		if attempts == 1 {
+			rsp := &http.Response{StatusCode: http.StatusTooManyRequests, Body: io.NopCloser(strings.NewReader("429")), Header: make(http.Header)}
+			rsp.Header.Set("Retry-After", "1")
+			return rsp, nil
+		}
+		return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("ok")), Header: make(http.Header)}, nil
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if attempts != 2 {
+		t.Fatalf("expected 2 attempts, got %d", attempts)
+	}
+	if elapsed := time.Since(start); elapsed < 900*time.Millisecond {
+		t.Fatalf("expected retry to respect Retry-After near 1s, got %v", elapsed)
+	}
+}
+
+func TestComputeBackoffDelay_Bounds(t *testing.T) {
+	policy := defaultThrottlingPolicy()
+	policy.InitialBackoff = 100 * time.Millisecond
+	policy.MaxBackoff = 300 * time.Millisecond
+	policy.Multiplier = 2.0
+	policy.JitterRatio = 0
+
+	if d := computeBackoffDelay(1, policy); d != 100*time.Millisecond {
+		t.Fatalf("attempt1 delay mismatch: %v", d)
+	}
+	if d := computeBackoffDelay(2, policy); d != 200*time.Millisecond {
+		t.Fatalf("attempt2 delay mismatch: %v", d)
+	}
+	if d := computeBackoffDelay(3, policy); d != 300*time.Millisecond {
+		t.Fatalf("attempt3 delay should cap at max_backoff, got %v", d)
+	}
 }

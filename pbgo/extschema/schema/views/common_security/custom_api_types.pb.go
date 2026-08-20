@@ -5,15 +5,16 @@ package common_security
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
-	dos_mitigation "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dos_mitigation"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	golang_proto "github.com/golang/protobuf/proto"
+	dos_mitigation "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dos_mitigation"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1314,10 +1315,7 @@ func (m *GetSecurityConfigRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApiTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApiTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -1431,10 +1429,7 @@ func (m *GetDoSAutoMitigationRulesReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApiTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApiTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -1518,10 +1513,7 @@ func (m *GetDoSAutoMitigationRulesRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApiTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApiTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -1667,10 +1659,7 @@ func (m *DeleteDoSAutoMitigationRuleReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApiTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApiTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -1752,10 +1741,7 @@ func (m *DeleteDoSAutoMitigationRuleRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthCustomApiTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthCustomApiTypes
 			}
 			if (iNdEx + skippy) > l {

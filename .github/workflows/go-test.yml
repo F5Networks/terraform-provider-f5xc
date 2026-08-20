@@ -19,22 +19,23 @@ jobs:
     env:
       GOPRIVATE: "gopkg.volterra.us,gitlab.com/f5/*"
       GOTOOLCHAIN: "auto"
-      # Set terminal prompt to 0 to prevent Git from hanging on authentication
+      # Prevent Git from hanging on interactive authentication prompts
       GIT_TERMINAL_PROMPT: "0"
 
     steps:
-      # 1. Reset permissions if the previous run left root-owned files
+      # 1. Reset permissions and clean previous run state on self-hosted runner
       - name: Cleanup workspace and git config
         run: |
-          sudo chown -R $USER:$USER $GITHUB_WORKSPACE
-          git config --global --remove-section url."https://gitlab.com/" || true
+          sudo chown -R $USER:$USER $GITHUB_WORKSPACE || true
+          rm -f ~/.netrc
+          git config --global --remove-section url."https://gitlab.com/" 2>/dev/null || true
         continue-on-error: true
       
-      # 2. Install tools
+      # 2. Ensure required system packages are installed
       - name: Install unzip
         run: |
           if command -v unzip > /dev/null; then
-            echo "unzip already installed"
+            echo "unzip is already installed"
           else
             sudo yum install -y unzip || sudo dnf install -y unzip || sudo apt-get install -y unzip
           fi
@@ -43,58 +44,50 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # This prevents the default GITHUB_TOKEN from interfering with your GitLab config
           persist-credentials: false
 
-      # 4. Install Go environment (Updated to Go 1.25)
+      # 4. Set up Go environment (automatically matches version in go.mod)
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version-file: 'go.mod'
           cache: true
         id: go
 
-      # 5. Configure Git for Private Modules
+      # 5. Configure GitLab authentication for private Go modules via Deploy Token
       - name: Configure Git for Private Modules
         shell: bash
+        env:
+          DEPLOY_USER: ${{ secrets.GITLAB_DEPLOY_TOKEN_USERNAME }}
+          DEPLOY_PASSWORD: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
         run: |
-          # 1. Check if the secret is available
-          if [ -z "${{ secrets.GITLAB_PAT }}" ]; then
-            echo "::error::GITLAB_PAT is empty or inaccessible. Check repository secrets."
+          # 1. Check if the required secrets are available
+          if [ -z "${DEPLOY_PASSWORD}" ]; then
+            echo "::error::GITLAB_DEPLOY_TOKEN_PASSWORD secret is empty or inaccessible."
             exit 1
           fi
           
-          # 2. Cleanup existing entries to prevent ".gitconfig" bloat on self-hosted runner
-          # This removes all previous insteadOf configurations for these domains
-          git config --global --remove-section url."https://gitlab.com/" 2>/dev/null || true
-          # Clean up entries that might contain old tokens in the key
-          git config --global --list | grep "insteadof=https://gitlab.com/" | cut -d. -f2 | xargs -I {} git config --global --remove-section url.{} 2>/dev/null || true
-          git config --global --list | grep "insteadof=https://gopkg.volterra.us/" | cut -d. -f2 | xargs -I {} git config --global --remove-section url.{} 2>/dev/null || true
+          # 2. Configure ~/.netrc using Deploy Token credentials
+          echo "machine gitlab.com login ${DEPLOY_USER} password ${DEPLOY_PASSWORD}" > ~/.netrc
+          chmod 600 ~/.netrc
           
-          # 3. Standard GitLab Rewrite
-          git config --global url."https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/".insteadOf "https://gitlab.com/"
-          
-          # 4. Vanity Domain Rewrite (Specific for Volterra/F5)
-          # This ensures that requests to gopkg.volterra.us are authenticated via GitLab
-          git config --global url."https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/f5/volterra/ves.io/".insteadOf "https://gopkg.volterra.us/"
-          
-          # 5. Disable credential helper to ensure only our PAT is used
+          # 3. Disable credential helper to prevent caching stale credentials on self-hosted runner
           git config --global credential.helper ""
           
-          echo "Git configuration cleaned and freshly applied for gitlab.com and gopkg.volterra.us"
+          echo "GitLab Deploy Token credentials successfully configured in ~/.netrc"
 
-      # 6. Install a specific Terraform version
+      # 6. Install Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "v1.14.8"
+          terraform_version: "1.10.5" # Adjust to your desired Terraform version
           terraform_wrapper: false
 
-      # 7. Run custom make command for tidying
+      # 7. Run make target to tidy and verify Go modules
       - name: Make Tidy (Verify)
         run: make cmd-go-mod-tidy
 
-      # 8. Run the actual test suite
+      # 8. Run the test suite
       - name: Run tests
         run: |
           TF_BINARY=$(which terraform)
@@ -103,8 +96,9 @@ jobs:
           TF_ACC_TERRAFORM_PATH=$TF_BINARY \
           go test -v ./... -timeout=30m
 
-      # 9. Cleanup
-      - name: Cleanup Git Config
+      # 9. Cleanup sensitive credentials on self-hosted runner
+      - name: Cleanup Credentials
         if: always()
         run: |
-          git config --global --remove-section url."https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/" || true
+          rm -f ~/.netrc
+          echo "Successfully removed ~/.netrc"

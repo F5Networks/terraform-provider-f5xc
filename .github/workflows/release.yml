@@ -32,9 +32,9 @@ jobs:
 
       - name: Download binaries from GitLab Package Registry
         env:
-          GITLAB_USER: ${{ secrets.GITLAB_DEPLOY_TOKEN_USERNAME }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
+          # URL-encoded path of f5/volterra/ves.io/terraform-provider-f5xc
           GITLAB_PROJECT: "f5%2Fvolterra%2Fves.io%2Fterraform-provider-f5xc"
           PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
@@ -44,10 +44,27 @@ jobs:
           fi
 
           mkdir -p dist
-          BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${TAG}"
 
-          echo "Downloading binaries for tag: ${TAG}..."
+          echo "Searching GitLab Package Registry for tag: ${TAG}..."
 
+          # 1. Fetch package ID for this tag/version from GitLab API
+          PACKAGE_ID=$(curl -sSL --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages?package_name=${PACKAGE_NAME}" \
+            | jq -r --arg TAG "${TAG}" --arg TAG_NO_V "${TAG#v}" \
+              '.[] | select(.version == $TAG or .version == $TAG_NO_V or .version == ("v" + $TAG) or .version == ("vv" + $TAG)) | .id' | head -n 1)
+
+          if [ -z "$PACKAGE_ID" ] || [ "$PACKAGE_ID" = "null" ]; then
+            echo "::error::Could not find package ID for tag ${TAG} in GitLab Package Registry!"
+            exit 1
+          fi
+
+          echo "Found GitLab Package ID: ${PACKAGE_ID}"
+
+          # 2. Get list of all package files for this package
+          FILES_JSON=$(curl -sSL --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/${PACKAGE_ID}/package_files")
+
+          # 3. Target binary filenames
           BINARIES=(
             "terraform-provider-f5xc_linux_amd64"
             "terraform-provider-f5xc_darwin_amd64"
@@ -56,27 +73,34 @@ jobs:
           )
 
           for FILENAME in "${BINARIES[@]}"; do
-            echo "Fetching ${FILENAME}..."
-            curl --fail -sSL \
-              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-              -o "dist/${FILENAME}" \
-              "${BASE_URL}/${FILENAME}"
+            echo "Locating latest file ID for ${FILENAME}..."
+            # Pick the most recently created file ID for this filename
+            FILE_ID=$(echo "${FILES_JSON}" | jq -r --arg FN "${FILENAME}" \
+              '[.[] | select(.file_name == $FN)] | sort_by(.created_at) | last | .id')
+
+            if [ -n "$FILE_ID" ] && [ "$FILE_ID" != "null" ]; then
+              echo "Downloading ${FILENAME} (File ID: ${FILE_ID})..."
+              curl --fail -sSL \
+                --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+                -o "dist/${FILENAME}" \
+                "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${TAG}/${FILENAME}" \
+                || curl --fail -sSL \
+                --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+                -o "dist/${FILENAME}" \
+                "https://gitlab.com/f5/volterra/ves.io/terraform-provider-f5xc/-/package_files/${FILE_ID}/download"
+            else
+              echo "::warning::File ${FILENAME} not found in package ${PACKAGE_ID}"
+            fi
           done
 
-          # Check if SHA256SUMS was uploaded to GitLab or generate it locally
-          curl -sSL --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-            -o "dist/SHA256SUMS" \
-            "${BASE_URL}/SHA256SUMS" || true
+          # 4. Generate SHA256SUMS for the downloaded binaries
+          echo "Generating SHA256SUMS for downloaded binaries..."
+          cd dist
+          sha256sum terraform-provider-f5xc_* > SHA256SUMS 2>/dev/null || true
+          cd ..
 
-          if [ ! -s "dist/SHA256SUMS" ]; then
-            echo "Generating SHA256SUMS for downloaded binaries..."
-            cd dist
-            sha256sum terraform-provider-f5xc_* > SHA256SUMS
-            cd ..
-          fi
-
-          echo "Listing downloaded assets:"
-          ls -la dist/
+          echo "Listing downloaded assets in dist/:"
+          ls -lh dist/
 
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2

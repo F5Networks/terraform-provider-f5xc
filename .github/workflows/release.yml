@@ -15,7 +15,7 @@ jobs:
     # Ensure variables like GOPRIVATE are available for the build
     env:
       GOPRIVATE: "gopkg.volterra.us,gitlab.com/f5/*"
-      # GOTOOLCHAIN: "local"
+      GOTOOLCHAIN: auto
       GIT_TERMINAL_PROMPT: "0"
   sync-release:
     name: Sync GitLab Binaries to GitHub Release

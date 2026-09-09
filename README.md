@@ -1,5 +1,5 @@
 <a href="https://terraform.io">
-    <img src="images/tf.png" alt="Terraform logo" title="Terraform" align="left" height="50" />
+    <img src="images/tf.jpg" alt="Terraform logo" title="Terraform" align="left" height="50" />
 </a>
 
 # Terraform Provider for F5XC

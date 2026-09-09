@@ -11,6 +11,8 @@ We recommend using the latest version of Terraform Core ([the latest version can
 * [Terraform Website](https://www.terraform.io)
 * [F5XC Provider Documentation](https://registry.terraform.io/providers/f5xc/f5xc/latest/docs)
 * [F5XC Provider Usage Examples](https://github.com/f5xc/terraform-provider-f5xc/tree/main/examples)
+* [Pre-release builds of the F5 Distributed Cloud (`f5xc`) Terraform
+  provider](https://github.com/f5xc/terraform-provider-f5xc/tree/main/local.md)
 
 ## Usage Example
 

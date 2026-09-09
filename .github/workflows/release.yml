@@ -1,5 +1,6 @@
 # Binaries are built in GitLab CI and uploaded to the GitLab Generic Package Registry.
-# This workflow downloads those pre-built binaries and publishes them as a GitHub Release.
+# This workflow downloads those pre-built binaries, packages them into Terraform Registry
+# compliant ZIP archives, signs them with GPG, and publishes them as a GitHub Release.
 name: release
 
 on:
@@ -21,14 +22,19 @@ jobs:
       contents: write
 
     steps:
-      - name: Determine Release Tag
+      - name: Determine Release Tag & Version
         id: vars
         run: |
           if [ -n "${{ inputs.tag }}" ]; then
-            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+            TAG="${{ inputs.tag }}"
           else
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            TAG="${{ github.ref_name }}"
           fi
+          # Entfernt das führende 'v' für die Dateinamen (z.B. v0.3.1 -> 0.3.1)
+          VERSION="${TAG#v}"
+          
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Download binaries from GitLab Package Registry
         env:
@@ -42,7 +48,7 @@ jobs:
             exit 1
           fi
 
-          mkdir -p dist
+          mkdir -p raw_binaries
           BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${TAG}"
 
           echo "Downloading pre-built binaries for tag: ${TAG}..."
@@ -58,18 +64,76 @@ jobs:
             echo "Fetching ${FILENAME}..."
             curl --fail -sSL \
               --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-              -o "dist/${FILENAME}" \
+              -o "raw_binaries/${FILENAME}" \
               "${BASE_URL}/${FILENAME}"
           done
 
-          # Generate SHA256 checksums for the downloaded release assets
-          echo "Generating SHA256SUMS..."
+      - name: Package Binaries into Terraform Registry ZIP Archives
+        run: |
+          mkdir -p dist
+          VERSION="${{ steps.vars.outputs.version }}"
+
+          # Definition der Plattform-Mappings: Input-Dateiname -> OS_ARCH
+          declare -A PLATFORMS=(
+            ["terraform-provider-f5xc_linux_amd64"]="linux_amd64"
+            ["terraform-provider-f5xc_darwin_amd64"]="darwin_amd64"
+            ["terraform-provider-f5xc_darwin_arm64"]="darwin_arm64"
+            ["terraform-provider-f5xc_windows_amd64.exe"]="windows_amd64"
+          )
+
+          for SRC_FILE in "${!PLATFORMS[@]}"; do
+            OS_ARCH="${PLATFORMS[$SRC_FILE]}"
+            ZIP_NAME="terraform-provider-f5xc_${VERSION}_${OS_ARCH}.zip"
+
+            mkdir -p tmp_pack
+            if [[ "$OS_ARCH" == windows* ]]; then
+              INTERNAL_BIN="terraform-provider-f5xc_v${VERSION}.exe"
+            else
+              INTERNAL_BIN="terraform-provider-f5xc_v${VERSION}"
+            fi
+
+            cp "raw_binaries/${SRC_FILE}" "tmp_pack/${INTERNAL_BIN}"
+            chmod +x "tmp_pack/${INTERNAL_BIN}"
+
+            # Registry verlangt ZIP-Format
+            (cd tmp_pack && zip -q "../dist/${ZIP_NAME}" "${INTERNAL_BIN}")
+            rm -rf tmp_pack
+
+            echo "Created dist/${ZIP_NAME}"
+          done
+
+      - name: Generate Checksums
+        run: |
+          VERSION="${{ steps.vars.outputs.version }}"
+          CHECKSUM_FILE="terraform-provider-f5xc_${VERSION}_SHA256SUMS"
+
           cd dist
-          sha256sum terraform-provider-f5xc_* > SHA256SUMS
+          sha256sum *.zip > "${CHECKSUM_FILE}"
+          echo "Generated ${CHECKSUM_FILE}:"
+          cat "${CHECKSUM_FILE}"
           cd ..
 
-          echo "Listing downloaded assets in dist/:"
-          ls -lh dist/
+      - name: Import GPG Key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Sign Checksums with GPG
+        run: |
+          VERSION="${{ steps.vars.outputs.version }}"
+          CHECKSUM_FILE="terraform-provider-f5xc_${VERSION}_SHA256SUMS"
+          SIG_FILE="terraform-provider-f5xc_${VERSION}_SHA256SUMS.sig"
+
+          cd dist
+          gpg --batch --no-tty --detach-sign \
+            --local-user "${{ steps.import_gpg.outputs.fingerprint }}" \
+            --output "${SIG_FILE}" \
+            "${CHECKSUM_FILE}"
+
+          echo "Successfully generated signature ${SIG_FILE}"
+          cd ..
 
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2

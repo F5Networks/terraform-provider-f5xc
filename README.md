@@ -1,5 +1,5 @@
 <a href="https://terraform.io">
-    <img src="images/tf.jpg" alt="Terraform logo" title="Terraform" align="left" height="50" />
+    <img src="images/tf.png" alt="Terraform logo" title="Terraform" align="left" height="50" />
 </a>
 
 # Terraform Provider for F5XC
@@ -29,19 +29,22 @@ terraform {
 provider "f5xc" {
   api_p12_file = "/path/to/api_credential.p12"
   url          = "https://<tenant_name>.console.ves.volterra.io/api"
-  limiter {
-    rate  = 30.0
-    burst = 15
-  }
+  # Optional: Backend-driven Throttling (disabled by default unless block is declared)
+  throttling = {}
 }
 
 # 2. (Alternative) Configure the F5XC Provider using an API Token
 provider "f5xc" {
   api_token = "<your_api_token>"
   url       = "https://<tenant_name>.console.ves.volterra.io/api"
-  limiter {
-    rate  = 30.0
-    burst = 15
+  # Optional: Backend-driven Throttling (disabled by default unless block is declared)
+  throttling = {
+    max_retries         = 5
+    initial_backoff     = "250ms"
+    max_backoff         = "8s"
+    multiplier          = 2.0
+    jitter_ratio        = 0.2
+    respect_retry_after = true
   }
 }
 ```

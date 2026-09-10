@@ -78,7 +78,7 @@ Terraform automatically scans your local user plugin directory before querying e
   ```
 * **Windows (PowerShell):**
   ```powershell
-  New-Item -ItemType Directory -Force -Path "$env:APPDATA\terraform.d\plugins\registry.terraform.io\F5Networks\f5xc$VERSION\windows_amd64"
+  New-Item -ItemType Directory -Force -Path "$env:APPDATA\terraform.d\plugins\registry.terraform.io\F5Networks\f5xc\$VERSION\windows_amd64"
   ```
 
 #### 2. Move the binary into the directory:
@@ -97,7 +97,7 @@ Terraform automatically scans your local user plugin directory before querying e
   ```
 * **Windows (PowerShell):**
   ```powershell
-  Move-Item "terraform-provider-f5xc_v$VERSION.exe" "$env:APPDATA\terraform.d\plugins\registry.terraform.io\F5Networks\f5xc$VERSION\windows_amd64\"
+  Move-Item "terraform-provider-f5xc_v$VERSION.exe" "$env:APPDATA\terraform.d\plugins\registry.terraform.io\F5Networks\f5xc\$VERSION\windows_amd64\"
   ```
 
 #### 3. Configure your Terraform project (`versions.tf`):

@@ -7,7 +7,7 @@ provider downloaded directly from GitHub Releases.
 
 * [Terraform CLI](https://developer.hashicorp.com/terraform/install) installed (`>= 1.5.0`).
 * A downloaded `.zip` release archive matching your operating system and architecture from
-  the [GitHub Releases](https://github.com/F5Networks/terraform-provider-f5xc/releases) page.
+  the [GitHub Releases](https://github.com/F5Networks/terraform-provider-f5xc-preview/releases) page.
 
 ## Step 1: Extract the Archive & Detect Version
 

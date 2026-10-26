@@ -36,14 +36,14 @@ jobs:
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Download binaries from GitLab Package Registry
+      - name: Download binaries and release notes from GitLab Package Registry
         env:
-          GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
+          GITLAB_DEPLOY_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
           GITLAB_PROJECT_ID: "50750365"
           PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
-          if [ -z "${GITLAB_TOKEN}" ]; then
+          if [ -z "${GITLAB_DEPLOY_TOKEN}" ]; then
             echo "::error::GITLAB_DEPLOY_TOKEN_PASSWORD secret is missing or empty!"
             exit 1
           fi
@@ -63,10 +63,17 @@ jobs:
           for FILENAME in "${BINARIES[@]}"; do
             echo "Fetching ${FILENAME}..."
             curl --fail -sSL \
-              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+              --header "DEPLOY-TOKEN: ${GITLAB_DEPLOY_TOKEN}" \
               -o "raw_binaries/${FILENAME}" \
               "${BASE_URL}/${FILENAME}"
           done
+
+          echo "Fetching RELEASE_NOTES.md..."
+          curl --fail -sSL \
+            --header "DEPLOY-TOKEN: ${GITLAB_DEPLOY_TOKEN}" \
+            -o RELEASE_NOTES.md \
+            "${BASE_URL}/RELEASE_NOTES.md"
+          test -s RELEASE_NOTES.md
 
       - name: Package Binaries into Terraform Registry ZIP Archives
         run: |
@@ -139,7 +146,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.vars.outputs.tag }}
+          body_path: RELEASE_NOTES.md
           files: dist/*
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

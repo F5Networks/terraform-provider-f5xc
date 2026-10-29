@@ -1,6 +1,7 @@
-# Binaries are built in GitLab CI and uploaded to the GitLab Generic Package Registry.
-# This workflow downloads those pre-built binaries, packages them into Terraform Registry
-# compliant ZIP archives, signs them with GPG, and publishes them as a GitHub Release.
+# Binaries and SBOMs are built in GitLab CI and uploaded to the GitLab Generic Package Registry.
+# This workflow downloads those pre-built binaries and SBOMs, packages them into Terraform Registry
+# compliant ZIP archives, includes the registry manifest, signs checksums with GPG, and publishes
+# them as a GitHub Release.
 name: release
 
 on:
@@ -22,6 +23,9 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout repository (for terraform-registry-manifest.json)
+        uses: actions/checkout@v4
+
       - name: Determine Release Tag & Version
         id: vars
         run: |
@@ -30,13 +34,13 @@ jobs:
           else
             TAG="${{ github.ref_name }}"
           fi
-          # Entfernt das führende 'v' für die Dateinamen (z.B. v0.3.1 -> 0.3.1)
+          # Remove leading 'v' for artifact filenames (e.g. v0.3.1 -> 0.3.1)
           VERSION="${TAG#v}"
           
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Download binaries and release notes from GitLab Package Registry
+      - name: Download binaries, SBOMs, and release notes from GitLab Package Registry
         env:
           GITLAB_DEPLOY_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
@@ -51,7 +55,7 @@ jobs:
           mkdir -p raw_binaries
           BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${TAG}"
 
-          echo "Downloading pre-built binaries for tag: ${TAG}..."
+          echo "Downloading pre-built binaries and SBOMs for tag: ${TAG}..."
 
           BINARIES=(
             "terraform-provider-f5xc_linux_amd64"
@@ -66,6 +70,12 @@ jobs:
               --header "DEPLOY-TOKEN: ${GITLAB_DEPLOY_TOKEN}" \
               -o "raw_binaries/${FILENAME}" \
               "${BASE_URL}/${FILENAME}"
+
+            echo "Fetching ${FILENAME}.sbom.json..."
+            curl --fail -sSL \
+              --header "DEPLOY-TOKEN: ${GITLAB_DEPLOY_TOKEN}" \
+              -o "raw_binaries/${FILENAME}.sbom.json" \
+              "${BASE_URL}/${FILENAME}.sbom.json"
           done
 
           echo "Fetching RELEASE_NOTES.md..."
@@ -75,12 +85,12 @@ jobs:
             "${BASE_URL}/RELEASE_NOTES.md"
           test -s RELEASE_NOTES.md
 
-      - name: Package Binaries into Terraform Registry ZIP Archives
+      - name: Package Binaries, SBOMs, and Registry Manifest
         run: |
           mkdir -p dist
           VERSION="${{ steps.vars.outputs.version }}"
 
-          # Definition der Plattform-Mappings: Input-Dateiname -> OS_ARCH
+          # Platform mappings: Input filename -> OS_ARCH
           declare -A PLATFORMS=(
             ["terraform-provider-f5xc_linux_amd64"]="linux_amd64"
             ["terraform-provider-f5xc_darwin_amd64"]="darwin_amd64"
@@ -91,6 +101,7 @@ jobs:
           for SRC_FILE in "${!PLATFORMS[@]}"; do
             OS_ARCH="${PLATFORMS[$SRC_FILE]}"
             ZIP_NAME="terraform-provider-f5xc_${VERSION}_${OS_ARCH}.zip"
+            SBOM_NAME="${ZIP_NAME}.sbom.json"
 
             mkdir -p tmp_pack
             if [[ "$OS_ARCH" == windows* ]]; then
@@ -102,12 +113,20 @@ jobs:
             cp "raw_binaries/${SRC_FILE}" "tmp_pack/${INTERNAL_BIN}"
             chmod +x "tmp_pack/${INTERNAL_BIN}"
 
-            # Registry verlangt ZIP-Format
+            # Terraform Registry requires ZIP format
             (cd tmp_pack && zip -q "../dist/${ZIP_NAME}" "${INTERNAL_BIN}")
             rm -rf tmp_pack
 
-            echo "Created dist/${ZIP_NAME}"
+            # Copy corresponding SPDX-JSON SBOM into dist/
+            cp "raw_binaries/${SRC_FILE}.sbom.json" "dist/${SBOM_NAME}"
+
+            echo "Created dist/${ZIP_NAME} and dist/${SBOM_NAME}"
           done
+
+          # Include Terraform Registry Manifest (required for Protocol v6.0 advertisement)
+          MANIFEST_NAME="terraform-provider-f5xc_${VERSION}_manifest.json"
+          cp terraform-registry-manifest.json "dist/${MANIFEST_NAME}"
+          echo "Created dist/${MANIFEST_NAME}"
 
       - name: Generate Checksums
         run: |
@@ -115,7 +134,7 @@ jobs:
           CHECKSUM_FILE="terraform-provider-f5xc_${VERSION}_SHA256SUMS"
 
           cd dist
-          sha256sum *.zip > "${CHECKSUM_FILE}"
+          sha256sum *.zip *_manifest.json *.sbom.json > "${CHECKSUM_FILE}"
           echo "Generated ${CHECKSUM_FILE}:"
           cat "${CHECKSUM_FILE}"
           cd ..

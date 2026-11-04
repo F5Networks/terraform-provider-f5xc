@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -21,6 +23,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -34,60 +38,60 @@ type DataSourceF5XCV1HttpMonitor struct {
 	client *client.APIClient
 }
 
-type V1HttpMonitorSyntheticMonitorSourceExternal struct {
+type V1HttpMonitorSrcExternal struct {
 	SourceChoice types.Object `tfsdk:"source_choice"`
 }
 
-type V1HttpMonitorSourceExternalSourceChoice struct {
+type V1HttpMonitorSrcChoice struct {
 	Aws  types.Object `tfsdk:"aws"`
 	F5Xc types.Object `tfsdk:"f5xc"`
 }
 
-type V1HttpMonitorSourceExternalAws struct {
+type V1HttpMonitorAws struct {
 	Regions types.List `tfsdk:"regions"`
 }
 
-type V1HttpMonitorSourceExternalF5Xc struct {
+type V1HttpMonitorF5Xc struct {
 	Regions types.List `tfsdk:"regions"`
 }
 
-type V1HttpMonitorSyntheticMonitorHealthPolicy struct {
+type V1HttpMonitorHealthPolicy struct {
 	DynamicThresholdPolicyChoice   types.Object `tfsdk:"dynamic_threshold_policy_choice"`
 	StaticMaxThresholdPolicyChoice types.Object `tfsdk:"static_max_threshold_policy_choice"`
 	StaticMinThresholdPolicyChoice types.Object `tfsdk:"static_min_threshold_policy_choice"`
 }
 
-type V1HttpMonitorHealthPolicyDynamicThresholdPolicyChoice struct {
+type V1HttpMonitorDynamicThresholdPolicyChoice struct {
 	DynamicThreshold         types.Object `tfsdk:"dynamic_threshold"`
 	DynamicThresholdDisabled types.Bool   `tfsdk:"dynamic_threshold_disabled"`
 }
 
-type V1HttpMonitorHealthPolicyDynamicThreshold struct {
+type V1HttpMonitorDynamicThreshold struct {
 	EvalPeriod types.List `tfsdk:"eval_period"`
 	StdDevVal  types.List `tfsdk:"std_dev_val"`
 }
 
-type V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyChoice struct {
+type V1HttpMonitorStaticMaxThresholdPolicyChoice struct {
 	StaticMaxThreshold         types.Object `tfsdk:"static_max_threshold"`
 	StaticMaxThresholdDisabled types.Bool   `tfsdk:"static_max_threshold_disabled"`
 }
 
-type V1HttpMonitorHealthPolicyStaticMaxThreshold struct {
+type V1HttpMonitorStaticMaxThreshold struct {
 	EvalPeriod      types.List  `tfsdk:"eval_period"`
 	MaxResponseTime types.Int64 `tfsdk:"max_response_time"`
 }
 
-type V1HttpMonitorHealthPolicyStaticMinThresholdPolicyChoice struct {
+type V1HttpMonitorStaticMinThresholdPolicyChoice struct {
 	StaticMinThreshold         types.Object `tfsdk:"static_min_threshold"`
 	StaticMinThresholdDisabled types.Bool   `tfsdk:"static_min_threshold_disabled"`
 }
 
-type V1HttpMonitorHealthPolicyStaticMinThreshold struct {
+type V1HttpMonitorStaticMinThreshold struct {
 	EvalPeriod      types.List  `tfsdk:"eval_period"`
 	MinResponseTime types.Int64 `tfsdk:"min_response_time"`
 }
 
-type V1HttpMonitorCreateSpecTypeIntervalChoice struct {
+type V1HttpMonitorIntervalChoice struct {
 	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
 	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
 	Interval_1Day    types.Bool `tfsdk:"interval_1_day"`
@@ -99,7 +103,7 @@ type V1HttpMonitorCreateSpecTypeIntervalChoice struct {
 	Interval_6Hours  types.Bool `tfsdk:"interval_6_hours"`
 }
 
-type V1HttpMonitorCreateSpecTypeMethodChoice struct {
+type V1HttpMonitorMethodChoice struct {
 	Delete  types.Object `tfsdk:"delete"`
 	Get     types.Bool   `tfsdk:"get"`
 	Head    types.Bool   `tfsdk:"head"`
@@ -109,23 +113,23 @@ type V1HttpMonitorCreateSpecTypeMethodChoice struct {
 	Put     types.Object `tfsdk:"put"`
 }
 
-type V1HttpMonitorCreateSpecTypeDelete struct {
+type V1HttpMonitorDelete struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorCreateSpecTypePatch struct {
+type V1HttpMonitorPatch struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorCreateSpecTypePost struct {
+type V1HttpMonitorPost struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorCreateSpecTypePut struct {
+type V1HttpMonitorPut struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorV1HttpMonitorHTTPMonitorHeader struct {
+type V1HttpMonitorHTTPMonitorHeader struct {
 	Key   types.String `tfsdk:"key"`
 	Value types.String `tfsdk:"value"`
 }
@@ -340,8 +344,8 @@ func (d *DataSourceF5XCV1HttpMonitor) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a v1_http_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_http_monitor) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a v1_http_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_http_monitor) etc. can be fetched",
+		MarkdownDescription: "HTTP Monitor defines an HTTP synthetic monitor.",
+		Description:         "HTTP Monitor defines an HTTP synthetic monitor.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -820,9 +824,15 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "v1_http_monitor", err))
 		return
 	}
 
@@ -830,7 +840,41 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -853,8 +897,14 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -863,6 +913,7 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -914,10 +965,10 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
-	externalSourcesElementsSpectToModel := make([]V1HttpMonitorSyntheticMonitorSourceExternal, 0, len(specData.GetExternalSources()))
+	externalSourcesElementsSpectToModel := make([]V1HttpMonitorSrcExternal, 0, len(specData.GetExternalSources()))
 
 	for _, externalSourcesElement := range specData.GetExternalSources() {
-		v1HttpMonitorSyntheticMonitorSourceExternalModel := V1HttpMonitorSyntheticMonitorSourceExternal{}
+		v1HttpMonitorSrcExternalModel := V1HttpMonitorSrcExternal{}
 
 		// data specToModelNested RequiredOneOfField --> SourceChoice
 		// CreateSpecType
@@ -1011,12 +1062,12 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = finalObj
+			v1HttpMonitorSrcExternalModel.SourceChoice = finalObj
 		} else {
-			v1HttpMonitorSyntheticMonitorSourceExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
+			v1HttpMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
 		}
 
-		externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSyntheticMonitorSourceExternalModel)
+		externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1HttpMonitorSrcExternalModel)
 	}
 
 	{
@@ -1039,7 +1090,7 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> HealthPolicy
 	if specData.GetHealthPolicy() != nil {
-		var v1HttpMonitorSyntheticMonitorHealthPolicyModel = &V1HttpMonitorSyntheticMonitorHealthPolicy{}
+		var v1HttpMonitorHealthPolicyModel = &V1HttpMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
 		// data specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
@@ -1139,9 +1190,9 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
@@ -1230,9 +1281,9 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
@@ -1321,15 +1372,15 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
 		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			V1HttpMonitorHealthPolicyModelAttributeMap,
-			v1HttpMonitorSyntheticMonitorHealthPolicyModel,
+			v1HttpMonitorHealthPolicyModel,
 		)
 		response.Diagnostics.Append(healthPolicyDiags...)
 		data.HealthPolicy = healthPolicyObj
@@ -1398,10 +1449,15 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	if oneofIntervalChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		intervalChoiceChoices := rawSpecMap["interval_choice"]
+		var intervalChoiceChoices interface{}
+		if v := rawSpecMap["interval_choice"]; v != nil {
+			intervalChoiceChoices = v
+		} else {
+			intervalChoiceChoices = specData.GetIntervalChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var intervalChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeIntervalChoice{}
+		var intervalChoiceChoicesModel = &V1HttpMonitorIntervalChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1673,10 +1729,15 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	if oneofMethodPresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		methodChoiceChoices := rawSpecMap["method"]
+		var methodChoiceChoices interface{}
+		if v := rawSpecMap["method"]; v != nil {
+			methodChoiceChoices = v
+		} else {
+			methodChoiceChoices = specData.GetMethod()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var methodChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeMethodChoice{}
+		var methodChoiceChoicesModel = &V1HttpMonitorMethodChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1691,12 +1752,8 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 				deleteElement := deleteOptionsWrapper.Delete
 
 				// data specToModelNested StringField --> RequestBody
-				if deleteElement.GetRequestBody() != "" {
-					deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					deleteAttributeMap["request_body"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
 
 				deleteObj, deleteObjDiags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
 				response.Diagnostics.Append(deleteObjDiags...)
@@ -1786,12 +1843,8 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 				patchElement := patchOptionsWrapper.Patch
 
 				// data specToModelNested StringField --> RequestBody
-				if patchElement.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					patchAttributeMap["request_body"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
 
 				patchObj, patchObjDiags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
 				response.Diagnostics.Append(patchObjDiags...)
@@ -1815,12 +1868,8 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 				postElement := postOptionsWrapper.Post
 
 				// data specToModelNested StringField --> RequestBody
-				if postElement.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					postAttributeMap["request_body"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
 
 				postObj, postObjDiags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
 				response.Diagnostics.Append(postObjDiags...)
@@ -1844,12 +1893,8 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 				putElement := putOptionsWrapper.Put
 
 				// data specToModelNested StringField --> RequestBody
-				if putElement.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
 
 				putObj, putObjDiags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
 				response.Diagnostics.Append(putObjDiags...)
@@ -1889,37 +1934,33 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	}
 
 	// data SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// data SpecToModelRoot ArrayOfPointerField --> RequestHeaders
 	if len(specData.GetRequestHeaders()) > 0 {
-		requestHeadersElements := make([]V1HttpMonitorV1HttpMonitorHTTPMonitorHeader, 0, len(specData.GetRequestHeaders()))
+		requestHeadersElements := make([]V1HttpMonitorHTTPMonitorHeader, 0, len(specData.GetRequestHeaders()))
 
 		for _, requestHeadersElement := range specData.GetRequestHeaders() {
-			v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorV1HttpMonitorHTTPMonitorHeader{}
+			v1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorHTTPMonitorHeader{}
 
 			// data specToModelNested RequiredStringField --> Key
 			if requestHeadersElement.GetKey() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
 			} else {
 				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
+				v1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Value
 			if requestHeadersElement.GetValue() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
 			} else {
 				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
+				v1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
 			}
 
-			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel)
+			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorHTTPMonitorHeaderModel)
 		}
 
 		{

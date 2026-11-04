@@ -28,15 +28,15 @@ func TestAccResourceAutoF5XCAppSetting_basic(t *testing.T) {
 	// Do NOT use t.Parallel() here — concurrent tests would conflict on Create.
 
 	namespace := "default"
-	name := "tf-acc-app-setting-" + acctest.RandString(t, 8)
-	appTypeName := "tf-acc-app-type-" + acctest.RandString(t, 8)
+	name := "example-app-setting-" + acctest.RandString(t, 8)
+	appTypeName := "example-app-type-" + acctest.RandString(t, 8)
 	createConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -45,7 +45,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -53,12 +53,12 @@ resource "f5xc_app_setting" "test" {
 }
 `, appTypeName, name, namespace)
 	updateConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name        = %q
   namespace   = %q
   description = "Updated app setting"
@@ -73,7 +73,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -95,20 +95,20 @@ resource "f5xc_app_setting" "test" {
 				Config: createConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: updateConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -120,15 +120,15 @@ func TestAccResourceAutoF5XCAppSetting_withUserBehaviorLearningTransition(t *tes
 	// Do NOT use t.Parallel() here — concurrent tests would conflict on Create.
 
 	namespace := "default"
-	name := "tf-acc-app-setting-" + acctest.RandString(t, 8)
-	appTypeName := "tf-acc-app-type-" + acctest.RandString(t, 8)
+	name := "example-app-setting-" + acctest.RandString(t, 8)
+	appTypeName := "example-app-type-" + acctest.RandString(t, 8)
 	createConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -145,7 +145,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -153,12 +153,12 @@ resource "f5xc_app_setting" "test" {
 }
 `, appTypeName, name, namespace)
 	updateConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -175,7 +175,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -197,20 +197,20 @@ resource "f5xc_app_setting" "test" {
 				Config: createConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: updateConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -222,15 +222,15 @@ func TestAccResourceAutoF5XCAppSetting_withMaliciousDetectionTransition(t *testi
 	// Do NOT use t.Parallel() here — concurrent tests would conflict on Create.
 
 	namespace := "default"
-	name := "tf-acc-app-setting-" + acctest.RandString(t, 8)
-	appTypeName := "tf-acc-app-type-" + acctest.RandString(t, 8)
+	name := "example-app-setting-" + acctest.RandString(t, 8)
+	appTypeName := "example-app-type-" + acctest.RandString(t, 8)
 	createConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -247,7 +247,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -255,12 +255,12 @@ resource "f5xc_app_setting" "test" {
 }
 `, appTypeName, name, namespace)
 	updateConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -303,7 +303,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -325,20 +325,20 @@ resource "f5xc_app_setting" "test" {
 				Config: createConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: updateConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -350,15 +350,15 @@ func TestAccResourceAutoF5XCAppSetting_withDetectionFactorTransitions(t *testing
 	// Do NOT use t.Parallel() here — concurrent tests would conflict on Create.
 
 	namespace := "default"
-	name := "tf-acc-app-setting-" + acctest.RandString(t, 8)
-	appTypeName := "tf-acc-app-type-" + acctest.RandString(t, 8)
+	name := "example-app-setting-" + acctest.RandString(t, 8)
+	appTypeName := "example-app-type-" + acctest.RandString(t, 8)
 	createConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -401,7 +401,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -409,12 +409,12 @@ resource "f5xc_app_setting" "test" {
 }
 `, appTypeName, name, namespace)
 	updateConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -453,7 +453,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -475,20 +475,20 @@ resource "f5xc_app_setting" "test" {
 				Config: createConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: updateConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -500,15 +500,15 @@ func TestAccResourceAutoF5XCAppSetting_withTimeseriesAnalysis(t *testing.T) {
 	// Do NOT use t.Parallel() here — concurrent tests would conflict on Create.
 
 	namespace := "default"
-	name := "tf-acc-app-setting-" + acctest.RandString(t, 8)
-	appTypeName := "tf-acc-app-type-" + acctest.RandString(t, 8)
+	name := "example-app-setting-" + acctest.RandString(t, 8)
+	appTypeName := "example-app-type-" + acctest.RandString(t, 8)
 	createConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -525,7 +525,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -533,12 +533,12 @@ resource "f5xc_app_setting" "test" {
 }
 `, appTypeName, name, namespace)
 	updateConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name      = %q
   namespace = %q
 
@@ -555,7 +555,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -577,20 +577,20 @@ resource "f5xc_app_setting" "test" {
 				Config: createConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: updateConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -602,21 +602,21 @@ func TestAccResourceAutoF5XCAppSetting_full(t *testing.T) {
 	// Do NOT use t.Parallel() here — concurrent tests would conflict on Create.
 
 	namespace := "default"
-	name := "tf-acc-app-setting-" + acctest.RandString(t, 8)
-	appTypeName := "tf-acc-app-type-" + acctest.RandString(t, 8)
+	name := "example-app-setting-" + acctest.RandString(t, 8)
+	appTypeName := "example-app-type-" + acctest.RandString(t, 8)
 	createConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name        = %q
   namespace   = %q
   description = "Full app setting"
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "api"
   }
 
@@ -672,7 +672,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -681,18 +681,18 @@ resource "f5xc_app_setting" "test" {
 
 `, appTypeName, name, namespace)
 	updateConfig := fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = "shared"
 }
 
-resource "f5xc_app_setting" "test" {
+resource "f5xc_app_setting" "example" {
   name        = %q
   namespace   = %q
   description = "Full app setting updated"
 
   labels = {
-    env     = "test"
+    env     = "example"
     tier    = "api"
     updated = "true"
   }
@@ -745,7 +745,7 @@ resource "f5xc_app_setting" "test" {
       app_type_ref = [
         {
           namespace = "shared"
-          name      = f5xc_app_type.test.name
+          name      = f5xc_app_type.example.name
         }
       ]
     }
@@ -753,7 +753,7 @@ resource "f5xc_app_setting" "test" {
 }
 `, appTypeName, name, namespace)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy: acctest.CheckDestroyProducerReplayAware(
@@ -767,22 +767,26 @@ resource "f5xc_app_setting" "test" {
 				Config: createConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: updateConfig,
 			},
 			{
-				ResourceName:                         "f5xc_app_setting.test",
+				ResourceName:                         "f5xc_app_setting.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_setting.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  createConfig,
+		})
 }

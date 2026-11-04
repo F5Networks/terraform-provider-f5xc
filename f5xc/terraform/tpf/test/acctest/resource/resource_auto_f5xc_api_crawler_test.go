@@ -25,12 +25,11 @@ import (
 )
 
 func TestAccResourceAutoF5XCApiCrawler_basic(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-ac-" + acctest.RandString(t, 8)
+	name := "example-api-crawler-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiCrawlerDestroyProducer(t),
@@ -39,30 +38,33 @@ func TestAccResourceAutoF5XCApiCrawler_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiCrawlerConfig_basic("example-api-crawler", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCApiCrawler_withDomains(t *testing.T) {
-	t.Parallel()
 
-	name := "tf-acc-ac-" + acctest.RandString(t, 8)
+	name := "example-api-crawler-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,10 +76,10 @@ func TestAccResourceAutoF5XCApiCrawler_withDomains(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withDomains(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -90,10 +92,10 @@ func testAccCheckApiCrawlerDestroyProducer(t *testing.T) func(*terraform.State) 
 
 func testAccResourceAutoF5XCApiCrawlerConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test api crawler"
+	description = "API crawler example"
   domains = [
     {
       domain = "example.com"
@@ -105,10 +107,10 @@ resource "f5xc_api_crawler" "test" {
 
 func testAccResourceAutoF5XCApiCrawlerConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test api crawler updated"
+	description = "API crawler example updated"
   domains = [
     {
       domain = "example.com"
@@ -120,10 +122,10 @@ resource "f5xc_api_crawler" "test" {
 
 func testAccResourceAutoF5XCApiCrawlerConfig_withDomains(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name        = %q
   namespace   = %q
-  description = "API crawler with domains"
+	description = "API crawler domains example"
 
   domains = [
     { domain = "example.com" },
@@ -136,12 +138,11 @@ resource "f5xc_api_crawler" "test" {
 // TestAccResourceAutoF5XCApiCrawler_withSimpleLoginUser exercises a domain
 // with only the user field set inside simple_login (no password).
 func TestAccResourceAutoF5XCApiCrawler_withSimpleLoginUser(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-crawler-" + acctest.RandString(t, 8)
+	name := "example-api-crawler-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiCrawlerDestroyProducer(t),
@@ -150,33 +151,36 @@ func TestAccResourceAutoF5XCApiCrawler_withSimpleLoginUser(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withSimpleLoginUser(name, namespace, "testuser"),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withSimpleLoginUser(name, namespace, "updateduser"),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiCrawlerConfig_withSimpleLoginUser("example-api-crawler", "default", "example-user"),
+		})
 }
 
 // TestAccResourceAutoF5XCApiCrawler_withClearSecretCredentials exercises the
 // clear_secret_info oneof variant (secret_info_choice variant A).
 func TestAccResourceAutoF5XCApiCrawler_withClearSecretCredentials(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-crawler-" + acctest.RandString(t, 8)
+	name := "example-api-crawler-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -187,10 +191,10 @@ func TestAccResourceAutoF5XCApiCrawler_withClearSecretCredentials(t *testing.T) 
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withClearSecret(name, namespace, "crawluser", "string:///dGVzdHBhc3N3b3Jk"),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.clear_secret_info.url",
@@ -202,10 +206,10 @@ func TestAccResourceAutoF5XCApiCrawler_withClearSecretCredentials(t *testing.T) 
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withClearSecret(name, namespace, "crawluser2", "string:///dXBkYXRlZHBhc3N3b3Jk"),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.clear_secret_info.url",
@@ -220,10 +224,9 @@ func TestAccResourceAutoF5XCApiCrawler_withClearSecretCredentials(t *testing.T) 
 // TestAccResourceAutoF5XCApiCrawler_withBlindfoldSecretCredentials exercises
 // the blindfold_secret_info oneof variant (secret_info_choice variant B).
 func TestAccResourceAutoF5XCApiCrawler_withBlindfoldSecretCredentials(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-crawler-" + acctest.RandString(t, 8)
+	name := "example-api-crawler-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -234,10 +237,10 @@ func TestAccResourceAutoF5XCApiCrawler_withBlindfoldSecretCredentials(t *testing
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withBlindfoldSecret(name, namespace, "crawluser", "string:///"+blindFoldKeyB64(t)),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.blindfold_secret_info.location",
@@ -249,10 +252,10 @@ func TestAccResourceAutoF5XCApiCrawler_withBlindfoldSecretCredentials(t *testing
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withBlindfoldSecret(name, namespace, "crawluser2", "string:///"+blindFoldKeyB64(t)),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.blindfold_secret_info.location",
@@ -267,10 +270,9 @@ func TestAccResourceAutoF5XCApiCrawler_withBlindfoldSecretCredentials(t *testing
 // TestAccResourceAutoF5XCApiCrawler_withCredentialTypeTransition tests the
 // oneof field transition: Create with clear_secret_info → Update to blindfold_secret_info.
 func TestAccResourceAutoF5XCApiCrawler_withCredentialTypeTransition(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-crawler-" + acctest.RandString(t, 8)
+	name := "example-api-crawler-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -281,10 +283,10 @@ func TestAccResourceAutoF5XCApiCrawler_withCredentialTypeTransition(t *testing.T
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withClearSecret(name, namespace, "crawluser", "string:///dGVzdHBhc3N3b3Jk"),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.clear_secret_info.url",
@@ -296,10 +298,10 @@ func TestAccResourceAutoF5XCApiCrawler_withCredentialTypeTransition(t *testing.T
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_withBlindfoldSecret(name, namespace, "crawluser", "string:///"+blindFoldKeyB64(t)),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.blindfold_secret_info.location",
@@ -314,12 +316,11 @@ func TestAccResourceAutoF5XCApiCrawler_withCredentialTypeTransition(t *testing.T
 // TestAccResourceAutoF5XCApiCrawler_full tests all optional fields: labels,
 // description, annotations, and multiple domains with mixed credential configurations.
 func TestAccResourceAutoF5XCApiCrawler_full(t *testing.T) {
-	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-crawler-" + acctest.RandString(t, 8)
+	name := "example-api-crawler-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiCrawlerDestroyProducer(t),
@@ -328,10 +329,10 @@ func TestAccResourceAutoF5XCApiCrawler_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.clear_secret_info.url",
@@ -343,10 +344,10 @@ func TestAccResourceAutoF5XCApiCrawler_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiCrawlerConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_crawler.test",
+				ResourceName:                         "f5xc_api_crawler.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_crawler.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.simple_login.password.secret_info_choice.clear_secret_info.url",
@@ -355,12 +356,16 @@ func TestAccResourceAutoF5XCApiCrawler_full(t *testing.T) {
 				},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiCrawlerConfig_full("example-api-crawler", "default"),
+		})
 }
 
 func testAccResourceAutoF5XCApiCrawlerConfig_withSimpleLoginUser(name, namespace, user string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name      = %q
   namespace = %q
 
@@ -378,7 +383,7 @@ resource "f5xc_api_crawler" "test" {
 
 func testAccResourceAutoF5XCApiCrawlerConfig_withClearSecret(name, namespace, user, url string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name      = %q
   namespace = %q
 
@@ -403,7 +408,7 @@ resource "f5xc_api_crawler" "test" {
 
 func testAccResourceAutoF5XCApiCrawlerConfig_withBlindfoldSecret(name, namespace, user, location string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name      = %q
   namespace = %q
 
@@ -428,13 +433,13 @@ resource "f5xc_api_crawler" "test" {
 
 func testAccResourceAutoF5XCApiCrawlerConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name        = %q
   namespace   = %q
-  description = "Full API crawler configuration"
+	description = "API crawler full example"
 
   labels = {
-    env  = "test"
+		env  = "example"
     tier = "api"
   }
 
@@ -446,7 +451,7 @@ resource "f5xc_api_crawler" "test" {
         password = {
           secret_info_choice = {
             clear_secret_info = {
-              url = "string:///ZnVsbHRlc3RwYXNzd29yZA=="
+							url = "string:///ZXhhbXBsZS1wYXNzd29yZA=="
             }
           }
         }
@@ -462,13 +467,13 @@ resource "f5xc_api_crawler" "test" {
 
 func testAccResourceAutoF5XCApiCrawlerConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_crawler" "test" {
+resource "f5xc_api_crawler" "example" {
   name        = %q
   namespace   = %q
-  description = "Full API crawler configuration updated"
+	description = "API crawler full example updated"
 
   labels = {
-    env  = "test"
+		env  = "example"
     tier = "api"
     updated = "true"
   }
@@ -481,7 +486,7 @@ resource "f5xc_api_crawler" "test" {
         password = {
           secret_info_choice = {
             clear_secret_info = {
-              url = "string:///dXBkYXRlZGZ1bGxwYXNzd29yZA=="
+							url = "string:///ZXhhbXBsZS1wYXNzd29yZA=="
             }
           }
         }

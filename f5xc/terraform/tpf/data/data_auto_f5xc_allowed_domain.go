@@ -15,9 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
@@ -58,8 +58,8 @@ func (d *DataSourceF5XCAllowedDomain) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCAllowedDomain) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a allowed_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of allowed_domain) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a allowed_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of allowed_domain) etc. can be fetched",
+		MarkdownDescription: "Allowed Domain Object defines which domains will be allowed by Client-Side Defense<br>Client-Side Defense Objects is used to configure Client-Side Defense to detect/mitigate anomalous URLs for enterprise webpages<br>Custom handler in Client-Side Defense microservice will forward request(s) to backend API(s)",
+		Description:         "Allowed Domain Object defines which domains will be allowed by Client-Side Defense Client-Side Defense Objects is used to configure Client-Side Defense to detect/mitigate anomalous URLs for enterprise webpages Custom handler in Client-Side Defense microservice will forward request(s) to backend API(s)",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -103,7 +103,7 @@ func (r *DataSourceF5XCAllowedDomain) Schema(ctx context.Context, request dataso
 			"allowed_domain": schema.StringAttribute{
 				Description: "Allowed Domain Enter root domain or domain to be entered to allow list below. Domains can be entered only one at a time. In case of conflicting entries, the domain entry takes precedence over the root domain entry. Example: if you are adding Client-Side Defense JS on checkout.example.com, you should enter example.com here.",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 			},
 			"date_added": schema.StringAttribute{
@@ -168,68 +168,82 @@ func (d *DataSourceF5XCAllowedDomain) Read(ctx context.Context, request datasour
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_client_side_defense_allowed_domain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	// CRUD List Read: the Get API is unavailable for this object, so the entry is
+	// resolved from the List API by matching the configured lookup key.
+	listOpts := []vesapi.CallOpt{
+		vesapi.WithReportFields("metadata"),
+	}
+	listItems, err := d.client.ListObjects(ctx, ves_io_schema_shape_client_side_defense_allowed_domain.ObjectType, data.Namespace.ValueString(), listOpts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list %s, got error: %s", "allowed_domain", err))
 		return
 	}
 
-	// Write back the response to the model
-	metaData := httpResp.GetObjMetadata()
-	specData := httpResp.GetObjSpec().(*ves_io_schema_shape_client_side_defense_allowed_domain.SpecType).GcSpec
-	systemMetaData := httpResp.GetObjSystemMetadata()
+	var readRespItem *ves_io_schema_shape_client_side_defense_allowed_domain.ListResponseItem
+	for _, listItem := range listItems {
+		item, ok := listItem.(*ves_io_schema_shape_client_side_defense_allowed_domain.ListResponseItem)
+		if !ok {
+			continue
+		}
+		itemName := item.GetGetSpec().GetAllowedDomain()
+		if itemName == data.AllowedDomain.ValueString() {
+			readRespItem = item
+			break
+		}
+	}
+	if readRespItem == nil {
+		response.Diagnostics.AddError("Not Found", fmt.Sprintf("No %s matching the given attributes was found", "allowed_domain"))
+		return
+	}
 
-	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
+	// Some CRUD List APIs omit object metadata entirely. Preserve configured lookup
+	// fields rather than overwriting them with empty list-response values.
+	specData := readRespItem.GetGetSpec()
+
+	tflog.Info(ctx, fmt.Sprintf("list_item_type: %v", readRespItem))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
-	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Annotations = annotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
+	// CRUD List responses may omit metadata. Preserve configured values and leave
+	// unconfigured computed metadata null instead of replacing it with empty values.
+	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	// CRUD List responses may omit metadata. Preserve configured values and leave
+	// unconfigured computed metadata null instead of replacing it with empty values.
+	if data.Description.IsNull() || data.Description.IsUnknown() {
+		data.Description = types.StringNull()
+	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
+	// CRUD List responses may omit metadata. Preserve configured values and leave
+	// unconfigured computed metadata null instead of replacing it with empty values.
+	if data.Labels.IsNull() || data.Labels.IsUnknown() {
 		data.Labels = types.MapNull(types.StringType)
 	}
 
 	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
+	// CRUD List responses may omit metadata. Preserve configured values and leave
+	// unconfigured computed metadata null instead of replacing it with empty values.
+	if data.Name.IsNull() || data.Name.IsUnknown() {
+		data.Name = types.StringNull()
+	}
 
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
+	// CRUD List responses may omit metadata. Preserve configured values and leave
+	// unconfigured computed metadata null instead of replacing it with empty values.
+	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
+		data.Namespace = types.StringNull()
+	}
 
 	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
+	// CRUD List responses may omit metadata. Preserve configured values and leave
+	// unconfigured computed metadata null instead of replacing it with empty values.
+	if data.Uid.IsNull() || data.Uid.IsUnknown() {
+		data.Uid = types.StringNull()
+	}
 
 	// data SpecToModelRoot RequiredStringField --> AllowedDomain
 	if specData.GetAllowedDomain() != "" {

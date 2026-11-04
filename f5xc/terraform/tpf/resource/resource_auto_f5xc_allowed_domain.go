@@ -31,14 +31,17 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_shape_client_side_defense_allowed_domain "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/shape/client_side_defense/allowed_domain"
 )
@@ -66,6 +69,7 @@ var (
 	_ resource.Resource                   = &ResourceF5XCAllowedDomain{}
 	_ resource.ResourceWithConfigure      = &ResourceF5XCAllowedDomain{}
 	_ resource.ResourceWithModifyPlan     = &ResourceF5XCAllowedDomain{}
+	_ resource.ResourceWithImportState    = &ResourceF5XCAllowedDomain{}
 	_ resource.ResourceWithValidateConfig = &ResourceF5XCAllowedDomain{}
 )
 
@@ -82,8 +86,8 @@ func (r *ResourceF5XCAllowedDomain) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCAllowedDomain) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a allowed_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of allowed_domain) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a allowed_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of allowed_domain) etc. can be fetched",
+		MarkdownDescription: "Allowed Domain Object defines which domains will be allowed by Client-Side Defense<br>Client-Side Defense Objects is used to configure Client-Side Defense to detect/mitigate anomalous URLs for enterprise webpages<br>Custom handler in Client-Side Defense microservice will forward request(s) to backend API(s)",
+		Description:         "Allowed Domain Object defines which domains will be allowed by Client-Side Defense Client-Side Defense Objects is used to configure Client-Side Defense to detect/mitigate anomalous URLs for enterprise webpages Custom handler in Client-Side Defense microservice will forward request(s) to backend API(s)",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -147,7 +151,7 @@ func (r *ResourceF5XCAllowedDomain) Schema(ctx context.Context, request resource
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -254,9 +258,17 @@ func (r *ResourceF5XCAllowedDomain) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAllowedDomain) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAllowedDomainModel
 
 	// Read Terraform plan data into the model
@@ -343,7 +355,7 @@ func (r *ResourceF5XCAllowedDomain) Create(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -366,7 +378,7 @@ func (r *ResourceF5XCAllowedDomain) Create(ctx context.Context, request resource
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_shape_client_side_defense_allowed_domain.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "allowed_domain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "allowed_domain", err),
 		)
 		return
 	}
@@ -659,9 +671,36 @@ func (r *ResourceF5XCAllowedDomain) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "allowed_domain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "allowed_domain", err),
 		)
 		return
 	}
 
+}
+func (r *ResourceF5XCAllowedDomain) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
+	// Import ID format: namespace/allowed_domain
+	parts := strings.Split(req.ID, "/")
+	if len(parts) != 2 {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/allowed_domain, got: %s", req.ID),
+		)
+		return
+	}
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/allowed_domain, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/allowed_domain, got: %s (allowed_domain is empty)", req.ID),
+		)
+		return
+	}
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("allowed_domain"), parts[1])...)
 }

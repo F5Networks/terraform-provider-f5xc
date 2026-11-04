@@ -30,7 +30,7 @@ import (
 func TestAccResourceAutoF5XCSubnet_basic(t *testing.T) {
 
 	namespace := "system"
-	name := "tf-acc-subnet-" + testAccRunSuffix(t)
+	name := "example-subnet-" + testAccRunSuffix(t)
 	ipv4Prefix := testAccSubnetIPv4PrefixForName(name, 0)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -42,20 +42,20 @@ func TestAccResourceAutoF5XCSubnet_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "connect_to_slo", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSubnetConfig_withDescription(name, namespace, "subnet basic updated", ipv4Prefix),
+				Config: testAccResourceAutoF5XCSubnetConfig_withDescription(name, namespace, "subnet updated example", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -65,7 +65,7 @@ func TestAccResourceAutoF5XCSubnet_basic(t *testing.T) {
 func TestAccResourceAutoF5XCSubnet_withPoolSettingsTransition(t *testing.T) {
 
 	namespace := "system"
-	name := "tf-acc-subnet-" + testAccRunSuffix(t)
+	name := "example-subnet-" + testAccRunSuffix(t)
 	ipv4Prefix := testAccSubnetIPv4PrefixForName(name, 1)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -77,20 +77,20 @@ func TestAccResourceAutoF5XCSubnet_withPoolSettingsTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "connect_to_slo", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "connect_to_slo", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -100,7 +100,7 @@ func TestAccResourceAutoF5XCSubnet_withPoolSettingsTransition(t *testing.T) {
 func TestAccResourceAutoF5XCSubnet_withInterfaceAddressingTransition(t *testing.T) {
 
 	namespace := "system"
-	name := "tf-acc-subnet-" + testAccRunSuffix(t)
+	name := "example-subnet-" + testAccRunSuffix(t)
 	ipv4Prefix := testAccSubnetIPv4PrefixForName(name, 2)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -112,20 +112,20 @@ func TestAccResourceAutoF5XCSubnet_withInterfaceAddressingTransition(t *testing.
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "connect_to_slo", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "connect_to_slo", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -135,7 +135,7 @@ func TestAccResourceAutoF5XCSubnet_withInterfaceAddressingTransition(t *testing.
 func TestAccResourceAutoF5XCSubnet_withSiteAddressChoiceTransition(t *testing.T) {
 
 	namespace := "system"
-	name := "tf-acc-subnet-" + testAccRunSuffix(t)
+	name := "example-subnet-" + testAccRunSuffix(t)
 	ipv4Prefix := testAccSubnetIPv4PrefixForName(name, 3)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -147,20 +147,20 @@ func TestAccResourceAutoF5XCSubnet_withSiteAddressChoiceTransition(t *testing.T)
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "connect_to_slo", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "isolated_nw", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -170,7 +170,7 @@ func TestAccResourceAutoF5XCSubnet_withSiteAddressChoiceTransition(t *testing.T)
 func TestAccResourceAutoF5XCSubnet_withConnectionChoiceTransition(t *testing.T) {
 
 	namespace := "system"
-	name := "tf-acc-subnet-" + testAccRunSuffix(t)
+	name := "example-subnet-" + testAccRunSuffix(t)
 	ipv4Prefix := testAccSubnetIPv4PrefixForName(name, 4)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -182,60 +182,64 @@ func TestAccResourceAutoF5XCSubnet_withConnectionChoiceTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "connect_to_slo", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSubnetConfig_base(name, namespace, "dhcp", "isolated_nw", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCSubnet_withPrefixChoiceTransitionFull(t *testing.T) {
+func TestAccResourceAutoF5XCSubnet_full(t *testing.T) {
 
 	namespace := "system"
-	name := "tf-acc-subnet-" + testAccRunSuffix(t)
+	name := "example-subnet-" + testAccRunSuffix(t)
 	ipv4Prefix := testAccSubnetIPv4PrefixForName(name, 5)
 	ipv4UpdatedPrefix := testAccSubnetIPv4PrefixForName(name, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSubnetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSubnetConfig_full(name, namespace, "test", "platform", "owner-a", "network_prefix", ipv4Prefix),
+				Config: testAccResourceAutoF5XCSubnetConfig_full(name, namespace, "example", "platform", "example-owner", "network_prefix", ipv4Prefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSubnetConfig_full(name, namespace, "prod", "security", "owner-b", "network_prefix", ipv4UpdatedPrefix),
+				Config: testAccResourceAutoF5XCSubnetConfig_full(name, namespace, "example", "security", "example-owner-alt", "network_prefix", ipv4UpdatedPrefix),
 			},
 			{
-				ResourceName:                         "f5xc_subnet.test",
+				ResourceName:                         "f5xc_subnet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_subnet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSubnetConfig_full("example-subnet", "system", "example", "platform", "example-owner", "network_prefix", testAccSubnetIPv4PrefixForName("example-subnet", 0)),
+		})
 }
 
 func testAccCheckSubnetDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -268,7 +272,7 @@ func testAccSubnetIPv6PrefixForName(name string, salt int) string {
 
 func testAccResourceAutoF5XCSubnetConfig_withDescription(name, namespace, description, subnetPrefixValue string) string {
 	return fmt.Sprintf(`
-resource "f5xc_subnet" "test" {
+resource "f5xc_subnet" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -288,7 +292,7 @@ resource "f5xc_subnet" "test" {
         dhcp_networks = [
           {
             network_prefix_choice = {
-							network_prefix = %q
+              network_prefix = %q
             }
           }
         ]
@@ -305,7 +309,7 @@ resource "f5xc_subnet" "test" {
 
 func testAccResourceAutoF5XCSubnetConfig_base(name, namespace, siteAddressChoiceField, connectionChoiceField, subnetPrefixField, subnetPrefixValue string) string {
 	return fmt.Sprintf(`
-resource "f5xc_subnet" "test" {
+resource "f5xc_subnet" "example" {
   name      = %q
   namespace = %q
 
@@ -341,7 +345,7 @@ resource "f5xc_subnet" "test" {
 
 func testAccResourceAutoF5XCSubnetConfig_full(name, namespace, env, team, owner, subnetPrefixField, subnetPrefixValue string) string {
 	return fmt.Sprintf(`
-resource "f5xc_subnet" "test" {
+resource "f5xc_subnet" "example" {
   name      = %q
   namespace = %q
 
@@ -376,7 +380,7 @@ resource "f5xc_subnet" "test" {
       }
 
       address_choice = {
-				dhcp = true
+        dhcp = true
       }
     }
   ]

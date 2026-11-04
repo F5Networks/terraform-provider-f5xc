@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCDnsComplianceChecks_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-dnscompliance-" + acctest.RandString(t, 8)
+	name := "example-dns-compliance-checks-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_basic(t *testing.T) {
 func TestAccResourceAutoF5XCDnsComplianceChecks_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-dnscompliance-" + acctest.RandString(t, 8)
+	name := "example-dns-compliance-checks-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +97,7 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCDnsComplianceChecks_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-dnscompliance-" + acctest.RandString(t, 8)
+	name := "example-dns-compliance-checks-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +132,7 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCDnsComplianceChecks_withQueryTypes(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-dnscompliance-" + acctest.RandString(t, 8)
+	name := "example-dns-compliance-checks-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_withQueryTypes(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_withQueryTypes(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_withQueryTypesUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,10 +167,10 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_withQueryTypes(t *testing.T) {
 func TestAccResourceAutoF5XCDnsComplianceChecks_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-dnscompliance-" + acctest.RandString(t, 8)
+	name := "example-dns-compliance-checks-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsComplianceChecksDestroyProducer(t),
@@ -179,23 +179,26 @@ func TestAccResourceAutoF5XCDnsComplianceChecks_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsComplianceChecksConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_compliance_checks.test",
+				ResourceName:                         "f5xc_dns_compliance_checks.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_compliance_checks.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsComplianceChecksConfig_full("example-dns-compliance-checks", "default"),
 	})
 }
 
@@ -205,10 +208,10 @@ func testAccCheckDnsComplianceChecksDestroyProducer(t *testing.T) func(*terrafor
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test DNS compliance checks"
+  description = "DNS compliance checks basic example"
 
   domain_denylist = ["malicious-test.com"]
 }
@@ -217,10 +220,10 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test DNS compliance checks updated"
+  description = "DNS compliance checks basic example updated"
 
   domain_denylist = ["malicious-test.com", "blocked-test.org"]
 }
@@ -229,7 +232,7 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "DNS compliance checks with labels"
@@ -237,7 +240,7 @@ resource "f5xc_dns_compliance_checks" "test" {
   domain_denylist = ["malicious-test.com"]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -245,7 +248,7 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "DNS compliance checks with labels"
@@ -253,7 +256,7 @@ resource "f5xc_dns_compliance_checks" "test" {
   domain_denylist = ["malicious-test.com"]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "security"
   }
 }
@@ -262,7 +265,7 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "DNS compliance checks with annotations"
@@ -278,7 +281,7 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "DNS compliance checks with annotations"
@@ -294,7 +297,7 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_withQueryTypes(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "DNS compliance checks with query types"
@@ -307,7 +310,7 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_withQueryTypesUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "DNS compliance checks with query types updated"
@@ -320,17 +323,17 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full DNS compliance checks"
+  description = "DNS compliance checks example"
 
   domain_denylist                        = ["malicious-test.com"]
   disallowed_query_type_list             = ["IQUERY", "STATUS"]
   disallowed_resource_record_type_list   = ["MD", "MF"]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -342,17 +345,17 @@ resource "f5xc_dns_compliance_checks" "test" {
 
 func testAccResourceAutoF5XCDnsComplianceChecksConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "test" {
+resource "f5xc_dns_compliance_checks" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full DNS compliance checks updated"
+  description = "DNS compliance checks example updated"
 
   domain_denylist                        = ["malicious-test.com", "blocked-test.org"]
   disallowed_query_type_list             = ["IQUERY", "STATUS", "NOTIFY"]
   disallowed_resource_record_type_list   = ["MD", "MF", "MB"]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "security"
   }
 

@@ -81,8 +81,8 @@ func (d *DataSourceF5XCTrustedCaList) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCTrustedCaList) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a trusted_ca_list This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of trusted_ca_list) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a trusted_ca_list This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of trusted_ca_list) etc. can be fetched",
+		MarkdownDescription: "A Root CA Certificate represents list of trusted root CAs",
+		Description:         "A Root CA Certificate represents list of trusted root CAs",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -234,7 +234,7 @@ func (d *DataSourceF5XCTrustedCaList) Read(ctx context.Context, request datasour
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "trusted_ca_list", err))
 		return
 	}
 
@@ -379,12 +379,8 @@ func (d *DataSourceF5XCTrustedCaList) Read(ctx context.Context, request datasour
 	}
 
 	// data SpecToModelRoot StringField --> TrustedCaUrl
-	if specData.GetTrustedCaUrl() != "" {
-		data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TrustedCaUrl = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
 
 	// Set state to fully populated data
 	diags := response.State.Set(ctx, &data)

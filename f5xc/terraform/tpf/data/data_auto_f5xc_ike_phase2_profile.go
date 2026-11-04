@@ -29,26 +29,26 @@ type DataSourceF5XCIkePhase2Profile struct {
 	client *client.APIClient
 }
 
-type IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice struct {
+type IkePhase2ProfileIkeKeyLifetimeChoice struct {
 	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
 	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
 	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
 }
 
-type IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours struct {
+type IkePhase2ProfileIkeKeylifetimeHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
+type IkePhase2ProfileIkeKeylifetimeMinutes struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase2ProfileGlobalSpecTypePfsModeChoice struct {
+type IkePhase2ProfilePfsModeChoice struct {
 	DhGroupSet types.Object `tfsdk:"dh_group_set"`
 	DisablePfs types.Bool   `tfsdk:"disable_pfs"`
 }
 
-type IkePhase2ProfileGlobalSpecTypeDhGroupSet struct {
+type IkePhase2ProfileDhGroupSet struct {
 	DhGroups types.List `tfsdk:"dh_groups"`
 }
 
@@ -123,8 +123,8 @@ func (d *DataSourceF5XCIkePhase2Profile) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCIkePhase2Profile) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a ike_phase2_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase2_profile) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a ike_phase2_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase2_profile) etc. can be fetched",
+		MarkdownDescription: "IKE Phase2 profile mainly includes the following<br>1. Encryption protocols to be used for IKE SA<br>2. Authentication Protocols to be used for IKE SA<br>3. DH group (if PFS is enabled)<br>4. Key lifetime etc",
+		Description:         "IKE Phase2 profile mainly includes the following 1. Encryption protocols to be used for IKE SA 2. Authentication Protocols to be used for IKE SA 3. DH group (if PFS is enabled) 4. Key lifetime etc",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -307,7 +307,7 @@ func (d *DataSourceF5XCIkePhase2Profile) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "ike_phase2_profile", err))
 		return
 	}
 
@@ -418,7 +418,7 @@ func (d *DataSourceF5XCIkePhase2Profile) Read(ctx context.Context, request datas
 		ikeKeyLifetimeChoiceChoices := specData.GetIkeKeyLifetime()
 
 		// The model struct that will be populated by the nested template.
-		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice{}
+		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase2ProfileIkeKeyLifetimeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -509,7 +509,7 @@ func (d *DataSourceF5XCIkePhase2Profile) Read(ctx context.Context, request datas
 		pfsModeChoiceChoices := specData.GetPfsMode()
 
 		// The model struct that will be populated by the nested template.
-		var pfsModeChoiceChoicesModel = &IkePhase2ProfileGlobalSpecTypePfsModeChoice{}
+		var pfsModeChoiceChoicesModel = &IkePhase2ProfilePfsModeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

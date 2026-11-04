@@ -30,26 +30,26 @@ type DataSourceF5XCCloudLink struct {
 	client *client.APIClient
 }
 
-type CloudLinkGlobalSpecTypeCloudProviderChoice struct {
+type CloudLinkCloudProvChoice struct {
 	Aws types.Object `tfsdk:"aws"`
 	Gcp types.Object `tfsdk:"gcp"`
 }
 
-type CloudLinkGlobalSpecTypeAws struct {
+type CloudLinkAws struct {
 	AwsCred                       types.Object `tfsdk:"aws_cred"`
 	CloudLinkTypeChoice           types.Object `tfsdk:"cloud_link_type_choice"`
 	DirectConnectGatewayAsnChoice types.Object `tfsdk:"direct_connect_gateway_asn_choice"`
 }
 
-type CloudLinkAWSTypeCloudLinkTypeChoice struct {
+type CloudLinkCloudLinkTypeChoice struct {
 	Byoc types.Object `tfsdk:"byoc"`
 }
 
-type CloudLinkAWSTypeByoc struct {
+type CloudLinkByoc struct {
 	Connections types.List `tfsdk:"connections"`
 }
 
-type CloudLinkCloudLinkAWSBYOCType struct {
+type CloudLinkAWSBYOCType struct {
 	AuthKey              types.Object `tfsdk:"auth_key"`
 	BgpAsn               types.Int64  `tfsdk:"bgp_asn"`
 	ConnectionId         types.String `tfsdk:"connection_id"`
@@ -65,27 +65,28 @@ type CloudLinkSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type CloudLinkSecretTypeSecretInfoChoice struct {
+type CloudLinkSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type CloudLinkSecretTypeBlindfoldSecretInfo struct {
+type CloudLinkBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type CloudLinkSecretTypeClearSecretInfo struct {
+type CloudLinkClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type CloudLinkAWSBYOCTypeIpTypeChoice struct {
+type CloudLinkIpTypeChoice struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
 }
 
-type CloudLinkAWSBYOCTypeIpv4 struct {
+type CloudLinkIpv4 struct {
 	AwsRouterPeerAddress types.String `tfsdk:"aws_router_peer_address"`
 	RouterPeerAddress    types.String `tfsdk:"router_peer_address"`
 }
@@ -95,11 +96,11 @@ type CloudLinkMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type CloudLinkAWSTypeDirectConnectGatewayAsnChoice struct {
+type CloudLinkDirectConnectGatewayAsnChoice struct {
 	CustomAsn types.Int64 `tfsdk:"custom_asn"`
 }
 
-type CloudLinkGlobalSpecTypeGcp struct {
+type CloudLinkGcp struct {
 	CloudLinkTypeChoice types.Object `tfsdk:"cloud_link_type_choice"`
 	GcpCred             types.Object `tfsdk:"gcp_cred"`
 }
@@ -112,24 +113,24 @@ type CloudLinkGCPTypeByoc struct {
 	Connections types.List `tfsdk:"connections"`
 }
 
-type CloudLinkCloudLinkGCPBYOCType struct {
+type CloudLinkGCPBYOCType struct {
 	InterconnectAttachmentName types.String `tfsdk:"interconnect_attachment_name"`
 	Metadata                   types.Object `tfsdk:"metadata"`
 	ProjectChoice              types.Object `tfsdk:"project_choice"`
 	Region                     types.String `tfsdk:"region"`
 }
 
-type CloudLinkGCPBYOCTypeProjectChoice struct {
+type CloudLinkProjectChoice struct {
 	Project          types.String `tfsdk:"project"`
 	SameAsCredential types.Bool   `tfsdk:"same_as_credential"`
 }
 
-type CloudLinkGlobalSpecTypeEnableConnectionToReChoice struct {
+type CloudLinkEnableConnToReChoice struct {
 	Disabled types.Bool   `tfsdk:"disabled"`
 	Enabled  types.Object `tfsdk:"enabled"`
 }
 
-type CloudLinkGlobalSpecTypeEnabled struct {
+type CloudLinkEnabled struct {
 	CloudlinkNetworkName types.String `tfsdk:"cloudlink_network_name"`
 }
 
@@ -271,6 +272,7 @@ var CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeySecretInfoOneofM
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -423,8 +425,8 @@ func (d *DataSourceF5XCCloudLink) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCCloudLink) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a cloud_link This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_link) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a cloud_link This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_link) etc. can be fetched",
+		MarkdownDescription: "CloudLink is used to establish private connectivity from customer network to Cloud Sites or private connectivity from<br>F5 XC Regional Edge(RE) to customer Cloud Sites",
+		Description:         "CloudLink is used to establish private connectivity from customer network to Cloud Sites or private connectivity from F5 XC Regional Edge(RE) to customer Cloud Sites",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -584,8 +586,15 @@ func (r *DataSourceF5XCCloudLink) Schema(ctx context.Context, request datasource
 																					Required:    false,
 																					Optional:    false,
 																					Computed:    true,
+																					Sensitive:   true,
 																				},
 																			},
+																		},
+																		"none": schema.BoolAttribute{
+																			Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
 																		},
 																	},
 																},
@@ -912,7 +921,7 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_cloud_link.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "cloud_link", err))
 		return
 	}
 
@@ -1000,7 +1009,7 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 		cloudProviderChoiceChoices := specData.GetCloudProvider()
 
 		// The model struct that will be populated by the nested template.
-		var cloudProviderChoiceChoicesModel = &CloudLinkGlobalSpecTypeCloudProviderChoice{}
+		var cloudProviderChoiceChoicesModel = &CloudLinkCloudProvChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1090,9 +1099,9 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 							if len(byocElement.GetConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								connectionsElements := make([]CloudLinkCloudLinkAWSBYOCType, 0, len(byocElement.GetConnections()))
+								connectionsElements := make([]CloudLinkAWSBYOCType, 0, len(byocElement.GetConnections()))
 								for _, connectionsElement := range byocElement.GetConnections() {
-									cloudLinkCloudLinkAWSBYOCTypeModel := CloudLinkCloudLinkAWSBYOCType{}
+									cloudLinkAWSBYOCTypeModel := CloudLinkAWSBYOCType{}
 
 									// data specToModelNested RequiredPointerField --> AuthKey
 									if connectionsElement.GetAuthKey() != nil {
@@ -1196,6 +1205,15 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 												}
 											}
 
+											// data specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := authKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												authKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -1233,7 +1251,7 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cloudLinkCloudLinkAWSBYOCTypeModel.AuthKey = cloudLinkSecretTypeModelObj
+										cloudLinkAWSBYOCTypeModel.AuthKey = cloudLinkSecretTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -1242,18 +1260,18 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										cloudLinkCloudLinkAWSBYOCTypeModel.AuthKey = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeyModelAttributeMap)
+										cloudLinkAWSBYOCTypeModel.AuthKey = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsAuthKeyModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredUintField --> BgpAsn
-									cloudLinkCloudLinkAWSBYOCTypeModel.BgpAsn = types.Int64Value(int64(connectionsElement.GetBgpAsn()))
+									cloudLinkAWSBYOCTypeModel.BgpAsn = types.Int64Value(int64(connectionsElement.GetBgpAsn()))
 
 									// data specToModelNested RequiredStringField --> ConnectionId
 									if connectionsElement.GetConnectionId() != "" {
-										cloudLinkCloudLinkAWSBYOCTypeModel.ConnectionId = types.StringValue(connectionsElement.GetConnectionId())
+										cloudLinkAWSBYOCTypeModel.ConnectionId = types.StringValue(connectionsElement.GetConnectionId())
 									} else {
 										// Empty string, set to null
-										cloudLinkCloudLinkAWSBYOCTypeModel.ConnectionId = types.StringNull()
+										cloudLinkAWSBYOCTypeModel.ConnectionId = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> IpType
@@ -1318,10 +1336,10 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cloudLinkCloudLinkAWSBYOCTypeModel.IpTypeChoice = finalObj
+										cloudLinkAWSBYOCTypeModel.IpTypeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cloudLinkCloudLinkAWSBYOCTypeModel.IpTypeChoice = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsIpTypeModelAttributeMap)
+										cloudLinkAWSBYOCTypeModel.IpTypeChoice = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsIpTypeModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> Metadata
@@ -1354,7 +1372,7 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cloudLinkCloudLinkAWSBYOCTypeModel.Metadata = cloudLinkMessageMetaTypeModelObj
+										cloudLinkAWSBYOCTypeModel.Metadata = cloudLinkMessageMetaTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -1363,15 +1381,15 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										cloudLinkCloudLinkAWSBYOCTypeModel.Metadata = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsMetadataModelAttributeMap)
+										cloudLinkAWSBYOCTypeModel.Metadata = types.ObjectNull(CloudLinkCloudProviderAwsCloudLinkTypeByocConnectionsMetadataModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Region
 									if connectionsElement.GetRegion() != "" {
-										cloudLinkCloudLinkAWSBYOCTypeModel.Region = types.StringValue(connectionsElement.GetRegion())
+										cloudLinkAWSBYOCTypeModel.Region = types.StringValue(connectionsElement.GetRegion())
 									} else {
 										// Empty string, set to null
-										cloudLinkCloudLinkAWSBYOCTypeModel.Region = types.StringNull()
+										cloudLinkAWSBYOCTypeModel.Region = types.StringNull()
 									}
 
 									// data specToModelNested MapOfStringField --> Tags
@@ -1383,13 +1401,13 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 											return
 										}
 										// Assign the typed map to the model
-										cloudLinkCloudLinkAWSBYOCTypeModel.Tags = tagsMap
+										cloudLinkAWSBYOCTypeModel.Tags = tagsMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										cloudLinkCloudLinkAWSBYOCTypeModel.Tags = types.MapNull(types.StringType)
+										cloudLinkAWSBYOCTypeModel.Tags = types.MapNull(types.StringType)
 									}
 
 									// data specToModelNested EnumField --> VirtualInterfaceType
@@ -1401,15 +1419,15 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cloudLinkCloudLinkAWSBYOCTypeModel.VirtualInterfaceType = listValue
+										cloudLinkAWSBYOCTypeModel.VirtualInterfaceType = listValue
 									} else {
-										cloudLinkCloudLinkAWSBYOCTypeModel.VirtualInterfaceType = types.ListNull(types.StringType)
+										cloudLinkAWSBYOCTypeModel.VirtualInterfaceType = types.ListNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredUintField --> Vlan
-									cloudLinkCloudLinkAWSBYOCTypeModel.Vlan = types.Int64Value(int64(connectionsElement.GetVlan()))
+									cloudLinkAWSBYOCTypeModel.Vlan = types.Int64Value(int64(connectionsElement.GetVlan()))
 
-									connectionsElements = append(connectionsElements, cloudLinkCloudLinkAWSBYOCTypeModel)
+									connectionsElements = append(connectionsElements, cloudLinkAWSBYOCTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1545,16 +1563,16 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 							if len(byocElement.GetConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								connectionsElements := make([]CloudLinkCloudLinkGCPBYOCType, 0, len(byocElement.GetConnections()))
+								connectionsElements := make([]CloudLinkGCPBYOCType, 0, len(byocElement.GetConnections()))
 								for _, connectionsElement := range byocElement.GetConnections() {
-									cloudLinkCloudLinkGCPBYOCTypeModel := CloudLinkCloudLinkGCPBYOCType{}
+									cloudLinkGCPBYOCTypeModel := CloudLinkGCPBYOCType{}
 
 									// data specToModelNested RequiredStringField --> InterconnectAttachmentName
 									if connectionsElement.GetInterconnectAttachmentName() != "" {
-										cloudLinkCloudLinkGCPBYOCTypeModel.InterconnectAttachmentName = types.StringValue(connectionsElement.GetInterconnectAttachmentName())
+										cloudLinkGCPBYOCTypeModel.InterconnectAttachmentName = types.StringValue(connectionsElement.GetInterconnectAttachmentName())
 									} else {
 										// Empty string, set to null
-										cloudLinkCloudLinkGCPBYOCTypeModel.InterconnectAttachmentName = types.StringNull()
+										cloudLinkGCPBYOCTypeModel.InterconnectAttachmentName = types.StringNull()
 									}
 
 									// data specToModelNested RequiredPointerField --> Metadata
@@ -1587,7 +1605,7 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										if response.Diagnostics.HasError() {
 											return
 										}
-										cloudLinkCloudLinkGCPBYOCTypeModel.Metadata = cloudLinkMessageMetaTypeModelObj
+										cloudLinkGCPBYOCTypeModel.Metadata = cloudLinkMessageMetaTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -1596,7 +1614,7 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										cloudLinkCloudLinkGCPBYOCTypeModel.Metadata = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsMetadataModelAttributeMap)
+										cloudLinkGCPBYOCTypeModel.Metadata = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsMetadataModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredOneOfField --> ProjectChoice
@@ -1643,21 +1661,21 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cloudLinkCloudLinkGCPBYOCTypeModel.ProjectChoice = finalObj
+										cloudLinkGCPBYOCTypeModel.ProjectChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cloudLinkCloudLinkGCPBYOCTypeModel.ProjectChoice = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsProjectChoiceModelAttributeMap)
+										cloudLinkGCPBYOCTypeModel.ProjectChoice = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsProjectChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Region
 									if connectionsElement.GetRegion() != "" {
-										cloudLinkCloudLinkGCPBYOCTypeModel.Region = types.StringValue(connectionsElement.GetRegion())
+										cloudLinkGCPBYOCTypeModel.Region = types.StringValue(connectionsElement.GetRegion())
 									} else {
 										// Empty string, set to null
-										cloudLinkCloudLinkGCPBYOCTypeModel.Region = types.StringNull()
+										cloudLinkGCPBYOCTypeModel.Region = types.StringNull()
 									}
 
-									connectionsElements = append(connectionsElements, cloudLinkCloudLinkGCPBYOCTypeModel)
+									connectionsElements = append(connectionsElements, cloudLinkGCPBYOCTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1796,7 +1814,7 @@ func (d *DataSourceF5XCCloudLink) Read(ctx context.Context, request datasource.R
 		enableConnectionToReChoiceChoices := specData.GetEnableConnectionToReChoice()
 
 		// The model struct that will be populated by the nested template.
-		var enableConnectionToReChoiceChoicesModel = &CloudLinkGlobalSpecTypeEnableConnectionToReChoice{}
+		var enableConnectionToReChoiceChoicesModel = &CloudLinkEnableConnToReChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -34,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -44,6 +46,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_cloud_credentials "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/cloud_credentials"
 )
@@ -80,6 +83,7 @@ type CloudCredentialsSecretType struct {
 type CloudCredentialsSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type CloudCredentialsBlindfoldSecretInfo struct {
@@ -192,6 +196,7 @@ var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap =
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -239,6 +244,7 @@ var CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttrib
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -287,6 +293,7 @@ var CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttribut
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -331,6 +338,7 @@ var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeM
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -359,8 +367,8 @@ func (r *ResourceF5XCCloudCredentials) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a cloud_credentials This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_credentials) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a cloud_credentials This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_credentials) etc. can be fetched",
+		MarkdownDescription: "Cloud Credentials object is used to give user cloud credentials to public cloud like<br>AWS, Azure and GCP. These credentials can then be used by different features in volterra<br>to perform cloud API(s) on users behalf.",
+		Description:         "Cloud Credentials object is used to give user cloud credentials to public cloud like AWS, Azure and GCP. These credentials can then be used by different features in volterra to perform cloud API(s) on users behalf.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -416,7 +424,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -541,6 +549,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -564,6 +573,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -616,6 +626,16 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -658,6 +678,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -681,6 +702,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -733,6 +755,16 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -813,6 +845,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -836,6 +869,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -888,6 +922,16 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -940,6 +984,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -963,6 +1008,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1015,6 +1061,16 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -1087,9 +1143,17 @@ func (r *ResourceF5XCCloudCredentials) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCloudCredentialsModel
 
 	// Read Terraform plan data into the model
@@ -1097,6 +1161,17 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCCloudCredentialsModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.CloudChoice.IsNull() && !configData.CloudChoice.IsUnknown() {
+		data.CloudChoice = configData.CloudChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1187,6 +1262,9 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 			}
 			awsAssumeRoleOneOfSpec := &ves_io_schema_cloud_credentials.CreateSpecType_AwsAssumeRole{}
 			awsAssumeRoleOneOfSpec.AwsAssumeRole = &ves_io_schema_cloud_credentials.AWSAssumeRoleType{}
+			awsAssumeRoleOneOfSpec.AwsAssumeRole.ExternalId = &ves_io_schema_cloud_credentials.AWSAssumeRoleType_ExternalIdIsTenantId{
+				ExternalIdIsTenantId: &ves_io_schema.Empty{},
+			}
 			spec.Cloud = awsAssumeRoleOneOfSpec
 
 			// resource modelToSpecNested UintField --> DurationSeconds
@@ -1308,6 +1386,13 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !secretKeySecretInfoChoiceModel.None.IsNull() && !secretKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						secretKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -1398,6 +1483,13 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !clientSecretSecretInfoChoiceModel.None.IsNull() && !clientSecretSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						clientSecretSpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -1507,6 +1599,13 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						passwordSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -1604,6 +1703,13 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !credentialFileSecretInfoChoiceModel.None.IsNull() && !credentialFileSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						credentialFileSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -1614,7 +1720,7 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1637,7 +1743,7 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_cloud_credentials.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "cloud_credentials", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "cloud_credentials", err),
 		)
 		return
 	}
@@ -1944,6 +2050,15 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -2109,6 +2224,15 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 							} else {
 								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -2302,6 +2426,15 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -2477,6 +2610,15 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := credentialFilesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -2598,7 +2740,7 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_credentials.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "cloud_credentials", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "cloud_credentials", err),
 		)
 		return
 	}
@@ -2905,6 +3047,15 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -3082,6 +3233,15 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 							} else {
 								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -3287,6 +3447,15 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -3474,6 +3643,15 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := credentialFilesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -3571,6 +3749,12 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCloudCredentialsModel
@@ -3580,6 +3764,7 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planCloudChoice := data.CloudChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -3599,7 +3784,11 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planCloudChoice := data.CloudChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.CloudChoice.IsNull() && !configData.CloudChoice.IsUnknown() {
+		data.CloudChoice = configData.CloudChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -3689,6 +3878,9 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 			}
 			awsAssumeRoleOneOfSpec := &ves_io_schema_cloud_credentials.ReplaceSpecType_AwsAssumeRole{}
 			awsAssumeRoleOneOfSpec.AwsAssumeRole = &ves_io_schema_cloud_credentials.AWSAssumeRoleType{}
+			awsAssumeRoleOneOfSpec.AwsAssumeRole.ExternalId = &ves_io_schema_cloud_credentials.AWSAssumeRoleType_ExternalIdIsTenantId{
+				ExternalIdIsTenantId: &ves_io_schema.Empty{},
+			}
 			spec.Cloud = awsAssumeRoleOneOfSpec
 
 			// resource modelToSpecNested UintField --> DurationSeconds
@@ -3810,6 +4002,13 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !secretKeySecretInfoChoiceModel.None.IsNull() && !secretKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						secretKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -3900,6 +4099,13 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !clientSecretSecretInfoChoiceModel.None.IsNull() && !clientSecretSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						clientSecretSpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -4009,6 +4215,13 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						passwordSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -4106,6 +4319,13 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !credentialFileSecretInfoChoiceModel.None.IsNull() && !credentialFileSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						credentialFileSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -4116,7 +4336,7 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4132,7 +4352,7 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_credentials.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "cloud_credentials", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cloud_credentials", err),
 		)
 		return
 	}
@@ -4141,7 +4361,7 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_credentials.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "cloud_credentials", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cloud_credentials", err),
 		)
 		return
 	}
@@ -4447,6 +4667,15 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -4612,6 +4841,15 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 							} else {
 								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -4805,6 +5043,15 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -4980,6 +5227,15 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := credentialFilesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -5077,7 +5333,7 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 	}
 	// Restore plan value for CloudChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.CloudChoice = planCloudChoice
+	data.CloudChoice = utils.ResolveUnknowns(planCloudChoice, data.CloudChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -5125,7 +5381,7 @@ func (r *ResourceF5XCCloudCredentials) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "cloud_credentials", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "cloud_credentials", err),
 		)
 		return
 	}

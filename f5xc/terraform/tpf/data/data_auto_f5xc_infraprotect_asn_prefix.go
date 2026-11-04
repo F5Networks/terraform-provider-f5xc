@@ -30,20 +30,20 @@ type DataSourceF5XCInfraprotectAsnPrefix struct {
 	client *client.APIClient
 }
 
-type InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice struct {
+type InfraprotectAsnPrefixIrrStatusChoice struct {
 	IrrStatusMissing    types.Bool `tfsdk:"irr_status_missing"`
 	IrrStatusUnverified types.Bool `tfsdk:"irr_status_unverified"`
 	IrrStatusValid      types.Bool `tfsdk:"irr_status_valid"`
 }
 
-type InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice struct {
+type InfraprotectAsnPrefixReviewTypeChoice struct {
 	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
 	ReviewTypeGrace    types.Bool `tfsdk:"review_type_grace"`
 	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
 	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
 }
 
-type InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice struct {
+type InfraprotectAsnPrefixRpkiStatusChoice struct {
 	RpkiStatusInvalid    types.Bool `tfsdk:"rpki_status_invalid"`
 	RpkiStatusUnknown    types.Bool `tfsdk:"rpki_status_unknown"`
 	RpkiStatusUnverified types.Bool `tfsdk:"rpki_status_unverified"`
@@ -117,8 +117,8 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Metadata(ctx context.Context, requ
 func (r *DataSourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_asn_prefix This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn_prefix) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a infraprotect_asn_prefix This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn_prefix) etc. can be fetched",
+		MarkdownDescription: "DDoS transit Prefix Information",
+		Description:         "DDoS transit Prefix Information",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -351,7 +351,7 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_asn_prefix", err))
 		return
 	}
 
@@ -473,7 +473,7 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 		irrStatusChoiceChoices := specData.GetIrrStatus()
 
 		// The model struct that will be populated by the nested template.
-		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice{}
+		var irrStatusChoiceChoicesModel = &InfraprotectAsnPrefixIrrStatusChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -542,7 +542,7 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 		reviewTypeChoiceChoices := specData.GetReviewType()
 
 		// The model struct that will be populated by the nested template.
-		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice{}
+		var reviewTypeChoiceChoicesModel = &InfraprotectAsnPrefixReviewTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -612,7 +612,7 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
 
 		// The model struct that will be populated by the nested template.
-		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice{}
+		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixRpkiStatusChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

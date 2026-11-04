@@ -33,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -86,8 +87,8 @@ func (r *ResourceF5XCRole) Metadata(ctx context.Context, request resource.Metada
 func (r *ResourceF5XCRole) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a role This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of role) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a role This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of role) etc. can be fetched",
+		MarkdownDescription: "Defines the role the user has in a namespace. There are two kinds of roles:<br>* user defines roles - each tenant can define a set of their roles suiting their needs.<br>* built-in roles - volterra defined roles. Admins are free to use them but can't amend them nor can they remove them.",
+		Description:         "Defines the role the user has in a namespace. There are two kinds of roles: user defines roles - each tenant can define a set of their roles suiting their needs. built-in roles - volterra defined roles. Admins are free to use them but can't amend them nor can they remove them.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -226,9 +227,17 @@ func (r *ResourceF5XCRole) ModifyPlan(ctx context.Context, req resource.ModifyPl
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCRole) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCRoleModel
 
 	// Read Terraform plan data into the model
@@ -343,7 +352,7 @@ func (r *ResourceF5XCRole) Create(ctx context.Context, request resource.CreateRe
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "role", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "role", err),
 		)
 		return
 	}
@@ -405,7 +414,7 @@ func (r *ResourceF5XCRole) Read(ctx context.Context, request resource.ReadReques
 	customListMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "role", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "role", err),
 		)
 		return
 	}
@@ -449,7 +458,7 @@ func (r *ResourceF5XCRole) Read(ctx context.Context, request resource.ReadReques
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_role.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s after CustomAPI call, got error: %s", "role", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read after CustomAPI call", "role", err),
 		)
 		return
 	}
@@ -657,7 +666,12 @@ func (r *ResourceF5XCRole) Read(ctx context.Context, request resource.ReadReques
 			}
 			data.ApiGroups = listValue
 		} else {
-			data.ApiGroups = types.ListNull(types.StringType)
+			if !data.ApiGroups.IsNull() && !data.ApiGroups.IsUnknown() && len(data.ApiGroups.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.ApiGroups = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.ApiGroups = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -670,6 +684,12 @@ func (r *ResourceF5XCRole) Read(ctx context.Context, request resource.ReadReques
 }
 
 func (r *ResourceF5XCRole) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCRoleModel
@@ -733,7 +753,7 @@ func (r *ResourceF5XCRole) Update(ctx context.Context, request resource.UpdateRe
 	_, err = r.client.CustomAPI(ctx, "PUT", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "role", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "role", err),
 		)
 		return
 	}
@@ -798,7 +818,7 @@ func (r *ResourceF5XCRole) Delete(ctx context.Context, request resource.DeleteRe
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "role", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "role", err),
 		)
 		return
 	}

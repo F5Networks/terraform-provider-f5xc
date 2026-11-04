@@ -30,26 +30,26 @@ type DataSourceF5XCBotNetworkPolicy struct {
 	client *client.APIClient
 }
 
-type BotNetworkPolicyBotDefenseBotInfraWithVersion struct {
+type BotNetPolicyBotInfraWithVersion struct {
 	BotInfraName types.String `tfsdk:"bot_infra_name"`
 	InUseVersion types.String `tfsdk:"in_use_version"`
 }
 
-type BotNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersion struct {
+type BotNetPolicyCosseBotInfraWithDeliveredVersion struct {
 	CosseBotInfraName types.String `tfsdk:"cosse_bot_infra_name"`
 	DeliveredVersion  types.String `tfsdk:"delivered_version"`
 }
 
-type BotNetworkPolicyBotDefenseNetworkPolicyContent struct {
+type BotNetPolicyNetPolicyContent struct {
 	ManualRoutingList   types.Object `tfsdk:"manual_routing_list"`
 	UpstreamRoutingList types.Object `tfsdk:"upstream_routing_list"`
 }
 
-type BotNetworkPolicyBotDefenseManualRoutings struct {
+type BotNetPolicyManualRoutings struct {
 	ManualRouting types.List `tfsdk:"manual_routing"`
 }
 
-type BotNetworkPolicyBotDefenseManualRoutingDetail struct {
+type BotNetPolicyManualRoutingDetail struct {
 	DomainOperatorChoice   types.Object `tfsdk:"domain_operator_choice"`
 	DomainName             types.String `tfsdk:"domain_name"`
 	OutboundDomainName     types.String `tfsdk:"outbound_domain_name"`
@@ -57,21 +57,21 @@ type BotNetworkPolicyBotDefenseManualRoutingDetail struct {
 	Port                   types.Int64  `tfsdk:"port"`
 }
 
-type BotNetworkPolicyManualRoutingDetailDomainOperatorChoice struct {
+type BotNetPolicyDomainOperatorChoice struct {
 	Http  types.Bool `tfsdk:"http"`
 	Https types.Bool `tfsdk:"https"`
 }
 
-type BotNetworkPolicyManualRoutingDetailOutboundOperatorChoice struct {
+type BotNetPolicyOutboundOperatorChoice struct {
 	ProtocolHttp  types.Bool `tfsdk:"protocol_http"`
 	ProtocolHttps types.Bool `tfsdk:"protocol_https"`
 }
 
-type BotNetworkPolicyBotDefenseUpstreamRoutings struct {
+type BotNetPolicyUpstreamRoutings struct {
 	UpstreamRouting types.List `tfsdk:"upstream_routing"`
 }
 
-type BotNetworkPolicyBotDefenseUpstreamRoutingDetail struct {
+type BotNetPolicyUpstreamRoutingDetail struct {
 	DomainName types.String `tfsdk:"domain_name"`
 }
 
@@ -223,8 +223,8 @@ func (d *DataSourceF5XCBotNetworkPolicy) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCBotNetworkPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bot_network_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bot_network_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bot_network_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bot_network_policy) etc. can be fetched",
+		MarkdownDescription: "Configures Bot network Policy",
+		Description:         "Configures Bot network Policy",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -341,7 +341,7 @@ func (r *DataSourceF5XCBotNetworkPolicy) Schema(ctx context.Context, request dat
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"domain_operator_choice": schema.SingleNestedAttribute{
-											Description: "Protocol Inbound Protocol Value",
+											Description: "Protocol The protocol for requests that are routed to Bot Defense (HTTP or HTTPS).",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
@@ -361,19 +361,19 @@ func (r *DataSourceF5XCBotNetworkPolicy) Schema(ctx context.Context, request dat
 											},
 										},
 										"domain_name": schema.StringAttribute{
-											Description: "Fully qualified domain name Inbound FQDN value",
+											Description: "Fully qualified domain name The hostname and domain name for requests that are routed to Bot Defense. For example, 'shop.example.com'.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"outbound_domain_name": schema.StringAttribute{
-											Description: "FQDN / IP Outbound FQDN or IP value",
+											Description: "FQDN / IP The host and domain name or the IP address where you want to send requests that Bot Defense allows to continue to the origin. For example, enter 'internal.example.com'.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"outbound_operator_choice": schema.SingleNestedAttribute{
-											Description: "Protocol Outbound Protocol Value",
+											Description: "Protocol The protocol for requests that Bot Defense allows to continue to the origin (HTTP or HTTPS).",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
@@ -393,7 +393,7 @@ func (r *DataSourceF5XCBotNetworkPolicy) Schema(ctx context.Context, request dat
 											},
 										},
 										"port": schema.Int64Attribute{
-											Description: "port Outbound Port value",
+											Description: "port The outbound port number for requests that Bot Defense allows to continue to the origin.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
@@ -417,7 +417,7 @@ func (r *DataSourceF5XCBotNetworkPolicy) Schema(ctx context.Context, request dat
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"domain_name": schema.StringAttribute{
-											Description: "Fully qualified domain name Domain Name",
+											Description: "Fully qualified domain name The fully-qualified domain name of the origin where you want to send requests that Bot Defense determines to be human traffic.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
@@ -498,7 +498,7 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_bot_defense_bot_network_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "bot_network_policy", err))
 		return
 	}
 
@@ -561,28 +561,28 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 
 	// data SpecToModelRoot ArrayOfPointerField --> BotInfrasWithVersion
 	if len(specData.GetBotInfrasWithVersion()) > 0 {
-		botInfrasWithVersionElements := make([]BotNetworkPolicyBotDefenseBotInfraWithVersion, 0, len(specData.GetBotInfrasWithVersion()))
+		botInfrasWithVersionElements := make([]BotNetPolicyBotInfraWithVersion, 0, len(specData.GetBotInfrasWithVersion()))
 
 		for _, botInfrasWithVersionElement := range specData.GetBotInfrasWithVersion() {
-			botNetworkPolicyBotDefenseBotInfraWithVersionModel := BotNetworkPolicyBotDefenseBotInfraWithVersion{}
+			botNetPolicyBotInfraWithVersionModel := BotNetPolicyBotInfraWithVersion{}
 
 			// data specToModelNested StringField --> BotInfraName
 			if botInfrasWithVersionElement.GetBotInfraName() != "" {
-				botNetworkPolicyBotDefenseBotInfraWithVersionModel.BotInfraName = types.StringValue(botInfrasWithVersionElement.GetBotInfraName())
+				botNetPolicyBotInfraWithVersionModel.BotInfraName = types.StringValue(botInfrasWithVersionElement.GetBotInfraName())
 			} else {
 				// Empty string, set to null
-				botNetworkPolicyBotDefenseBotInfraWithVersionModel.BotInfraName = types.StringNull()
+				botNetPolicyBotInfraWithVersionModel.BotInfraName = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> InUseVersion
 			if botInfrasWithVersionElement.GetInUseVersion() != "" {
-				botNetworkPolicyBotDefenseBotInfraWithVersionModel.InUseVersion = types.StringValue(botInfrasWithVersionElement.GetInUseVersion())
+				botNetPolicyBotInfraWithVersionModel.InUseVersion = types.StringValue(botInfrasWithVersionElement.GetInUseVersion())
 			} else {
 				// Empty string, set to null
-				botNetworkPolicyBotDefenseBotInfraWithVersionModel.InUseVersion = types.StringNull()
+				botNetPolicyBotInfraWithVersionModel.InUseVersion = types.StringNull()
 			}
 
-			botInfrasWithVersionElements = append(botInfrasWithVersionElements, botNetworkPolicyBotDefenseBotInfraWithVersionModel)
+			botInfrasWithVersionElements = append(botInfrasWithVersionElements, botNetPolicyBotInfraWithVersionModel)
 		}
 
 		{
@@ -617,28 +617,28 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 
 	// data SpecToModelRoot ArrayOfPointerField --> CosseBotInfrasWithDeliveredVersion
 	if len(specData.GetCosseBotInfrasWithDeliveredVersion()) > 0 {
-		cosseBotInfrasWithDeliveredVersionElements := make([]BotNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersion, 0, len(specData.GetCosseBotInfrasWithDeliveredVersion()))
+		cosseBotInfrasWithDeliveredVersionElements := make([]BotNetPolicyCosseBotInfraWithDeliveredVersion, 0, len(specData.GetCosseBotInfrasWithDeliveredVersion()))
 
 		for _, cosseBotInfrasWithDeliveredVersionElement := range specData.GetCosseBotInfrasWithDeliveredVersion() {
-			botNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel := BotNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersion{}
+			botNetPolicyCosseBotInfraWithDeliveredVersionModel := BotNetPolicyCosseBotInfraWithDeliveredVersion{}
 
 			// data specToModelNested StringField --> CosseBotInfraName
 			if cosseBotInfrasWithDeliveredVersionElement.GetCosseBotInfraName() != "" {
-				botNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetCosseBotInfraName())
+				botNetPolicyCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetCosseBotInfraName())
 			} else {
 				// Empty string, set to null
-				botNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringNull()
+				botNetPolicyCosseBotInfraWithDeliveredVersionModel.CosseBotInfraName = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> DeliveredVersion
 			if cosseBotInfrasWithDeliveredVersionElement.GetDeliveredVersion() != "" {
-				botNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetDeliveredVersion())
+				botNetPolicyCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringValue(cosseBotInfrasWithDeliveredVersionElement.GetDeliveredVersion())
 			} else {
 				// Empty string, set to null
-				botNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringNull()
+				botNetPolicyCosseBotInfraWithDeliveredVersionModel.DeliveredVersion = types.StringNull()
 			}
 
-			cosseBotInfrasWithDeliveredVersionElements = append(cosseBotInfrasWithDeliveredVersionElements, botNetworkPolicyBotDefenseCosseBotInfraWithDeliveredVersionModel)
+			cosseBotInfrasWithDeliveredVersionElements = append(cosseBotInfrasWithDeliveredVersionElements, botNetPolicyCosseBotInfraWithDeliveredVersionModel)
 		}
 
 		{
@@ -673,13 +673,13 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 
 	// data SpecToModelRoot PointerField --> NetworkPolicyContent
 	if specData.GetNetworkPolicyContent() != nil {
-		var botNetworkPolicyBotDefenseNetworkPolicyContentModel = &BotNetworkPolicyBotDefenseNetworkPolicyContent{}
+		var botNetPolicyNetPolicyContentModel = &BotNetPolicyNetPolicyContent{}
 		networkPolicyContentElement := specData.GetNetworkPolicyContent()
 
 		// data specToModelNested PointerField --> ManualRoutingList
 		if networkPolicyContentElement.GetManualRoutingList() != nil {
 			// Create the nested Go struct
-			botNetworkPolicyBotDefenseManualRoutingsModel := &BotNetworkPolicyBotDefenseManualRoutings{}
+			botNetPolicyManualRoutingsModel := &BotNetPolicyManualRoutings{}
 			manualRoutingListElement := networkPolicyContentElement.GetManualRoutingList()
 
 			// Recursively populate the nested struct
@@ -688,9 +688,9 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 			if len(manualRoutingListElement.GetManualRouting()) > 0 {
 				// Step 1: Always create a slice of model structs from the spec data.
 				// This slice serves as an intermediate representation.
-				manualRoutingElements := make([]BotNetworkPolicyBotDefenseManualRoutingDetail, 0, len(manualRoutingListElement.GetManualRouting()))
+				manualRoutingElements := make([]BotNetPolicyManualRoutingDetail, 0, len(manualRoutingListElement.GetManualRouting()))
 				for _, manualRoutingElement := range manualRoutingListElement.GetManualRouting() {
-					botNetworkPolicyBotDefenseManualRoutingDetailModel := BotNetworkPolicyBotDefenseManualRoutingDetail{}
+					botNetPolicyManualRoutingDetailModel := BotNetPolicyManualRoutingDetail{}
 
 					// data specToModelNested RequiredOneOfField --> DomainOperatorChoice
 					// <no value>
@@ -735,26 +735,26 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.DomainOperatorChoice = finalObj
+						botNetPolicyManualRoutingDetailModel.DomainOperatorChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.DomainOperatorChoice = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentManualRoutingListManualRoutingDomainOperatorChoiceModelAttributeMap)
+						botNetPolicyManualRoutingDetailModel.DomainOperatorChoice = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentManualRoutingListManualRoutingDomainOperatorChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredStringField --> DomainName
 					if manualRoutingElement.GetDomainName() != "" {
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.DomainName = types.StringValue(manualRoutingElement.GetDomainName())
+						botNetPolicyManualRoutingDetailModel.DomainName = types.StringValue(manualRoutingElement.GetDomainName())
 					} else {
 						// Empty string, set to null
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.DomainName = types.StringNull()
+						botNetPolicyManualRoutingDetailModel.DomainName = types.StringNull()
 					}
 
 					// data specToModelNested RequiredStringField --> OutboundDomainName
 					if manualRoutingElement.GetOutboundDomainName() != "" {
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.OutboundDomainName = types.StringValue(manualRoutingElement.GetOutboundDomainName())
+						botNetPolicyManualRoutingDetailModel.OutboundDomainName = types.StringValue(manualRoutingElement.GetOutboundDomainName())
 					} else {
 						// Empty string, set to null
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.OutboundDomainName = types.StringNull()
+						botNetPolicyManualRoutingDetailModel.OutboundDomainName = types.StringNull()
 					}
 
 					// data specToModelNested RequiredOneOfField --> OutboundOperatorChoice
@@ -800,16 +800,16 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.OutboundOperatorChoice = finalObj
+						botNetPolicyManualRoutingDetailModel.OutboundOperatorChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						botNetworkPolicyBotDefenseManualRoutingDetailModel.OutboundOperatorChoice = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentManualRoutingListManualRoutingOutboundOperatorChoiceModelAttributeMap)
+						botNetPolicyManualRoutingDetailModel.OutboundOperatorChoice = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentManualRoutingListManualRoutingOutboundOperatorChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested UintField --> Port
-					botNetworkPolicyBotDefenseManualRoutingDetailModel.Port = types.Int64Value(int64(manualRoutingElement.GetPort()))
+					botNetPolicyManualRoutingDetailModel.Port = types.Int64Value(int64(manualRoutingElement.GetPort()))
 
-					manualRoutingElements = append(manualRoutingElements, botNetworkPolicyBotDefenseManualRoutingDetailModel)
+					manualRoutingElements = append(manualRoutingElements, botNetPolicyManualRoutingDetailModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -818,22 +818,22 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 				if response.Diagnostics.HasError() {
 					return
 				}
-				botNetworkPolicyBotDefenseManualRoutingsModel.ManualRouting = manualRoutingListValue
+				botNetPolicyManualRoutingsModel.ManualRouting = manualRoutingListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				botNetworkPolicyBotDefenseManualRoutingsModel.ManualRouting = types.ListNull(types.ObjectType{AttrTypes: BotNetworkPolicyNetworkPolicyContentManualRoutingListManualRoutingModelAttributeMap})
+				botNetPolicyManualRoutingsModel.ManualRouting = types.ListNull(types.ObjectType{AttrTypes: BotNetworkPolicyNetworkPolicyContentManualRoutingListManualRoutingModelAttributeMap})
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			botNetworkPolicyBotDefenseManualRoutingsModelObj, objDiags := types.ObjectValueFrom(ctx, BotNetworkPolicyNetworkPolicyContentManualRoutingListModelAttributeMap, botNetworkPolicyBotDefenseManualRoutingsModel)
+			botNetPolicyManualRoutingsModelObj, objDiags := types.ObjectValueFrom(ctx, BotNetworkPolicyNetworkPolicyContentManualRoutingListModelAttributeMap, botNetPolicyManualRoutingsModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			botNetworkPolicyBotDefenseNetworkPolicyContentModel.ManualRoutingList = botNetworkPolicyBotDefenseManualRoutingsModelObj
+			botNetPolicyNetPolicyContentModel.ManualRoutingList = botNetPolicyManualRoutingsModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -842,13 +842,13 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			botNetworkPolicyBotDefenseNetworkPolicyContentModel.ManualRoutingList = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentManualRoutingListModelAttributeMap)
+			botNetPolicyNetPolicyContentModel.ManualRoutingList = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentManualRoutingListModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> UpstreamRoutingList
 		if networkPolicyContentElement.GetUpstreamRoutingList() != nil {
 			// Create the nested Go struct
-			botNetworkPolicyBotDefenseUpstreamRoutingsModel := &BotNetworkPolicyBotDefenseUpstreamRoutings{}
+			botNetPolicyUpstreamRoutingsModel := &BotNetPolicyUpstreamRoutings{}
 			upstreamRoutingListElement := networkPolicyContentElement.GetUpstreamRoutingList()
 
 			// Recursively populate the nested struct
@@ -857,19 +857,19 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 			if len(upstreamRoutingListElement.GetUpstreamRouting()) > 0 {
 				// Step 1: Always create a slice of model structs from the spec data.
 				// This slice serves as an intermediate representation.
-				upstreamRoutingElements := make([]BotNetworkPolicyBotDefenseUpstreamRoutingDetail, 0, len(upstreamRoutingListElement.GetUpstreamRouting()))
+				upstreamRoutingElements := make([]BotNetPolicyUpstreamRoutingDetail, 0, len(upstreamRoutingListElement.GetUpstreamRouting()))
 				for _, upstreamRoutingElement := range upstreamRoutingListElement.GetUpstreamRouting() {
-					botNetworkPolicyBotDefenseUpstreamRoutingDetailModel := BotNetworkPolicyBotDefenseUpstreamRoutingDetail{}
+					botNetPolicyUpstreamRoutingDetailModel := BotNetPolicyUpstreamRoutingDetail{}
 
 					// data specToModelNested StringField --> DomainName
 					if upstreamRoutingElement.GetDomainName() != "" {
-						botNetworkPolicyBotDefenseUpstreamRoutingDetailModel.DomainName = types.StringValue(upstreamRoutingElement.GetDomainName())
+						botNetPolicyUpstreamRoutingDetailModel.DomainName = types.StringValue(upstreamRoutingElement.GetDomainName())
 					} else {
 						// Empty string, set to null
-						botNetworkPolicyBotDefenseUpstreamRoutingDetailModel.DomainName = types.StringNull()
+						botNetPolicyUpstreamRoutingDetailModel.DomainName = types.StringNull()
 					}
 
-					upstreamRoutingElements = append(upstreamRoutingElements, botNetworkPolicyBotDefenseUpstreamRoutingDetailModel)
+					upstreamRoutingElements = append(upstreamRoutingElements, botNetPolicyUpstreamRoutingDetailModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -878,22 +878,22 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 				if response.Diagnostics.HasError() {
 					return
 				}
-				botNetworkPolicyBotDefenseUpstreamRoutingsModel.UpstreamRouting = upstreamRoutingListValue
+				botNetPolicyUpstreamRoutingsModel.UpstreamRouting = upstreamRoutingListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				botNetworkPolicyBotDefenseUpstreamRoutingsModel.UpstreamRouting = types.ListNull(types.ObjectType{AttrTypes: BotNetworkPolicyNetworkPolicyContentUpstreamRoutingListUpstreamRoutingModelAttributeMap})
+				botNetPolicyUpstreamRoutingsModel.UpstreamRouting = types.ListNull(types.ObjectType{AttrTypes: BotNetworkPolicyNetworkPolicyContentUpstreamRoutingListUpstreamRoutingModelAttributeMap})
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			botNetworkPolicyBotDefenseUpstreamRoutingsModelObj, objDiags := types.ObjectValueFrom(ctx, BotNetworkPolicyNetworkPolicyContentUpstreamRoutingListModelAttributeMap, botNetworkPolicyBotDefenseUpstreamRoutingsModel)
+			botNetPolicyUpstreamRoutingsModelObj, objDiags := types.ObjectValueFrom(ctx, BotNetworkPolicyNetworkPolicyContentUpstreamRoutingListModelAttributeMap, botNetPolicyUpstreamRoutingsModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			botNetworkPolicyBotDefenseNetworkPolicyContentModel.UpstreamRoutingList = botNetworkPolicyBotDefenseUpstreamRoutingsModelObj
+			botNetPolicyNetPolicyContentModel.UpstreamRoutingList = botNetPolicyUpstreamRoutingsModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -902,13 +902,13 @@ func (d *DataSourceF5XCBotNetworkPolicy) Read(ctx context.Context, request datas
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			botNetworkPolicyBotDefenseNetworkPolicyContentModel.UpstreamRoutingList = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentUpstreamRoutingListModelAttributeMap)
+			botNetPolicyNetPolicyContentModel.UpstreamRoutingList = types.ObjectNull(BotNetworkPolicyNetworkPolicyContentUpstreamRoutingListModelAttributeMap)
 		}
 
 		networkPolicyContentObj, networkPolicyContentDiags := utils.GoStructToObjectValue(
 			ctx,
 			BotNetworkPolicyNetworkPolicyContentModelAttributeMap,
-			botNetworkPolicyBotDefenseNetworkPolicyContentModel,
+			botNetPolicyNetPolicyContentModel,
 		)
 		response.Diagnostics.Append(networkPolicyContentDiags...)
 		data.NetworkPolicyContent = networkPolicyContentObj

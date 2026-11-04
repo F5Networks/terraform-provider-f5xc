@@ -27,9 +27,9 @@ func TestAccResourceAutoF5XCAppApiGroup_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-app-api-group-" + acctest.RandString(t, 8)
+	name := "example-app-api-group-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy: acctest.CheckDestroyProducerReplayAware(
@@ -43,31 +43,35 @@ func TestAccResourceAutoF5XCAppApiGroup_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAppApiGroupConfig_full("example-app-api-group", "shared"),
+		})
 }
 
 func TestAccResourceAutoF5XCAppApiGroup_withHttpLoadbalancerVariants(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-app-api-group-" + acctest.RandString(t, 8)
+	name := "example-app-api-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -83,20 +87,20 @@ func TestAccResourceAutoF5XCAppApiGroup_withHttpLoadbalancerVariants(t *testing.
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_withHttpLoadbalancer(name, namespace, "app-http-lb"),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_withHttpLoadbalancerUpdated(name, namespace, "app-http-lb"),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -107,7 +111,7 @@ func TestAccResourceAutoF5XCAppApiGroup_withMethodTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-app-api-group-" + acctest.RandString(t, 8)
+	name := "example-app-api-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -123,30 +127,30 @@ func TestAccResourceAutoF5XCAppApiGroup_withMethodTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_withMethods(name, namespace, "GET"),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_withMethods(name, namespace, "GET", "POST"),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_withMethods(name, namespace, "DELETE", "PUT"),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -157,7 +161,7 @@ func TestAccResourceAutoF5XCAppApiGroup_withPathRegexVariants(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-app-api-group-" + acctest.RandString(t, 8)
+	name := "example-app-api-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -173,20 +177,20 @@ func TestAccResourceAutoF5XCAppApiGroup_withPathRegexVariants(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_withPathRegex(name, namespace, "^/api/v1/orders$"),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_withPathRegex(name, namespace, "^/api/v[0-9]+/orders/.+$"),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -197,7 +201,7 @@ func TestAccResourceAutoF5XCAppApiGroup_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-app-api-group-" + acctest.RandString(t, 8)
+	name := "example-app-api-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -213,20 +217,20 @@ func TestAccResourceAutoF5XCAppApiGroup_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppApiGroupConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_api_group.test",
+				ResourceName:                         "f5xc_app_api_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_api_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -235,7 +239,7 @@ func TestAccResourceAutoF5XCAppApiGroup_full(t *testing.T) {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name      = %q
   namespace = %q
 
@@ -260,10 +264,10 @@ resource "f5xc_app_api_group" "test" {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name        = %q
   namespace   = %q
-  description = "Updated app api group"
+	description = "App API group example updated"
 
   elements = [
     {
@@ -286,7 +290,7 @@ resource "f5xc_app_api_group" "test" {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_withHttpLoadbalancer(name, namespace, lbName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name      = %q
   namespace = %q
 
@@ -311,7 +315,7 @@ resource "f5xc_app_api_group" "test" {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_withCdnLoadbalancer(name, namespace, lbName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name      = %q
   namespace = %q
 
@@ -336,10 +340,10 @@ resource "f5xc_app_api_group" "test" {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_withHttpLoadbalancerUpdated(name, namespace, lbName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name        = %q
   namespace   = %q
-  description = "Updated with more paths"
+	description = "App API group path expansion example"
 
   elements = [
     {
@@ -374,7 +378,7 @@ func testAccResourceAutoF5XCAppApiGroupConfig_withMethods(name, namespace string
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name      = %q
   namespace = %q
 
@@ -399,7 +403,7 @@ resource "f5xc_app_api_group" "test" {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_withPathRegex(name, namespace, pathRegex string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name      = %q
   namespace = %q
 
@@ -424,13 +428,13 @@ resource "f5xc_app_api_group" "test" {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name        = %q
   namespace   = %q
-  description = "Full app api group"
+	description = "App API group example"
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "api"
   }
 
@@ -459,13 +463,13 @@ resource "f5xc_app_api_group" "test" {
 
 func testAccResourceAutoF5XCAppApiGroupConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_api_group" "test" {
+resource "f5xc_app_api_group" "example" {
   name        = %q
   namespace   = %q
-  description = "Full app api group updated"
+	description = "App API group example updated"
 
   labels = {
-    env     = "test"
+    env     = "example"
     tier    = "api"
     updated = "true"
   }

@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -35,6 +34,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -365,8 +365,8 @@ func (r *ResourceF5XCAlertPolicy) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a alert_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a alert_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_policy) etc. can be fetched",
+		MarkdownDescription: "Alert Policy is used to specify a set of routes to match the incoming alert and the set of receivers to<br>send the alert notification if there is a match.<br>An Alert policy object defines a node in the Alert policy routing tree. An incoming alert matches the<br>routes defined in the alert policy in order till a match is found. If the action defined in the matching route is send,<br>then the alert is sent to all the receivers associated with the alert policy, else the alert is not sent<br>to any receiver.",
+		Description:         "Alert Policy is used to specify a set of routes to match the incoming alert and the set of receivers to send the alert notification if there is a match. An Alert policy object defines a node in the Alert policy routing tree. An incoming alert matches the routes defined in the alert policy in order till a match is found. If the action defined in the matching route is send, then the alert is sent to all the receivers associated with the alert policy, else the alert is not sent to any receiver.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -588,7 +588,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -865,12 +865,11 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 									Attributes: map[string]schema.Attribute{
 										"groups": schema.ListAttribute{
 											Description:         "groups Name of groups to match the alert",
-											MarkdownDescription: "groups Name of groups to match the alert<br>**Valid Options:** `['CDN', 'CLOUD_LINK', 'DNS', 'IAAS_CAAS', 'INFRASTRUCTURE', 'ROUTED_DDOS', 'SECURITY', 'SECURITY_BOT_DEFENSE', 'SECURITY_CSD', 'SHAPE_SECURITY', 'SYNTHETIC_MONITORS', 'TIMESERIES_ANOMALY', 'TLS', 'UAM', 'VIRTUAL_HOST', 'VOLT_SHARE']` (Multiple selection allowed)<br>**Default:** `INFRASTRUCTURE`",
+											MarkdownDescription: "groups Name of groups to match the alert<br>**Valid Options:** `['CDN', 'CLOUD_LINK', 'DNS', 'IAAS_CAAS', 'INFRASTRUCTURE', 'ROUTED_DDOS', 'SECURITY', 'SECURITY_BOT_DEFENSE', 'SECURITY_CSD', 'SHAPE_SECURITY', 'SYNTHETIC_MONITORS', 'TIMESERIES_ANOMALY', 'TLS', 'UAM', 'VIRTUAL_HOST', 'VOLT_SHARE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("INFRASTRUCTURE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"CDN", "CLOUD_LINK", "DNS", "IAAS_CAAS", "INFRASTRUCTURE", "ROUTED_DDOS", "SECURITY", "SECURITY_BOT_DEFENSE", "SECURITY_CSD", "SHAPE_SECURITY", "SYNTHETIC_MONITORS", "TIMESERIES_ANOMALY", "TLS", "UAM", "VIRTUAL_HOST", "VOLT_SHARE"}...)),
 											},
@@ -886,12 +885,11 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 									Attributes: map[string]schema.Attribute{
 										"severities": schema.ListAttribute{
 											Description:         "Severities List of severity levels",
-											MarkdownDescription: "Severities List of severity levels<br>**Valid Options:** `['CRITICAL', 'MAJOR', 'MINOR']` (Multiple selection allowed)<br>**Default:** `MINOR`",
+											MarkdownDescription: "Severities List of severity levels<br>**Valid Options:** `['CRITICAL', 'MAJOR', 'MINOR']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("MINOR")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"CRITICAL", "MAJOR", "MINOR"}...)),
 											},
@@ -1089,9 +1087,17 @@ func (r *ResourceF5XCAlertPolicy) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAlertPolicyModel
 
 	// Read Terraform plan data into the model
@@ -1731,7 +1737,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1754,7 +1760,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_alert_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "alert_policy", err),
 		)
 		return
 	}
@@ -2803,7 +2809,7 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "alert_policy", err),
 		)
 		return
 	}
@@ -3015,7 +3021,12 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 			alertPolicyNotificationParametersModel.GroupByChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
+			alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectValueMust(AlertPolicyNotificationParametersGroupByModelAttributeMap, map[string]attr.Value{
+				"custom":       types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap),
+				"default":      types.BoolNull(),
+				"individual":   types.BoolValue(true),
+				"ves_io_group": types.BoolNull(),
+			})
 		}
 
 		// resource specToModelNested StringField --> GroupInterval
@@ -3154,7 +3165,10 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 				alertPolicyRouteModel.ActionChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				alertPolicyRouteModel.ActionChoice = types.ObjectNull(AlertPolicyRoutesActionModelAttributeMap)
+				alertPolicyRouteModel.ActionChoice = types.ObjectValueMust(AlertPolicyRoutesActionModelAttributeMap, map[string]attr.Value{
+					"dont_send": types.BoolNull(),
+					"send":      types.BoolValue(true),
+				})
 			}
 
 			// resource specToModelNested OneOfField --> Matcher
@@ -3740,7 +3754,12 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 					alertPolicyNotificationParametersModel.GroupByChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap)
+					alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectValueMust(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap, map[string]attr.Value{
+						"custom":       types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByCustomModelAttributeMap),
+						"default":      types.BoolNull(),
+						"individual":   types.BoolValue(true),
+						"ves_io_group": types.BoolNull(),
+					})
 				}
 
 				// resource specToModelNested StringField --> GroupInterval
@@ -3811,6 +3830,12 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAlertPolicyModel
@@ -4470,7 +4495,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4486,7 +4511,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	err = r.client.ReplaceObject(ctx, ves_io_schema_alert_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "alert_policy", err),
 		)
 		return
 	}
@@ -4495,7 +4520,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "alert_policy", err),
 		)
 		return
 	}
@@ -5565,7 +5590,7 @@ func (r *ResourceF5XCAlertPolicy) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "alert_policy", err),
 		)
 		return
 	}

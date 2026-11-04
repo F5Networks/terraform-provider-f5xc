@@ -41,6 +41,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/rrsetlistmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
@@ -52,6 +53,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_dns_zone "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dns_zone"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -319,7 +321,8 @@ type DnsZoneDNSSECMode struct {
 }
 
 type DnsZoneModeChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
 type DnsZoneRRSetGroup struct {
@@ -360,6 +363,7 @@ type DnsZoneSecretType struct {
 type DnsZoneSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type DnsZoneBlindfoldSecretInfo struct {
@@ -373,19 +377,31 @@ type DnsZoneClearSecretInfo struct {
 	Url      types.String `tfsdk:"url"`
 }
 
+type DnsZoneNsRBAC struct {
+	ModeChoice types.Object `tfsdk:"mode_choice"`
+}
+
+type DnsZoneNsRBACModeChoice struct {
+	Disabled types.Bool   `tfsdk:"disabled"`
+	Enabled  types.Object `tfsdk:"enabled"`
+}
+
+type DnsZoneEnabled struct {
+	Namespaces types.List `tfsdk:"namespaces"`
+}
+
 // ResourceF5XCDnsZoneModel describes the resource data model.
 type ResourceF5XCDnsZoneModel struct {
-	Annotations       types.Map      `tfsdk:"annotations"`
-	Description       types.String   `tfsdk:"description"`
-	Labels            types.Map      `tfsdk:"labels"`
-	Name              types.String   `tfsdk:"name"`
-	Namespace         types.String   `tfsdk:"namespace"`
-	Uid               types.String   `tfsdk:"uid"`
-	DnsTypeChoice     types.Object   `tfsdk:"dns_type_choice"`
-	NumOfDnsRecords   types.Int64    `tfsdk:"num_of_dns_records"`
-	ServiceInstanceId types.String   `tfsdk:"service_instance_id"`
-	SubscriptionId    types.String   `tfsdk:"subscription_id"`
-	Timeouts          timeouts.Value `tfsdk:"timeouts"`
+	Annotations     types.Map      `tfsdk:"annotations"`
+	Description     types.String   `tfsdk:"description"`
+	Labels          types.Map      `tfsdk:"labels"`
+	Name            types.String   `tfsdk:"name"`
+	Namespace       types.String   `tfsdk:"namespace"`
+	Uid             types.String   `tfsdk:"uid"`
+	DnsTypeChoice   types.Object   `tfsdk:"dns_type_choice"`
+	NamespaceRbac   types.Object   `tfsdk:"namespace_rbac"`
+	NumOfDnsRecords types.Int64    `tfsdk:"num_of_dns_records"`
+	Timeouts        timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -1071,7 +1087,8 @@ var DnsZoneDnsTypePrimaryDnssecModeModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> Mode
 var DnsZoneDnsTypePrimaryDnssecModeModeModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> RrSetGroup
@@ -1756,6 +1773,7 @@ var DnsZoneDnsTypeSecondaryTsigKeyValueSecretInfoOneofModelAttributeMap = map[st
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DnsZoneDnsTypeSecondaryTsigKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1773,6 +1791,31 @@ var DnsZoneDnsTypeSecondaryTsigKeyValueSecretInfoOneofClearSecretInfoModelAttrib
 	"url":      types.StringType,
 }
 
+// Attribute map for PointerField --> NamespaceRbac
+var DnsZoneNamespaceRbacModelAttributeMap = map[string]attr.Type{
+
+	"mode_choice": types.ObjectType{
+		AttrTypes: DnsZoneNamespaceRbacModeModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> Mode
+var DnsZoneNamespaceRbacModeModelAttributeMap = map[string]attr.Type{
+
+	"disabled": types.BoolType,
+	"enabled": types.ObjectType{
+		AttrTypes: DnsZoneNamespaceRbacModeEnabledModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Enabled
+var DnsZoneNamespaceRbacModeEnabledModelAttributeMap = map[string]attr.Type{
+
+	"namespaces": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 func NewResourceF5XCDnsZone() resource.Resource {
 	return &ResourceF5XCDnsZone{}
 }
@@ -1784,8 +1827,8 @@ func (r *ResourceF5XCDnsZone) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_zone This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_zone) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_zone This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_zone) etc. can be fetched",
+		MarkdownDescription: "DNS Zone object is used for configuring Primary and Secondary DNS zones.<br><br>User configures zone 'example.com'<br><br>Status for this object will show following<br><br>* List of nameservers<br><br>User can configure DNS records for a Primary zone and a Secondary zone will<br>transfer the DNS records from the primary DNS servers.",
+		Description:         "DNS Zone object is used for configuring Primary and Secondary DNS zones. User configures zone 'example.com' Status for this object will show following List of nameservers User can configure DNS records for a Primary zone and a Secondary zone will transfer the DNS records from the primary DNS servers.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1847,7 +1890,7 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -1888,8 +1931,8 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 								Computed:            true,
 							},
 							"allow_http_lb_managed_records": schema.BoolAttribute{
-								Description:         "Allow HTTP Load Balancer Managed Records Option to allow user-created HTTP, TCP, and CDN load balancer related resource records to be automatically managed in a protected RRset.",
-								MarkdownDescription: "Allow HTTP Load Balancer Managed Records Option to allow user-created HTTP, TCP, and CDN load balancer related resource records to be automatically managed in a protected RRset.<br>**Default:** `false`",
+								Description:         "Allow Application Managed Records Allow F5 Distributed Cloud services to automatically create and manage resource records in a protected RRset.",
+								MarkdownDescription: "Allow Application Managed Records Allow F5 Distributed Cloud services to automatically create and manage resource records in a protected RRset.<br>**Default:** `false`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -1916,6 +1959,9 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 											Required:            false,
 											Optional:            true,
 											Computed:            true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
 										},
 										"ttl": schema.Int64Attribute{
 											Description:         "TTL",
@@ -2164,7 +2210,7 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 																	},
 																	"tag": schema.StringAttribute{
 																		Description:         "Certification authority authorization tag",
-																		MarkdownDescription: "Certification authority authorization tag",
+																		MarkdownDescription: "Certification authority authorization tag<br>**Allowed Values (choose one):** `['issue', 'issuewild', 'iodef']`",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -2682,7 +2728,7 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2723,9 +2769,9 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 																	"altitude": schema.Float32Attribute{
 																		Description:         "Altitude Altitude in meters",
 																		MarkdownDescription: "Altitude Altitude in meters",
-																		Required:            false,
+																		Required:            true,
 																		Optional:            false,
-																		Computed:            true,
+																		Computed:            false,
 																	},
 																	"horizontal_precision": schema.Float32Attribute{
 																		Description:         "Horizontal Precision Horizontal Precision in meters",
@@ -3398,10 +3444,21 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 										Computed:            false,
 										Validators: []validator.Object{
 											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"disable",
 												"enable",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "Disable DNSSEC disabled",
+												MarkdownDescription: "Disable DNSSEC disabled",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable DNSSEC enable",
 												MarkdownDescription: "Enable DNSSEC enable",
@@ -3480,6 +3537,9 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 														Required:            false,
 														Optional:            true,
 														Computed:            true,
+														PlanModifiers: []planmodifier.String{
+															stringplanmodifier.UseStateForUnknown(),
+														},
 													},
 													"ttl": schema.Int64Attribute{
 														Description:         "TTL",
@@ -3728,7 +3788,7 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 																				},
 																				"tag": schema.StringAttribute{
 																					Description:         "Certification authority authorization tag",
-																					MarkdownDescription: "Certification authority authorization tag",
+																					MarkdownDescription: "Certification authority authorization tag<br>**Allowed Values (choose one):** `['issue', 'issuewild', 'iodef']`",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4246,7 +4306,7 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -4287,9 +4347,9 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 																				"altitude": schema.Float32Attribute{
 																					Description:         "Altitude Altitude in meters",
 																					MarkdownDescription: "Altitude Altitude in meters",
-																					Required:            false,
+																					Required:            true,
 																					Optional:            false,
-																					Computed:            true,
+																					Computed:            false,
 																				},
 																				"horizontal_precision": schema.Float32Attribute{
 																					Description:         "Horizontal Precision Horizontal Precision in meters",
@@ -5097,10 +5157,11 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 							},
 							"tsig_key_name": schema.StringAttribute{
 								Description:         "TSIG Key Name TSIG key name as used in TSIG protocol extension",
-								MarkdownDescription: "TSIG Key Name TSIG key name as used in TSIG protocol extension",
+								MarkdownDescription: "TSIG Key Name TSIG key name as used in TSIG protocol extension<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 								Validators: []validator.String{
 									stringvalidator.RegexMatches(
 										regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$`),
@@ -5125,6 +5186,7 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
@@ -5148,6 +5210,7 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5202,6 +5265,72 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 													},
 												},
 											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"namespace_rbac": schema.SingleNestedAttribute{
+				Description:         "Namespace RBAC Namespace-based access control configuration for the DNS zone. Updates require a role that carries the f5xc-dns-standard-admin API group, such as f5xc-dns-management-admin.",
+				MarkdownDescription: "Namespace RBAC Namespace-based access control configuration for the DNS zone. Updates require a role that carries the f5xc-dns-standard-admin API group, such as f5xc-dns-management-admin.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Attributes: map[string]schema.Attribute{
+					"mode_choice": schema.SingleNestedAttribute{
+						Description:         "Namespace RBAC Mode Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and who can manage DNS records in this zone. When disabled, any namespace can use this zone. Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert. Changes are restricted to DNS administrators. When disabled, any namespace can use this zone.",
+						MarkdownDescription: "Namespace RBAC Mode Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and who can manage DNS records in this zone. When disabled, any namespace can use this zone. Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert. Changes are restricted to DNS administrators. When disabled, any namespace can use this zone.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Object{
+							exactlyoneofvalidator.ExactlyOneOf(
+								"disabled",
+								"enabled",
+							),
+						},
+						Attributes: map[string]schema.Attribute{
+							"disabled": schema.BoolAttribute{
+								Description:         "Disabled Any namespace can use this DNS zone for HTTP Load Balancer domains and auto-cert. DNS records can be managed based on existing DNS permissions",
+								MarkdownDescription: "Disabled Any namespace can use this DNS zone for HTTP Load Balancer domains and auto-cert. DNS records can be managed based on existing DNS permissions",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+							"enabled": schema.SingleNestedAttribute{
+								Description:         "Enabled Map this DNS zone to authorized namespaces (up to 64). Only mapped namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and manage DNS records in this zone.",
+								MarkdownDescription: "Enabled Map this DNS zone to authorized namespaces (up to 64). Only mapped namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and manage DNS records in this zone.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"namespaces": schema.ListAttribute{
+										Description:         "Authorized namespaces",
+										MarkdownDescription: "Authorized namespaces",
+										ElementType:         types.StringType,
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.List{
+											listvalidator.SizeBetween(1, 64),
+											listvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 256)),
+											listvalidator.UniqueValues(),
 										},
 									},
 								},
@@ -5216,26 +5345,6 @@ func (r *ResourceF5XCDnsZone) Schema(ctx context.Context, request resource.Schem
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
-			},
-			"service_instance_id": schema.StringAttribute{
-				Description:         "Service Instance ID Service Instance ID is an internal identifier for backend dns services",
-				MarkdownDescription: "Service Instance ID Service Instance ID is an internal identifier for backend dns services",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"subscription_id": schema.StringAttribute{
-				Description:         "Subscription ID Subscription ID is an internal identifier for backend dns services",
-				MarkdownDescription: "Subscription ID Subscription ID is an internal identifier for backend dns services",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
@@ -5299,9 +5408,17 @@ func (r *ResourceF5XCDnsZone) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDnsZoneModel
 
 	// Read Terraform plan data into the model
@@ -5309,6 +5426,17 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCDnsZoneModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.DnsTypeChoice.IsNull() && !configData.DnsTypeChoice.IsUnknown() {
+		data.DnsTypeChoice = configData.DnsTypeChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -6159,6 +6287,9 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 
 									// Recursively process nested elements
 
+									// resource modelToSpecNested RequiredFloatField --> Altitude
+									locRecordOneOfSpec.LocRecord.Values[ii].Altitude = float32(valuesElement.Altitude.ValueFloat32())
+
 									// resource modelToSpecNested FloatField --> HorizontalPrecision
 									if !valuesElement.HorizontalPrecision.IsNull() && !valuesElement.HorizontalPrecision.IsUnknown() {
 										locRecordOneOfSpec.LocRecord.Values[ii].HorizontalPrecision = float32(valuesElement.HorizontalPrecision.ValueFloat32())
@@ -6784,6 +6915,13 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 					response.Diagnostics.Append(dnssecModeModel.ModeChoice.As(ctx, &dnssecModeModeChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !dnssecModeModeChoiceModel.Disable.IsNull() && !dnssecModeModeChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_dns_zone.DNSSECMode_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						dnssecModeSpec.Mode = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
@@ -7591,6 +7729,9 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 
 											// Recursively process nested elements
 
+											// resource modelToSpecNested RequiredFloatField --> Altitude
+											locRecordOneOfSpec.LocRecord.Values[iii].Altitude = float32(valuesElement.Altitude.ValueFloat32())
+
 											// resource modelToSpecNested FloatField --> HorizontalPrecision
 											if !valuesElement.HorizontalPrecision.IsNull() && !valuesElement.HorizontalPrecision.IsUnknown() {
 												locRecordOneOfSpec.LocRecord.Values[iii].HorizontalPrecision = float32(valuesElement.HorizontalPrecision.ValueFloat32())
@@ -8318,6 +8459,8 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 			// resource modelToSpecNested StringField --> TsigKeyName
 			if !dnsZoneSecondaryModel.TsigKeyName.IsNull() && !dnsZoneSecondaryModel.TsigKeyName.IsUnknown() {
 				secondaryOneOfSpec.Secondary.TsigKeyName = string(dnsZoneSecondaryModel.TsigKeyName.ValueString())
+			} else {
+				secondaryOneOfSpec.Secondary.TsigKeyName = ""
 			}
 
 			// resource modelToSpecNested PointerField --> TsigKeyValue
@@ -8390,6 +8533,13 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !tsigKeyValueSecretInfoChoiceModel.None.IsNull() && !tsigKeyValueSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						tsigKeyValueSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -8398,10 +8548,68 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 
 	}
 
+	{
+		// resource modelToSpecRoot PointerField --> NamespaceRbac
+		if !data.NamespaceRbac.IsNull() && !data.NamespaceRbac.IsUnknown() {
+			namespaceRbacSpec := &ves_io_schema_dns_zone.NamespaceRBAC{}
+			spec.NamespaceRbac = namespaceRbacSpec
+			var namespaceRbacModel DnsZoneNsRBAC
+
+			// Populate the nested model from the main data model
+			diags.Append(data.NamespaceRbac.As(ctx, &namespaceRbacModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested OneOfField --> Mode
+			if !namespaceRbacModel.ModeChoice.IsNull() && !namespaceRbacModel.ModeChoice.IsUnknown() {
+				namespaceRbacModeChoiceModel := DnsZoneNsRBACModeChoice{}
+				response.Diagnostics.Append(namespaceRbacModel.ModeChoice.As(ctx, &namespaceRbacModeChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
+				if !namespaceRbacModeChoiceModel.Disabled.IsNull() && !namespaceRbacModeChoiceModel.Disabled.IsUnknown() {
+					disabledSpecBool := &ves_io_schema_dns_zone.NamespaceRBAC_Disabled{}
+					disabledSpecBool.Disabled = &ves_io_schema.Empty{}
+					namespaceRbacSpec.Mode = disabledSpecBool
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Enabled
+				if !namespaceRbacModeChoiceModel.Enabled.IsNull() && !namespaceRbacModeChoiceModel.Enabled.IsUnknown() {
+					var dnsZoneEnabledModel DnsZoneEnabled
+					response.Diagnostics.Append(namespaceRbacModeChoiceModel.Enabled.As(ctx, &dnsZoneEnabledModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					enabledOneOfSpec := &ves_io_schema_dns_zone.NamespaceRBAC_Enabled{}
+					enabledOneOfSpec.Enabled = &ves_io_schema_dns_zone.NamespaceRBACEnabled{}
+					namespaceRbacSpec.Mode = enabledOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Namespaces
+					{
+						elements := make([]string, 0, len(dnsZoneEnabledModel.Namespaces.Elements()))
+						diags = dnsZoneEnabledModel.Namespaces.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						enabledOneOfSpec.Enabled.Namespaces = elements
+					}
+
+				}
+
+			}
+
+		}
+	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -8424,7 +8632,7 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_dns_zone.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "dns_zone", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "dns_zone", err),
 		)
 		return
 	}
@@ -9813,28 +10021,16 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 											dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 											// resource specToModelNested StringField --> Regexp
-											if valuesElement.GetRegexp() != "" {
-												dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Regexp = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 											// resource specToModelNested StringField --> Replacement
-											if valuesElement.GetReplacement() != "" {
-												dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Replacement = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 											// resource specToModelNested StringField --> Service
-											if valuesElement.GetService() != "" {
-												dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Service = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
 											valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 										}
@@ -10417,6 +10613,15 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 						dnssecModemodeChoiceChoices := dnssecModeElement.GetMode()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Disable)
+
+						if isDisable {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Enable)
@@ -11752,28 +11957,16 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 													dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 													// resource specToModelNested StringField --> Regexp
-													if valuesElement.GetRegexp() != "" {
-														dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Regexp = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 													// resource specToModelNested StringField --> Replacement
-													if valuesElement.GetReplacement() != "" {
-														dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Replacement = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 													// resource specToModelNested StringField --> Service
-													if valuesElement.GetService() != "" {
-														dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Service = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
 													valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 												}
@@ -12494,12 +12687,8 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 				}
 
 				// resource specToModelNested StringField --> TsigKeyName
-				if secondaryElement.GetTsigKeyName() != "" {
-					secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
-				} else {
-					// Empty string, set to null
-					secondaryAttributeMap["tsig_key_name"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
 
 				// resource specToModelNested PointerField --> TsigKeyValue
 				if secondaryElement.GetTsigKeyValue() != nil {
@@ -12602,6 +12791,15 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := tsigKeyValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -12672,28 +12870,104 @@ func (r *ResourceF5XCDnsZone) Create(ctx context.Context, request resource.Creat
 		data.DnsTypeChoice = types.ObjectNull(DnsZoneDnsTypeModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot PointerField --> NamespaceRbac
+	if specData.GetNamespaceRbac() != nil {
+		var dnsZoneNsRBACModel = &DnsZoneNsRBAC{}
+		namespaceRbacElement := specData.GetNamespaceRbac()
+
+		// resource specToModelNested OneOfField --> Mode
+		if namespaceRbacElement.GetMode() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			namespaceRbacmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			namespaceRbacmodeChoiceChoices := namespaceRbacElement.GetMode()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+			_, isDisabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Disabled)
+
+			if isDisabled {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolValue(true)
+			} else {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolNull()
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> Enabled
+			// GlobalSpecType
+			// false
+			{
+				enabledOptionsWrapper, isEnabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Enabled)
+				enabledAttributeMap := make(map[string]attr.Value)
+
+				if isEnabled && enabledOptionsWrapper != nil && enabledOptionsWrapper.Enabled != nil {
+					enabledElement := enabledOptionsWrapper.Enabled
+
+					// resource specToModelNested RequiredArrayOfStringField --> Namespaces
+					{
+						if len(enabledElement.GetNamespaces()) > 0 {
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, enabledElement.GetNamespaces())
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							enabledAttributeMap["namespaces"] = listValue
+						} else {
+							enabledAttributeMap["namespaces"] = types.ListNull(types.StringType)
+						}
+					}
+
+					enabledObj, enabledObjDiags := types.ObjectValue(DnsZoneNamespaceRbacModeEnabledModelAttributeMap, enabledAttributeMap)
+					response.Diagnostics.Append(enabledObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = enabledObj
+				} else {
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = types.ObjectNull(DnsZoneNamespaceRbacModeEnabledModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, namespaceRbacmodeChoiceChoicesObjDiags := types.ObjectValue(
+				DnsZoneNamespaceRbacModeModelAttributeMap, // The attribute schema for the OneOf choices
+				namespaceRbacmodeChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(namespaceRbacmodeChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			dnsZoneNsRBACModel.ModeChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			dnsZoneNsRBACModel.ModeChoice = types.ObjectNull(DnsZoneNamespaceRbacModeModelAttributeMap)
+		}
+
+		namespaceRbacObj, namespaceRbacDiags := utils.GoStructToObjectValue(
+			ctx,
+			DnsZoneNamespaceRbacModelAttributeMap,
+			dnsZoneNsRBACModel,
+		)
+		response.Diagnostics.Append(namespaceRbacDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.NamespaceRbac = namespaceRbacObj
+	} else {
+		data.NamespaceRbac = types.ObjectNull(DnsZoneNamespaceRbacModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot UintField --> NumOfDnsRecords
 	numOfDnsRecordsValue := specData.GetNumOfDnsRecords()
 	if numOfDnsRecordsValue > 0 {
 		data.NumOfDnsRecords = types.Int64Value(int64(numOfDnsRecordsValue))
 	} else {
 		data.NumOfDnsRecords = types.Int64Null()
-	}
-
-	// resource SpecToModelRoot StringField --> ServiceInstanceId
-	if specData.GetServiceInstanceId() != "" {
-		data.ServiceInstanceId = types.StringValue(specData.GetServiceInstanceId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ServiceInstanceId = types.StringNull()
-	}
-
-	// resource SpecToModelRoot StringField --> SubscriptionId
-	if specData.GetSubscriptionId() != "" {
-		data.SubscriptionId = types.StringValue(specData.GetSubscriptionId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SubscriptionId = types.StringNull()
 	}
 
 	if response.Diagnostics.HasError() {
@@ -12746,7 +13020,7 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_zone.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "dns_zone", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_zone", err),
 		)
 		return
 	}
@@ -14135,28 +14409,16 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 											dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 											// resource specToModelNested StringField --> Regexp
-											if valuesElement.GetRegexp() != "" {
-												dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Regexp = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 											// resource specToModelNested StringField --> Replacement
-											if valuesElement.GetReplacement() != "" {
-												dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Replacement = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 											// resource specToModelNested StringField --> Service
-											if valuesElement.GetService() != "" {
-												dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Service = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
 											valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 										}
@@ -14740,6 +15002,15 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Disable)
+
+						if isDisable {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
+
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Enable)
 
@@ -14765,7 +15036,10 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 						dnsZoneDNSSECModeModel.ModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						dnsZoneDNSSECModeModel.ModeChoice = types.ObjectNull(DnsZoneDnsTypePrimaryDnssecModeModeModelAttributeMap)
+						dnsZoneDNSSECModeModel.ModeChoice = types.ObjectValueMust(DnsZoneDnsTypePrimaryDnssecModeModeModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolValue(true),
+							"enable":  types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -16074,28 +16348,16 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 													dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 													// resource specToModelNested StringField --> Regexp
-													if valuesElement.GetRegexp() != "" {
-														dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Regexp = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 													// resource specToModelNested StringField --> Replacement
-													if valuesElement.GetReplacement() != "" {
-														dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Replacement = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 													// resource specToModelNested StringField --> Service
-													if valuesElement.GetService() != "" {
-														dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Service = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
 													valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 												}
@@ -16754,7 +17016,10 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 					primaryAttributeMap["soa_record_parameters_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					primaryAttributeMap["soa_record_parameters_choice"] = types.ObjectNull(DnsZoneDnsTypePrimarySoaRecordParametersChoiceModelAttributeMap)
+					primaryAttributeMap["soa_record_parameters_choice"] = types.ObjectValueMust(DnsZoneDnsTypePrimarySoaRecordParametersChoiceModelAttributeMap, map[string]attr.Value{
+						"default_soa_parameters": types.BoolValue(true),
+						"soa_parameters":         types.ObjectNull(DnsZoneDnsTypePrimarySoaRecordParametersChoiceSoaParametersModelAttributeMap),
+					})
 				}
 
 				primaryObj, primaryObjDiags := types.ObjectValue(DnsZoneDnsTypePrimaryModelAttributeMap, primaryAttributeMap)
@@ -16816,12 +17081,8 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 				}
 
 				// resource specToModelNested StringField --> TsigKeyName
-				if secondaryElement.GetTsigKeyName() != "" {
-					secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
-				} else {
-					// Empty string, set to null
-					secondaryAttributeMap["tsig_key_name"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
 
 				// resource specToModelNested PointerField --> TsigKeyValue
 				if secondaryElement.GetTsigKeyValue() != nil {
@@ -16924,6 +17185,15 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := tsigKeyValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -17006,28 +17276,104 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 		data.DnsTypeChoice = types.ObjectNull(DnsZoneDnsTypeModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot PointerField --> NamespaceRbac
+	if specData.GetNamespaceRbac() != nil {
+		var dnsZoneNsRBACModel = &DnsZoneNsRBAC{}
+		namespaceRbacElement := specData.GetNamespaceRbac()
+
+		// resource specToModelNested OneOfField --> Mode
+		if namespaceRbacElement.GetMode() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			namespaceRbacmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			namespaceRbacmodeChoiceChoices := namespaceRbacElement.GetMode()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+			_, isDisabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Disabled)
+
+			if isDisabled {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolValue(true)
+			} else {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolNull()
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> Enabled
+			// <no value>
+			// false
+			{
+				enabledOptionsWrapper, isEnabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Enabled)
+				enabledAttributeMap := make(map[string]attr.Value)
+
+				if isEnabled && enabledOptionsWrapper != nil && enabledOptionsWrapper.Enabled != nil {
+					enabledElement := enabledOptionsWrapper.Enabled
+
+					// resource specToModelNested RequiredArrayOfStringField --> Namespaces
+					{
+						if len(enabledElement.GetNamespaces()) > 0 {
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, enabledElement.GetNamespaces())
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							enabledAttributeMap["namespaces"] = listValue
+						} else {
+							enabledAttributeMap["namespaces"] = types.ListNull(types.StringType)
+						}
+					}
+
+					enabledObj, enabledObjDiags := types.ObjectValue(DnsZoneNamespaceRbacModeEnabledModelAttributeMap, enabledAttributeMap)
+					response.Diagnostics.Append(enabledObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = enabledObj
+				} else {
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = types.ObjectNull(DnsZoneNamespaceRbacModeEnabledModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, namespaceRbacmodeChoiceChoicesObjDiags := types.ObjectValue(
+				DnsZoneNamespaceRbacModeModelAttributeMap, // The attribute schema for the OneOf choices
+				namespaceRbacmodeChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(namespaceRbacmodeChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			dnsZoneNsRBACModel.ModeChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			dnsZoneNsRBACModel.ModeChoice = types.ObjectNull(DnsZoneNamespaceRbacModeModelAttributeMap)
+		}
+
+		namespaceRbacObj, namespaceRbacDiags := utils.GoStructToObjectValue(
+			ctx,
+			DnsZoneNamespaceRbacModelAttributeMap,
+			dnsZoneNsRBACModel,
+		)
+		response.Diagnostics.Append(namespaceRbacDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.NamespaceRbac = namespaceRbacObj
+	} else {
+		data.NamespaceRbac = types.ObjectNull(DnsZoneNamespaceRbacModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot UintField --> NumOfDnsRecords
 	numOfDnsRecordsValue := specData.GetNumOfDnsRecords()
 	if numOfDnsRecordsValue > 0 {
 		data.NumOfDnsRecords = types.Int64Value(int64(numOfDnsRecordsValue))
 	} else {
 		data.NumOfDnsRecords = types.Int64Null()
-	}
-
-	// resource SpecToModelRoot StringField --> ServiceInstanceId
-	if specData.GetServiceInstanceId() != "" {
-		data.ServiceInstanceId = types.StringValue(specData.GetServiceInstanceId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ServiceInstanceId = types.StringNull()
-	}
-
-	// resource SpecToModelRoot StringField --> SubscriptionId
-	if specData.GetSubscriptionId() != "" {
-		data.SubscriptionId = types.StringValue(specData.GetSubscriptionId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SubscriptionId = types.StringNull()
 	}
 
 	if response.Diagnostics.HasError() {
@@ -17039,6 +17385,12 @@ func (r *ResourceF5XCDnsZone) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDnsZoneModel
@@ -17066,6 +17418,11 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 	}
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.DnsTypeChoice.IsNull() && !configData.DnsTypeChoice.IsUnknown() {
+		data.DnsTypeChoice = configData.DnsTypeChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -17916,6 +18273,9 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 
 									// Recursively process nested elements
 
+									// resource modelToSpecNested RequiredFloatField --> Altitude
+									locRecordOneOfSpec.LocRecord.Values[ii].Altitude = float32(valuesElement.Altitude.ValueFloat32())
+
 									// resource modelToSpecNested FloatField --> HorizontalPrecision
 									if !valuesElement.HorizontalPrecision.IsNull() && !valuesElement.HorizontalPrecision.IsUnknown() {
 										locRecordOneOfSpec.LocRecord.Values[ii].HorizontalPrecision = float32(valuesElement.HorizontalPrecision.ValueFloat32())
@@ -18541,6 +18901,13 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 					response.Diagnostics.Append(dnssecModeModel.ModeChoice.As(ctx, &dnssecModeModeChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !dnssecModeModeChoiceModel.Disable.IsNull() && !dnssecModeModeChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_dns_zone.DNSSECMode_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						dnssecModeSpec.Mode = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
@@ -19348,6 +19715,9 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 
 											// Recursively process nested elements
 
+											// resource modelToSpecNested RequiredFloatField --> Altitude
+											locRecordOneOfSpec.LocRecord.Values[iii].Altitude = float32(valuesElement.Altitude.ValueFloat32())
+
 											// resource modelToSpecNested FloatField --> HorizontalPrecision
 											if !valuesElement.HorizontalPrecision.IsNull() && !valuesElement.HorizontalPrecision.IsUnknown() {
 												locRecordOneOfSpec.LocRecord.Values[iii].HorizontalPrecision = float32(valuesElement.HorizontalPrecision.ValueFloat32())
@@ -20075,6 +20445,8 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 			// resource modelToSpecNested StringField --> TsigKeyName
 			if !dnsZoneSecondaryModel.TsigKeyName.IsNull() && !dnsZoneSecondaryModel.TsigKeyName.IsUnknown() {
 				secondaryOneOfSpec.Secondary.TsigKeyName = string(dnsZoneSecondaryModel.TsigKeyName.ValueString())
+			} else {
+				secondaryOneOfSpec.Secondary.TsigKeyName = ""
 			}
 
 			// resource modelToSpecNested PointerField --> TsigKeyValue
@@ -20147,6 +20519,13 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !tsigKeyValueSecretInfoChoiceModel.None.IsNull() && !tsigKeyValueSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						tsigKeyValueSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -20155,10 +20534,68 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 
 	}
 
+	{
+		// resource modelToSpecRoot PointerField --> NamespaceRbac
+		if !data.NamespaceRbac.IsNull() && !data.NamespaceRbac.IsUnknown() {
+			namespaceRbacSpec := &ves_io_schema_dns_zone.NamespaceRBAC{}
+			spec.NamespaceRbac = namespaceRbacSpec
+			var namespaceRbacModel DnsZoneNsRBAC
+
+			// Populate the nested model from the main data model
+			diags.Append(data.NamespaceRbac.As(ctx, &namespaceRbacModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested OneOfField --> Mode
+			if !namespaceRbacModel.ModeChoice.IsNull() && !namespaceRbacModel.ModeChoice.IsUnknown() {
+				namespaceRbacModeChoiceModel := DnsZoneNsRBACModeChoice{}
+				response.Diagnostics.Append(namespaceRbacModel.ModeChoice.As(ctx, &namespaceRbacModeChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
+				if !namespaceRbacModeChoiceModel.Disabled.IsNull() && !namespaceRbacModeChoiceModel.Disabled.IsUnknown() {
+					disabledSpecBool := &ves_io_schema_dns_zone.NamespaceRBAC_Disabled{}
+					disabledSpecBool.Disabled = &ves_io_schema.Empty{}
+					namespaceRbacSpec.Mode = disabledSpecBool
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Enabled
+				if !namespaceRbacModeChoiceModel.Enabled.IsNull() && !namespaceRbacModeChoiceModel.Enabled.IsUnknown() {
+					var dnsZoneEnabledModel DnsZoneEnabled
+					response.Diagnostics.Append(namespaceRbacModeChoiceModel.Enabled.As(ctx, &dnsZoneEnabledModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					enabledOneOfSpec := &ves_io_schema_dns_zone.NamespaceRBAC_Enabled{}
+					enabledOneOfSpec.Enabled = &ves_io_schema_dns_zone.NamespaceRBACEnabled{}
+					namespaceRbacSpec.Mode = enabledOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Namespaces
+					{
+						elements := make([]string, 0, len(dnsZoneEnabledModel.Namespaces.Elements()))
+						diags = dnsZoneEnabledModel.Namespaces.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						enabledOneOfSpec.Enabled.Namespaces = elements
+					}
+
+				}
+
+			}
+
+		}
+	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -20174,7 +20611,7 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_zone.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "dns_zone", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_zone", err),
 		)
 		return
 	}
@@ -20183,7 +20620,7 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_zone.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "dns_zone", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_zone", err),
 		)
 		return
 	}
@@ -21571,28 +22008,16 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 											dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 											// resource specToModelNested StringField --> Regexp
-											if valuesElement.GetRegexp() != "" {
-												dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Regexp = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 											// resource specToModelNested StringField --> Replacement
-											if valuesElement.GetReplacement() != "" {
-												dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Replacement = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 											// resource specToModelNested StringField --> Service
-											if valuesElement.GetService() != "" {
-												dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-											} else {
-												// Empty string, set to null
-												dnsZoneNAPTRValueModel.Service = types.StringNull()
-											}
+											// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+											dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
 											valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 										}
@@ -22175,6 +22600,15 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 						dnssecModemodeChoiceChoices := dnssecModeElement.GetMode()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Disable)
+
+						if isDisable {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							dnssecModemodeChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := dnssecModemodeChoiceChoices.(*ves_io_schema_dns_zone.DNSSECMode_Enable)
@@ -23510,28 +23944,16 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 													dnsZoneNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 													// resource specToModelNested StringField --> Regexp
-													if valuesElement.GetRegexp() != "" {
-														dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Regexp = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 													// resource specToModelNested StringField --> Replacement
-													if valuesElement.GetReplacement() != "" {
-														dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Replacement = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 													// resource specToModelNested StringField --> Service
-													if valuesElement.GetService() != "" {
-														dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-													} else {
-														// Empty string, set to null
-														dnsZoneNAPTRValueModel.Service = types.StringNull()
-													}
+													// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+													dnsZoneNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
 													valuesElements = append(valuesElements, dnsZoneNAPTRValueModel)
 												}
@@ -24252,12 +24674,8 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 				}
 
 				// resource specToModelNested StringField --> TsigKeyName
-				if secondaryElement.GetTsigKeyName() != "" {
-					secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
-				} else {
-					// Empty string, set to null
-					secondaryAttributeMap["tsig_key_name"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				secondaryAttributeMap["tsig_key_name"] = types.StringValue(secondaryElement.GetTsigKeyName())
 
 				// resource specToModelNested PointerField --> TsigKeyValue
 				if secondaryElement.GetTsigKeyValue() != nil {
@@ -24360,6 +24778,15 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := tsigKeyValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							tsigKeyValuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -24430,28 +24857,104 @@ func (r *ResourceF5XCDnsZone) Update(ctx context.Context, request resource.Updat
 		data.DnsTypeChoice = types.ObjectNull(DnsZoneDnsTypeModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot PointerField --> NamespaceRbac
+	if specData.GetNamespaceRbac() != nil {
+		var dnsZoneNsRBACModel = &DnsZoneNsRBAC{}
+		namespaceRbacElement := specData.GetNamespaceRbac()
+
+		// resource specToModelNested OneOfField --> Mode
+		if namespaceRbacElement.GetMode() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			namespaceRbacmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			namespaceRbacmodeChoiceChoices := namespaceRbacElement.GetMode()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+			_, isDisabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Disabled)
+
+			if isDisabled {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolValue(true)
+			} else {
+				namespaceRbacmodeChoiceChoicesAttributeMap["disabled"] = types.BoolNull()
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> Enabled
+			// GlobalSpecType
+			// false
+			{
+				enabledOptionsWrapper, isEnabled := namespaceRbacmodeChoiceChoices.(*ves_io_schema_dns_zone.NamespaceRBAC_Enabled)
+				enabledAttributeMap := make(map[string]attr.Value)
+
+				if isEnabled && enabledOptionsWrapper != nil && enabledOptionsWrapper.Enabled != nil {
+					enabledElement := enabledOptionsWrapper.Enabled
+
+					// resource specToModelNested RequiredArrayOfStringField --> Namespaces
+					{
+						if len(enabledElement.GetNamespaces()) > 0 {
+							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, enabledElement.GetNamespaces())
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							enabledAttributeMap["namespaces"] = listValue
+						} else {
+							enabledAttributeMap["namespaces"] = types.ListNull(types.StringType)
+						}
+					}
+
+					enabledObj, enabledObjDiags := types.ObjectValue(DnsZoneNamespaceRbacModeEnabledModelAttributeMap, enabledAttributeMap)
+					response.Diagnostics.Append(enabledObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = enabledObj
+				} else {
+					namespaceRbacmodeChoiceChoicesAttributeMap["enabled"] = types.ObjectNull(DnsZoneNamespaceRbacModeEnabledModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, namespaceRbacmodeChoiceChoicesObjDiags := types.ObjectValue(
+				DnsZoneNamespaceRbacModeModelAttributeMap, // The attribute schema for the OneOf choices
+				namespaceRbacmodeChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(namespaceRbacmodeChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			dnsZoneNsRBACModel.ModeChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			dnsZoneNsRBACModel.ModeChoice = types.ObjectNull(DnsZoneNamespaceRbacModeModelAttributeMap)
+		}
+
+		namespaceRbacObj, namespaceRbacDiags := utils.GoStructToObjectValue(
+			ctx,
+			DnsZoneNamespaceRbacModelAttributeMap,
+			dnsZoneNsRBACModel,
+		)
+		response.Diagnostics.Append(namespaceRbacDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.NamespaceRbac = namespaceRbacObj
+	} else {
+		data.NamespaceRbac = types.ObjectNull(DnsZoneNamespaceRbacModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot UintField --> NumOfDnsRecords
 	numOfDnsRecordsValue := specData.GetNumOfDnsRecords()
 	if numOfDnsRecordsValue > 0 {
 		data.NumOfDnsRecords = types.Int64Value(int64(numOfDnsRecordsValue))
 	} else {
 		data.NumOfDnsRecords = types.Int64Null()
-	}
-
-	// resource SpecToModelRoot StringField --> ServiceInstanceId
-	if specData.GetServiceInstanceId() != "" {
-		data.ServiceInstanceId = types.StringValue(specData.GetServiceInstanceId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ServiceInstanceId = types.StringNull()
-	}
-
-	// resource SpecToModelRoot StringField --> SubscriptionId
-	if specData.GetSubscriptionId() != "" {
-		data.SubscriptionId = types.StringValue(specData.GetSubscriptionId())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SubscriptionId = types.StringNull()
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -24527,7 +25030,7 @@ func (r *ResourceF5XCDnsZone) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "dns_zone", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "dns_zone", err),
 		)
 		return
 	}

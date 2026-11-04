@@ -21,6 +21,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
@@ -32,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -42,6 +44,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_container_registry "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/container_registry"
 )
@@ -58,6 +61,7 @@ type ContainerRegistrySecretType struct {
 type ContainerRegistrySecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type ContainerRegistryBlindfoldSecretInfo struct {
@@ -113,6 +117,7 @@ var ContainerRegistryPasswordSecretInfoOneofModelAttributeMap = map[string]attr.
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ContainerRegistryPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -141,8 +146,8 @@ func (r *ResourceF5XCContainerRegistry) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCContainerRegistry) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a container_registry This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of container_registry) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a container_registry This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of container_registry) etc. can be fetched",
+		MarkdownDescription: "Container registry is the container or docker registry information",
+		Description:         "Container registry is the container or docker registry information",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -198,7 +203,7 @@ func (r *ResourceF5XCContainerRegistry) Schema(ctx context.Context, request reso
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"shared", "user"}...),
+					namespacetypevalidator.AllowedIn("shared", "user"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -241,6 +246,7 @@ func (r *ResourceF5XCContainerRegistry) Schema(ctx context.Context, request reso
 							exactlyoneofvalidator.RequiredExactlyOneOf(
 								"blindfold_secret_info",
 								"clear_secret_info",
+								"none",
 							),
 						},
 						Attributes: map[string]schema.Attribute{
@@ -264,6 +270,7 @@ func (r *ResourceF5XCContainerRegistry) Schema(ctx context.Context, request reso
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
+										WriteOnly:           true,
 										Validators: []validator.String{
 											stringvalidator.RegexMatches(
 												regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -316,6 +323,16 @@ func (r *ResourceF5XCContainerRegistry) Schema(ctx context.Context, request reso
 											),
 										},
 									},
+								},
+							},
+							"none": schema.BoolAttribute{
+								Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
 								},
 							},
 						},
@@ -407,9 +424,17 @@ func (r *ResourceF5XCContainerRegistry) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCContainerRegistry) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCContainerRegistryModel
 
 	// Read Terraform plan data into the model
@@ -417,6 +442,17 @@ func (r *ResourceF5XCContainerRegistry) Create(ctx context.Context, request reso
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCContainerRegistryModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Password.IsNull() && !configData.Password.IsUnknown() {
+		data.Password = configData.Password
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -568,6 +604,13 @@ func (r *ResourceF5XCContainerRegistry) Create(ctx context.Context, request reso
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> None
+				if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+					noneSpecBool := &ves_io_schema.SecretType_None{}
+					noneSpecBool.None = &ves_io_schema.Empty{}
+					passwordSpec.SecretInfoOneof = noneSpecBool
+				}
+
 			}
 
 		}
@@ -582,7 +625,7 @@ func (r *ResourceF5XCContainerRegistry) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -605,7 +648,7 @@ func (r *ResourceF5XCContainerRegistry) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_container_registry.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "container_registry", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "container_registry", err),
 		)
 		return
 	}
@@ -829,6 +872,15 @@ func (r *ResourceF5XCContainerRegistry) Create(ctx context.Context, request reso
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -929,7 +981,7 @@ func (r *ResourceF5XCContainerRegistry) Read(ctx context.Context, request resour
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_container_registry.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "container_registry", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "container_registry", err),
 		)
 		return
 	}
@@ -1153,6 +1205,15 @@ func (r *ResourceF5XCContainerRegistry) Read(ctx context.Context, request resour
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -1241,6 +1302,12 @@ func (r *ResourceF5XCContainerRegistry) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCContainerRegistryModel
@@ -1250,6 +1317,7 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planPassword := data.Password
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -1269,7 +1337,11 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planPassword := data.Password
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.Password.IsNull() && !configData.Password.IsUnknown() {
+		data.Password = configData.Password
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -1420,6 +1492,13 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> None
+				if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+					noneSpecBool := &ves_io_schema.SecretType_None{}
+					noneSpecBool.None = &ves_io_schema.Empty{}
+					passwordSpec.SecretInfoOneof = noneSpecBool
+				}
+
 			}
 
 		}
@@ -1434,7 +1513,7 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1450,7 +1529,7 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 	err = r.client.ReplaceObject(ctx, ves_io_schema_container_registry.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "container_registry", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "container_registry", err),
 		)
 		return
 	}
@@ -1459,7 +1538,7 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_container_registry.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "container_registry", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "container_registry", err),
 		)
 		return
 	}
@@ -1682,6 +1761,15 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -1758,7 +1846,7 @@ func (r *ResourceF5XCContainerRegistry) Update(ctx context.Context, request reso
 	}
 	// Restore plan value for Password. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.Password = planPassword
+	data.Password = utils.ResolveUnknowns(planPassword, data.Password)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -1806,7 +1894,7 @@ func (r *ResourceF5XCContainerRegistry) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "container_registry", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "container_registry", err),
 		)
 		return
 	}

@@ -29,24 +29,24 @@ type DataSourceF5XCNginxServiceDiscovery struct {
 	client *client.APIClient
 }
 
-type NginxServiceDiscoveryNginxServiceDiscoveryDiscoveryTarget struct {
+type NginxSvcDiscoveryDiscoveryTarget struct {
 	TargetChoice types.Object `tfsdk:"target_choice"`
 }
 
-type NginxServiceDiscoveryDiscoveryTargetTargetChoice struct {
+type NginxSvcDiscoveryTargetChoice struct {
 	ConfigSyncGroup types.Object `tfsdk:"config_sync_group"`
 	NginxInstance   types.Object `tfsdk:"nginx_instance"`
 }
 
-type NginxServiceDiscoveryDiscoveryTargetConfigSyncGroup struct {
+type NginxSvcDiscoveryConfigSyncGroup struct {
 	ConfigSyncGroup types.List `tfsdk:"config_sync_group"`
 }
 
-type NginxServiceDiscoveryDiscoveryTargetNginxInstance struct {
+type NginxSvcDiscoveryNginxInstance struct {
 	NginxInstance types.List `tfsdk:"nginx_instance"`
 }
 
-type NginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilter struct {
+type NginxSvcDiscoveryServerBlockFilter struct {
 	NameRegex  types.String `tfsdk:"name_regex"`
 	PortRanges types.String `tfsdk:"port_ranges"`
 }
@@ -153,8 +153,8 @@ func (d *DataSourceF5XCNginxServiceDiscovery) Metadata(ctx context.Context, requ
 func (r *DataSourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a nginx_service_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nginx_service_discovery) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a nginx_service_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nginx_service_discovery) etc. can be fetched",
+		MarkdownDescription: "NGINX Service discovery in F5XC",
+		Description:         "NGINX Service discovery in F5XC",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -374,7 +374,7 @@ func (d *DataSourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request 
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "nginx_service_discovery", err))
 		return
 	}
 
@@ -437,7 +437,7 @@ func (d *DataSourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request 
 
 	// data SpecToModelRoot PointerField --> DiscoveryTarget
 	if specData.GetDiscoveryTarget() != nil {
-		var nginxServiceDiscoveryNginxServiceDiscoveryDiscoveryTargetModel = &NginxServiceDiscoveryNginxServiceDiscoveryDiscoveryTarget{}
+		var nginxSvcDiscoveryDiscoveryTargetModel = &NginxSvcDiscoveryDiscoveryTarget{}
 		discoveryTargetElement := specData.GetDiscoveryTarget()
 
 		// data specToModelNested RequiredOneOfField --> Target
@@ -607,16 +607,16 @@ func (d *DataSourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request 
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			nginxServiceDiscoveryNginxServiceDiscoveryDiscoveryTargetModel.TargetChoice = finalObj
+			nginxSvcDiscoveryDiscoveryTargetModel.TargetChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			nginxServiceDiscoveryNginxServiceDiscoveryDiscoveryTargetModel.TargetChoice = types.ObjectNull(NginxServiceDiscoveryDiscoveryTargetTargetModelAttributeMap)
+			nginxSvcDiscoveryDiscoveryTargetModel.TargetChoice = types.ObjectNull(NginxServiceDiscoveryDiscoveryTargetTargetModelAttributeMap)
 		}
 
 		discoveryTargetObj, discoveryTargetDiags := utils.GoStructToObjectValue(
 			ctx,
 			NginxServiceDiscoveryDiscoveryTargetModelAttributeMap,
-			nginxServiceDiscoveryNginxServiceDiscoveryDiscoveryTargetModel,
+			nginxSvcDiscoveryDiscoveryTargetModel,
 		)
 		response.Diagnostics.Append(discoveryTargetDiags...)
 		data.DiscoveryTarget = discoveryTargetObj
@@ -642,28 +642,28 @@ func (d *DataSourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request 
 
 	// data SpecToModelRoot ArrayOfPointerField --> ServerBlockFilters
 	if len(specData.GetServerBlockFilters()) > 0 {
-		serverBlockFiltersElements := make([]NginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilter, 0, len(specData.GetServerBlockFilters()))
+		serverBlockFiltersElements := make([]NginxSvcDiscoveryServerBlockFilter, 0, len(specData.GetServerBlockFilters()))
 
 		for _, serverBlockFiltersElement := range specData.GetServerBlockFilters() {
-			nginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilterModel := NginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilter{}
+			nginxSvcDiscoveryServerBlockFilterModel := NginxSvcDiscoveryServerBlockFilter{}
 
 			// data specToModelNested StringField --> NameRegex
 			if serverBlockFiltersElement.GetNameRegex() != "" {
-				nginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilterModel.NameRegex = types.StringValue(serverBlockFiltersElement.GetNameRegex())
+				nginxSvcDiscoveryServerBlockFilterModel.NameRegex = types.StringValue(serverBlockFiltersElement.GetNameRegex())
 			} else {
 				// Empty string, set to null
-				nginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilterModel.NameRegex = types.StringNull()
+				nginxSvcDiscoveryServerBlockFilterModel.NameRegex = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> PortRanges
 			if serverBlockFiltersElement.GetPortRanges() != "" {
-				nginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilterModel.PortRanges = types.StringValue(serverBlockFiltersElement.GetPortRanges())
+				nginxSvcDiscoveryServerBlockFilterModel.PortRanges = types.StringValue(serverBlockFiltersElement.GetPortRanges())
 			} else {
 				// Empty string, set to null
-				nginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilterModel.PortRanges = types.StringNull()
+				nginxSvcDiscoveryServerBlockFilterModel.PortRanges = types.StringNull()
 			}
 
-			serverBlockFiltersElements = append(serverBlockFiltersElements, nginxServiceDiscoveryNginxServiceDiscoveryServerBlockFilterModel)
+			serverBlockFiltersElements = append(serverBlockFiltersElements, nginxSvcDiscoveryServerBlockFilterModel)
 		}
 
 		{

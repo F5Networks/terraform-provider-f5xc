@@ -28,9 +28,9 @@ func TestAccResourceAutoF5XCSiteMeshGroup_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-site-mesh-group-" + testAccRunSuffix(t)
+	name := "example-site-mesh-group-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSiteMeshGroupDestroyProducer(t),
@@ -39,31 +39,35 @@ func TestAccResourceAutoF5XCSiteMeshGroup_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withDescription(name, namespace, "site mesh group basic updated"),
+				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withDescription(name, namespace, "site mesh group updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSiteMeshGroupConfig_basic("example-site-mesh-group", "system"),
+		})
 }
 
 func TestAccResourceAutoF5XCSiteMeshGroup_withReFallbackTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-site-mesh-group-" + testAccRunSuffix(t)
+	name := "example-site-mesh-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +78,20 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withReFallbackTransition(t *testing.T)
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withReFallback(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withReFallback(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +102,7 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withBfdTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-site-mesh-group-" + testAccRunSuffix(t)
+	name := "example-site-mesh-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +113,20 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withBfdTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withBfdDisabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withBfdEnabled(name, namespace, 1500, 1500, 5),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +137,7 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withHubMeshTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-site-mesh-group-" + testAccRunSuffix(t)
+	name := "example-site-mesh-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -141,23 +145,23 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withHubMeshTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckSiteMeshGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withHubMesh(name, namespace, true),
+				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withHubMesh(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withHubMesh(name, namespace, false),
+				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withFullMesh(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +172,7 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withFullMeshTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-site-mesh-group-" + testAccRunSuffix(t)
+	name := "example-site-mesh-group-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +183,20 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withFullMeshTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withFullMesh(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withFullMesh(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,43 +207,47 @@ func TestAccResourceAutoF5XCSiteMeshGroup_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-site-mesh-group-" + testAccRunSuffix(t)
+	name := "example-site-mesh-group-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSiteMeshGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_full(name, namespace, "site mesh group full", "test", "platform", "mesh-owner-a", true, true, 1200, 1200, 4),
+				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_full(name, namespace, "site mesh group full", "example", "platform", "mesh-owner-a", true, true, 1200, 1200, 4),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_full(name, namespace, "site mesh group full updated", "prod", "security", "mesh-owner-b", false, false, 1500, 1500, 5),
+				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_full(name, namespace, "site mesh group updated full example", "example", "security", "example-mesh-owner-alt", false, false, 1500, 1500, 5),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSiteMeshGroupConfig_full("example-site-mesh-group", "system", "Site mesh group full example", "example", "platform", "mesh-owner", true, true, 1200, 1200, 4),
+		})
 }
 
 func TestAccResourceAutoF5XCSiteMeshGroup_withSpokeMeshTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	hubName := "tf-acc-site-mesh-hub-" + testAccRunSuffix(t)
-	name := "tf-acc-site-mesh-spoke-" + testAccRunSuffix(t)
+	hubName := "example-site-mesh-hub-" + testAccRunSuffix(t)
+	name := "example-site-mesh-spoke-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -250,20 +258,20 @@ func TestAccResourceAutoF5XCSiteMeshGroup_withSpokeMeshTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withSpokeMesh(name, hubName, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSiteMeshGroupConfig_withSpokeMesh(name, hubName, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_site_mesh_group.test",
+				ResourceName:                         "f5xc_site_mesh_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_site_mesh_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -278,17 +286,17 @@ func testAccCheckSiteMeshGroupDestroyProducer(t *testing.T) func(*terraform.Stat
 
 func testAccResourceAutoF5XCSiteMeshGroupConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   name      = %q
   namespace = %q
 
   mesh_choice = {
-		full_mesh = {
-			full_mesh_choice = {
-				data_plane_mesh = true
-			}
-		}
-	}
+    full_mesh = {
+      full_mesh_choice = {
+        data_plane_mesh = true
+      }
+    }
+  }
 
   re_fallback_choice = {
     enable_re_fallback = true
@@ -303,18 +311,18 @@ resource "f5xc_site_mesh_group" "test" {
 
 func testAccResourceAutoF5XCSiteMeshGroupConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
-	mesh_choice = {
-		full_mesh = {
-			full_mesh_choice = {
-				data_plane_mesh = true
-			}
-		}
-	}
+  mesh_choice = {
+    full_mesh = {
+      full_mesh_choice = {
+        data_plane_mesh = true
+      }
+    }
+  }
 
   re_fallback_choice = {
     enable_re_fallback = true
@@ -334,17 +342,17 @@ func testAccResourceAutoF5XCSiteMeshGroupConfig_withReFallback(name, namespace s
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   name      = %q
   namespace = %q
 
-	mesh_choice = {
-		full_mesh = {
-			full_mesh_choice = {
-				data_plane_mesh = true
-			}
-		}
-	}
+  mesh_choice = {
+    full_mesh = {
+      full_mesh_choice = {
+        data_plane_mesh = true
+      }
+    }
+  }
 
   re_fallback_choice = {
     %s = true
@@ -359,17 +367,17 @@ resource "f5xc_site_mesh_group" "test" {
 
 func testAccResourceAutoF5XCSiteMeshGroupConfig_withBfdDisabled(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   name      = %q
   namespace = %q
 
-	mesh_choice = {
-		full_mesh = {
-			full_mesh_choice = {
-				data_plane_mesh = true
-			}
-		}
-	}
+  mesh_choice = {
+    full_mesh = {
+      full_mesh_choice = {
+        data_plane_mesh = true
+      }
+    }
+  }
 
   re_fallback_choice = {
     enable_re_fallback = true
@@ -384,17 +392,17 @@ resource "f5xc_site_mesh_group" "test" {
 
 func testAccResourceAutoF5XCSiteMeshGroupConfig_withBfdEnabled(name, namespace string, tx, rx, mult int64) string {
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   name      = %q
   namespace = %q
 
-	mesh_choice = {
-		full_mesh = {
-			full_mesh_choice = {
-				data_plane_mesh = true
-			}
-		}
-	}
+  mesh_choice = {
+    full_mesh = {
+      full_mesh_choice = {
+        data_plane_mesh = true
+      }
+    }
+  }
 
   re_fallback_choice = {
     enable_re_fallback = true
@@ -411,23 +419,14 @@ resource "f5xc_site_mesh_group" "test" {
 `, name, namespace, tx, rx, mult)
 }
 
-func testAccResourceAutoF5XCSiteMeshGroupConfig_withHubMesh(name, namespace string, dataPlane bool) string {
-	choiceField := "control_and_data_plane_mesh"
-	if dataPlane {
-		choiceField = "data_plane_mesh"
-	}
-
+func testAccResourceAutoF5XCSiteMeshGroupConfig_withHubMesh(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   name      = %q
   namespace = %q
 
   mesh_choice = {
-    hub_mesh = {
-      hub_full_mesh_choice = {
-        %s = true
-      }
-    }
+		hub_mesh = true
   }
 
   re_fallback_choice = {
@@ -438,7 +437,7 @@ resource "f5xc_site_mesh_group" "test" {
     bfd_disabled = true
   }
 }
-`, name, namespace, choiceField)
+`, name, namespace)
 }
 
 func testAccResourceAutoF5XCSiteMeshGroupConfig_withFullMesh(name, namespace string, dataPlane bool) string {
@@ -448,7 +447,7 @@ func testAccResourceAutoF5XCSiteMeshGroupConfig_withFullMesh(name, namespace str
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   name      = %q
   namespace = %q
 
@@ -483,39 +482,39 @@ func testAccResourceAutoF5XCSiteMeshGroupConfig_full(name, namespace, descriptio
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_site_mesh_group" "test" {
-	name        = %q
-	namespace   = %q
-	description = %q
+resource "f5xc_site_mesh_group" "example" {
+  name        = %q
+  namespace   = %q
+  description = %q
 
-	labels = {
-		env  = %q
-		team = %q
-	}
+  labels = {
+    env  = %q
+    team = %q
+  }
 
-	annotations = {
-		owner = %q
-	}
+  annotations = {
+    owner = %q
+  }
 
-	mesh_choice = {
-		full_mesh = {
-			full_mesh_choice = {
-				%s = true
-			}
-		}
-	}
+  mesh_choice = {
+    full_mesh = {
+      full_mesh_choice = {
+        %s = true
+      }
+    }
+  }
 
-	re_fallback_choice = {
-		%s = true
-	}
+  re_fallback_choice = {
+    %s = true
+  }
 
-	bfd_choice = {
-		bfd_enabled = {
-			transmit_interval_milliseconds = %d
-			receive_interval_milliseconds  = %d
-			multiplier                     = %d
-		}
-	}
+  bfd_choice = {
+    bfd_enabled = {
+      transmit_interval_milliseconds = %d
+      receive_interval_milliseconds  = %d
+      multiplier                     = %d
+    }
+  }
 }
 `, name, namespace, description, environment, team, owner, meshChoiceField, reFallbackField, tx, rx, mult)
 }
@@ -532,11 +531,7 @@ resource "f5xc_site_mesh_group" "hub" {
   namespace = %q
 
   mesh_choice = {
-    hub_mesh = {
-      hub_full_mesh_choice = {
-        data_plane_mesh = true
-      }
-    }
+		hub_mesh = true
   }
 
   re_fallback_choice = {
@@ -548,7 +543,7 @@ resource "f5xc_site_mesh_group" "hub" {
   }
 }
 
-resource "f5xc_site_mesh_group" "test" {
+resource "f5xc_site_mesh_group" "example" {
   depends_on = [f5xc_site_mesh_group.hub]
 
   name      = %q

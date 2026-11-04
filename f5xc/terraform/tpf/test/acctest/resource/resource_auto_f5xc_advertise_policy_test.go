@@ -27,8 +27,8 @@ import (
 func TestAccResourceAutoF5XCAdvertisePolicy_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-advertise-policy-" + acctest.RandString(t, 8)
-	vnName := "tf-acc-vn-" + acctest.RandString(t, 8)
+	name := "example-advertise-policy-" + acctest.RandString(t, 8)
+	vnName := "example-vn-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -40,20 +40,20 @@ func TestAccResourceAutoF5XCAdvertisePolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_basic(name, vnName, namespace, "TCP", 80),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_basic(name, vnName, namespace, "TCP", 443),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,8 +63,8 @@ func TestAccResourceAutoF5XCAdvertisePolicy_basic(t *testing.T) {
 func TestAccResourceAutoF5XCAdvertisePolicy_withProtocol(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-advertise-policy-" + acctest.RandString(t, 8)
-	vnName := "tf-acc-vn-" + acctest.RandString(t, 8)
+	name := "example-advertise-policy-" + acctest.RandString(t, 8)
+	vnName := "example-vn-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,20 +76,20 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withProtocol(t *testing.T) {
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_protocol(name, vnName, namespace, "TCP", 8443),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_protocol(name, vnName, namespace, "UDP", 5353),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -99,8 +99,8 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withProtocol(t *testing.T) {
 func TestAccResourceAutoF5XCAdvertisePolicy_withPortChoice(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-advertise-policy-" + acctest.RandString(t, 8)
-	vnName := "tf-acc-vn-" + acctest.RandString(t, 8)
+	name := "example-advertise-policy-" + acctest.RandString(t, 8)
+	vnName := "example-vn-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -112,20 +112,20 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withPortChoice(t *testing.T) {
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_port(name, vnName, namespace, "TCP", 8080),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_port_ranges(name, vnName, namespace, "TCP", "8080,8443,9000-9002"),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -135,8 +135,8 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withPortChoice(t *testing.T) {
 func TestAccResourceAutoF5XCAdvertisePolicy_withSkipXffAppend(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-advertise-policy-" + acctest.RandString(t, 8)
-	vnName := "tf-acc-vn-" + acctest.RandString(t, 8)
+	name := "example-advertise-policy-" + acctest.RandString(t, 8)
+	vnName := "example-vn-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -148,20 +148,20 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withSkipXffAppend(t *testing.T) {
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_skip_xff_append(name, vnName, namespace, "TCP", false),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_skip_xff_append(name, vnName, namespace, "TCP", true),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -171,8 +171,8 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withSkipXffAppend(t *testing.T) {
 func TestAccResourceAutoF5XCAdvertisePolicy_withTlsEnums(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-advertise-policy-" + acctest.RandString(t, 8)
-	vnName := "tf-acc-vn-" + acctest.RandString(t, 8)
+	name := "example-advertise-policy-" + acctest.RandString(t, 8)
+	vnName := "example-vn-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -184,20 +184,20 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withTlsEnums(t *testing.T) {
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_tls_enums(name, vnName, namespace, "TLSv1_2", "TLSv1_3", "XFCC_SUBJECT"),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_with_tls_enums(name, vnName, namespace, "TLSv1_0", "TLSv1_2", "XFCC_URI"),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -207,11 +207,11 @@ func TestAccResourceAutoF5XCAdvertisePolicy_withTlsEnums(t *testing.T) {
 func TestAccResourceAutoF5XCAdvertisePolicy_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-advertise-policy-" + acctest.RandString(t, 8)
-	vnName := "tf-acc-vn-" + acctest.RandString(t, 8)
+	name := "example-advertise-policy-" + acctest.RandString(t, 8)
+	vnName := "example-vn-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAdvertisePolicyDestroyProducer(t),
@@ -220,24 +220,28 @@ func TestAccResourceAutoF5XCAdvertisePolicy_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_full(name, vnName, namespace, "UDP", true, "443,8443", "TLSv1_2", "TLSv1_3"),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAdvertisePolicyConfig_full(name, vnName, namespace, "TCP", false, "80,8080", "TLSv1_0", "TLSv1_2"),
 			},
 			{
-				ResourceName:                         "f5xc_advertise_policy.test",
+				ResourceName:                         "f5xc_advertise_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_advertise_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAdvertisePolicyConfig_full(name, vnName, "default", "UDP", true, "443,8443", "TLSv1_2", "TLSv1_3"),
+		})
 }
 
 func testAccCheckAdvertisePolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -246,7 +250,7 @@ func testAccCheckAdvertisePolicyDestroyProducer(t *testing.T) func(*terraform.St
 
 func testAccResourceAutoF5XCAdvertisePolicyConfig_basic(name, vnName, namespace, protocol string, port int) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = "system"
 
@@ -255,8 +259,8 @@ resource "f5xc_virtual_network" "test" {
   }
 }
 
-resource "f5xc_advertise_policy" "test" {
-  depends_on = [f5xc_virtual_network.test]
+resource "f5xc_advertise_policy" "example" {
+  depends_on = [f5xc_virtual_network.example]
 
   name      = %q
   namespace = %q
@@ -266,8 +270,8 @@ resource "f5xc_advertise_policy" "test" {
     ref_or_selector_choice = {
       virtual_network = {
         ref = [{
-          namespace = f5xc_virtual_network.test.namespace
-          name      = f5xc_virtual_network.test.name
+          namespace = f5xc_virtual_network.example.namespace
+          name      = f5xc_virtual_network.example.name
         }]
       }
     }
@@ -282,7 +286,7 @@ resource "f5xc_advertise_policy" "test" {
 
 func testAccResourceAutoF5XCAdvertisePolicyConfig_with_protocol(name, vnName, namespace, protocol string, port int) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = "system"
 
@@ -291,8 +295,8 @@ resource "f5xc_virtual_network" "test" {
   }
 }
 
-resource "f5xc_advertise_policy" "test" {
-  depends_on = [f5xc_virtual_network.test]
+resource "f5xc_advertise_policy" "example" {
+  depends_on = [f5xc_virtual_network.example]
 
   name      = %q
   namespace = %q
@@ -302,8 +306,8 @@ resource "f5xc_advertise_policy" "test" {
     ref_or_selector_choice = {
       virtual_network = {
         ref = [{
-          namespace = f5xc_virtual_network.test.namespace
-          name      = f5xc_virtual_network.test.name
+          namespace = f5xc_virtual_network.example.namespace
+          name      = f5xc_virtual_network.example.name
         }]
       }
     }
@@ -322,7 +326,7 @@ func testAccResourceAutoF5XCAdvertisePolicyConfig_with_port(name, vnName, namesp
 
 func testAccResourceAutoF5XCAdvertisePolicyConfig_with_port_ranges(name, vnName, namespace, protocol, portRanges string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = "system"
 
@@ -331,8 +335,8 @@ resource "f5xc_virtual_network" "test" {
   }
 }
 
-resource "f5xc_advertise_policy" "test" {
-  depends_on = [f5xc_virtual_network.test]
+resource "f5xc_advertise_policy" "example" {
+  depends_on = [f5xc_virtual_network.example]
 
   name      = %q
   namespace = %q
@@ -342,8 +346,8 @@ resource "f5xc_advertise_policy" "test" {
     ref_or_selector_choice = {
       virtual_network = {
         ref = [{
-          namespace = f5xc_virtual_network.test.namespace
-          name      = f5xc_virtual_network.test.name
+          namespace = f5xc_virtual_network.example.namespace
+          name      = f5xc_virtual_network.example.name
         }]
       }
     }
@@ -358,7 +362,7 @@ resource "f5xc_advertise_policy" "test" {
 
 func testAccResourceAutoF5XCAdvertisePolicyConfig_with_skip_xff_append(name, vnName, namespace, protocol string, skipXffAppend bool) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = "system"
 
@@ -367,8 +371,8 @@ resource "f5xc_virtual_network" "test" {
   }
 }
 
-resource "f5xc_advertise_policy" "test" {
-  depends_on = [f5xc_virtual_network.test]
+resource "f5xc_advertise_policy" "example" {
+  depends_on = [f5xc_virtual_network.example]
 
   name            = %q
   namespace       = %q
@@ -379,8 +383,8 @@ resource "f5xc_advertise_policy" "test" {
     ref_or_selector_choice = {
       virtual_network = {
         ref = [{
-          namespace = f5xc_virtual_network.test.namespace
-          name      = f5xc_virtual_network.test.name
+          namespace = f5xc_virtual_network.example.namespace
+          name      = f5xc_virtual_network.example.name
         }]
       }
     }
@@ -395,7 +399,7 @@ resource "f5xc_advertise_policy" "test" {
 
 func testAccResourceAutoF5XCAdvertisePolicyConfig_with_tls_enums(name, vnName, namespace, minProtocol, maxProtocol, xfccElement string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = "system"
 
@@ -404,8 +408,8 @@ resource "f5xc_virtual_network" "test" {
   }
 }
 
-resource "f5xc_advertise_policy" "test" {
-  depends_on = [f5xc_virtual_network.test]
+resource "f5xc_advertise_policy" "example" {
+  depends_on = [f5xc_virtual_network.example]
 
   name      = %q
   namespace = %q
@@ -415,8 +419,8 @@ resource "f5xc_advertise_policy" "test" {
     ref_or_selector_choice = {
       virtual_network = {
         ref = [{
-          namespace = f5xc_virtual_network.test.namespace
-          name      = f5xc_virtual_network.test.name
+          namespace = f5xc_virtual_network.example.namespace
+          name      = f5xc_virtual_network.example.name
         }]
       }
     }
@@ -445,7 +449,7 @@ resource "f5xc_advertise_policy" "test" {
 
 func testAccResourceAutoF5XCAdvertisePolicyConfig_full(name, vnName, namespace, protocol string, skipXffAppend bool, portRanges, minProtocol, maxProtocol string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_network" "test" {
+resource "f5xc_virtual_network" "example" {
   name      = %q
   namespace = "system"
 
@@ -454,8 +458,8 @@ resource "f5xc_virtual_network" "test" {
   }
 }
 
-resource "f5xc_advertise_policy" "test" {
-  depends_on = [f5xc_virtual_network.test]
+resource "f5xc_advertise_policy" "example" {
+  depends_on = [f5xc_virtual_network.example]
 
   name            = %q
   namespace       = %q
@@ -464,7 +468,7 @@ resource "f5xc_advertise_policy" "test" {
   skip_xff_append = %t
 
   labels = {
-    env  = "test"
+    env  = "example"
     team = "platform"
   }
 
@@ -476,8 +480,8 @@ resource "f5xc_advertise_policy" "test" {
     ref_or_selector_choice = {
       virtual_network = {
         ref = [{
-          namespace = f5xc_virtual_network.test.namespace
-          name      = f5xc_virtual_network.test.name
+          namespace = f5xc_virtual_network.example.namespace
+          name      = f5xc_virtual_network.example.name
         }]
       }
     }

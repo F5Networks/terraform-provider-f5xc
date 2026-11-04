@@ -30,7 +30,7 @@ type DataSourceF5XCCloudCredentials struct {
 	client *client.APIClient
 }
 
-type CloudCredentialsGlobalSpecTypeCloudChoice struct {
+type CloudCredentialsCloudChoice struct {
 	AwsAssumeRole       types.Object `tfsdk:"aws_assume_role"`
 	AwsSecretKey        types.Object `tfsdk:"aws_secret_key"`
 	AzureClientSecret   types.Object `tfsdk:"azure_client_secret"`
@@ -38,14 +38,14 @@ type CloudCredentialsGlobalSpecTypeCloudChoice struct {
 	GcpCredFile         types.Object `tfsdk:"gcp_cred_file"`
 }
 
-type CloudCredentialsGlobalSpecTypeAwsAssumeRole struct {
+type CloudCredentialsAwsAssumeRole struct {
 	DurationSeconds types.Int64  `tfsdk:"duration_seconds"`
 	RoleArn         types.String `tfsdk:"role_arn"`
 	SessionName     types.String `tfsdk:"session_name"`
 	SessionTags     types.Map    `tfsdk:"session_tags"`
 }
 
-type CloudCredentialsGlobalSpecTypeAwsSecretKey struct {
+type CloudCredentialsAwsSecretKey struct {
 	AccessKey types.String `tfsdk:"access_key"`
 	SecretKey types.Object `tfsdk:"secret_key"`
 }
@@ -54,30 +54,31 @@ type CloudCredentialsSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type CloudCredentialsSecretTypeSecretInfoChoice struct {
+type CloudCredentialsSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type CloudCredentialsSecretTypeBlindfoldSecretInfo struct {
+type CloudCredentialsBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type CloudCredentialsSecretTypeClearSecretInfo struct {
+type CloudCredentialsClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type CloudCredentialsGlobalSpecTypeAzureClientSecret struct {
+type CloudCredentialsAzureClientSecret struct {
 	ClientId       types.String `tfsdk:"client_id"`
 	ClientSecret   types.Object `tfsdk:"client_secret"`
 	SubscriptionId types.String `tfsdk:"subscription_id"`
 	TenantId       types.String `tfsdk:"tenant_id"`
 }
 
-type CloudCredentialsGlobalSpecTypeAzurePfxCertificate struct {
+type CloudCredentialsAzurePfxCert struct {
 	CertificateUrl types.String `tfsdk:"certificate_url"`
 	ClientId       types.String `tfsdk:"client_id"`
 	Password       types.Object `tfsdk:"password"`
@@ -85,7 +86,7 @@ type CloudCredentialsGlobalSpecTypeAzurePfxCertificate struct {
 	TenantId       types.String `tfsdk:"tenant_id"`
 }
 
-type CloudCredentialsGlobalSpecTypeGcpCredFile struct {
+type CloudCredentialsGcpCredFile struct {
 	CredentialFile types.Object `tfsdk:"credential_file"`
 }
 
@@ -161,6 +162,7 @@ var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap =
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -208,6 +210,7 @@ var CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttrib
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -256,6 +259,7 @@ var CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttribut
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -300,6 +304,7 @@ var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeM
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -331,8 +336,8 @@ func (d *DataSourceF5XCCloudCredentials) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCCloudCredentials) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a cloud_credentials This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_credentials) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a cloud_credentials This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_credentials) etc. can be fetched",
+		MarkdownDescription: "Cloud Credentials object is used to give user cloud credentials to public cloud like<br>AWS, Azure and GCP. These credentials can then be used by different features in volterra<br>to perform cloud API(s) on users behalf.",
+		Description:         "Cloud Credentials object is used to give user cloud credentials to public cloud like AWS, Azure and GCP. These credentials can then be used by different features in volterra to perform cloud API(s) on users behalf.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -479,8 +484,15 @@ func (r *DataSourceF5XCCloudCredentials) Schema(ctx context.Context, request dat
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -555,8 +567,15 @@ func (r *DataSourceF5XCCloudCredentials) Schema(ctx context.Context, request dat
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -649,8 +668,15 @@ func (r *DataSourceF5XCCloudCredentials) Schema(ctx context.Context, request dat
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -731,8 +757,15 @@ func (r *DataSourceF5XCCloudCredentials) Schema(ctx context.Context, request dat
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -799,7 +832,7 @@ func (d *DataSourceF5XCCloudCredentials) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_cloud_credentials.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "cloud_credentials", err))
 		return
 	}
 
@@ -870,7 +903,7 @@ func (d *DataSourceF5XCCloudCredentials) Read(ctx context.Context, request datas
 		cloudChoiceChoices := specData.GetCloud()
 
 		// The model struct that will be populated by the nested template.
-		var cloudChoiceChoicesModel = &CloudCredentialsGlobalSpecTypeCloudChoice{}
+		var cloudChoiceChoicesModel = &CloudCredentialsCloudChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1052,6 +1085,15 @@ func (d *DataSourceF5XCCloudCredentials) Read(ctx context.Context, request datas
 							}
 						}
 
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							secretKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -1230,6 +1272,15 @@ func (d *DataSourceF5XCCloudCredentials) Read(ctx context.Context, request datas
 							} else {
 								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							clientSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -1436,6 +1487,15 @@ func (d *DataSourceF5XCCloudCredentials) Read(ctx context.Context, request datas
 							}
 						}
 
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -1622,6 +1682,15 @@ func (d *DataSourceF5XCCloudCredentials) Read(ctx context.Context, request datas
 							} else {
 								credentialFilesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := credentialFilesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							credentialFilesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---

@@ -28,9 +28,9 @@ func TestAccResourceAutoF5XCFastAclRule_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-far-" + acctest.RandString(t, 8)
+	name := "example-far-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckFastAclRuleDestroyProducer(t),
@@ -40,29 +40,33 @@ func TestAccResourceAutoF5XCFastAclRule_basic(t *testing.T) {
 				Config:    testAccResourceAutoF5XCFastAclRuleConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclRuleConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCFastAclRuleConfig_basic("example-fast-acl-rule", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCFastAclRule_withSimpleActionTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-far-" + acctest.RandString(t, 8)
+	name := "example-far-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,18 +78,18 @@ func TestAccResourceAutoF5XCFastAclRule_withSimpleActionTransition(t *testing.T)
 				Config:    testAccResourceAutoF5XCFastAclRuleConfig_withSimpleAction(name, namespace, "DENY"),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclRuleConfig_withSimpleAction(name, namespace, "ALLOW")},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -96,7 +100,7 @@ func TestAccResourceAutoF5XCFastAclRule_withPortChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-far-" + acctest.RandString(t, 8)
+	name := "example-far-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -108,26 +112,26 @@ func TestAccResourceAutoF5XCFastAclRule_withPortChoiceTransition(t *testing.T) {
 				Config:    testAccResourceAutoF5XCFastAclRuleConfig_withPortChoice(name, namespace, "all", 0),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclRuleConfig_withPortChoice(name, namespace, "dns", 0)},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclRuleConfig_withPortChoice(name, namespace, "user_defined", 8080)},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -138,7 +142,7 @@ func TestAccResourceAutoF5XCFastAclRule_withPrefixVariantTransition(t *testing.T
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-far-" + acctest.RandString(t, 8)
+	name := "example-far-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -150,18 +154,18 @@ func TestAccResourceAutoF5XCFastAclRule_withPrefixVariantTransition(t *testing.T
 				Config:    testAccResourceAutoF5XCFastAclRuleConfig_withPrefixSource(name, namespace, "10.10.0.0/16", ""),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclRuleConfig_withPrefixSource(name, namespace, "10.20.0.0/16", "2001:0db8:0000:0000:0000:0000:0000:0000/64")},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -172,7 +176,7 @@ func TestAccResourceAutoF5XCFastAclRule_withMultiplePortsTransition(t *testing.T
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-far-" + acctest.RandString(t, 8)
+	name := "example-far-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -184,18 +188,18 @@ func TestAccResourceAutoF5XCFastAclRule_withMultiplePortsTransition(t *testing.T
 				Config:    testAccResourceAutoF5XCFastAclRuleConfig_withMultiplePorts(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclRuleConfig_withMultiplePorts(name, namespace, true)},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -206,9 +210,9 @@ func TestAccResourceAutoF5XCFastAclRule_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-far-" + acctest.RandString(t, 8)
+	name := "example-far-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckFastAclRuleDestroyProducer(t),
@@ -218,22 +222,26 @@ func TestAccResourceAutoF5XCFastAclRule_full(t *testing.T) {
 				Config:    testAccResourceAutoF5XCFastAclRuleConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCFastAclRuleConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_fast_acl_rule.test",
+				ResourceName:                         "f5xc_fast_acl_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_fast_acl_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCFastAclRuleConfig_full("example-fast-acl-rule", namespace),
+		})
 }
 
 func testAccCheckFastAclRuleDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -242,7 +250,7 @@ func testAccCheckFastAclRuleDestroyProducer(t *testing.T) func(*terraform.State)
 
 func testAccResourceAutoF5XCFastAclRuleConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -271,10 +279,10 @@ resource "f5xc_fast_acl_rule" "test" {
 
 func testAccResourceAutoF5XCFastAclRuleConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name        = %q
   namespace   = %q
-  description = "updated fast acl rule"
+  description = "Updated fast ACL rule example"
 
   action = {
     action_choice = {
@@ -301,7 +309,7 @@ resource "f5xc_fast_acl_rule" "test" {
 
 func testAccResourceAutoF5XCFastAclRuleConfig_withSimpleAction(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -338,7 +346,7 @@ func testAccResourceAutoF5XCFastAclRuleConfig_withPortChoice(name, namespace, ch
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -372,7 +380,7 @@ func testAccResourceAutoF5XCFastAclRuleConfig_withPrefixSource(name, namespace, 
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -411,7 +419,7 @@ func testAccResourceAutoF5XCFastAclRuleConfig_withMultiplePorts(name, namespace 
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -440,13 +448,13 @@ resource "f5xc_fast_acl_rule" "test" {
 
 func testAccResourceAutoF5XCFastAclRuleConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name        = %q
   namespace   = %q
-  description = "fast acl rule full"
+  description = "Full fast ACL rule example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -475,7 +483,7 @@ resource "f5xc_fast_acl_rule" "test" {
   source_choice = {
     prefix = {
       prefix      = ["10.40.0.0/16"]
-			ipv6_prefix = ["2001:0db8:0010:0000:0000:0000:0000:0000/64"]
+      ipv6_prefix = ["2001:0db8:0010:0000:0000:0000:0000:0000/64"]
     }
   }
 }
@@ -484,13 +492,13 @@ resource "f5xc_fast_acl_rule" "test" {
 
 func testAccResourceAutoF5XCFastAclRuleConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acl_rule" "test" {
+resource "f5xc_fast_acl_rule" "example" {
   name        = %q
   namespace   = %q
-  description = "fast acl rule full updated"
+  description = "Updated full fast ACL rule example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {
@@ -514,7 +522,7 @@ resource "f5xc_fast_acl_rule" "test" {
   source_choice = {
     prefix = {
       prefix      = ["172.20.0.0/16"]
-			ipv6_prefix = ["2001:0db8:0020:0000:0000:0000:0000:0000/64"]
+      ipv6_prefix = ["2001:0db8:0020:0000:0000:0000:0000:0000/64"]
     }
   }
 }

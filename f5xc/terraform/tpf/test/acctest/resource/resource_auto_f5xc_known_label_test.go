@@ -27,11 +27,11 @@ import (
 func TestAccResourceAutoF5XCKnownLabel_basic(t *testing.T) {
 	t.Parallel()
 
-	key := "tf-acc-kl-" + acctest.RandString(t, 8)
-	value := "tf-acc-val-" + acctest.RandString(t, 8)
+	key := "example-kl-" + acctest.RandString(t, 8)
+	value := "example-val-" + acctest.RandString(t, 8)
 	namespace := "shared"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckKnownLabelDestroyProducer(t),
@@ -40,31 +40,35 @@ func TestAccResourceAutoF5XCKnownLabel_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCKnownLabelConfig_basic(key, value, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_known_label.test",
+				ResourceName:                         "f5xc_known_label.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccKnownLabelImportStateID("f5xc_known_label.test"),
+				ImportStateIdFunc:                    testAccKnownLabelImportStateID("f5xc_known_label.example"),
 				ImportStateVerifyIdentifierAttribute: "key",
 			},
 			{
 				Config: testAccResourceAutoF5XCKnownLabelConfig_basicUpdated(key, value, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_known_label.test",
+				ResourceName:                         "f5xc_known_label.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccKnownLabelImportStateID("f5xc_known_label.test"),
+				ImportStateIdFunc:                    testAccKnownLabelImportStateID("f5xc_known_label.example"),
 				ImportStateVerifyIdentifierAttribute: "key",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCKnownLabelConfig_basic("example-kl", "example-val", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCKnownLabel_withDescription(t *testing.T) {
 	t.Parallel()
 
-	key := "tf-acc-kl-" + acctest.RandString(t, 8)
-	value := "tf-acc-val-" + acctest.RandString(t, 8)
+	key := "example-kl-" + acctest.RandString(t, 8)
+	value := "example-val-" + acctest.RandString(t, 8)
 	namespace := "shared"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,10 +80,10 @@ func TestAccResourceAutoF5XCKnownLabel_withDescription(t *testing.T) {
 				Config: testAccResourceAutoF5XCKnownLabelConfig_withDescription(key, value, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_known_label.test",
+				ResourceName:                         "f5xc_known_label.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccKnownLabelImportStateID("f5xc_known_label.test"),
+				ImportStateIdFunc:                    testAccKnownLabelImportStateID("f5xc_known_label.example"),
 				ImportStateVerifyIdentifierAttribute: "key",
 			},
 		},
@@ -124,7 +128,7 @@ resource "f5xc_known_label_key" "key" {
 	namespace = %q
 }
 
-resource "f5xc_known_label" "test" {
+resource "f5xc_known_label" "example" {
   key       = %q
   value     = %q
   namespace = %q
@@ -141,11 +145,11 @@ resource "f5xc_known_label_key" "key" {
 	namespace = %q
 }
 
-resource "f5xc_known_label" "test" {
+resource "f5xc_known_label" "example" {
   key         = %q
   value       = %q
   namespace   = %q
-  description = "Updated known label"
+  description = "Updated known label example"
 
 	depends_on = [f5xc_known_label_key.key]
 }
@@ -159,11 +163,11 @@ resource "f5xc_known_label_key" "key" {
 	namespace = %q
 }
 
-resource "f5xc_known_label" "test" {
+resource "f5xc_known_label" "example" {
   key         = %q
   value       = %q
   namespace   = %q
-  description = "Acceptance test known label"
+  description = "Known label example"
 
 	depends_on = [f5xc_known_label_key.key]
 }

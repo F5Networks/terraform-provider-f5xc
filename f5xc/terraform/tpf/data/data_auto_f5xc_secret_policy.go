@@ -33,20 +33,20 @@ type DataSourceF5XCSecretPolicy struct {
 	client *client.APIClient
 }
 
-type SecretPolicyGlobalSpecTypeRuleChoice struct {
+type SecretPolicyRuleChoice struct {
 	LegacyRuleList types.Object `tfsdk:"legacy_rule_list"`
 	RuleList       types.Object `tfsdk:"rule_list"`
 }
 
-type SecretPolicyGlobalSpecTypeLegacyRuleList struct {
+type SecretPolicyLegacyRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type SecretPolicyGlobalSpecTypeRuleList struct {
+type SecretPolicyRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type SecretPolicySecretPolicyRule struct {
+type SecretPolicyRule struct {
 	Metadata types.Object `tfsdk:"metadata"`
 	Spec     types.Object `tfsdk:"spec"`
 }
@@ -56,24 +56,24 @@ type SecretPolicyMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type SecretPolicySecretPolicyRuleGlobalSpecType struct {
+type SecretPolicyGst struct {
 	Action       types.List   `tfsdk:"action"`
 	ClientChoice types.Object `tfsdk:"client_choice"`
 }
 
-type SecretPolicyGlobalSpecTypeClientChoice struct {
+type SecretPolicyClientChoice struct {
 	ClientName        types.String `tfsdk:"client_name"`
 	ClientNameMatcher types.Object `tfsdk:"client_name_matcher"`
 	ClientSelector    types.Object `tfsdk:"client_selector"`
 }
 
-type SecretPolicyGlobalSpecTypeClientNameMatcher struct {
+type SecretPolicyClientNameMatcher struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type SecretPolicyGlobalSpecTypeClientSelector struct {
+type SecretPolicyClientSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
@@ -233,8 +233,8 @@ func (d *DataSourceF5XCSecretPolicy) Metadata(ctx context.Context, request datas
 func (r *DataSourceF5XCSecretPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "rule A Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced.",
-		Description:         "rule A Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced.",
+		MarkdownDescription: "A Secret Policy defines who gets access to a secret.<br>A secret_policy object consists of an unordered list of predicates and a list of secret policy rules.<br>The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate.<br>Any predicates that are not specified in a policy are implicitly considered to be true.<br>The rules in the policy are also evaluated against the input fields.<br>They are treated as an ordered or unordered list depending on the value of the rule combining algorithm.<br>A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched.<br><br>If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified.<br>If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action.<br>If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.",
+		Description:         "A Secret Policy defines who gets access to a secret. A secret_policy object consists of an unordered list of predicates and a list of secret policy rules. The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate. Any predicates that are not specified in a policy are implicitly considered to be true. The rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining algorithm. A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched. If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -500,7 +500,7 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_secret_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "secret_policy", err))
 		return
 	}
 
@@ -582,7 +582,7 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &SecretPolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &SecretPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -671,9 +671,9 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]SecretPolicySecretPolicyRule, 0, len(ruleListElement.GetRules()))
+					rulesElements := make([]SecretPolicyRule, 0, len(ruleListElement.GetRules()))
 					for _, rulesElement := range ruleListElement.GetRules() {
-						secretPolicySecretPolicyRuleModel := SecretPolicySecretPolicyRule{}
+						secretPolicyRuleModel := SecretPolicyRule{}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if rulesElement.GetMetadata() != nil {
@@ -705,7 +705,7 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
+							secretPolicyRuleModel.Metadata = secretPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -714,13 +714,13 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
+							secretPolicyRuleModel.Metadata = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Spec
 						if rulesElement.GetSpec() != nil {
 							// Create the nested Go struct
-							secretPolicySecretPolicyRuleGlobalSpecTypeModel := &SecretPolicySecretPolicyRuleGlobalSpecType{}
+							secretPolicyGstModel := &SecretPolicyGst{}
 							specElement := rulesElement.GetSpec()
 
 							// Recursively populate the nested struct
@@ -734,9 +734,9 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 								if response.Diagnostics.HasError() {
 									return
 								}
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = listValue
+								secretPolicyGstModel.Action = listValue
 							} else {
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.Action = types.ListNull(types.StringType)
+								secretPolicyGstModel.Action = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested RequiredOneOfField --> ClientChoice
@@ -870,19 +870,19 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = finalObj
+								secretPolicyGstModel.ClientChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								secretPolicySecretPolicyRuleGlobalSpecTypeModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
+								secretPolicyGstModel.ClientChoice = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							secretPolicySecretPolicyRuleGlobalSpecTypeModelObj, objDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicySecretPolicyRuleGlobalSpecTypeModel)
+							secretPolicyGstModelObj, objDiags := types.ObjectValueFrom(ctx, SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap, secretPolicyGstModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							secretPolicySecretPolicyRuleModel.Spec = secretPolicySecretPolicyRuleGlobalSpecTypeModelObj
+							secretPolicyRuleModel.Spec = secretPolicyGstModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -891,10 +891,10 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							secretPolicySecretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
+							secretPolicyRuleModel.Spec = types.ObjectNull(SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
 						}
 
-						rulesElements = append(rulesElements, secretPolicySecretPolicyRuleModel)
+						rulesElements = append(rulesElements, secretPolicyRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.

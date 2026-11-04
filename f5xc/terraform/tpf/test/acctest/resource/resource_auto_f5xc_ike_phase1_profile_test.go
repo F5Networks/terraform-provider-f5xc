@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCIkePhase1Profile_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ikep1-" + acctest.RandString(t, 8)
+	name := "example-ikep1-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCIkePhase1Profile_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withEncryptionAlgosTransition(t *te
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ikep1-" + acctest.RandString(t, 8)
+	name := "example-ikep1-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withEncryptionAlgosTransition(t *te
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withEncryptionAlgo(name, namespace, "AES256_GCM"),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withEncryptionAlgo(name, namespace, "AES128_CBC"),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withAuthenticationAlgosTransition(t
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ikep1-" + acctest.RandString(t, 8)
+	name := "example-ikep1-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withAuthenticationAlgosTransition(t
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withAuthenticationAlgo(name, namespace, "AUTH_ALG_NONE"),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withAuthenticationAlgo(name, namespace, "SHA256_HMAC"),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withPrfDhGroupTransition(t *testing
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ikep1-" + acctest.RandString(t, 8)
+	name := "example-ikep1-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withPrfDhGroupTransition(t *testing
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withPrfDhGroup(name, namespace, "PRFSHA512", "DH_GROUP_19"),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withPrfDhGroup(name, namespace, "PRFSHA256", "DH_GROUP_14"),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +168,7 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withIkeKeyLifetimeChoiceTransition(
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ikep1-" + acctest.RandString(t, 8)
+	name := "example-ikep1-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,30 +179,30 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withIkeKeyLifetimeChoiceTransition(
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeKeyLifetimeUseDefault(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeKeyLifetimeMinutes(name, namespace, 120),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeKeyLifetimeHours(name, namespace, 2),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -213,7 +213,7 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withIkeReauthTimeoutChoiceTransitio
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ikep1-" + acctest.RandString(t, 8)
+	name := "example-ikep1-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -224,30 +224,30 @@ func TestAccResourceAutoF5XCIkePhase1Profile_withIkeReauthTimeoutChoiceTransitio
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeReauthDisabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeReauthHours(name, namespace, 2),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeReauthDays(name, namespace, 7),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -258,9 +258,9 @@ func TestAccResourceAutoF5XCIkePhase1Profile_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ikep1-" + acctest.RandString(t, 8)
+	name := "example-ikep1-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckIkePhase1ProfileDestroyProducer(t),
@@ -269,24 +269,28 @@ func TestAccResourceAutoF5XCIkePhase1Profile_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCIkePhase1ProfileConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_ike_phase1_profile.test",
+				ResourceName:                         "f5xc_ike_phase1_profile.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike_phase1_profile.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCIkePhase1ProfileConfig_full("example-ike-phase1-profile", "default"),
+		})
 }
 
 func testAccCheckIkePhase1ProfileDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -295,7 +299,7 @@ func testAccCheckIkePhase1ProfileDestroyProducer(t *testing.T) func(*terraform.S
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -312,10 +316,10 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name        = %q
   namespace   = %q
-  description = "ike phase1 profile updated"
+  description = "Updated IKE phase1 profile example"
 
   encryption_algos     = ["AES128_CBC"]
   authentication_algos = ["SHA256_HMAC"]
@@ -339,7 +343,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withEncryptionAlgo(name, namespace, algo string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -358,7 +362,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withAuthenticationAlgo(name, namespace, algo string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -377,7 +381,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withPrfDhGroup(name, namespace, prf, dhGroup string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -397,7 +401,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeKeyLifetimeUseDefault(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -414,7 +418,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeKeyLifetimeMinutes(name, namespace string, duration int) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -433,7 +437,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeKeyLifetimeHours(name, namespace string, duration int) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -452,7 +456,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeReauthDisabled(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -469,7 +473,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeReauthHours(name, namespace string, duration int) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -488,7 +492,7 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_withIkeReauthDays(name, namespace string, duration int) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name      = %q
   namespace = %q
 
@@ -507,13 +511,13 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name        = %q
   namespace   = %q
-  description = "ike phase1 profile full"
+  description = "Full IKE phase1 profile example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -542,13 +546,13 @@ resource "f5xc_ike_phase1_profile" "test" {
 
 func testAccResourceAutoF5XCIkePhase1ProfileConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike_phase1_profile" "test" {
+resource "f5xc_ike_phase1_profile" "example" {
   name        = %q
   namespace   = %q
-  description = "ike phase1 profile full updated"
+  description = "Updated full IKE phase1 profile example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {

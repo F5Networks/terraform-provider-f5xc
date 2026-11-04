@@ -27,7 +27,7 @@ func TestAccResourceAutoF5XCBigipIrule_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-bigip-irule-" + acctest.RandString(t, 8)
+	name := "example-bigip-irule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -38,10 +38,10 @@ func TestAccResourceAutoF5XCBigipIrule_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -49,10 +49,10 @@ func TestAccResourceAutoF5XCBigipIrule_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCBigipIrule_withSourceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-bigip-irule-" + acctest.RandString(t, 8)
+	name := "example-bigip-irule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -75,10 +75,10 @@ func TestAccResourceAutoF5XCBigipIrule_withSourceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_withSource(name, namespace, "AI"),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -86,10 +86,10 @@ func TestAccResourceAutoF5XCBigipIrule_withSourceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_withSource(name, namespace, "Human"),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -97,10 +97,10 @@ func TestAccResourceAutoF5XCBigipIrule_withSourceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_withSource(name, namespace, "Mix"),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -112,7 +112,7 @@ func TestAccResourceAutoF5XCBigipIrule_withCodeTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-bigip-irule-" + acctest.RandString(t, 8)
+	name := "example-bigip-irule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -123,10 +123,10 @@ func TestAccResourceAutoF5XCBigipIrule_withCodeTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_withCode(name, namespace, "when HTTP_REQUEST { log local0. \"start\" }"),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -134,10 +134,10 @@ func TestAccResourceAutoF5XCBigipIrule_withCodeTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_withCode(name, namespace, "when HTTP_RESPONSE { HTTP::header insert x-test update }"),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -149,7 +149,7 @@ func TestAccResourceAutoF5XCBigipIrule_withMetadata(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-bigip-irule-" + acctest.RandString(t, 8)
+	name := "example-bigip-irule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -157,24 +157,24 @@ func TestAccResourceAutoF5XCBigipIrule_withMetadata(t *testing.T) {
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_bigip_irule", bigipIruleSchema.ObjectType, "bigip irule"),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCBigipIruleConfig_withMetadata(name, namespace, "dev", "team-a"),
+				Config: testAccResourceAutoF5XCBigipIruleConfig_withMetadata(name, namespace, "dev", "example-team"),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
 			{
-				Config: testAccResourceAutoF5XCBigipIruleConfig_withMetadata(name, namespace, "prod", "team-b"),
+				Config: testAccResourceAutoF5XCBigipIruleConfig_withMetadata(name, namespace, "example", "example-team-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -186,9 +186,9 @@ func TestAccResourceAutoF5XCBigipIrule_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-bigip-irule-" + acctest.RandString(t, 8)
+	name := "example-bigip-irule-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_bigip_irule", bigipIruleSchema.ObjectType, "bigip irule"),
@@ -197,10 +197,10 @@ func TestAccResourceAutoF5XCBigipIrule_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
@@ -208,20 +208,24 @@ func TestAccResourceAutoF5XCBigipIrule_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCBigipIruleConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bigip_irule.test",
+				ResourceName:                         "f5xc_bigip_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bigip_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"name"},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCBigipIruleConfig_full("example-bigip-irule", "default"),
+		})
 }
 
 func testAccResourceAutoF5XCBigipIruleConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bigip_irule" "test" {
+resource "f5xc_bigip_irule" "example" {
   name      = %q
   namespace = %q
   source    = "Human"
@@ -232,10 +236,10 @@ resource "f5xc_bigip_irule" "test" {
 
 func testAccResourceAutoF5XCBigipIruleConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bigip_irule" "test" {
+resource "f5xc_bigip_irule" "example" {
   name        = %q
   namespace   = %q
-  description = "updated bigip irule"
+  description = "BIG-IP iRule example updated"
   source      = "Human"
   code        = "when HTTP_REQUEST { return }"
 }
@@ -244,7 +248,7 @@ resource "f5xc_bigip_irule" "test" {
 
 func testAccResourceAutoF5XCBigipIruleConfig_withSource(name, namespace, source string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bigip_irule" "test" {
+resource "f5xc_bigip_irule" "example" {
   name       = %q
   namespace  = %q
   source     = %q
@@ -256,7 +260,7 @@ resource "f5xc_bigip_irule" "test" {
 
 func testAccResourceAutoF5XCBigipIruleConfig_withCode(name, namespace, code string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bigip_irule" "test" {
+resource "f5xc_bigip_irule" "example" {
   name       = %q
   namespace  = %q
   source     = "Human"
@@ -268,7 +272,7 @@ resource "f5xc_bigip_irule" "test" {
 
 func testAccResourceAutoF5XCBigipIruleConfig_withMetadata(name, namespace, envLabel, ownerAnnotation string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bigip_irule" "test" {
+resource "f5xc_bigip_irule" "example" {
   name       = %q
   namespace  = %q
   source     = "Mix"
@@ -288,16 +292,16 @@ resource "f5xc_bigip_irule" "test" {
 
 func testAccResourceAutoF5XCBigipIruleConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bigip_irule" "test" {
+resource "f5xc_bigip_irule" "example" {
   name        = %q
   namespace   = %q
-  description = "bigip irule full config"
+  description = "BIG-IP iRule example"
   source      = "AI"
   irule_name  = "full-irule"
   code        = "when CLIENT_ACCEPTED { log local0. client-accepted }"
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "shared"
   }
 
@@ -311,16 +315,16 @@ resource "f5xc_bigip_irule" "test" {
 
 func testAccResourceAutoF5XCBigipIruleConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bigip_irule" "test" {
+resource "f5xc_bigip_irule" "example" {
   name        = %q
   namespace   = %q
-  description = "bigip irule full config updated"
+  description = "BIG-IP iRule example updated"
   source      = "Human"
   irule_name  = "full-irule-updated"
-  code        = "when HTTP_RESPONSE { HTTP::header insert x-full updated }"
+  code        = "when HTTP_RESPONSE { HTTP::header insert x-updated full example }"
 
   labels = {
-    env  = "prod"
+    env  = "example"
     tier = "edge"
   }
 

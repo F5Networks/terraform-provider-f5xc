@@ -58,8 +58,8 @@ func (v InlineReferenceValidator) ValidateObject(_ context.Context, req validato
 					req.Path,
 					"Conflicting Service Policy Configuration",
 					fmt.Sprintf(
-						"Configuring '%s' in 'service_policy_choice' on HTTP LoadBalancer is incompatible with '%s'.\n"+
-							"To manage service policies, please remove 'service_policy_choice' from the HTTP LoadBalancer resource and use '%s' instead.",
+						"Configuring '%s' inline is incompatible with the attachment resource '%s'.\n"+
+							"To manage policies via attachment resource, remove this inline choice from the parent resource and use '%s' instead.",
 						attrKey, v.SuggestedResource, v.SuggestedResource,
 					),
 				)

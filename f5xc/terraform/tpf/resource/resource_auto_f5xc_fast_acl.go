@@ -39,6 +39,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -49,6 +50,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_fast_acl "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/fast_acl"
 	ves_io_schema_fast_acl_rule "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/fast_acl_rule"
@@ -617,8 +619,8 @@ func (r *ResourceF5XCFastAcl) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Destination type Type of destination configuration. It will provide destination IP, port and protocol 'ves-io' tenant has the option of choosing all type of destination type Any other tenant can choose destination as interface_services, vip_services or all_services Further details on each destination type on RE and CE is provided in destination options Destination protocol and port for VIP or interface services is picked from configured listener",
-		Description:         "Destination type Type of destination configuration. It will provide destination IP, port and protocol 'ves-io' tenant has the option of choosing all type of destination type Any other tenant can choose destination as interface_services, vip_services or all_services Further details on each destination type on RE and CE is provided in destination options Destination protocol and port for VIP or interface services is picked from configured listener",
+		MarkdownDescription: "Fast ACL provides destination and specifies rules to protect the site from denial of service attacks.<br>- It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}.<br>- Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action<br>- Destination is always provided as a combination of destination IP and port<br><br>Typical Usecase(s) are:<br>- Rate-limiting traffic to destination<br>- Accepting traffic from certain source IPs to destination<br>- Ratelimiting or dropping traffic from source IPs to destination<br><br>These ACL rules are applied at very early stage in datapath ingress processing and form<br>first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress),<br>unlike session based ACL where action is calculated only on first packet in session.<br><br>Fast ACL picks source based on Longest prefix match for faster processing, which differs<br>from traditional ACL where rules are evaluated in order. If none of the rule matches<br>then default action is to forward the packet<br><br>Fast ACL on a customer edge(CE) Site<br><br>Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site<br>- Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall<br>- Network Firewall is referred to by a Fleet<br>- CE site is member of the Fleet<br>- Only tenant can configure the set<br>- Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE<br><br>Selection of Destination<br>- Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL<br><br>Fast ACL on RE<br><br>- Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s)<br>- Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected<br><br>Selection of public VIP destination<br>- tenant ACL can pick VIP corresponding to tenant only<br>Selection of shared VIP destination<br>- tenant CANNOT use this option on RE.<br>Custom prefixes destination<br>- tenant CANNOT use this option on RE.<br>Shared VIP services<br>- tenant CANNOT use this option, is only meant for volterra administrators<br><br>Default Protocol Policer<br><br>- Is valid on CE and RE and configurable by any tenant<br>- Used for rate limiting<br>- Applied when none of the source rules match<br>- Protocols supported are ICMP, TCP, UDP, DNS",
+		Description:         "Fast ACL provides destination and specifies rules to protect the site from denial of service attacks. - It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}. - Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action - Destination is always provided as a combination of destination IP and port Typical Usecase(s) are: - Rate-limiting traffic to destination - Accepting traffic from certain source IPs to destination - Ratelimiting or dropping traffic from source IPs to destination These ACL rules are applied at very early stage in datapath ingress processing and form first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress), unlike session based ACL where action is calculated only on first packet in session. Fast ACL picks source based on Longest prefix match for faster processing, which differs from traditional ACL where rules are evaluated in order. If none of the rule matches then default action is to forward the packet Fast ACL on a customer edge(CE) Site Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site - Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall - Network Firewall is referred to by a Fleet - CE site is member of the Fleet - Only tenant can configure the set - Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE Selection of Destination - Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL Fast ACL on RE - Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s) - Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected Selection of public VIP destination - tenant ACL can pick VIP corresponding to tenant only Selection of shared VIP destination - tenant CANNOT use this option on RE. Custom prefixes destination - tenant CANNOT use this option on RE. Shared VIP services - tenant CANNOT use this option, is only meant for volterra administrators Default Protocol Policer - Is valid on CE and RE and configurable by any tenant - Used for rate limiting - Applied when none of the source rules match - Protocols supported are ICMP, TCP, UDP, DNS",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -674,7 +676,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -715,7 +717,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 						Optional:            false,
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+							stringplanmodifier.UseNonNullStateForUnknown(),
 						},
 					},
 				},
@@ -811,7 +813,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -858,7 +860,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -1027,7 +1029,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1052,7 +1054,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(256),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 															},
@@ -1160,7 +1162,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -1250,7 +1252,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -1297,7 +1299,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 																				Optional:            false,
 																				Computed:            true,
 																				PlanModifiers: []planmodifier.String{
-																					stringplanmodifier.UseStateForUnknown(),
+																					stringplanmodifier.UseNonNullStateForUnknown(),
 																				},
 																			},
 																		},
@@ -1466,7 +1468,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1491,7 +1493,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(256),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 															},
@@ -1665,9 +1667,17 @@ func (r *ResourceF5XCFastAcl) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCFastAclModel
 
 	// Read Terraform plan data into the model
@@ -2609,7 +2619,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2632,7 +2642,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_fast_acl.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "fast_acl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "fast_acl", err),
 		)
 		return
 	}
@@ -3150,6 +3160,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesActionActionModelAttributeMap)
 							}
 
@@ -3302,6 +3313,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
 									fastAclPortValueTypeModel.PortValueTypeChoice = finalObj
 								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
 									fastAclPortValueTypeModel.PortValueTypeChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesPortPortValueTypeChoiceModelAttributeMap)
 								}
 
@@ -3425,29 +3437,31 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 											if response.Diagnostics.HasError() {
 												return
 											}
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: reconcile backend list order against client representation.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = listValue
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										} else {
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										}
 									}
 
@@ -3491,6 +3505,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesSourceModelAttributeMap)
 						}
 
@@ -3659,6 +3674,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					reAclAttributeMap["vip_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					reAclAttributeMap["vip_choice"] = types.ObjectNull(FastAclSiteChoiceReAclVipChoiceModelAttributeMap)
 				}
 
@@ -3912,6 +3928,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesActionActionModelAttributeMap)
 							}
 
@@ -4064,6 +4081,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
 									fastAclPortValueTypeModel.PortValueTypeChoice = finalObj
 								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
 									fastAclPortValueTypeModel.PortValueTypeChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesPortPortValueTypeChoiceModelAttributeMap)
 								}
 
@@ -4187,29 +4205,31 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 											if response.Diagnostics.HasError() {
 												return
 											}
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: reconcile backend list order against client representation.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = listValue
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										} else {
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										}
 									}
 
@@ -4253,6 +4273,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesSourceModelAttributeMap)
 						}
 
@@ -4347,6 +4368,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					siteAclAttributeMap["network_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					siteAclAttributeMap["network_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclNetworkChoiceModelAttributeMap)
 				}
 
@@ -4444,6 +4466,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					siteAclAttributeMap["vip_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					siteAclAttributeMap["vip_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclVipChoiceModelAttributeMap)
 				}
 
@@ -4534,7 +4557,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "fast_acl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "fast_acl", err),
 		)
 		return
 	}
@@ -5046,6 +5069,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesActionActionModelAttributeMap)
 							}
 
@@ -5198,6 +5222,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
 									fastAclPortValueTypeModel.PortValueTypeChoice = finalObj
 								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
 									fastAclPortValueTypeModel.PortValueTypeChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesPortPortValueTypeChoiceModelAttributeMap)
 								}
 
@@ -5321,29 +5346,31 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 											if response.Diagnostics.HasError() {
 												return
 											}
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: reconcile backend list order against client representation.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = listValue
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										} else {
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										}
 									}
 
@@ -5387,6 +5414,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesSourceModelAttributeMap)
 						}
 
@@ -5555,7 +5583,12 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					reAclAttributeMap["vip_choice"] = finalObj
 				} else {
-					reAclAttributeMap["vip_choice"] = types.ObjectNull(FastAclSiteChoiceReAclVipChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					reAclAttributeMap["vip_choice"] = types.ObjectValueMust(FastAclSiteChoiceReAclVipChoiceModelAttributeMap, map[string]attr.Value{
+						"all_public_vips":     types.BoolValue(true),
+						"default_tenant_vip":  types.BoolNull(),
+						"selected_tenant_vip": types.ObjectNull(FastAclSiteChoiceReAclVipChoiceSelectedTenantVipModelAttributeMap),
+					})
 				}
 
 				reAclObj, reAclObjDiags := types.ObjectValue(FastAclSiteChoiceReAclModelAttributeMap, reAclAttributeMap)
@@ -5808,6 +5841,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesActionActionModelAttributeMap)
 							}
 
@@ -5960,6 +5994,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
 									fastAclPortValueTypeModel.PortValueTypeChoice = finalObj
 								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
 									fastAclPortValueTypeModel.PortValueTypeChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesPortPortValueTypeChoiceModelAttributeMap)
 								}
 
@@ -6083,29 +6118,31 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 											if response.Diagnostics.HasError() {
 												return
 											}
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: reconcile backend list order against client representation.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = listValue
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										} else {
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 											var priorValIpv6Prefix types.List
 											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										}
 									}
 
@@ -6149,6 +6186,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesSourceModelAttributeMap)
 						}
 
@@ -6243,7 +6281,11 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					siteAclAttributeMap["network_choice"] = finalObj
 				} else {
-					siteAclAttributeMap["network_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclNetworkChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					siteAclAttributeMap["network_choice"] = types.ObjectValueMust(FastAclSiteChoiceSiteAclNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"inside_network":  types.BoolNull(),
+						"outside_network": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> VipChoice
@@ -6340,7 +6382,12 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					siteAclAttributeMap["vip_choice"] = finalObj
 				} else {
-					siteAclAttributeMap["vip_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclVipChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					siteAclAttributeMap["vip_choice"] = types.ObjectValueMust(FastAclSiteChoiceSiteAclVipChoiceModelAttributeMap, map[string]attr.Value{
+						"all_services":       types.BoolNull(),
+						"interface_services": types.BoolValue(true),
+						"vip_services":       types.BoolNull(),
+					})
 				}
 
 				siteAclObj, siteAclObjDiags := types.ObjectValue(FastAclSiteChoiceSiteAclModelAttributeMap, siteAclAttributeMap)
@@ -6371,7 +6418,20 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.SiteChoice = types.ObjectNull(FastAclSiteChoiceModelAttributeMap)
+
+		if data.SiteChoice.IsNull() || data.SiteChoice.IsUnknown() || ((data.SiteChoice.Attributes()["re_acl"].(types.Object).IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).IsUnknown() || ((data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["fast_acl_rules"].IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["fast_acl_rules"].IsUnknown()) && (data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).IsUnknown() || ((data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["all_public_vips"].IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["all_public_vips"].IsUnknown()) && (data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["default_tenant_vip"].IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["default_tenant_vip"].IsUnknown()) && (data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["selected_tenant_vip"].(types.Object).IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["selected_tenant_vip"].(types.Object).IsUnknown() || ((data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["selected_tenant_vip"].(types.Object).Attributes()["default_tenant_vip"].IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["selected_tenant_vip"].(types.Object).Attributes()["default_tenant_vip"].IsUnknown()) && (data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["selected_tenant_vip"].(types.Object).Attributes()["public_ip_refs"].IsNull() || data.SiteChoice.Attributes()["re_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["selected_tenant_vip"].(types.Object).Attributes()["public_ip_refs"].IsUnknown()))))))) && (data.SiteChoice.Attributes()["site_acl"].(types.Object).IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).IsUnknown() || ((data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["fast_acl_rules"].IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["fast_acl_rules"].IsUnknown()) && (data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["network_choice"].(types.Object).IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["network_choice"].(types.Object).IsUnknown() || ((data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["network_choice"].(types.Object).Attributes()["inside_network"].IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["network_choice"].(types.Object).Attributes()["inside_network"].IsUnknown()) && (data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["network_choice"].(types.Object).Attributes()["outside_network"].IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["network_choice"].(types.Object).Attributes()["outside_network"].IsUnknown()))) && (data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).IsUnknown() || ((data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["all_services"].IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["all_services"].IsUnknown()) && (data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["interface_services"].IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["interface_services"].IsUnknown()) && (data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["vip_services"].IsNull() || data.SiteChoice.Attributes()["site_acl"].(types.Object).Attributes()["vip_choice"].(types.Object).Attributes()["vip_services"].IsUnknown())))))) {
+			data.SiteChoice = types.ObjectValueMust(FastAclSiteChoiceModelAttributeMap, map[string]attr.Value{
+				"re_acl": types.ObjectValueMust(FastAclSiteChoiceReAclModelAttributeMap, map[string]attr.Value{
+					"fast_acl_rules": types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceReAclFastAclRulesModelAttributeMap}),
+					"vip_choice": types.ObjectValueMust(FastAclSiteChoiceReAclVipChoiceModelAttributeMap, map[string]attr.Value{
+						"all_public_vips":     types.BoolValue(true),
+						"default_tenant_vip":  types.BoolNull(),
+						"selected_tenant_vip": types.ObjectNull(FastAclSiteChoiceReAclVipChoiceSelectedTenantVipModelAttributeMap),
+					}),
+				}),
+				"site_acl": types.ObjectNull(FastAclSiteChoiceSiteAclModelAttributeMap),
+			})
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -6383,6 +6443,12 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCFastAclModel
@@ -7344,7 +7410,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -7360,7 +7426,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 	err = r.client.ReplaceObject(ctx, ves_io_schema_fast_acl.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "fast_acl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "fast_acl", err),
 		)
 		return
 	}
@@ -7375,7 +7441,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "fast_acl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "fast_acl", err),
 		)
 		return
 	}
@@ -7481,34 +7547,27 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -7537,17 +7596,23 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -7887,6 +7952,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesActionActionModelAttributeMap)
 							}
 
@@ -8039,6 +8105,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
 									fastAclPortValueTypeModel.PortValueTypeChoice = finalObj
 								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
 									fastAclPortValueTypeModel.PortValueTypeChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesPortPortValueTypeChoiceModelAttributeMap)
 								}
 
@@ -8162,29 +8229,31 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 											if response.Diagnostics.HasError() {
 												return
 											}
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: reconcile backend list order against client representation.
 											var priorValIpv6Prefix types.List
-											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
+											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = listValue
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										} else {
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 											var priorValIpv6Prefix types.List
-											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
+											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("re_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										}
 									}
 
@@ -8228,6 +8297,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesSourceModelAttributeMap)
 						}
 
@@ -8396,6 +8466,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					reAclAttributeMap["vip_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					reAclAttributeMap["vip_choice"] = types.ObjectNull(FastAclSiteChoiceReAclVipChoiceModelAttributeMap)
 				}
 
@@ -8649,6 +8720,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesActionActionModelAttributeMap)
 							}
 
@@ -8801,6 +8873,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
 									fastAclPortValueTypeModel.PortValueTypeChoice = finalObj
 								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
 									fastAclPortValueTypeModel.PortValueTypeChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesPortPortValueTypeChoiceModelAttributeMap)
 								}
 
@@ -8924,29 +8997,31 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 											if response.Diagnostics.HasError() {
 												return
 											}
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: reconcile backend list order against client representation.
 											var priorValIpv6Prefix types.List
-											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
+											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = listValue
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										} else {
-											// State Healing: preserve prior list representation for marked fields.
+											// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 											var priorValIpv6Prefix types.List
-											response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
+											response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("site_choice").AtName("site_acl").AtName("fast_acl_rules").AtListIndex(i).AtName("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-												prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-											} else {
-												prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+											reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+											response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+											if response.Diagnostics.HasError() {
+												return
 											}
+											prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 										}
 									}
 
@@ -8990,6 +9065,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesSourceModelAttributeMap)
 						}
 
@@ -9084,6 +9160,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					siteAclAttributeMap["network_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					siteAclAttributeMap["network_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclNetworkChoiceModelAttributeMap)
 				}
 
@@ -9181,6 +9258,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					siteAclAttributeMap["vip_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					siteAclAttributeMap["vip_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclVipChoiceModelAttributeMap)
 				}
 
@@ -9287,7 +9365,7 @@ func (r *ResourceF5XCFastAcl) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "fast_acl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "fast_acl", err),
 		)
 		return
 	}

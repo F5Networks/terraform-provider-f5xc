@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCNetworkPolicyView_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-npv-" + acctest.RandString(t, 8)
+	name := "example-npv-" + acctest.RandString(t, 8)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkPolicyViewDestroyProducer(t),
@@ -39,30 +39,34 @@ func TestAccResourceAutoF5XCNetworkPolicyView_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withDescription(name, namespace, "network policy view basic updated"),
+				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withDescription(name, namespace, "Updated basic network policy view example"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNetworkPolicyViewConfig_basic("example-npv", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCNetworkPolicyView_withEndpointChoiceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-npv-" + acctest.RandString(t, 8)
+	name := "example-npv-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +78,20 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withEndpointChoiceTransition(t *te
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withEndpointChoice(name, namespace, "outside_endpoints"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withEndpointChoice(name, namespace, "inside_endpoints"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +101,7 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withEndpointChoiceTransition(t *te
 func TestAccResourceAutoF5XCNetworkPolicyView_withAnyEndpoint(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-npv-" + acctest.RandString(t, 8)
+	name := "example-npv-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +113,20 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withAnyEndpoint(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withAnyEndpoint(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withEndpointChoice(name, namespace, "outside_endpoints"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +136,7 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withAnyEndpoint(t *testing.T) {
 func TestAccResourceAutoF5XCNetworkPolicyView_withPrefixListEndpoint(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-npv-" + acctest.RandString(t, 8)
+	name := "example-npv-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +148,20 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withPrefixListEndpoint(t *testing.
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withPrefixList(name, namespace, "[\"10.1.0.0/16\"]"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withPrefixList(name, namespace, "[\"10.1.0.0/16\", \"10.2.0.0/16\"]"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,7 +171,7 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withPrefixListEndpoint(t *testing.
 func TestAccResourceAutoF5XCNetworkPolicyView_withIngressRules(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-npv-" + acctest.RandString(t, 8)
+	name := "example-npv-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -179,20 +183,20 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withIngressRules(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withIngressRule(name, namespace, "ALLOW", "all_tcp_traffic"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_withIngressRule(name, namespace, "DENY", "all_udp_traffic"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -202,36 +206,40 @@ func TestAccResourceAutoF5XCNetworkPolicyView_withIngressRules(t *testing.T) {
 func TestAccResourceAutoF5XCNetworkPolicyView_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-npv-" + acctest.RandString(t, 8)
+	name := "example-npv-" + acctest.RandString(t, 8)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkPolicyViewDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_full(name, namespace, "network policy view full", "team-a"),
+				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_full(name, namespace, "Full network policy view example", "example-team"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_full(name, namespace, "network policy view full updated", "team-b"),
+				Config: testAccResourceAutoF5XCNetworkPolicyViewConfig_full(name, namespace, "Updated full network policy view example", "example-team-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_network_policy_view.test",
+				ResourceName:                         "f5xc_network_policy_view.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_policy_view.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNetworkPolicyViewConfig_full("example-npv", namespace, "Full network policy view example", "example-team"),
+		})
 }
 
 func testAccCheckNetworkPolicyViewDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -240,7 +248,7 @@ func testAccCheckNetworkPolicyViewDestroyProducer(t *testing.T) func(*terraform.
 
 func testAccResourceAutoF5XCNetworkPolicyViewConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_view" "test" {
+resource "f5xc_network_policy_view" "example" {
   name      = %q
   namespace = %q
 
@@ -255,7 +263,7 @@ resource "f5xc_network_policy_view" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyViewConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_view" "test" {
+resource "f5xc_network_policy_view" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -276,7 +284,7 @@ func testAccResourceAutoF5XCNetworkPolicyViewConfig_withEndpointChoice(name, nam
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_view" "test" {
+resource "f5xc_network_policy_view" "example" {
   name      = %q
   namespace = %q
 
@@ -291,7 +299,7 @@ resource "f5xc_network_policy_view" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyViewConfig_withAnyEndpoint(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_view" "test" {
+resource "f5xc_network_policy_view" "example" {
   name      = %q
   namespace = %q
 
@@ -306,7 +314,7 @@ resource "f5xc_network_policy_view" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyViewConfig_withPrefixList(name, namespace, prefixes string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_view" "test" {
+resource "f5xc_network_policy_view" "example" {
   name      = %q
   namespace = %q
 
@@ -328,7 +336,7 @@ func testAccResourceAutoF5XCNetworkPolicyViewConfig_withIngressRule(name, namesp
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_view" "test" {
+resource "f5xc_network_policy_view" "example" {
   name      = %q
   namespace = %q
 
@@ -340,7 +348,7 @@ resource "f5xc_network_policy_view" "test" {
 
   ingress_rules = [{
     metadata = {
-      name = "rule-1"
+      name = "example-rule"
     }
     action = [%q]
     other_endpoint_choice = {
@@ -356,18 +364,18 @@ resource "f5xc_network_policy_view" "test" {
 
 func testAccResourceAutoF5XCNetworkPolicyViewConfig_full(name, namespace, description, team string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_policy_view" "test" {
+resource "f5xc_network_policy_view" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
   labels = {
-    env  = "acceptance"
+    env  = "example"
     team = %q
   }
 
   annotations = {
-    owner = "network"
+    owner = "platform-team"
   }
 
   endpoint = {

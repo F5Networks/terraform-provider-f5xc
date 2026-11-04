@@ -6,14 +6,10 @@
 package data
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -33,21 +29,45 @@ type DataSourceF5XCActiveAlertPolicies struct {
 	client *client.APIClient
 }
 
+type ActiveAlertPoliciesAlertPolicyStatus struct {
+	Policy types.Object `tfsdk:"policy"`
+	Reason types.List   `tfsdk:"reason"`
+	Status types.String `tfsdk:"status"`
+}
+
 // DataSourceF5XCActiveAlertPoliciesModel describes the resource data model.
 type DataSourceF5XCActiveAlertPoliciesModel struct {
-	Annotations   types.Map      `tfsdk:"annotations"`
-	Description   types.String   `tfsdk:"description"`
-	Labels        types.Map      `tfsdk:"labels"`
-	Name          types.String   `tfsdk:"name"`
-	Namespace     types.String   `tfsdk:"namespace"`
-	Uid           types.String   `tfsdk:"uid"`
-	AlertPolicies types.List     `tfsdk:"alert_policies"`
-	Timeouts      timeouts.Value `tfsdk:"timeouts"`
+	Namespace           types.String   `tfsdk:"namespace"`
+	AlertPolicies       types.List     `tfsdk:"alert_policies"`
+	AlertPoliciesStatus types.List     `tfsdk:"alert_policies_status"`
+	Timeouts            timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
 // Attribute map for ArrayOfPointerField --> AlertPolicies
 var ActiveAlertPoliciesAlertPoliciesObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> AlertPoliciesStatus
+var ActiveAlertPoliciesAlertPoliciesStatusModelAttributeMap = map[string]attr.Type{
+	"policy": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+	"reason": types.ListType{
+		ElemType: types.StringType,
+	},
+	"status": types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> Policy
+var ActiveAlertPoliciesAlertPoliciesStatusPolicyModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
 	"namespace": types.StringType,
@@ -68,52 +88,20 @@ func (d *DataSourceF5XCActiveAlertPolicies) Metadata(ctx context.Context, reques
 func (r *DataSourceF5XCActiveAlertPolicies) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		MarkdownDescription: "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names.<br><br>Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace<br><br>All monitoring is scoped by namespace<br><br>List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace<br><br>User roles can be scoped by namespace<br><br>The 'namespace' value of a namespace object itself is empty string",
+		Description:         "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names. Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace All monitoring is scoped by namespace List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace User roles can be scoped by namespace The 'namespace' value of a namespace object itself is empty string",
 
 		Attributes: map[string]schema.Attribute{
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
 			"namespace": schema.StringAttribute{
 				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"alert_policies": schema.ListNestedAttribute{
 				Description: "alert_policies A list of references to alert_policy objects.",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -131,6 +119,55 @@ func (r *DataSourceF5XCActiveAlertPolicies) Schema(ctx context.Context, request 
 						},
 						"tenant": schema.StringAttribute{
 							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+					},
+				},
+			},
+			"alert_policies_status": schema.ListNestedAttribute{
+				Description: "policy_status The status of alert policies",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"policy": schema.SingleNestedAttribute{
+							Description: "Alert Policy Reference to Alert Policy objects to send the alert.",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"namespace": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"tenant": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+							},
+						},
+						"reason": schema.ListAttribute{
+							Description: "Reason A human-readable description of why this status is in the 'Partially Active' or 'Inactive' status. The value will be empty for 'Active' status.",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"status": schema.StringAttribute{
+							Description: "Status Staus of the alert policy",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
@@ -193,89 +230,30 @@ func (d *DataSourceF5XCActiveAlertPolicies) Read(ctx context.Context, request da
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_namespace.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	// CustomAPI Read: GetActiveAlertPolicies
+	customReadRPCFQN := "ves.io.schema.namespace.NamespaceCustomAPI.GetActiveAlertPolicies"
+	customReadURI := fmt.Sprintf("/public/namespaces/%s/active_alert_policies", data.Namespace.ValueString())
+
+	readRespMsg, err := d.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "active_alert_policies", err))
 		return
 	}
-
-	// Write back the response to the model
-	metaData := httpResp.GetObjMetadata()
-	var specData ves_io_schema_namespace.SetActiveAlertPoliciesRequest
-	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
-		var buf bytes.Buffer
-		marshaler := &jsonpb.Marshaler{
-			OrigName: true,
-		}
-
-		specMsg, ok := interface{}(objSpec).(proto.Message)
-		if !ok {
-			response.Diagnostics.AddError("Internal Error", "objSpec is not a proto message")
-			return
-		}
-
-		if err := marshaler.Marshal(&buf, specMsg); err != nil {
-			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal: %s", err))
-			return
-		}
-
-		if err := json.Unmarshal(buf.Bytes(), &rawSpecMap); err != nil {
-			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to marshal: %s", err))
-			return
-		}
-
-		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
-
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
-			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
-			return
-		}
+	// Cast the proto.Message to the concrete read response type
+	readResp, ok := readRespMsg.(*ves_io_schema_namespace.GetActiveAlertPoliciesResponse)
+	if !ok {
+		response.Diagnostics.AddError("Type Assertion Error", fmt.Sprintf("Failed to cast read response to *ves_io_schema_namespace.GetActiveAlertPoliciesResponse, got: %T", readRespMsg))
+		return
 	}
-	systemMetaData := httpResp.GetObjSystemMetadata()
+	specData := readResp
 
-	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
-	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Description.IsNull() || data.Description.IsUnknown() {
-		data.Description = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Name.IsNull() || data.Name.IsUnknown() {
-		data.Name = types.StringNull()
-	}
 
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
 	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
 	// were set from the request config and must not be overwritten with an empty string).
 	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
 		data.Namespace = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Uid.IsNull() || data.Uid.IsUnknown() {
-		data.Uid = types.StringNull()
 	}
 
 	// data SpecToModelRoot ArrayOfPointerField --> AlertPolicies
@@ -332,6 +310,108 @@ func (d *DataSourceF5XCActiveAlertPolicies) Read(ctx context.Context, request da
 		}
 		nullAlertPoliciesList := basetypes.NewListNull(alertPoliciesObjectType)
 		data.AlertPolicies = nullAlertPoliciesList
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> AlertPoliciesStatus
+	if len(specData.GetAlertPoliciesStatus()) > 0 {
+		alertPoliciesStatusElements := make([]ActiveAlertPoliciesAlertPolicyStatus, 0, len(specData.GetAlertPoliciesStatus()))
+
+		for _, alertPoliciesStatusElement := range specData.GetAlertPoliciesStatus() {
+			activeAlertPoliciesAlertPolicyStatusModel := ActiveAlertPoliciesAlertPolicyStatus{}
+
+			// data specToModelNested RequiredPointerField --> Policy
+			if alertPoliciesStatusElement.GetPolicy() != nil {
+				// Create the nested Go struct
+				objectRefTypeModelModel := &ObjectRefTypeModel{}
+				policyElement := alertPoliciesStatusElement.GetPolicy()
+
+				// Recursively populate the nested struct
+
+				// data specToModelNested RequiredStringField --> Name
+				if policyElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(policyElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// data specToModelNested RequiredStringField --> Namespace
+				if policyElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(policyElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				// data specToModelNested StringField --> Tenant
+				if policyElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(policyElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, ActiveAlertPoliciesAlertPoliciesStatusPolicyModelAttributeMap, objectRefTypeModelModel)
+				response.Diagnostics.Append(objDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				activeAlertPoliciesAlertPolicyStatusModel.Policy = objectRefTypeModelModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+				// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+				// here because the API may always return a non-nil struct (with REDACTED values) for this
+				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				activeAlertPoliciesAlertPolicyStatusModel.Policy = types.ObjectNull(ActiveAlertPoliciesAlertPoliciesStatusPolicyModelAttributeMap)
+			}
+
+			// data specToModelNested ArrayOfStringField --> Reason
+			if len(alertPoliciesStatusElement.GetReason()) > 0 {
+				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, alertPoliciesStatusElement.GetReason())
+				response.Diagnostics.Append(listDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				activeAlertPoliciesAlertPolicyStatusModel.Reason = listValue
+			} else {
+				activeAlertPoliciesAlertPolicyStatusModel.Reason = types.ListNull(types.StringType)
+			}
+
+			// data specToModelNested StringField --> Status
+			if alertPoliciesStatusElement.GetStatus() != "" {
+				activeAlertPoliciesAlertPolicyStatusModel.Status = types.StringValue(alertPoliciesStatusElement.GetStatus())
+			} else {
+				// Empty string, set to null
+				activeAlertPoliciesAlertPolicyStatusModel.Status = types.StringNull()
+			}
+
+			alertPoliciesStatusElements = append(alertPoliciesStatusElements, activeAlertPoliciesAlertPolicyStatusModel)
+		}
+
+		{
+			alertPoliciesStatusList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ActiveAlertPoliciesAlertPoliciesStatusModelAttributeMap,
+				alertPoliciesStatusElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.AlertPoliciesStatus = alertPoliciesStatusList
+		}
+	} else {
+		var alertPoliciesStatusObjectType = basetypes.ObjectType{
+			AttrTypes: ActiveAlertPoliciesAlertPoliciesStatusModelAttributeMap,
+		}
+		nullAlertPoliciesStatusList := basetypes.NewListNull(alertPoliciesStatusObjectType)
+		data.AlertPoliciesStatus = nullAlertPoliciesStatusList
 	}
 
 	// Set state to fully populated data

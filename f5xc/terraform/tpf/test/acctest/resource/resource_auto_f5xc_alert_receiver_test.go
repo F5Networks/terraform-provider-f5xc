@@ -38,9 +38,9 @@ func TestAccResourceAutoF5XCAlertReceiver_basicEmail(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-alert-receiver-" + acctest.RandString(t, 8)
+	name := "example-alert-receiver-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertReceiverDestroyProducer(t),
@@ -49,33 +49,37 @@ func TestAccResourceAutoF5XCAlertReceiver_basicEmail(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertReceiverConfig_basic(name, namespace, "alerts@example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertReceiverConfig_basicUpdated(name, namespace, "alerts-updated@example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAlertReceiverConfig_basic("example-alert-receiver", "default", "alerts@example.com"),
+		})
 }
 
 func TestAccResourceAutoF5XCAlertReceiver_withSMS(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-alert-receiver-" + acctest.RandString(t, 8)
+	name := "example-alert-receiver-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -86,22 +90,22 @@ func TestAccResourceAutoF5XCAlertReceiver_withSMS(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertReceiverConfig_withSMS(name, namespace, "+14084004001"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertReceiverConfig_withSMS(name, namespace, "+14084004002"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -112,7 +116,7 @@ func TestAccResourceAutoF5XCAlertReceiver_withSlack(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-alert-receiver-" + acctest.RandString(t, 8)
+	name := "example-alert-receiver-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -120,25 +124,25 @@ func TestAccResourceAutoF5XCAlertReceiver_withSlack(t *testing.T) {
 		CheckDestroy:             testAccCheckAlertReceiverDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCAlertReceiverConfig_withSlack(name, namespace, "alerts-main", "string:///aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vaW5pdA=="),
+				Config: testAccResourceAutoF5XCAlertReceiverConfig_withSlack(name, namespace, "alerts-main", "string:///aHR0cHM6Ly9leGFtcGxlLmNvbS9zbGFjay13ZWJob29r"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCAlertReceiverConfig_withSlack(name, namespace, "alerts-updated", "string:///aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vdXBkYXRlZA=="),
+				Config: testAccResourceAutoF5XCAlertReceiverConfig_withSlack(name, namespace, "alerts-updated", "string:///aHR0cHM6Ly9leGFtcGxlLmNvbS9zbGFjay13ZWJob29r"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -149,7 +153,7 @@ func TestAccResourceAutoF5XCAlertReceiver_withPagerDuty(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-alert-receiver-" + acctest.RandString(t, 8)
+	name := "example-alert-receiver-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -157,25 +161,25 @@ func TestAccResourceAutoF5XCAlertReceiver_withPagerDuty(t *testing.T) {
 		CheckDestroy:             testAccCheckAlertReceiverDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCAlertReceiverConfig_withPagerDuty(name, namespace, "https://events.pagerduty.com/v2/enqueue", "string:///cGFnZXJkdXR5LWtleS0x"),
+				Config: testAccResourceAutoF5XCAlertReceiverConfig_withPagerDuty(name, namespace, "https://events.pagerduty.com/v2/enqueue", "string:///ZXhhbXBsZS1yb3V0aW5nLWtleQ=="),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCAlertReceiverConfig_withPagerDuty(name, namespace, "https://events.eu.pagerduty.com/v2/enqueue", "string:///cGFnZXJkdXR5LWtleS0y"),
+				Config: testAccResourceAutoF5XCAlertReceiverConfig_withPagerDuty(name, namespace, "https://events.eu.pagerduty.com/v2/enqueue", "string:///ZXhhbXBsZS1yb3V0aW5nLWtleQ=="),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -186,7 +190,7 @@ func TestAccResourceAutoF5XCAlertReceiver_withOpsGenie(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-alert-receiver-" + acctest.RandString(t, 8)
+	name := "example-alert-receiver-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -194,25 +198,25 @@ func TestAccResourceAutoF5XCAlertReceiver_withOpsGenie(t *testing.T) {
 		CheckDestroy:             testAccCheckAlertReceiverDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCAlertReceiverConfig_withOpsGenie(name, namespace, "https://api.opsgenie.com", "string:///b3BzZ2VuaWUta2V5LTE="),
+				Config: testAccResourceAutoF5XCAlertReceiverConfig_withOpsGenie(name, namespace, "https://api.opsgenie.com", "string:///ZXhhbXBsZS1hcGkta2V5"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCAlertReceiverConfig_withOpsGenie(name, namespace, "https://api.eu.opsgenie.com", "string:///b3BzZ2VuaWUta2V5LTI="),
+				Config: testAccResourceAutoF5XCAlertReceiverConfig_withOpsGenie(name, namespace, "https://api.eu.opsgenie.com", "string:///ZXhhbXBsZS1hcGkta2V5"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -223,9 +227,9 @@ func TestAccResourceAutoF5XCAlertReceiver_fullWebhook(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-alert-receiver-" + acctest.RandString(t, 8)
+	name := "example-alert-receiver-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertReceiverDestroyProducer(t),
@@ -234,26 +238,30 @@ func TestAccResourceAutoF5XCAlertReceiver_fullWebhook(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertReceiverConfig_fullWebhook(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertReceiverConfig_fullWebhookUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_receiver.test",
+				ResourceName:                         "f5xc_alert_receiver.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAlertReceiverAuthChoiceImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_receiver.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAlertReceiverConfig_fullWebhookUpdated("example-alert-receiver", "default"),
+		})
 }
 
 func testAccCheckAlertReceiverDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -264,21 +272,21 @@ func testAccResourceAutoF5XCAlertReceiverConfig_basic(name, namespace, email str
 	receiverChoice := fmt.Sprintf(`    email = {
       email = %q
     }`, email)
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Alert receiver", "", receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Alert receiver example", "", receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig_basicUpdated(name, namespace, email string) string {
 	receiverChoice := fmt.Sprintf(`    email = {
       email = %q
     }`, email)
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Alert receiver updated", "", receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Alert receiver example updated", "", receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig_withSMS(name, namespace, contactNumber string) string {
 	receiverChoice := fmt.Sprintf(`    sms = {
       contact_number = %q
     }`, contactNumber)
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "SMS receiver", "", receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "SMS receiver example", "", receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig_withSlack(name, namespace, channel, secretURL string) string {
@@ -292,7 +300,7 @@ func testAccResourceAutoF5XCAlertReceiverConfig_withSlack(name, namespace, chann
       }
       channel = %q
     }`, secretURL, channel)
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Slack receiver", "", receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Slack receiver example", "", receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig_withPagerDuty(name, namespace, url, routingKey string) string {
@@ -306,7 +314,7 @@ func testAccResourceAutoF5XCAlertReceiverConfig_withPagerDuty(name, namespace, u
       }
       url = %q
     }`, routingKey, url)
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "PagerDuty receiver", "", receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "PagerDuty receiver example", "", receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig_withOpsGenie(name, namespace, url, apiKey string) string {
@@ -320,12 +328,12 @@ func testAccResourceAutoF5XCAlertReceiverConfig_withOpsGenie(name, namespace, ur
       }
       url = %q
     }`, apiKey, url)
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "OpsGenie receiver", "", receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "OpsGenie receiver example", "", receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig_fullWebhook(name, namespace string) string {
 	metadata := `  labels = {
-    env = "test"
+	env = "example"
   }
 
   annotations = {
@@ -336,7 +344,7 @@ func testAccResourceAutoF5XCAlertReceiverConfig_fullWebhook(name, namespace stri
       url = {
         secret_info_choice = {
           clear_secret_info = {
-						url = "string:///aHR0cHM6Ly93ZWJob29rLnNpdGUvaW5pdA=="
+						url = "string:///aHR0cHM6Ly9leGFtcGxlLmNvbS93ZWJob29r"
           }
         }
       }
@@ -349,12 +357,12 @@ func testAccResourceAutoF5XCAlertReceiverConfig_fullWebhook(name, namespace stri
         }
       }
     }`
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Webhook receiver", metadata, receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Webhook receiver example", metadata, receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig_fullWebhookUpdated(name, namespace string) string {
 	metadata := `  labels = {
-    env  = "stage"
+	env  = "example"
     team = "sre"
   }
 
@@ -366,7 +374,7 @@ func testAccResourceAutoF5XCAlertReceiverConfig_fullWebhookUpdated(name, namespa
       url = {
         secret_info_choice = {
           clear_secret_info = {
-						url = "string:///aHR0cHM6Ly93ZWJob29rLnNpdGUvdXBkYXRlZA=="
+						url = "string:///aHR0cHM6Ly9leGFtcGxlLmNvbS93ZWJob29r"
           }
         }
       }
@@ -377,7 +385,7 @@ func testAccResourceAutoF5XCAlertReceiverConfig_fullWebhookUpdated(name, namespa
             password = {
               secret_info_choice = {
                 clear_secret_info = {
-                  url = "string:///YXBpLXBhc3M="
+							url = "string:///ZXhhbXBsZS1wYXNzd29yZA=="
                 }
               }
             }
@@ -399,12 +407,12 @@ func testAccResourceAutoF5XCAlertReceiverConfig_fullWebhookUpdated(name, namespa
         }
       }
     }`
-	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Webhook receiver updated", metadata, receiverChoice)
+	return testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, "Webhook receiver example updated", metadata, receiverChoice)
 }
 
 func testAccResourceAutoF5XCAlertReceiverConfig(name, namespace, description, metadata, receiverChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_alert_receiver" "test" {
+resource "f5xc_alert_receiver" "example" {
   name        = %q
   namespace   = %q
   description = %q

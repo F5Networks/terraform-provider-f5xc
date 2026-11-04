@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
@@ -31,36 +30,46 @@ type DataSourceF5XCServiceCredential struct {
 	client *client.APIClient
 }
 
+type SvcCredentialNsAccessType struct {
+	NamespaceRoleMap types.Map `tfsdk:"namespace_role_map"`
+}
+
+type SvcCredentialRoleListType struct {
+	Names types.List `tfsdk:"names"`
+}
+
 // DataSourceF5XCServiceCredentialModel describes the resource data model.
 type DataSourceF5XCServiceCredentialModel struct {
-	Annotations          types.Map         `tfsdk:"annotations"`
-	Description          types.String      `tfsdk:"description"`
-	Labels               types.Map         `tfsdk:"labels"`
-	Name                 types.String      `tfsdk:"name"`
-	Namespace            types.String      `tfsdk:"namespace"`
-	Uid                  types.String      `tfsdk:"uid"`
-	Active               types.Bool        `tfsdk:"active"`
-	CertificateSerialNum types.String      `tfsdk:"certificate_serial_num"`
-	CreatedTimestamp     timetypes.RFC3339 `tfsdk:"created_timestamp"`
-	Digest               types.String      `tfsdk:"digest"`
-	ExpirationTimestamp  timetypes.RFC3339 `tfsdk:"expiration_timestamp"`
-	SiteName             types.String      `tfsdk:"site_name"`
-	Type                 types.List        `tfsdk:"type"`
-	Users                types.List        `tfsdk:"users"`
-	VirtualK8SName       types.String      `tfsdk:"virtual_k8s_name"`
-	VirtualK8SNamespace  types.String      `tfsdk:"virtual_k8s_namespace"`
-	CredentialName       types.String      `tfsdk:"credential_name"`
-	RenewTrigger         types.Bool        `tfsdk:"renew_trigger"`
-	Timeouts             timeouts.Value    `tfsdk:"timeouts"`
+	Active          types.Bool        `tfsdk:"active"`
+	CreateTimestamp timetypes.RFC3339 `tfsdk:"create_timestamp"`
+	ExpiryTimestamp timetypes.RFC3339 `tfsdk:"expiry_timestamp"`
+	Name            types.String      `tfsdk:"name"`
+	Namespace       types.String      `tfsdk:"namespace"`
+	NamespaceAccess types.Object      `tfsdk:"namespace_access"`
+	Type            types.List        `tfsdk:"type"`
+	Uid             types.String      `tfsdk:"uid"`
+	UserEmail       types.String      `tfsdk:"user_email"`
+	UserGroupNames  types.List        `tfsdk:"user_group_names"`
+	Timeouts        timeouts.Value    `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> Users
-var ServiceCredentialUsersObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> NamespaceAccess
+var ServiceCredentialNamespaceAccessModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
+	"namespace_role_map": types.MapType{
+		ElemType: types.ObjectType{
+			AttrTypes: ServiceCredentialNamespaceAccessNamespaceRoleMapModelAttributeMap,
+		},
+	},
+}
+
+// Attribute map for MapOfPointerField --> NamespaceRoleMap
+var ServiceCredentialNamespaceAccessNamespaceRoleMapModelAttributeMap = map[string]attr.Type{
+
+	"names": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -77,144 +86,92 @@ func (d *DataSourceF5XCServiceCredential) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCServiceCredential) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Replace Service credentials request to replace user_groups and roles in service credentials. Note - for updating expiry use RenewServiceCredentials and to active/inactive service credential use ActivateServiceCredentials API",
-		Description:         "Replace Service credentials request to replace user_groups and roles in service credentials. Note - for updating expiry use RenewServiceCredentials and to active/inactive service credential use ActivateServiceCredentials API",
+		MarkdownDescription: "Object keeps track of various object credentials downloaded by users.",
+		Description:         "Object keeps track of various object credentials downloaded by users.",
 
 		Attributes: map[string]schema.Attribute{
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+			"active": schema.BoolAttribute{
+				Description: "Active Possibility to deactivate credential with no deletion.",
 				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+			"create_timestamp": schema.StringAttribute{
+				Description: "Create timestamp Create time of API credential.",
+				CustomType:  timetypes.RFC3339Type{},
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
-				ElementType: types.StringType,
+			},
+			"expiry_timestamp": schema.StringAttribute{
+				Description: "Expiry time Expiry time of credential.",
+				CustomType:  timetypes.RFC3339Type{},
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
 			},
 			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Description: "Credential name Name of API credential object.",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 			},
 			"namespace": schema.StringAttribute{
-				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Description: "Namespace Namespace of API credential object.",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+			"namespace_access": schema.SingleNestedAttribute{
+				Description: "Namespace Access List of directly attached roles that the service credential has for each namespace.",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
-			},
-			"active": schema.BoolAttribute{
-				Description: "Active Possibility to deactivate/activate credential with no deletion",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"certificate_serial_num": schema.StringAttribute{
-				Description: "Certificate Serial Number Serial number of the client certificate part of credential type API Certificate or Kubeconfig",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"created_timestamp": schema.StringAttribute{
-				Description: "Created timestamp Timestamp of credential creation",
-				CustomType:  timetypes.RFC3339Type{},
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"digest": schema.StringAttribute{
-				Description: "Digest sha1 Digest sha1 of credential",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"expiration_timestamp": schema.StringAttribute{
-				Description: "Expiry timestamp Timestamp of credential expiration",
-				CustomType:  timetypes.RFC3339Type{},
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"site_name": schema.StringAttribute{
-				Description: "Site Name Site name when global kubeconfig is issued for physical k8s site",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"type": schema.ListAttribute{
-				Description: "API Credential type Type of API credential",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"users": schema.ListNestedAttribute{
-				Description: "user requesting credential Reference to user for whom API credential is created",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"namespace_role_map": schema.MapNestedAttribute{
+						Description: "Namespace Role Map List of all the roles for the entity in the namespaces",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"names": schema.ListAttribute{
+									Description: "Roles List List of all the roles",
+									ElementType: types.StringType,
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+							},
 						},
 					},
 				},
 			},
-			"virtual_k8s_name": schema.StringAttribute{
-				Description: "Virtual K8s Name of virtual K8s cluster",
+			"type": schema.ListAttribute{
+				Description: "Type of credential Type of API credential.",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"uid": schema.StringAttribute{
+				Description: "uuid of the record UUID of API credential object.",
+				Required:    false,
+				Optional:    true,
 				Computed:    true,
 			},
-			"virtual_k8s_namespace": schema.StringAttribute{
-				Description: "Virtual K8s namespace Namespace of virtual_k8s",
+			"user_email": schema.StringAttribute{
+				Description: "Email of user User email of user that requested credential .",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 			},
-			"credential_name": schema.StringAttribute{
-				Description: "Actual credential name assigned by backend.",
+			"user_group_names": schema.ListAttribute{
+				Description: "User Groups Names user group list associated to this service credential.",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
-			},
-			"renew_trigger": schema.BoolAttribute{
-				Description: "Local Terraform trigger flag for API token renewal.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Read: false, // activate timeouts.read
@@ -271,92 +228,116 @@ func (d *DataSourceF5XCServiceCredential) Read(ctx context.Context, request data
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_api_credential.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	// CustomAPI Read: ListServiceCredentials
+	customReadRPCFQN := "ves.io.schema.api_credential.CustomAPI.ListServiceCredentials"
+	customReadURI := fmt.Sprintf("/public/namespaces/%s/service_credentials", data.Namespace.ValueString())
+
+	readRespMsg, err := d.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "service_credential", err))
 		return
 	}
+	// Cast the proto.Message to the concrete read response type
+	readResp, ok := readRespMsg.(*ves_io_schema_api_credential.ListServiceCredentialsResponse)
+	if !ok {
+		response.Diagnostics.AddError("Type Assertion Error", fmt.Sprintf("Failed to cast read response to *ves_io_schema_api_credential.ListServiceCredentialsResponse, got: %T", readRespMsg))
+		return
+	}
+	// List-RPC: iterate items to find the entry matching the primary key.
+	// ListMatchExpr defines which Go expression to compare against (defaults to data.Name.ValueString()).
+	var readRespItem *ves_io_schema_api_credential.ListServiceCredentialsResponseItem
+	for _, item := range readResp.GetItems() {
+		itemName := item.GetName()
+		if itemName == data.Name.ValueString() {
+			readRespItem = item
+			break
+		}
+	}
+	if readRespItem == nil {
+		response.Diagnostics.AddError("Not Found", fmt.Sprintf("No %s matching the given attributes was found", "service_credential"))
+		return
+	}
+	specData := readRespItem
 
-	// Write back the response to the model
-	metaData := httpResp.GetObjMetadata()
-	specData := httpResp.GetObjSpec().(*ves_io_schema_api_credential.SpecType).GcSpec
-	systemMetaData := httpResp.GetObjSystemMetadata()
-
-	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
-	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Description.IsNull() || data.Description.IsUnknown() {
-		data.Description = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Name.IsNull() || data.Name.IsUnknown() {
-		data.Name = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
-		data.Namespace = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Uid.IsNull() || data.Uid.IsUnknown() {
-		data.Uid = types.StringNull()
-	}
 
 	// data SpecToModelRoot BoolField --> Active
 	data.Active = types.BoolValue(specData.GetActive())
 
-	// data SpecToModelRoot StringField --> CertificateSerialNum
-	if specData.GetCertificateSerialNum() != "" {
-		data.CertificateSerialNum = types.StringValue(specData.GetCertificateSerialNum())
+	// data SpecToModelRoot TimeStampField --> CreateTimestamp
+	data.CreateTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetCreateTimestamp())
+
+	// data SpecToModelRoot TimeStampField --> ExpiryTimestamp
+	data.ExpiryTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetExpiryTimestamp())
+
+	// data SpecToModelRoot StringField --> Name
+	if specData.GetName() != "" {
+		data.Name = types.StringValue(specData.GetName())
 	} else {
 		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.CertificateSerialNum = types.StringNull()
+		data.Name = types.StringNull()
 	}
 
-	// data SpecToModelRoot TimeStampField --> CreatedTimestamp
-	data.CreatedTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetCreatedTimestamp())
-
-	// data SpecToModelRoot StringField --> Digest
-	if specData.GetDigest() != "" {
-		data.Digest = types.StringValue(specData.GetDigest())
+	// data SpecToModelRoot StringField --> Namespace
+	if specData.GetNamespace() != "" {
+		data.Namespace = types.StringValue(specData.GetNamespace())
 	} else {
 		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Digest = types.StringNull()
+		data.Namespace = types.StringNull()
 	}
 
-	// data SpecToModelRoot TimeStampField --> ExpirationTimestamp
-	data.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetExpirationTimestamp())
+	// data SpecToModelRoot PointerField --> NamespaceAccess
+	if specData.GetNamespaceAccess() != nil {
+		var svcCredentialNsAccessTypeModel = &SvcCredentialNsAccessType{}
+		namespaceAccessElement := specData.GetNamespaceAccess()
 
-	// data SpecToModelRoot StringField --> SiteName
-	if specData.GetSiteName() != "" {
-		data.SiteName = types.StringValue(specData.GetSiteName())
+		// data specToModelNested MapOfPointerField --> NamespaceRoleMap
+		if len(namespaceAccessElement.GetNamespaceRoleMap()) > 0 {
+			namespaceRoleMapGoMap := make(map[string]SvcCredentialRoleListType, len(namespaceAccessElement.GetNamespaceRoleMap()))
+
+			for key, namespaceRoleMapElement := range namespaceAccessElement.GetNamespaceRoleMap() {
+				namespaceRoleMapItem := SvcCredentialRoleListType{}
+
+				// data specToModelNested RequiredArrayOfStringField --> Names
+				if len(namespaceRoleMapElement.GetNames()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, namespaceRoleMapElement.GetNames())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					namespaceRoleMapItem.Names = listValue
+				} else {
+					namespaceRoleMapItem.Names = types.ListNull(types.StringType)
+				}
+
+				namespaceRoleMapGoMap[key] = namespaceRoleMapItem
+			}
+
+			// Convert to Terraform MapValue using the Utility function
+			namespaceRoleMapMapValue, d := utils.GoMapToObjectMapValue(ctx, ServiceCredentialNamespaceAccessNamespaceRoleMapModelAttributeMap, namespaceRoleMapGoMap)
+			response.Diagnostics.Append(d...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			svcCredentialNsAccessTypeModel.NamespaceRoleMap = namespaceRoleMapMapValue
+		} else {
+			// If empty, set Terraform Null Map (using the extracted element type)
+			NamespaceRoleMapObjType := types.ObjectType{
+				AttrTypes: ServiceCredentialNamespaceAccessNamespaceRoleMapModelAttributeMap,
+			}
+			svcCredentialNsAccessTypeModel.NamespaceRoleMap = types.MapNull(NamespaceRoleMapObjType)
+		}
+
+		namespaceAccessObj, namespaceAccessDiags := utils.GoStructToObjectValue(
+			ctx,
+			ServiceCredentialNamespaceAccessModelAttributeMap,
+			svcCredentialNsAccessTypeModel,
+		)
+		response.Diagnostics.Append(namespaceAccessDiags...)
+		data.NamespaceAccess = namespaceAccessObj
 	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SiteName = types.StringNull()
+		data.NamespaceAccess = types.ObjectNull(ServiceCredentialNamespaceAccessModelAttributeMap)
 	}
 
 	// data SpecToModelRoot EnumField --> Type
@@ -376,76 +357,34 @@ func (d *DataSourceF5XCServiceCredential) Read(ctx context.Context, request data
 		}
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> Users
-	if len(specData.GetUsers()) > 0 {
-		usersElements := make([]ObjectRefTypeModel, 0, len(specData.GetUsers()))
+	// data SpecToModelRoot StringField --> Uid
+	if specData.GetUid() != "" {
+		data.Uid = types.StringValue(specData.GetUid())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.Uid = types.StringNull()
+	}
 
-		for _, usersElement := range specData.GetUsers() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+	// data SpecToModelRoot StringField --> UserEmail
+	if specData.GetUserEmail() != "" {
+		data.UserEmail = types.StringValue(specData.GetUserEmail())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.UserEmail = types.StringNull()
+	}
 
-			// data specToModelNested RequiredStringField --> Name
-			if usersElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(usersElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if usersElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(usersElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if usersElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(usersElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			usersElements = append(usersElements, objectRefTypeModelModel)
-		}
-
-		{
-			usersList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				ServiceCredentialUsersObjectRefModelAttributeMap,
-				usersElements,
-			)
-
+	// data specToModelRootOld ArrayOfStringField --> UserGroupNames
+	{
+		if len(specData.GetUserGroupNames()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetUserGroupNames())
 			response.Diagnostics.Append(listDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-
-			data.Users = usersList
+			data.UserGroupNames = listValue
+		} else {
+			data.UserGroupNames = types.ListNull(types.StringType)
 		}
-	} else {
-		var usersObjectType = basetypes.ObjectType{
-			AttrTypes: ServiceCredentialUsersObjectRefModelAttributeMap,
-		}
-		nullUsersList := basetypes.NewListNull(usersObjectType)
-		data.Users = nullUsersList
-	}
-
-	// data SpecToModelRoot StringField --> VirtualK8SName
-	if specData.GetVirtualK8SName() != "" {
-		data.VirtualK8SName = types.StringValue(specData.GetVirtualK8SName())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VirtualK8SName = types.StringNull()
-	}
-
-	// data SpecToModelRoot StringField --> VirtualK8SNamespace
-	if specData.GetVirtualK8SNamespace() != "" {
-		data.VirtualK8SNamespace = types.StringValue(specData.GetVirtualK8SNamespace())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VirtualK8SNamespace = types.StringNull()
 	}
 
 	// Set state to fully populated data

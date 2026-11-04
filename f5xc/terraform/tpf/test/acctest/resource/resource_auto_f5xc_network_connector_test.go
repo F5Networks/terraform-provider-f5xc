@@ -27,8 +27,8 @@ import (
 func TestAccResourceAutoF5XCNetworkConnector_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-netconn-" + acctest.RandString(t, 8)
-	namespace := "system" //acctest.DefaultNamespace()
+	name := "example-netconn-" + acctest.RandString(t, 8)
+	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCNetworkConnector_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,8 +62,8 @@ func TestAccResourceAutoF5XCNetworkConnector_basic(t *testing.T) {
 func TestAccResourceAutoF5XCNetworkConnector_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-netconn-" + acctest.RandString(t, 8)
-	namespace := "system" //acctest.DefaultNamespace()
+	name := "example-netconn-" + acctest.RandString(t, 8)
+	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCNetworkConnector_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,8 +97,8 @@ func TestAccResourceAutoF5XCNetworkConnector_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCNetworkConnector_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-netconn-" + acctest.RandString(t, 8)
-	namespace := "system" //acctest.DefaultNamespace()
+	name := "example-netconn-" + acctest.RandString(t, 8)
+	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCNetworkConnector_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,10 +132,10 @@ func TestAccResourceAutoF5XCNetworkConnector_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCNetworkConnector_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-netconn-" + acctest.RandString(t, 8)
-	namespace := "system" //acctest.DefaultNamespace()
+	name := "example-netconn-" + acctest.RandString(t, 8)
+	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkConnectorDestroyProducer(t),
@@ -144,24 +144,28 @@ func TestAccResourceAutoF5XCNetworkConnector_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkConnectorConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_connector.test",
+				ResourceName:                         "f5xc_network_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNetworkConnectorConfig_full("example-netconn", namespace),
+		})
 }
 
 func testAccCheckNetworkConnectorDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -171,90 +175,90 @@ func testAccCheckNetworkConnectorDestroyProducer(t *testing.T) func(*terraform.S
 func testAccResourceAutoF5XCNetworkConnectorGlobalVNConfig(name, namespace string) string {
 	return fmt.Sprintf(`
 resource "f5xc_virtual_network" "global_vn" {
-	name      = %q
-	namespace = %q
+  name      = %q
+  namespace = %q
 
-	network_choice = {
-		global_network = true
-	}
+  network_choice = {
+    global_network = true
+  }
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCNetworkConnectorConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Acceptance test network connector"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Basic network connector example"
 
-	connector_choice = {
-		sli_to_slo_snat = {
-			pool_choice = {
-				interface_ip = true
-			}
-			routing_choice = {
-				default_gw_snat = true
-			}
-		}
-	}
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		disable_forward_proxy = true
-	}
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCNetworkConnectorConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Acceptance test network connector updated"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Updated basic network connector example"
 
-	connector_choice = {
-		sli_to_slo_snat = {
-			pool_choice = {
-				interface_ip = true
-			}
-			routing_choice = {
-				default_gw_snat = true
-			}
-		}
-	}
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		disable_forward_proxy = true
-	}
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCNetworkConnectorConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Network connector with labels"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Network connector example with labels"
 
-	connector_choice = {
-		sli_to_slo_snat = {
-			pool_choice = {
-				interface_ip = true
-			}
-			routing_choice = {
-				default_gw_snat = true
-			}
-		}
-	}
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		disable_forward_proxy = true
-	}
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -262,28 +266,28 @@ resource "f5xc_network_connector" "test" {
 
 func testAccResourceAutoF5XCNetworkConnectorConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Network connector with labels"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Network connector example with labels"
 
-	connector_choice = {
-		sli_to_slo_snat = {
-			pool_choice = {
-				interface_ip = true
-			}
-			routing_choice = {
-				default_gw_snat = true
-			}
-		}
-	}
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		disable_forward_proxy = true
-	}
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "network"
   }
 }
@@ -292,25 +296,25 @@ resource "f5xc_network_connector" "test" {
 
 func testAccResourceAutoF5XCNetworkConnectorConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Network connector with annotations"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Network connector example with annotations"
 
-	connector_choice = {
-		sli_to_slo_snat = {
-			pool_choice = {
-				interface_ip = true
-			}
-			routing_choice = {
-				default_gw_snat = true
-			}
-		}
-	}
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		disable_forward_proxy = true
-	}
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
 
   annotations = {
     owner = "platform-team"
@@ -321,28 +325,28 @@ resource "f5xc_network_connector" "test" {
 
 func testAccResourceAutoF5XCNetworkConnectorConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Network connector with annotations"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Network connector example with annotations"
 
-	connector_choice = {
-		sli_to_slo_snat = {
-			pool_choice = {
-				interface_ip = true
-			}
-			routing_choice = {
-				default_gw_snat = true
-			}
-		}
-	}
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		disable_forward_proxy = true
-	}
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
 
   annotations = {
-    owner = "network-team"
+    owner = "netsec-team"
   }
 }
 `, name, namespace)
@@ -350,28 +354,28 @@ resource "f5xc_network_connector" "test" {
 
 func testAccResourceAutoF5XCNetworkConnectorConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Full network connector"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Full network connector example"
 
-	connector_choice = {
-		sli_to_slo_snat = {
-			pool_choice = {
-				interface_ip = true
-			}
-			routing_choice = {
-				default_gw_snat = true
-			}
-		}
-	}
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		disable_forward_proxy = true
-	}
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -385,36 +389,36 @@ func testAccResourceAutoF5XCNetworkConnectorConfig_fullUpdated(name, namespace s
 	globalVNName := name + "-global"
 
 	return testAccResourceAutoF5XCNetworkConnectorGlobalVNConfig(globalVNName, namespace) + fmt.Sprintf(`
-resource "f5xc_network_connector" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Full network connector updated"
+resource "f5xc_network_connector" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Updated full network connector example"
 
-	connector_choice = {
-		slo_to_global_dr = {
-			global_vn = {
-				name      = f5xc_virtual_network.global_vn.name
-				namespace = f5xc_virtual_network.global_vn.namespace
-			}
-		}
-	}
+  connector_choice = {
+    slo_to_global_dr = {
+      global_vn = {
+        name      = f5xc_virtual_network.global_vn.name
+        namespace = f5xc_virtual_network.global_vn.namespace
+      }
+    }
+  }
 
-	forward_proxy_choice = {
-		enable_forward_proxy = {
-			connection_timeout   = 3000
-			max_connect_attempts = 2
-			white_listed_ports   = [443]
-			white_listed_prefixes = ["10.10.0.0/24"]
-		}
-	}
+  forward_proxy_choice = {
+    enable_forward_proxy = {
+      connection_timeout    = 3000
+      max_connect_attempts  = 2
+      white_listed_ports    = [443]
+      white_listed_prefixes = ["10.10.0.0/24"]
+    }
+  }
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "network"
   }
 
   annotations = {
-    owner = "network-team"
+    owner = "netsec-team"
   }
 }
 `, name, namespace)

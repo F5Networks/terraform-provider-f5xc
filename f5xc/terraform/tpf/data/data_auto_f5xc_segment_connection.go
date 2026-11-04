@@ -29,13 +29,13 @@ type DataSourceF5XCSegmentConnection struct {
 	client *client.APIClient
 }
 
-type SegmentConnectionSegmentConnectionSegmentConnectionType struct {
+type SegmentConnSegmentConnType struct {
 	ConnectionChoice    types.Object `tfsdk:"connection_choice"`
 	DestinationSegments types.List   `tfsdk:"destination_segments"`
 	SourceSegments      types.List   `tfsdk:"source_segments"`
 }
 
-type SegmentConnectionSegmentConnectionTypeConnectionChoice struct {
+type SegmentConnConnChoice struct {
 	Direct types.Bool `tfsdk:"direct"`
 }
 
@@ -116,8 +116,8 @@ func (d *DataSourceF5XCSegmentConnection) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCSegmentConnection) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a segment_connection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment_connection) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a segment_connection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of segment_connection) etc. can be fetched",
+		MarkdownDescription: "Configure a Segment Connector to allow network traffic between Segments",
+		Description:         "Configure a Segment Connector to allow network traffic between Segments",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -295,7 +295,7 @@ func (d *DataSourceF5XCSegmentConnection) Read(ctx context.Context, request data
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_segment_connection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "segment_connection", err))
 		return
 	}
 
@@ -358,10 +358,10 @@ func (d *DataSourceF5XCSegmentConnection) Read(ctx context.Context, request data
 
 	// data SpecToModelRoot ArrayOfPointerField --> Connections
 	if len(specData.GetConnections()) > 0 {
-		connectionsElements := make([]SegmentConnectionSegmentConnectionSegmentConnectionType, 0, len(specData.GetConnections()))
+		connectionsElements := make([]SegmentConnSegmentConnType, 0, len(specData.GetConnections()))
 
 		for _, connectionsElement := range specData.GetConnections() {
-			segmentConnectionSegmentConnectionSegmentConnectionTypeModel := SegmentConnectionSegmentConnectionSegmentConnectionType{}
+			segmentConnSegmentConnTypeModel := SegmentConnSegmentConnType{}
 
 			// data specToModelNested OneOfField --> ConnectionChoice
 			if connectionsElement.GetConnectionChoice() != nil {
@@ -396,10 +396,10 @@ func (d *DataSourceF5XCSegmentConnection) Read(ctx context.Context, request data
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				segmentConnectionSegmentConnectionSegmentConnectionTypeModel.ConnectionChoice = finalObj
+				segmentConnSegmentConnTypeModel.ConnectionChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				segmentConnectionSegmentConnectionSegmentConnectionTypeModel.ConnectionChoice = types.ObjectNull(SegmentConnectionConnectionsConnectionChoiceModelAttributeMap)
+				segmentConnSegmentConnTypeModel.ConnectionChoice = types.ObjectNull(SegmentConnectionConnectionsConnectionChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested RequiredArrayOfPointerField --> DestinationSegments
@@ -443,13 +443,13 @@ func (d *DataSourceF5XCSegmentConnection) Read(ctx context.Context, request data
 				if response.Diagnostics.HasError() {
 					return
 				}
-				segmentConnectionSegmentConnectionSegmentConnectionTypeModel.DestinationSegments = destinationSegmentsListValue
+				segmentConnSegmentConnTypeModel.DestinationSegments = destinationSegmentsListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				segmentConnectionSegmentConnectionSegmentConnectionTypeModel.DestinationSegments = types.ListNull(types.ObjectType{AttrTypes: SegmentConnectionDestinationSegmentsObjectRefModelAttributeMap})
+				segmentConnSegmentConnTypeModel.DestinationSegments = types.ListNull(types.ObjectType{AttrTypes: SegmentConnectionDestinationSegmentsObjectRefModelAttributeMap})
 			}
 
 			// data specToModelNested RequiredArrayOfPointerField --> SourceSegments
@@ -493,16 +493,16 @@ func (d *DataSourceF5XCSegmentConnection) Read(ctx context.Context, request data
 				if response.Diagnostics.HasError() {
 					return
 				}
-				segmentConnectionSegmentConnectionSegmentConnectionTypeModel.SourceSegments = sourceSegmentsListValue
+				segmentConnSegmentConnTypeModel.SourceSegments = sourceSegmentsListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				segmentConnectionSegmentConnectionSegmentConnectionTypeModel.SourceSegments = types.ListNull(types.ObjectType{AttrTypes: SegmentConnectionSourceSegmentsObjectRefModelAttributeMap})
+				segmentConnSegmentConnTypeModel.SourceSegments = types.ListNull(types.ObjectType{AttrTypes: SegmentConnectionSourceSegmentsObjectRefModelAttributeMap})
 			}
 
-			connectionsElements = append(connectionsElements, segmentConnectionSegmentConnectionSegmentConnectionTypeModel)
+			connectionsElements = append(connectionsElements, segmentConnSegmentConnTypeModel)
 		}
 
 		{

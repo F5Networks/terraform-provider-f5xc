@@ -14,18 +14,51 @@
 page_title: "f5xc_network_connector Resource - F5 XC Distributed Cloud"
 subcategory: "Networking & Connectivity"
 description: |-
-  Network Connector Network Connector is used to create connection between two virtual networks on a given site. Outside Network is the unsecured network Inside Network is secured network Inside network can have connectivity to outside network in the following ways Snat: There are 2 Snat modes Default Gateway Snat: A default route is added in inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool Dynamic Gateway Snat: Non default routes from out side network are pushed to inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool This mode is currently not supported Dynamic Gateway: Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has reachability information of inside network, no SNAT is required This mode is currently not supported Proxy Configuration: In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity. There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would take effect Dynamic Reverse Proxy: There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network to select the destination. This dynamic resolution is done using a pre defined field in the received packet. This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https, DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the outside network Forward Proxy: Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated to actual IPs towards outside network Constraint: There are no overlapping ip(s) between outside and inside network.
+  Network Connector is used to create connection between two virtual networks on a given site.<br><br>Outside Network is the unsecured network<br><br>Inside Network is secured network<br><br>Inside network can have connectivity to outside network in the following ways<br><br>Snat: There are 2 Snat modes<br><br>Default Gateway Snat:<br>A default route is added in inside network with CE as gateway. As outside network does not have any visibility<br>of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either<br>interface IP of out side virtual network interface Snat pool<br><br>Dynamic Gateway Snat:<br>Non default routes from out side network are pushed to inside network with CE as gateway. As outside network<br>does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside.<br>SNAT IP can be either interface IP of out side virtual network interface Snat pool<br>This mode is currently not supported<br><br>Dynamic Gateway:<br><br>Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has<br>reachability information of inside network, no SNAT is required<br>This mode is currently not supported<br><br>Proxy Configuration:<br>In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity.<br>There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would<br>take effect<br><br>Dynamic Reverse Proxy:<br>There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is<br>attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network<br>to select the destination. This dynamic resolution is done using a pre defined field in the received packet.<br>This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https,<br>DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS<br>resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the<br>outside network<br><br>Forward Proxy:<br>Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated<br>to actual IPs towards outside network<br><br>Constraint: There are no overlapping ip(s) between outside and inside network.
 ---
 
 # f5xc_network_connector (Resource)
 
-Network Connector Network Connector is used to create connection between two virtual networks on a given site. Outside Network is the unsecured network Inside Network is secured network Inside network can have connectivity to outside network in the following ways Snat: There are 2 Snat modes Default Gateway Snat: A default route is added in inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool Dynamic Gateway Snat: Non default routes from out side network are pushed to inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool This mode is currently not supported Dynamic Gateway: Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has reachability information of inside network, no SNAT is required This mode is currently not supported Proxy Configuration: In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity. There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would take effect Dynamic Reverse Proxy: There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network to select the destination. This dynamic resolution is done using a pre defined field in the received packet. This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https, DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the outside network Forward Proxy: Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated to actual IPs towards outside network Constraint: There are no overlapping ip(s) between outside and inside network.
+Network Connector is used to create connection between two virtual networks on a given site.<br><br>Outside Network is the unsecured network<br><br>Inside Network is secured network<br><br>Inside network can have connectivity to outside network in the following ways<br><br>Snat: There are 2 Snat modes<br><br>Default Gateway Snat:<br>A default route is added in inside network with CE as gateway. As outside network does not have any visibility<br>of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either<br>interface IP of out side virtual network interface Snat pool<br><br>Dynamic Gateway Snat:<br>Non default routes from out side network are pushed to inside network with CE as gateway. As outside network<br>does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside.<br>SNAT IP can be either interface IP of out side virtual network interface Snat pool<br>This mode is currently not supported<br><br>Dynamic Gateway:<br><br>Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has<br>reachability information of inside network, no SNAT is required<br>This mode is currently not supported<br><br>Proxy Configuration:<br>In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity.<br>There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would<br>take effect<br><br>Dynamic Reverse Proxy:<br>There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is<br>attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network<br>to select the destination. This dynamic resolution is done using a pre defined field in the received packet.<br>This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https,<br>DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS<br>resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the<br>outside network<br><br>Forward Proxy:<br>Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated<br>to actual IPs towards outside network<br><br>Constraint: There are no overlapping ip(s) between outside and inside network.
 
 To get more information about f5xc_network_connector, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/network-connector)
 
+## Example Usage
 
+```terraform
+# Example: Network Connector - Full
+
+resource "f5xc_network_connector" "example" {
+  name        = "example-netconn"
+  namespace   = "system"
+  description = "Full network connector example"
+
+  connector_choice = {
+    sli_to_slo_snat = {
+      pool_choice = {
+        interface_ip = true
+      }
+      routing_choice = {
+        default_gw_snat = true
+      }
+    }
+  }
+
+  forward_proxy_choice = {
+    disable_forward_proxy = true
+  }
+
+  labels = {
+    env = "example"
+  }
+
+  annotations = {
+    owner = "platform-team"
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -160,7 +193,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -168,7 +201,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_network_connector.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

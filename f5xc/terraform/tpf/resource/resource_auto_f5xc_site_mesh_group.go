@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -45,6 +46,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_site_mesh_group "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/site_mesh_group"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -68,7 +70,7 @@ type SiteMeshGroupBfdEnabled struct {
 
 type SiteMeshGroupMeshChoice struct {
 	FullMesh  types.Object `tfsdk:"full_mesh"`
-	HubMesh   types.Object `tfsdk:"hub_mesh"`
+	HubMesh   types.Bool   `tfsdk:"hub_mesh"`
 	SpokeMesh types.Object `tfsdk:"spoke_mesh"`
 }
 
@@ -81,23 +83,8 @@ type SiteMeshGroupFullMeshChoice struct {
 	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 }
 
-type SiteMeshGroupHubMesh struct {
-	HubFullMeshChoice types.Object `tfsdk:"hub_full_mesh_choice"`
-}
-
-type SiteMeshGroupHubFullMeshChoice struct {
-	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
-}
-
 type SiteMeshGroupSpokeMesh struct {
-	HubMeshGroup       types.Object `tfsdk:"hub_mesh_group"`
-	SpokeHubMeshChoice types.Object `tfsdk:"spoke_hub_mesh_choice"`
-}
-
-type SiteMeshGroupSpokeHubMeshChoice struct {
-	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
+	HubMeshGroup types.Object `tfsdk:"hub_mesh_group"`
 }
 
 type SiteMeshGroupReFallbackChoice struct {
@@ -153,9 +140,7 @@ var SiteMeshGroupMeshChoiceModelAttributeMap = map[string]attr.Type{
 	"full_mesh": types.ObjectType{
 		AttrTypes: SiteMeshGroupMeshChoiceFullMeshModelAttributeMap,
 	},
-	"hub_mesh": types.ObjectType{
-		AttrTypes: SiteMeshGroupMeshChoiceHubMeshModelAttributeMap,
-	},
+	"hub_mesh": types.BoolType,
 	"spoke_mesh": types.ObjectType{
 		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap,
 	},
@@ -176,21 +161,6 @@ var SiteMeshGroupMeshChoiceFullMeshFullMeshChoiceModelAttributeMap = map[string]
 	"data_plane_mesh":             types.BoolType,
 }
 
-// Attribute map for PointerOfOneOfField --> HubMesh
-var SiteMeshGroupMeshChoiceHubMeshModelAttributeMap = map[string]attr.Type{
-
-	"hub_full_mesh_choice": types.ObjectType{
-		AttrTypes: SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> HubFullMeshChoice
-var SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap = map[string]attr.Type{
-
-	"control_and_data_plane_mesh": types.BoolType,
-	"data_plane_mesh":             types.BoolType,
-}
-
 // Attribute map for PointerOfOneOfField --> SpokeMesh
 var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
 	"hub_mesh_group": types.ObjectType{
@@ -198,9 +168,6 @@ var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
 			"name":      types.StringType,
 			"namespace": types.StringType,
 			"tenant":    types.StringType},
-	},
-	"spoke_hub_mesh_choice": types.ObjectType{
-		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap,
 	},
 }
 
@@ -210,13 +177,6 @@ var SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap = map[string]a
 	"name":      types.StringType,
 	"namespace": types.StringType,
 	"tenant":    types.StringType,
-}
-
-// Attribute map for OneOfField --> SpokeHubMeshChoice
-var SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap = map[string]attr.Type{
-
-	"control_and_data_plane_mesh": types.BoolType,
-	"data_plane_mesh":             types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ReFallback
@@ -245,8 +205,8 @@ func (r *ResourceF5XCSiteMeshGroup) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a site_mesh_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of site_mesh_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a site_mesh_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of site_mesh_group) etc. can be fetched",
+		MarkdownDescription: "Site mesh group is a configuration tool to provide Site to Site<br>connectivity<br><br>Set of sites in a site mesh group are defined by a virtual site.<br><br>The site mesh groups can be of type HUB or SPOKE. Where,<br>- SITE_MESH_GROUP_TYPE_HUB_FULL_MESH<br>'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group<br>A HUB Site will route traffic between all its Spoke Sites.<br><br>Current release can support only a single site in Site Mesh Group of this type<br><br>- SITE_MESH_GROUP_TYPE_SPOKE<br>'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is<br>routed thru Hub Sites.<br><br>'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group<br>gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the<br>Hub Sites<br><br>- SITE_MESH_GROUP_TYPE_FULL_MESH<br>'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that<br>are member of virtual_site<br><br>NOTE :<br>- The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs'<br>- The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only<br>- A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both",
+		Description:         "Site mesh group is a configuration tool to provide Site to Site connectivity Set of sites in a site mesh group are defined by a virtual site. The site mesh groups can be of type HUB or SPOKE. Where, - SITE_MESH_GROUP_TYPE_HUB_FULL_MESH 'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group A HUB Site will route traffic between all its Spoke Sites. Current release can support only a single site in Site Mesh Group of this type - SITE_MESH_GROUP_TYPE_SPOKE 'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is routed thru Hub Sites. 'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the Hub Sites - SITE_MESH_GROUP_TYPE_FULL_MESH 'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that are member of virtual_site NOTE : - The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs' - The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only - A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -302,7 +262,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -440,48 +400,14 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 							},
 						},
 					},
-					"hub_mesh": schema.SingleNestedAttribute{
+					"hub_mesh": schema.BoolAttribute{
 						Description:         "hub Mesh of Type Hub",
 						MarkdownDescription: "hub Mesh of Type Hub",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"hub_full_mesh_choice": schema.SingleNestedAttribute{
-								Description:         "Hub Full Mesh Choice Choice of data plane, data plane and control plane hub full mesh",
-								MarkdownDescription: "Hub Full Mesh Choice Choice of data plane, data plane and control plane hub full mesh",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Object{
-									exactlyoneofvalidator.ExactlyOneOf(
-										"control_and_data_plane_mesh",
-										"data_plane_mesh",
-									),
-								},
-								Attributes: map[string]schema.Attribute{
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description:         "Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites",
-										MarkdownDescription: "Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
-										},
-									},
-									"data_plane_mesh": schema.BoolAttribute{
-										Description:         "Data Plane Mesh Hub Full Mesh of data plane tunnels across sites",
-										MarkdownDescription: "Data Plane Mesh Hub Full Mesh of data plane tunnels across sites",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
-										},
-									},
-								},
-							},
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
 						},
 					},
 					"spoke_mesh": schema.SingleNestedAttribute{
@@ -519,42 +445,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
-										},
-									},
-								},
-							},
-							"spoke_hub_mesh_choice": schema.SingleNestedAttribute{
-								Description:         "Spoke Hub Mesh Choice Choice of data plane, data plane and control plane mesh",
-								MarkdownDescription: "Spoke Hub Mesh Choice Choice of data plane, data plane and control plane mesh",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Object{
-									exactlyoneofvalidator.ExactlyOneOf(
-										"control_and_data_plane_mesh",
-										"data_plane_mesh",
-									),
-								},
-								Attributes: map[string]schema.Attribute{
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description:         "Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s",
-										MarkdownDescription: "Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
-										},
-									},
-									"data_plane_mesh": schema.BoolAttribute{
-										Description:         "Data Plane Mesh Mesh of data plane tunnels to the hub site/s",
-										MarkdownDescription: "Data Plane Mesh Mesh of data plane tunnels to the hub site/s",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -630,7 +521,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -698,9 +589,17 @@ func (r *ResourceF5XCSiteMeshGroup) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCSiteMeshGroupModel
 
 	// Read Terraform plan data into the model
@@ -865,41 +764,14 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> HubMesh
+		// resource modelToSpecNested BoolOfOneOfPointerField --> HubMesh
 		if !meshChoiceModel.HubMesh.IsNull() && !meshChoiceModel.HubMesh.IsUnknown() {
-			var siteMeshGroupHubMeshModel SiteMeshGroupHubMesh
-			response.Diagnostics.Append(meshChoiceModel.HubMesh.As(ctx, &siteMeshGroupHubMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
+			hubMeshSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_HubMesh{}
+			hubMeshSpecBool.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
+			hubMeshSpecBool.HubMesh.HubFullMeshChoice = &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{
+				DataPlaneMesh: &ves_io_schema.Empty{},
 			}
-			hubMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_HubMesh{}
-			hubMeshOneOfSpec.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
-			spec.MeshChoice = hubMeshOneOfSpec
-
-			// resource modelToSpecNested OneOfField --> HubFullMeshChoice
-			if !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsNull() && !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsUnknown() {
-				hubMeshHubFullMeshChoiceModel := SiteMeshGroupHubFullMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupHubMeshModel.HubFullMeshChoice.As(ctx, &hubMeshHubFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = dataPlaneMeshSpecBool
-				}
-
-			}
-
+			spec.MeshChoice = hubMeshSpecBool
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> SpokeMesh
@@ -911,6 +783,9 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 			}
 			spokeMeshOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_SpokeMesh{}
 			spokeMeshOneOfSpec.SpokeMesh = &ves_io_schema_site_mesh_group.SpokeMeshGroupType{}
+			spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{
+				DataPlaneMesh: &ves_io_schema.Empty{},
+			}
 			spec.MeshChoice = spokeMeshOneOfSpec
 
 			// resource modelToSpecNested RequiredPointerField --> HubMeshGroup
@@ -932,30 +807,6 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 				// resource modelToSpecNested RequiredStringField --> Namespace
 				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
 					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
-				}
-
-			}
-
-			// resource modelToSpecNested OneOfField --> SpokeHubMeshChoice
-			if !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsNull() && !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsUnknown() {
-				spokeMeshSpokeHubMeshChoiceModel := SiteMeshGroupSpokeHubMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.As(ctx, &spokeMeshSpokeHubMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = dataPlaneMeshSpecBool
 				}
 
 			}
@@ -1022,7 +873,7 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1045,7 +896,7 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_site_mesh_group.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "site_mesh_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "site_mesh_group", err),
 		)
 		return
 	}
@@ -1318,72 +1169,13 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> HubMesh
-		// GlobalSpecType
-		// false
-		{
-			hubMeshOptionsWrapper, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
-			hubMeshAttributeMap := make(map[string]attr.Value)
+		// resource specToModelNested BoolOfOneOfPointerField --> HubMesh
+		_, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
 
-			if isHubMesh && hubMeshOptionsWrapper != nil && hubMeshOptionsWrapper.HubMesh != nil {
-				hubMeshElement := hubMeshOptionsWrapper.HubMesh
-
-				// resource specToModelNested OneOfField --> HubFullMeshChoice
-				if hubMeshElement.GetHubFullMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					hubMeshhubFullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					hubMeshhubFullMeshChoiceChoices := hubMeshElement.GetHubFullMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, hubMeshhubFullMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						hubMeshhubFullMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(hubMeshhubFullMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					hubMeshAttributeMap["hub_full_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					hubMeshAttributeMap["hub_full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap)
-				}
-
-				hubMeshObj, hubMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
-				response.Diagnostics.Append(hubMeshObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				meshChoiceChoicesModel.HubMesh = hubMeshObj
-			} else {
-				meshChoiceChoicesModel.HubMesh = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap)
-			}
+		if isHubMesh {
+			meshChoiceChoicesModel.HubMesh = types.BoolValue(true)
+		} else {
+			meshChoiceChoicesModel.HubMesh = types.BoolNull()
 		}
 
 		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
@@ -1444,53 +1236,6 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
 					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
-				}
-
-				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
-				if spokeMeshElement.GetSpokeHubMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					spokeMeshspokeHubMeshChoiceChoices := spokeMeshElement.GetSpokeHubMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
 				}
 
 				spokeMeshObj, spokeMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
@@ -1629,14 +1374,12 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
 		}
 		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
-		var priorValVirtualSite types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("virtual_site"), &priorValVirtualSite)
-		if !priorValVirtualSite.IsNull() && !priorValVirtualSite.IsUnknown() {
-			data.VirtualSite = priorValVirtualSite
+		if !data.VirtualSite.IsNull() && !data.VirtualSite.IsUnknown() && len(data.VirtualSite.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VirtualSite = basetypes.NewListValueMust(virtualSiteObjectType, nil)
 		} else {
 			data.VirtualSite = nullVirtualSiteList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1689,7 +1432,7 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "site_mesh_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "site_mesh_group", err),
 		)
 		return
 	}
@@ -1962,72 +1705,13 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> HubMesh
-		// <no value>
-		// false
-		{
-			hubMeshOptionsWrapper, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
-			hubMeshAttributeMap := make(map[string]attr.Value)
+		// resource specToModelNested BoolOfOneOfPointerField --> HubMesh
+		_, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
 
-			if isHubMesh && hubMeshOptionsWrapper != nil && hubMeshOptionsWrapper.HubMesh != nil {
-				hubMeshElement := hubMeshOptionsWrapper.HubMesh
-
-				// resource specToModelNested OneOfField --> HubFullMeshChoice
-				if hubMeshElement.GetHubFullMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					hubMeshhubFullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					hubMeshhubFullMeshChoiceChoices := hubMeshElement.GetHubFullMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, hubMeshhubFullMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						hubMeshhubFullMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(hubMeshhubFullMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					hubMeshAttributeMap["hub_full_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					hubMeshAttributeMap["hub_full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap)
-				}
-
-				hubMeshObj, hubMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
-				response.Diagnostics.Append(hubMeshObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				meshChoiceChoicesModel.HubMesh = hubMeshObj
-			} else {
-				meshChoiceChoicesModel.HubMesh = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap)
-			}
+		if isHubMesh {
+			meshChoiceChoicesModel.HubMesh = types.BoolValue(true)
+		} else {
+			meshChoiceChoicesModel.HubMesh = types.BoolNull()
 		}
 
 		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
@@ -2088,53 +1772,6 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
 					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
-				}
-
-				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
-				if spokeMeshElement.GetSpokeHubMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					spokeMeshspokeHubMeshChoiceChoices := spokeMeshElement.GetSpokeHubMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
 				}
 
 				spokeMeshObj, spokeMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
@@ -2218,7 +1855,13 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
+
+		if data.ReFallbackChoice.IsNull() || data.ReFallbackChoice.IsUnknown() || ((data.ReFallbackChoice.Attributes()["disable_re_fallback"].IsNull() || data.ReFallbackChoice.Attributes()["disable_re_fallback"].IsUnknown()) && (data.ReFallbackChoice.Attributes()["enable_re_fallback"].IsNull() || data.ReFallbackChoice.Attributes()["enable_re_fallback"].IsUnknown())) {
+			data.ReFallbackChoice = types.ObjectValueMust(SiteMeshGroupReFallbackModelAttributeMap, map[string]attr.Value{
+				"disable_re_fallback": types.BoolNull(),
+				"enable_re_fallback":  types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
@@ -2273,14 +1916,12 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
 		}
 		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
-		var priorValVirtualSite types.List
-		_ = request.State.GetAttribute(ctx, path.Root("virtual_site"), &priorValVirtualSite)
-		if !priorValVirtualSite.IsNull() && !priorValVirtualSite.IsUnknown() {
-			data.VirtualSite = priorValVirtualSite
+		if !data.VirtualSite.IsNull() && !data.VirtualSite.IsUnknown() && len(data.VirtualSite.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VirtualSite = basetypes.NewListValueMust(virtualSiteObjectType, nil)
 		} else {
 			data.VirtualSite = nullVirtualSiteList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2292,6 +1933,12 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCSiteMeshGroupModel
@@ -2476,41 +2123,14 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> HubMesh
+		// resource modelToSpecNested BoolOfOneOfPointerField --> HubMesh
 		if !meshChoiceModel.HubMesh.IsNull() && !meshChoiceModel.HubMesh.IsUnknown() {
-			var siteMeshGroupHubMeshModel SiteMeshGroupHubMesh
-			response.Diagnostics.Append(meshChoiceModel.HubMesh.As(ctx, &siteMeshGroupHubMeshModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
+			hubMeshSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_HubMesh{}
+			hubMeshSpecBool.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
+			hubMeshSpecBool.HubMesh.HubFullMeshChoice = &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{
+				DataPlaneMesh: &ves_io_schema.Empty{},
 			}
-			hubMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_HubMesh{}
-			hubMeshOneOfSpec.HubMesh = &ves_io_schema_site_mesh_group.HubFullMeshGroupType{}
-			spec.MeshChoice = hubMeshOneOfSpec
-
-			// resource modelToSpecNested OneOfField --> HubFullMeshChoice
-			if !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsNull() && !siteMeshGroupHubMeshModel.HubFullMeshChoice.IsUnknown() {
-				hubMeshHubFullMeshChoiceModel := SiteMeshGroupHubFullMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupHubMeshModel.HubFullMeshChoice.As(ctx, &hubMeshHubFullMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsNull() && !hubMeshHubFullMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					hubMeshOneOfSpec.HubMesh.HubFullMeshChoice = dataPlaneMeshSpecBool
-				}
-
-			}
-
+			spec.MeshChoice = hubMeshSpecBool
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> SpokeMesh
@@ -2522,6 +2142,9 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			}
 			spokeMeshOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_SpokeMesh{}
 			spokeMeshOneOfSpec.SpokeMesh = &ves_io_schema_site_mesh_group.SpokeMeshGroupType{}
+			spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{
+				DataPlaneMesh: &ves_io_schema.Empty{},
+			}
 			spec.MeshChoice = spokeMeshOneOfSpec
 
 			// resource modelToSpecNested RequiredPointerField --> HubMeshGroup
@@ -2543,30 +2166,6 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 				// resource modelToSpecNested RequiredStringField --> Namespace
 				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
 					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
-				}
-
-			}
-
-			// resource modelToSpecNested OneOfField --> SpokeHubMeshChoice
-			if !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsNull() && !siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.IsUnknown() {
-				spokeMeshSpokeHubMeshChoiceModel := SiteMeshGroupSpokeHubMeshChoice{}
-				response.Diagnostics.Append(siteMeshGroupSpokeMeshModel.SpokeHubMeshChoice.As(ctx, &spokeMeshSpokeHubMeshChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.ControlAndDataPlaneMesh.IsUnknown() {
-					controlAndDataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh{}
-					controlAndDataPlaneMeshSpecBool.ControlAndDataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = controlAndDataPlaneMeshSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> DataPlaneMesh
-				if !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsNull() && !spokeMeshSpokeHubMeshChoiceModel.DataPlaneMesh.IsUnknown() {
-					dataPlaneMeshSpecBool := &ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh{}
-					dataPlaneMeshSpecBool.DataPlaneMesh = &ves_io_schema.Empty{}
-					spokeMeshOneOfSpec.SpokeMesh.SpokeHubMeshChoice = dataPlaneMeshSpecBool
 				}
 
 			}
@@ -2633,7 +2232,7 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2649,7 +2248,7 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	err = r.client.ReplaceObject(ctx, ves_io_schema_site_mesh_group.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "site_mesh_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "site_mesh_group", err),
 		)
 		return
 	}
@@ -2658,7 +2257,7 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "site_mesh_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "site_mesh_group", err),
 		)
 		return
 	}
@@ -2930,72 +2529,13 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> HubMesh
-		// GlobalSpecType
-		// false
-		{
-			hubMeshOptionsWrapper, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
-			hubMeshAttributeMap := make(map[string]attr.Value)
+		// resource specToModelNested BoolOfOneOfPointerField --> HubMesh
+		_, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
 
-			if isHubMesh && hubMeshOptionsWrapper != nil && hubMeshOptionsWrapper.HubMesh != nil {
-				hubMeshElement := hubMeshOptionsWrapper.HubMesh
-
-				// resource specToModelNested OneOfField --> HubFullMeshChoice
-				if hubMeshElement.GetHubFullMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					hubMeshhubFullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					hubMeshhubFullMeshChoiceChoices := hubMeshElement.GetHubFullMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, hubMeshhubFullMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						hubMeshhubFullMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(hubMeshhubFullMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					hubMeshAttributeMap["hub_full_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					hubMeshAttributeMap["hub_full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap)
-				}
-
-				hubMeshObj, hubMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
-				response.Diagnostics.Append(hubMeshObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				meshChoiceChoicesModel.HubMesh = hubMeshObj
-			} else {
-				meshChoiceChoicesModel.HubMesh = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap)
-			}
+		if isHubMesh {
+			meshChoiceChoicesModel.HubMesh = types.BoolValue(true)
+		} else {
+			meshChoiceChoicesModel.HubMesh = types.BoolNull()
 		}
 
 		// resource specToModelNested PointerOfOneOfField --> SpokeMesh
@@ -3056,53 +2596,6 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
 					spokeMeshAttributeMap["hub_mesh_group"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap)
-				}
-
-				// resource specToModelNested OneOfField --> SpokeHubMeshChoice
-				if spokeMeshElement.GetSpokeHubMeshChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					spokeMeshspokeHubMeshChoiceChoices := spokeMeshElement.GetSpokeHubMeshChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
-					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
-
-					if isControlAndDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
-					}
-
-					// resource specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, spokeMeshspokeHubMeshChoiceChoicesObjDiags := types.ObjectValue(
-						SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(spokeMeshspokeHubMeshChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
 				}
 
 				spokeMeshObj, spokeMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
@@ -3241,14 +2734,12 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
 		}
 		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
-		var priorValVirtualSite types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("virtual_site"), &priorValVirtualSite)
-		if !priorValVirtualSite.IsNull() && !priorValVirtualSite.IsUnknown() {
-			data.VirtualSite = priorValVirtualSite
+		if !data.VirtualSite.IsNull() && !data.VirtualSite.IsUnknown() && len(data.VirtualSite.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VirtualSite = basetypes.NewListValueMust(virtualSiteObjectType, nil)
 		} else {
 			data.VirtualSite = nullVirtualSiteList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -3323,7 +2814,7 @@ func (r *ResourceF5XCSiteMeshGroup) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "site_mesh_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "site_mesh_group", err),
 		)
 		return
 	}

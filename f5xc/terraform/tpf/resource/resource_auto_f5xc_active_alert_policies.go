@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -76,8 +77,8 @@ func (r *ResourceF5XCActiveAlertPolicies) Metadata(ctx context.Context, request 
 func (r *ResourceF5XCActiveAlertPolicies) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		MarkdownDescription: "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names.<br><br>Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace<br><br>All monitoring is scoped by namespace<br><br>List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace<br><br>User roles can be scoped by namespace<br><br>The 'namespace' value of a namespace object itself is empty string",
+		Description:         "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names. Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace All monitoring is scoped by namespace List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace User roles can be scoped by namespace The 'namespace' value of a namespace object itself is empty string",
 
 		Attributes: map[string]schema.Attribute{
 			"namespace": schema.StringAttribute{
@@ -181,9 +182,17 @@ func (r *ResourceF5XCActiveAlertPolicies) ModifyPlan(ctx context.Context, req re
 			return
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCActiveAlertPolicies) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCActiveAlertPoliciesModel
 
 	// Read Terraform plan data into the model
@@ -270,7 +279,7 @@ func (r *ResourceF5XCActiveAlertPolicies) Create(ctx context.Context, request re
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "active_alert_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "active_alert_policies", err),
 		)
 		return
 	}
@@ -333,7 +342,7 @@ func (r *ResourceF5XCActiveAlertPolicies) Read(ctx context.Context, request reso
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "active_alert_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "active_alert_policies", err),
 		)
 		return
 	}
@@ -398,14 +407,12 @@ func (r *ResourceF5XCActiveAlertPolicies) Read(ctx context.Context, request reso
 			AttrTypes: ActiveAlertPoliciesAlertPoliciesObjectRefModelAttributeMap,
 		}
 		nullAlertPoliciesList := basetypes.NewListNull(alertPoliciesObjectType)
-		var priorValAlertPolicies types.List
-		_ = request.State.GetAttribute(ctx, path.Root("alert_policies"), &priorValAlertPolicies)
-		if !priorValAlertPolicies.IsNull() && !priorValAlertPolicies.IsUnknown() {
-			data.AlertPolicies = priorValAlertPolicies
+		if !data.AlertPolicies.IsNull() && !data.AlertPolicies.IsUnknown() && len(data.AlertPolicies.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.AlertPolicies = basetypes.NewListValueMust(alertPoliciesObjectType, nil)
 		} else {
 			data.AlertPolicies = nullAlertPoliciesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -417,6 +424,12 @@ func (r *ResourceF5XCActiveAlertPolicies) Read(ctx context.Context, request reso
 }
 
 func (r *ResourceF5XCActiveAlertPolicies) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCActiveAlertPoliciesModel
@@ -505,7 +518,7 @@ func (r *ResourceF5XCActiveAlertPolicies) Update(ctx context.Context, request re
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "active_alert_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "active_alert_policies", err),
 		)
 		return
 	}
@@ -576,7 +589,7 @@ func (r *ResourceF5XCActiveAlertPolicies) Delete(ctx context.Context, request re
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "active_alert_policies", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "active_alert_policies", err),
 			)
 			return
 		}
@@ -592,7 +605,7 @@ func (r *ResourceF5XCActiveAlertPolicies) Delete(ctx context.Context, request re
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "active_alert_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "active_alert_policies", err),
 		)
 		return
 	}

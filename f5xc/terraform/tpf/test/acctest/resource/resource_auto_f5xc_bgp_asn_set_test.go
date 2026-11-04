@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCBgpAsnSet_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-asn-set-" + acctest.RandString(t, 8)
+	name := "example-bgp-asn-set-" + acctest.RandString(t, 8)
 	namespace := "shared"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCBgpAsnSet_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65001]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65001, 65002]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccResourceAutoF5XCBgpAsnSet_basic(t *testing.T) {
 func TestAccResourceAutoF5XCBgpAsnSet_withMetadata(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-asn-set-" + acctest.RandString(t, 8)
+	name := "example-bgp-asn-set-" + acctest.RandString(t, 8)
 	namespace := "shared"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -71,23 +71,23 @@ func TestAccResourceAutoF5XCBgpAsnSet_withMetadata(t *testing.T) {
 		CheckDestroy:             testAccCheckBgpAsnSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withMetadata(name, namespace, "bgp asn set metadata", "test", "network", "[65010, 65011]"),
+				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withMetadata(name, namespace, "bgp asn set metadata", "example", "network", "[65010, 65011]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withMetadata(name, namespace, "bgp asn set metadata updated", "staging", "platform", "[65010, 65011, 65012]"),
+				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withMetadata(name, namespace, "bgp asn set metadata updated", "example", "platform", "[65010, 65011, 65012]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +97,7 @@ func TestAccResourceAutoF5XCBgpAsnSet_withMetadata(t *testing.T) {
 func TestAccResourceAutoF5XCBgpAsnSet_withExpandedAsnSet(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-asn-set-" + acctest.RandString(t, 8)
+	name := "example-bgp-asn-set-" + acctest.RandString(t, 8)
 	namespace := "shared"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCBgpAsnSet_withExpandedAsnSet(t *testing.T) {
 				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65100, 65101, 65102, 65103]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65100, 65101, 65102, 65103, 65104, 65105]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +132,7 @@ func TestAccResourceAutoF5XCBgpAsnSet_withExpandedAsnSet(t *testing.T) {
 func TestAccResourceAutoF5XCBgpAsnSet_withFourByteAsnValues(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-asn-set-" + acctest.RandString(t, 8)
+	name := "example-bgp-asn-set-" + acctest.RandString(t, 8)
 	namespace := "shared"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -141,62 +141,70 @@ func TestAccResourceAutoF5XCBgpAsnSet_withFourByteAsnValues(t *testing.T) {
 		CheckDestroy:             testAccCheckBgpAsnSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65551, 4200000001]"),
+				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65551, 4199999999]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65551, 4200000001, 4294967290]"),
+				Config: testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, "[65551, 4199999999, 4294967290]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
+// TestAccResourceAutoF5XCBgpAsnSet_full validates a production-representative BGP
+// ASN set with labels and annotations set together, the configuration most
+// customers converge on when grouping AS numbers for route filtering or peering
+// policies.
 func TestAccResourceAutoF5XCBgpAsnSet_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-bgp-asn-set-" + acctest.RandString(t, 8)
+	name := "example-bgp-asn-set-" + acctest.RandString(t, 8)
 	namespace := "shared"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckBgpAsnSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCBgpAsnSetConfig_full(name, namespace, "bgp asn set full", "team-a", "netops", "[65050, 65051, 65052]"),
+				Config: testAccResourceAutoF5XCBgpAsnSetConfig_full(name, namespace, "bgp asn set full", "example-team", "netops", "[65050, 65051, 65052]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCBgpAsnSetConfig_full(name, namespace, "bgp asn set full updated", "team-b", "platform", "[65060, 65061, 65062, 65063]"),
+				Config: testAccResourceAutoF5XCBgpAsnSetConfig_full(name, namespace, "bgp asn set updated full example", "example-team-alt", "platform", "[65060, 65061, 65062, 65063]"),
 			},
 			{
-				ResourceName:                         "f5xc_bgp_asn_set.test",
+				ResourceName:                         "f5xc_bgp_asn_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bgp_asn_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCBgpAsnSetConfig_full("example-bgp-asn-set", "shared", "BGP ASN set example", "example-team", "netops", "[65050, 65051, 65052]"),
+		})
 }
 
 func testAccCheckBgpAsnSetDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -205,7 +213,7 @@ func testAccCheckBgpAsnSetDestroyProducer(t *testing.T) func(*terraform.State) e
 
 func testAccResourceAutoF5XCBgpAsnSetConfig_withAsNumbers(name, namespace, asNumbers string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_asn_set" "test" {
+resource "f5xc_bgp_asn_set" "example" {
   name       = %q
   namespace  = %q
   as_numbers = %s
@@ -215,7 +223,7 @@ resource "f5xc_bgp_asn_set" "test" {
 
 func testAccResourceAutoF5XCBgpAsnSetConfig_withMetadata(name, namespace, description, env, owner, asNumbers string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_asn_set" "test" {
+resource "f5xc_bgp_asn_set" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -234,7 +242,7 @@ resource "f5xc_bgp_asn_set" "test" {
 
 func testAccResourceAutoF5XCBgpAsnSetConfig_full(name, namespace, description, team, owner, asNumbers string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bgp_asn_set" "test" {
+resource "f5xc_bgp_asn_set" "example" {
   name        = %q
   namespace   = %q
   description = %q

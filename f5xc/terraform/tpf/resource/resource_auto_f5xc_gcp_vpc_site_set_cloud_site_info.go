@@ -23,6 +23,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listsizevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -30,6 +32,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"gopkg.volterra.us/stdlib/codec"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema_views_gcp_vpc_site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/gcp_vpc_site"
 )
 
@@ -82,8 +85,8 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Metadata(ctx context.Context, r
 func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a gcp_vpc_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of gcp_vpc_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a gcp_vpc_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of gcp_vpc_site) etc. can be fetched",
+		MarkdownDescription: "GCP VPC site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in GCP VPC.<br>It can be used to automatically site creation in the GCP VPC.",
+		Description:         "GCP VPC site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in GCP VPC. It can be used to automatically site creation in the GCP VPC.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -100,7 +103,7 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Schema(ctx context.Context, req
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"aws_vpc_info": schema.SingleNestedAttribute{
@@ -206,9 +209,17 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) ModifyPlan(ctx context.Context,
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCGcpVpcSiteSetCloudSiteInfoModel
 
 	// Read Terraform plan data into the model
@@ -298,7 +309,7 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Create(ctx context.Context, req
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "gcp_vpc_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "gcp_vpc_site_set_cloud_site_info", err),
 		)
 		return
 	}
@@ -354,6 +365,12 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Read(ctx context.Context, reque
 }
 
 func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCGcpVpcSiteSetCloudSiteInfoModel
@@ -445,7 +462,7 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Update(ctx context.Context, req
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "gcp_vpc_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "gcp_vpc_site_set_cloud_site_info", err),
 		)
 		return
 	}
@@ -506,7 +523,7 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Delete(ctx context.Context, req
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "gcp_vpc_site_set_cloud_site_info", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "gcp_vpc_site_set_cloud_site_info", err),
 			)
 			return
 		}
@@ -522,7 +539,7 @@ func (r *ResourceF5XCGcpVpcSiteSetCloudSiteInfo) Delete(ctx context.Context, req
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "gcp_vpc_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "gcp_vpc_site_set_cloud_site_info", err),
 		)
 		return
 	}

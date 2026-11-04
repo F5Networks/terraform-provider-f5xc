@@ -30,148 +30,123 @@ type DataSourceF5XCUdpLoadbalancer struct {
 	client *client.APIClient
 }
 
-type UdpLoadbalancerGlobalSpecTypeAdvertiseChoice struct {
+type UdpLoadbalancerAdvertiseChoice struct {
 	AdvertiseCustom             types.Object `tfsdk:"advertise_custom"`
 	AdvertiseOnPublic           types.Object `tfsdk:"advertise_on_public"`
 	AdvertiseOnPublicDefaultVip types.Bool   `tfsdk:"advertise_on_public_default_vip"`
 	DoNotAdvertise              types.Bool   `tfsdk:"do_not_advertise"`
 }
 
-type UdpLoadbalancerGlobalSpecTypeAdvertiseCustom struct {
+type UdpLoadbalancerAdvertiseCustom struct {
 	AdvertiseWhere types.List `tfsdk:"advertise_where"`
 }
 
-type UdpLoadbalancerViewsWhereType struct {
+type UdpLoadbalancerWhereType struct {
 	Choice     types.Object `tfsdk:"choice"`
 	PortChoice types.Object `tfsdk:"port_choice"`
 }
 
-type UdpLoadbalancerWhereTypeChoice struct {
-	AdvertiseDualstackOnPublic types.Object `tfsdk:"advertise_dualstack_on_public"`
-	AdvertiseOnPublic          types.Object `tfsdk:"advertise_on_public"`
-	AdvertiseV6OnPublic        types.Object `tfsdk:"advertise_v6_on_public"`
-	CloudEdgeSegment           types.Object `tfsdk:"cloud_edge_segment"`
-	Segment                    types.Object `tfsdk:"segment"`
-	Site                       types.Object `tfsdk:"site"`
-	SiteSegment                types.Object `tfsdk:"site_segment"`
-	VirtualNetwork             types.Object `tfsdk:"virtual_network"`
-	VirtualSite                types.Object `tfsdk:"virtual_site"`
-	VirtualSiteSegment         types.Object `tfsdk:"virtual_site_segment"`
-	VirtualSiteWithVip         types.Object `tfsdk:"virtual_site_with_vip"`
-	Vk8SService                types.Object `tfsdk:"vk8s_service"`
+type UdpLoadbalancerChoice struct {
+	AdvertiseOnPublic  types.Object `tfsdk:"advertise_on_public"`
+	Site               types.Object `tfsdk:"site"`
+	SiteSegment        types.Object `tfsdk:"site_segment"`
+	VirtualNetwork     types.Object `tfsdk:"virtual_network"`
+	VirtualSite        types.Object `tfsdk:"virtual_site"`
+	VirtualSiteSegment types.Object `tfsdk:"virtual_site_segment"`
+	VirtualSiteWithVip types.Object `tfsdk:"virtual_site_with_vip"`
+	Vk8SService        types.Object `tfsdk:"vk8s_service"`
 }
 
-type UdpLoadbalancerWhereTypeAdvertiseDualstackOnPublic struct {
+type UdpLoadbalancerAdvertiseOnPublic struct {
 	PublicIp types.Object `tfsdk:"public_ip"`
 }
 
-type UdpLoadbalancerWhereTypeAdvertiseOnPublic struct {
-	PublicIp types.Object `tfsdk:"public_ip"`
-}
-
-type UdpLoadbalancerWhereTypeAdvertiseV6OnPublic struct {
-	PublicIp types.Object `tfsdk:"public_ip"`
-}
-
-type UdpLoadbalancerWhereTypeCloudEdgeSegment struct {
-	CloudEdge types.Object `tfsdk:"cloud_edge"`
-	Ip        types.String `tfsdk:"ip"`
-	Ipv6      types.String `tfsdk:"ipv6"`
-	Segment   types.Object `tfsdk:"segment"`
-}
-
-type UdpLoadbalancerWhereTypeSegment struct {
-	Ipv4Vip types.String `tfsdk:"ipv4_vip"`
-	Ipv6Vip types.String `tfsdk:"ipv6_vip"`
-	Segment types.Object `tfsdk:"segment"`
-}
-
-type UdpLoadbalancerWhereTypeSite struct {
+type UdpLoadbalancerSite struct {
 	Ip      types.String `tfsdk:"ip"`
 	Ipv6    types.String `tfsdk:"ipv6"`
 	Network types.List   `tfsdk:"network"`
 	Site    types.Object `tfsdk:"site"`
 }
 
-type UdpLoadbalancerWhereTypeSiteSegment struct {
+type UdpLoadbalancerSiteSegment struct {
 	Ip      types.String `tfsdk:"ip"`
 	Ipv6    types.String `tfsdk:"ipv6"`
 	Segment types.Object `tfsdk:"segment"`
 	Site    types.Object `tfsdk:"site"`
 }
 
-type UdpLoadbalancerWhereTypeVirtualNetwork struct {
+type UdpLoadbalancerVirtualNet struct {
 	V6VipChoice    types.Object `tfsdk:"v6_vip_choice"`
 	VipChoice      types.Object `tfsdk:"vip_choice"`
 	VirtualNetwork types.Object `tfsdk:"virtual_network"`
 }
 
-type UdpLoadbalancerWhereVirtualNetworkV6VipChoice struct {
+type UdpLoadbalancerV6VipChoice struct {
 	DefaultV6Vip  types.Bool   `tfsdk:"default_v6_vip"`
 	SpecificV6Vip types.String `tfsdk:"specific_v6_vip"`
 }
 
-type UdpLoadbalancerWhereVirtualNetworkVipChoice struct {
+type UdpLoadbalancerVipChoice struct {
 	DefaultVip  types.Bool   `tfsdk:"default_vip"`
 	SpecificVip types.String `tfsdk:"specific_vip"`
 }
 
-type UdpLoadbalancerWhereTypeVirtualSite struct {
+type UdpLoadbalancerVirtualSite struct {
 	Network     types.List   `tfsdk:"network"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type UdpLoadbalancerWhereTypeVirtualSiteSegment struct {
+type UdpLoadbalancerVirtualSiteSegment struct {
 	Ip          types.String `tfsdk:"ip"`
 	Ipv6        types.String `tfsdk:"ipv6"`
 	Segment     types.Object `tfsdk:"segment"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type UdpLoadbalancerWhereTypeVirtualSiteWithVip struct {
+type UdpLoadbalancerVirtualSiteWithVip struct {
 	Ip          types.String `tfsdk:"ip"`
 	Ipv6        types.String `tfsdk:"ipv6"`
 	Network     types.List   `tfsdk:"network"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type UdpLoadbalancerWhereTypeVk8SService struct {
+type UdpLoadbalancerVk8SSvc struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type UdpLoadbalancerWhereVK8SServiceChoice struct {
+type UdpLoadbalancerWhereVK8SSvcChoice struct {
 	Site        types.Object `tfsdk:"site"`
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type UdpLoadbalancerWhereTypePortChoice struct {
+type UdpLoadbalancerPortChoice struct {
 	Port           types.Int64  `tfsdk:"port"`
 	PortRanges     types.String `tfsdk:"port_ranges"`
 	UseDefaultPort types.Bool   `tfsdk:"use_default_port"`
 }
 
-type UdpLoadbalancerGlobalSpecTypeAdvertiseOnPublic struct {
+type UdpLoadbalancerGstAdvertiseOnPublic struct {
 	PublicIp types.Object `tfsdk:"public_ip"`
 }
 
-type UdpLoadbalancerVirtualHostDnsInfoDnsInfo struct {
+type UdpLoadbalancerDnsInfo struct {
 	IpAddress   types.String `tfsdk:"ip_address"`
 	Ipv6Address types.String `tfsdk:"ipv6_address"`
 }
 
-type UdpLoadbalancerGlobalSpecTypeHashPolicyChoice struct {
+type UdpLoadbalancerHashPolicyChoice struct {
 	HashPolicyChoiceRandom             types.Bool `tfsdk:"hash_policy_choice_random"`
 	HashPolicyChoiceRoundRobin         types.Bool `tfsdk:"hash_policy_choice_round_robin"`
 	HashPolicyChoiceSourceIpStickiness types.Bool `tfsdk:"hash_policy_choice_source_ip_stickiness"`
 }
 
-type UdpLoadbalancerViewsInternetVIPInfo struct {
+type UdpLoadbalancerInternetVIPInfo struct {
 	SiteName        types.String `tfsdk:"site_name"`
 	SiteNetworkType types.List   `tfsdk:"site_network_type"`
 	Status          types.Object `tfsdk:"status"`
 }
 
-type UdpLoadbalancerViewsInternetVIPStatus struct {
+type UdpLoadbalancerInternetVIPStatus struct {
 	Arn               types.String `tfsdk:"arn"`
 	Name              types.String `tfsdk:"name"`
 	NlbCname          types.String `tfsdk:"nlb_cname"`
@@ -180,7 +155,7 @@ type UdpLoadbalancerViewsInternetVIPStatus struct {
 	TargetGroupStatus types.List   `tfsdk:"target_group_status"`
 }
 
-type UdpLoadbalancerViewsInternetVIPTargetGroupStatusType struct {
+type UdpLoadbalancerInternetVIPTargetGroupStatusType struct {
 	Arn            types.String `tfsdk:"arn"`
 	ListenerStatus types.List   `tfsdk:"listener_status"`
 	Name           types.String `tfsdk:"name"`
@@ -189,7 +164,7 @@ type UdpLoadbalancerViewsInternetVIPTargetGroupStatusType struct {
 	Status         types.String `tfsdk:"status"`
 }
 
-type UdpLoadbalancerViewsInternetVIPListenerStatusType struct {
+type UdpLoadbalancerInternetVIPListenerStatusType struct {
 	Arn      types.String `tfsdk:"arn"`
 	Port     types.Int64  `tfsdk:"port"`
 	Protocol types.String `tfsdk:"protocol"`
@@ -197,34 +172,32 @@ type UdpLoadbalancerViewsInternetVIPListenerStatusType struct {
 	Status   types.String `tfsdk:"status"`
 }
 
-type UdpLoadbalancerGlobalSpecTypeLoadbalancerTypeChoice struct {
+type UdpLoadbalancerLoadbalancerTypeChoice struct {
 	Udp types.Bool `tfsdk:"udp"`
 }
 
-type UdpLoadbalancerViewsOriginPoolWithWeight struct {
-	EndpointSubsets types.Map    `tfsdk:"endpoint_subsets"`
-	PoolChoice      types.Object `tfsdk:"pool_choice"`
-	Priority        types.Int64  `tfsdk:"priority"`
-	Weight          types.Int64  `tfsdk:"weight"`
+type UdpLoadbalancerOriginPoolWithWeight struct {
+	PoolChoice types.Object `tfsdk:"pool_choice"`
+	Priority   types.Int64  `tfsdk:"priority"`
 }
 
-type UdpLoadbalancerOriginPoolWithWeightPoolChoice struct {
+type UdpLoadbalancerPoolChoice struct {
 	Cluster types.Object `tfsdk:"cluster"`
 	Pool    types.Object `tfsdk:"pool"`
 }
 
-type UdpLoadbalancerGlobalSpecTypePortChoice struct {
+type UdpLoadbalancerGstPortChoice struct {
 	ListenPort types.Int64  `tfsdk:"listen_port"`
 	PortRanges types.String `tfsdk:"port_ranges"`
 }
 
-type UdpLoadbalancerGlobalSpecTypeServicePolicyChoice struct {
+type UdpLoadbalancerSvcPolicyChoice struct {
 	ActiveServicePolicies        types.Object `tfsdk:"active_service_policies"`
 	NoServicePolicies            types.Bool   `tfsdk:"no_service_policies"`
 	ServicePoliciesFromNamespace types.Bool   `tfsdk:"service_policies_from_namespace"`
 }
 
-type UdpLoadbalancerGlobalSpecTypeActiveServicePolicies struct {
+type UdpLoadbalancerActiveSvcPolicies struct {
 	Policies types.List `tfsdk:"policies"`
 }
 
@@ -297,20 +270,8 @@ var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereModelAttributeMap
 // Attribute map for RequiredOneOfField --> Choice
 var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap = map[string]attr.Type{
 
-	"advertise_dualstack_on_public": types.ObjectType{
-		AttrTypes: UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap,
-	},
 	"advertise_on_public": types.ObjectType{
 		AttrTypes: UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap,
-	},
-	"advertise_v6_on_public": types.ObjectType{
-		AttrTypes: UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap,
-	},
-	"cloud_edge_segment": types.ObjectType{
-		AttrTypes: UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap,
-	},
-	"segment": types.ObjectType{
-		AttrTypes: UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap,
 	},
 	"site": types.ObjectType{
 		AttrTypes: UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSiteModelAttributeMap,
@@ -335,24 +296,6 @@ var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttrib
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> AdvertiseDualstackOnPublic
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap = map[string]attr.Type{
-	"public_ip": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> PublicIp
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
 // Attribute map for PointerOfOneOfField --> AdvertiseOnPublic
 var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap = map[string]attr.Type{
 	"public_ip": types.ObjectType{
@@ -365,77 +308,6 @@ var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOn
 
 // Attribute map for RequiredPointerField --> PublicIp
 var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> AdvertiseV6OnPublic
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap = map[string]attr.Type{
-	"public_ip": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> PublicIp
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> CloudEdgeSegment
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap = map[string]attr.Type{
-	"cloud_edge": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-	"ip":   types.StringType,
-	"ipv6": types.StringType, "segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> CloudEdge
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Segment
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap = map[string]attr.Type{
-
-	"ipv4_vip": types.StringType,
-	"ipv6_vip": types.StringType, "segment": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"namespace": types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Segment
-var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
 	"namespace": types.StringType,
@@ -804,14 +676,10 @@ var UdpLoadbalancerLoadbalancerTypeModelAttributeMap = map[string]attr.Type{
 // Attribute map for ArrayOfPointerField --> OriginPoolsWeights
 var UdpLoadbalancerOriginPoolsWeightsModelAttributeMap = map[string]attr.Type{
 
-	"endpoint_subsets": types.MapType{
-		ElemType: types.StringType,
-	},
 	"pool_choice": types.ObjectType{
 		AttrTypes: UdpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap,
 	},
 	"priority": types.Int64Type,
-	"weight":   types.Int64Type,
 }
 
 // Attribute map for RequiredOneOfField --> PoolChoice
@@ -895,8 +763,8 @@ func (d *DataSourceF5XCUdpLoadbalancer) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a udp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of udp_loadbalancer) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a udp_loadbalancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of udp_loadbalancer) etc. can be fetched",
+		MarkdownDescription: "UDP load balancer view defines a required parameters that can be used in CRUD, to create and manage UDP load balancer.<br>It can be used to create UDP load balancer.<br><br>View will create following child objects.<br><br>* Virtual-host<br>* default route<br>* clusters<br>* endpoints<br>* advertise policy",
+		Description:         "UDP load balancer view defines a required parameters that can be used in CRUD, to create and manage UDP load balancer. It can be used to create UDP load balancer. View will create following child objects. Virtual-host default route clusters endpoints advertise policy",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -962,40 +830,6 @@ func (r *DataSourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request data
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"advertise_dualstack_on_public": schema.SingleNestedAttribute{
-													Description: "Advertise DualStack On Public Advertise this load balancer with Dualstack VIP on public network",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"public_ip": schema.SingleNestedAttribute{
-															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
 												"advertise_on_public": schema.SingleNestedAttribute{
 													Description: "Advertise On Public Advertise this load balancer on public network",
 													Required:    false,
@@ -1004,158 +838,6 @@ func (r *DataSourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request data
 													Attributes: map[string]schema.Attribute{
 														"public_ip": schema.SingleNestedAttribute{
 															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-												"advertise_v6_on_public": schema.SingleNestedAttribute{
-													Description: "Advertise IPv6 On Public Advertise this load balancer with IPv6 VIP on public network",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"public_ip": schema.SingleNestedAttribute{
-															Description: "Public IP Dedicated Public IP, which is allocated by F5 Distributed Cloud on request, is used as a VIP.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-												"cloud_edge_segment": schema.SingleNestedAttribute{
-													Description: "Segment on Cloud Edge Advertise on a segment on a Cloud Edge",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"cloud_edge": schema.SingleNestedAttribute{
-															Description: "Site",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"ip": schema.StringAttribute{
-															Description: "IP address on the Cloud Edge Use given IP address as VIP on the Cloud Edge",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPv6 address on the Cloud Edge Use given IPv6 address as VIP on the Cloud Edge",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"segment": schema.SingleNestedAttribute{
-															Description: "Segment",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-												"segment": schema.SingleNestedAttribute{
-													Description: "Segment Advertise on a segment",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"ipv4_vip": schema.StringAttribute{
-															Description: "IPv4 VIP Configure IPV4 VIP address",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6_vip": schema.StringAttribute{
-															Description: "IPv6 VIP Configure IPV6 VIP address",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"segment": schema.SingleNestedAttribute{
-															Description: "Segment",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
@@ -1931,13 +1613,6 @@ func (r *DataSourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request data
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"endpoint_subsets": schema.MapAttribute{
-							Description: "Origin Servers Subset Upstream origin pool may be configured to divide its origin servers into subsets based on metadata attached to the origin servers. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer For origin servers which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those origin servers of upstream origin pool which match this metadata will be selected for load balancing",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
 						"pool_choice": schema.SingleNestedAttribute{
 							Description: "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.",
 							Required:    false,
@@ -2000,12 +1675,6 @@ func (r *DataSourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request data
 						},
 						"priority": schema.Int64Attribute{
 							Description: "Priority Priority of this origin pool, valid only with multiple origin pools. Value of 0 will make the pool as lowest priority origin pool Priority of 1 means highest priority and is considered active. When active origin pool is not available, lower priority origin pools are made active as per the increasing priority.",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"weight": schema.Int64Attribute{
-							Description: "Weight Weight of this origin pool, valid only with multiple origin pool. Value of 0 will disable the pool",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
@@ -2146,7 +1815,7 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_udp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "udp_loadbalancer", err))
 		return
 	}
 
@@ -2217,7 +1886,7 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 		advertiseChoiceChoices := specData.GetAdvertiseChoice()
 
 		// The model struct that will be populated by the nested template.
-		var advertiseChoiceChoicesModel = &UdpLoadbalancerGlobalSpecTypeAdvertiseChoice{}
+		var advertiseChoiceChoicesModel = &UdpLoadbalancerAdvertiseChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2235,9 +1904,9 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 				if len(advertiseCustomElement.GetAdvertiseWhere()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					advertiseWhereElements := make([]UdpLoadbalancerViewsWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
+					advertiseWhereElements := make([]UdpLoadbalancerWhereType, 0, len(advertiseCustomElement.GetAdvertiseWhere()))
 					for _, advertiseWhereElement := range advertiseCustomElement.GetAdvertiseWhere() {
-						udpLoadbalancerViewsWhereTypeModel := UdpLoadbalancerViewsWhereType{}
+						udpLoadbalancerWhereTypeModel := UdpLoadbalancerWhereType{}
 
 						// data specToModelNested RequiredOneOfField --> Choice
 						// <no value>
@@ -2250,77 +1919,6 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 							advertiseWherechoiceChoices := advertiseWhereElement.GetChoice()
 
 							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> AdvertiseDualstackOnPublic
-							// <no value>
-							// false
-							{
-								advertiseDualstackOnPublicOptionsWrapper, isAdvertiseDualstackOnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseDualstackOnPublic)
-								advertiseDualstackOnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseDualstackOnPublic && advertiseDualstackOnPublicOptionsWrapper != nil && advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic != nil {
-									advertiseDualstackOnPublicElement := advertiseDualstackOnPublicOptionsWrapper.AdvertiseDualstackOnPublic
-
-									// data specToModelNested RequiredPointerField --> PublicIp
-									if advertiseDualstackOnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseDualstackOnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseDualstackOnPublicAttributeMap["public_ip"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseDualstackOnPublicObj, advertiseDualstackOnPublicObjDiags := types.ObjectValue(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap, advertiseDualstackOnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseDualstackOnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = advertiseDualstackOnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_dualstack_on_public"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseDualstackOnPublicModelAttributeMap)
-								}
-							}
 
 							// data specToModelNested PointerOfOneOfField --> AdvertiseOnPublic
 							// <no value>
@@ -2390,301 +1988,6 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = advertiseOnPublicObj
 								} else {
 									advertiseWherechoiceChoicesAttributeMap["advertise_on_public"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseOnPublicModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> AdvertiseV6OnPublic
-							// <no value>
-							// false
-							{
-								advertiseV6OnPublicOptionsWrapper, isAdvertiseV6OnPublic := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_AdvertiseV6OnPublic)
-								advertiseV6OnPublicAttributeMap := make(map[string]attr.Value)
-
-								if isAdvertiseV6OnPublic && advertiseV6OnPublicOptionsWrapper != nil && advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic != nil {
-									advertiseV6OnPublicElement := advertiseV6OnPublicOptionsWrapper.AdvertiseV6OnPublic
-
-									// data specToModelNested RequiredPointerField --> PublicIp
-									if advertiseV6OnPublicElement.GetPublicIp() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										publicIpElement := advertiseV6OnPublicElement.GetPublicIp()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if publicIpElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(publicIpElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if publicIpElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(publicIpElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if publicIpElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(publicIpElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										advertiseV6OnPublicAttributeMap["public_ip"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										advertiseV6OnPublicAttributeMap["public_ip"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicPublicIpModelAttributeMap)
-									}
-
-									advertiseV6OnPublicObj, advertiseV6OnPublicObjDiags := types.ObjectValue(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap, advertiseV6OnPublicAttributeMap)
-									response.Diagnostics.Append(advertiseV6OnPublicObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = advertiseV6OnPublicObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["advertise_v6_on_public"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceAdvertiseV6OnPublicModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> CloudEdgeSegment
-							// <no value>
-							// false
-							{
-								cloudEdgeSegmentOptionsWrapper, isCloudEdgeSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_CloudEdgeSegment)
-								cloudEdgeSegmentAttributeMap := make(map[string]attr.Value)
-
-								if isCloudEdgeSegment && cloudEdgeSegmentOptionsWrapper != nil && cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment != nil {
-									cloudEdgeSegmentElement := cloudEdgeSegmentOptionsWrapper.CloudEdgeSegment
-
-									// data specToModelNested RequiredPointerField --> CloudEdge
-									if cloudEdgeSegmentElement.GetCloudEdge() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										cloudEdgeElement := cloudEdgeSegmentElement.GetCloudEdge()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if cloudEdgeElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(cloudEdgeElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if cloudEdgeElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(cloudEdgeElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if cloudEdgeElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(cloudEdgeElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["cloud_edge"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentCloudEdgeModelAttributeMap)
-									}
-
-									// data specToModelNested RequiredStringField --> Ip
-									if cloudEdgeSegmentElement.GetIp() != "" {
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringValue(cloudEdgeSegmentElement.GetIp())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6
-									if cloudEdgeSegmentElement.GetIpv6() != "" {
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringValue(cloudEdgeSegmentElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										cloudEdgeSegmentAttributeMap["ipv6"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredPointerField --> Segment
-									if cloudEdgeSegmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := cloudEdgeSegmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										cloudEdgeSegmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										cloudEdgeSegmentAttributeMap["segment"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentSegmentModelAttributeMap)
-									}
-
-									cloudEdgeSegmentObj, cloudEdgeSegmentObjDiags := types.ObjectValue(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap, cloudEdgeSegmentAttributeMap)
-									response.Diagnostics.Append(cloudEdgeSegmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = cloudEdgeSegmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["cloud_edge_segment"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceCloudEdgeSegmentModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> Segment
-							// <no value>
-							// false
-							{
-								segmentOptionsWrapper, isSegment := advertiseWherechoiceChoices.(*ves_io_schema_views.WhereType_Segment)
-								segmentAttributeMap := make(map[string]attr.Value)
-
-								if isSegment && segmentOptionsWrapper != nil && segmentOptionsWrapper.Segment != nil {
-									segmentElement := segmentOptionsWrapper.Segment
-
-									// data specToModelNested RequiredStringField --> Ipv4Vip
-									if segmentElement.GetIpv4Vip() != "" {
-										segmentAttributeMap["ipv4_vip"] = types.StringValue(segmentElement.GetIpv4Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv4_vip"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Ipv6Vip
-									if segmentElement.GetIpv6Vip() != "" {
-										segmentAttributeMap["ipv6_vip"] = types.StringValue(segmentElement.GetIpv6Vip())
-									} else {
-										// Empty string, set to null
-										segmentAttributeMap["ipv6_vip"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredPointerField --> Segment
-									if segmentElement.GetSegment() != nil {
-										// Create the nested Go struct
-										objectRefTypeModelModel := &ObjectRefTypeModel{}
-										segmentElement := segmentElement.GetSegment()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredStringField --> Name
-										if segmentElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(segmentElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if segmentElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(segmentElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if segmentElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(segmentElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap, objectRefTypeModelModel)
-										response.Diagnostics.Append(objDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										segmentAttributeMap["segment"] = objectRefTypeModelModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										segmentAttributeMap["segment"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentSegmentModelAttributeMap)
-									}
-
-									segmentObj, segmentObjDiags := types.ObjectValue(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap, segmentAttributeMap)
-									response.Diagnostics.Append(segmentObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									advertiseWherechoiceChoicesAttributeMap["segment"] = segmentObj
-								} else {
-									advertiseWherechoiceChoicesAttributeMap["segment"] = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceSegmentModelAttributeMap)
 								}
 							}
 
@@ -3573,10 +2876,10 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							udpLoadbalancerViewsWhereTypeModel.Choice = finalObj
+							udpLoadbalancerWhereTypeModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							udpLoadbalancerViewsWhereTypeModel.Choice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
+							udpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> PortChoice
@@ -3633,13 +2936,13 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							udpLoadbalancerViewsWhereTypeModel.PortChoice = finalObj
+							udpLoadbalancerWhereTypeModel.PortChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							udpLoadbalancerViewsWhereTypeModel.PortChoice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap)
+							udpLoadbalancerWhereTypeModel.PortChoice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap)
 						}
 
-						advertiseWhereElements = append(advertiseWhereElements, udpLoadbalancerViewsWhereTypeModel)
+						advertiseWhereElements = append(advertiseWhereElements, udpLoadbalancerWhereTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3779,28 +3082,28 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> DnsInfo
 	if len(specData.GetDnsInfo()) > 0 {
-		dnsInfoElements := make([]UdpLoadbalancerVirtualHostDnsInfoDnsInfo, 0, len(specData.GetDnsInfo()))
+		dnsInfoElements := make([]UdpLoadbalancerDnsInfo, 0, len(specData.GetDnsInfo()))
 
 		for _, dnsInfoElement := range specData.GetDnsInfo() {
-			udpLoadbalancerVirtualHostDnsInfoDnsInfoModel := UdpLoadbalancerVirtualHostDnsInfoDnsInfo{}
+			udpLoadbalancerDnsInfoModel := UdpLoadbalancerDnsInfo{}
 
 			// data specToModelNested StringField --> IpAddress
 			if dnsInfoElement.GetIpAddress() != "" {
-				udpLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringValue(dnsInfoElement.GetIpAddress())
+				udpLoadbalancerDnsInfoModel.IpAddress = types.StringValue(dnsInfoElement.GetIpAddress())
 			} else {
 				// Empty string, set to null
-				udpLoadbalancerVirtualHostDnsInfoDnsInfoModel.IpAddress = types.StringNull()
+				udpLoadbalancerDnsInfoModel.IpAddress = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Ipv6Address
 			if dnsInfoElement.GetIpv6Address() != "" {
-				udpLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringValue(dnsInfoElement.GetIpv6Address())
+				udpLoadbalancerDnsInfoModel.Ipv6Address = types.StringValue(dnsInfoElement.GetIpv6Address())
 			} else {
 				// Empty string, set to null
-				udpLoadbalancerVirtualHostDnsInfoDnsInfoModel.Ipv6Address = types.StringNull()
+				udpLoadbalancerDnsInfoModel.Ipv6Address = types.StringNull()
 			}
 
-			dnsInfoElements = append(dnsInfoElements, udpLoadbalancerVirtualHostDnsInfoDnsInfoModel)
+			dnsInfoElements = append(dnsInfoElements, udpLoadbalancerDnsInfoModel)
 		}
 
 		{
@@ -3852,7 +3155,7 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 		hashPolicyChoiceChoices := specData.GetHashPolicyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var hashPolicyChoiceChoicesModel = &UdpLoadbalancerGlobalSpecTypeHashPolicyChoice{}
+		var hashPolicyChoiceChoicesModel = &UdpLoadbalancerHashPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -3921,17 +3224,17 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> InternetVipInfo
 	if len(specData.GetInternetVipInfo()) > 0 {
-		internetVipInfoElements := make([]UdpLoadbalancerViewsInternetVIPInfo, 0, len(specData.GetInternetVipInfo()))
+		internetVipInfoElements := make([]UdpLoadbalancerInternetVIPInfo, 0, len(specData.GetInternetVipInfo()))
 
 		for _, internetVipInfoElement := range specData.GetInternetVipInfo() {
-			udpLoadbalancerViewsInternetVIPInfoModel := UdpLoadbalancerViewsInternetVIPInfo{}
+			udpLoadbalancerInternetVIPInfoModel := UdpLoadbalancerInternetVIPInfo{}
 
 			// data specToModelNested StringField --> SiteName
 			if internetVipInfoElement.GetSiteName() != "" {
-				udpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringValue(internetVipInfoElement.GetSiteName())
+				udpLoadbalancerInternetVIPInfoModel.SiteName = types.StringValue(internetVipInfoElement.GetSiteName())
 			} else {
 				// Empty string, set to null
-				udpLoadbalancerViewsInternetVIPInfoModel.SiteName = types.StringNull()
+				udpLoadbalancerInternetVIPInfoModel.SiteName = types.StringNull()
 			}
 
 			// data specToModelNested EnumField --> SiteNetworkType
@@ -3943,119 +3246,119 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				udpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = listValue
+				udpLoadbalancerInternetVIPInfoModel.SiteNetworkType = listValue
 			} else {
-				udpLoadbalancerViewsInternetVIPInfoModel.SiteNetworkType = types.ListNull(types.StringType)
+				udpLoadbalancerInternetVIPInfoModel.SiteNetworkType = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested PointerField --> Status
 			if internetVipInfoElement.GetStatus() != nil {
 				// Create the nested Go struct
-				udpLoadbalancerViewsInternetVIPStatusModel := &UdpLoadbalancerViewsInternetVIPStatus{}
+				udpLoadbalancerInternetVIPStatusModel := &UdpLoadbalancerInternetVIPStatus{}
 				statusElement := internetVipInfoElement.GetStatus()
 
 				// Recursively populate the nested struct
 
 				// data specToModelNested StringField --> Arn
 				if statusElement.GetArn() != "" {
-					udpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringValue(statusElement.GetArn())
+					udpLoadbalancerInternetVIPStatusModel.Arn = types.StringValue(statusElement.GetArn())
 				} else {
 					// Empty string, set to null
-					udpLoadbalancerViewsInternetVIPStatusModel.Arn = types.StringNull()
+					udpLoadbalancerInternetVIPStatusModel.Arn = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Name
 				if statusElement.GetName() != "" {
-					udpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringValue(statusElement.GetName())
+					udpLoadbalancerInternetVIPStatusModel.Name = types.StringValue(statusElement.GetName())
 				} else {
 					// Empty string, set to null
-					udpLoadbalancerViewsInternetVIPStatusModel.Name = types.StringNull()
+					udpLoadbalancerInternetVIPStatusModel.Name = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> NlbCname
 				if statusElement.GetNlbCname() != "" {
-					udpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringValue(statusElement.GetNlbCname())
+					udpLoadbalancerInternetVIPStatusModel.NlbCname = types.StringValue(statusElement.GetNlbCname())
 				} else {
 					// Empty string, set to null
-					udpLoadbalancerViewsInternetVIPStatusModel.NlbCname = types.StringNull()
+					udpLoadbalancerInternetVIPStatusModel.NlbCname = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> NlbStatus
 				if statusElement.GetNlbStatus() != "" {
-					udpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringValue(statusElement.GetNlbStatus())
+					udpLoadbalancerInternetVIPStatusModel.NlbStatus = types.StringValue(statusElement.GetNlbStatus())
 				} else {
 					// Empty string, set to null
-					udpLoadbalancerViewsInternetVIPStatusModel.NlbStatus = types.StringNull()
+					udpLoadbalancerInternetVIPStatusModel.NlbStatus = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> Reason
 				if statusElement.GetReason() != "" {
-					udpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringValue(statusElement.GetReason())
+					udpLoadbalancerInternetVIPStatusModel.Reason = types.StringValue(statusElement.GetReason())
 				} else {
 					// Empty string, set to null
-					udpLoadbalancerViewsInternetVIPStatusModel.Reason = types.StringNull()
+					udpLoadbalancerInternetVIPStatusModel.Reason = types.StringNull()
 				}
 
 				// data specToModelNested ArrayOfPointerField --> TargetGroupStatus
 				if len(statusElement.GetTargetGroupStatus()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					targetGroupStatusElements := make([]UdpLoadbalancerViewsInternetVIPTargetGroupStatusType, 0, len(statusElement.GetTargetGroupStatus()))
+					targetGroupStatusElements := make([]UdpLoadbalancerInternetVIPTargetGroupStatusType, 0, len(statusElement.GetTargetGroupStatus()))
 					for _, targetGroupStatusElement := range statusElement.GetTargetGroupStatus() {
-						udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel := UdpLoadbalancerViewsInternetVIPTargetGroupStatusType{}
+						udpLoadbalancerInternetVIPTargetGroupStatusTypeModel := UdpLoadbalancerInternetVIPTargetGroupStatusType{}
 
 						// data specToModelNested StringField --> Arn
 						if targetGroupStatusElement.GetArn() != "" {
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringValue(targetGroupStatusElement.GetArn())
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Arn = types.StringValue(targetGroupStatusElement.GetArn())
 						} else {
 							// Empty string, set to null
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Arn = types.StringNull()
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Arn = types.StringNull()
 						}
 
 						// data specToModelNested ArrayOfPointerField --> ListenerStatus
 						if len(targetGroupStatusElement.GetListenerStatus()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							listenerStatusElements := make([]UdpLoadbalancerViewsInternetVIPListenerStatusType, 0, len(targetGroupStatusElement.GetListenerStatus()))
+							listenerStatusElements := make([]UdpLoadbalancerInternetVIPListenerStatusType, 0, len(targetGroupStatusElement.GetListenerStatus()))
 							for _, listenerStatusElement := range targetGroupStatusElement.GetListenerStatus() {
-								udpLoadbalancerViewsInternetVIPListenerStatusTypeModel := UdpLoadbalancerViewsInternetVIPListenerStatusType{}
+								udpLoadbalancerInternetVIPListenerStatusTypeModel := UdpLoadbalancerInternetVIPListenerStatusType{}
 
 								// data specToModelNested StringField --> Arn
 								if listenerStatusElement.GetArn() != "" {
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringValue(listenerStatusElement.GetArn())
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Arn = types.StringValue(listenerStatusElement.GetArn())
 								} else {
 									// Empty string, set to null
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Arn = types.StringNull()
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Arn = types.StringNull()
 								}
 
 								// data specToModelNested UintField --> Port
-								udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Port = types.Int64Value(int64(listenerStatusElement.GetPort()))
+								udpLoadbalancerInternetVIPListenerStatusTypeModel.Port = types.Int64Value(int64(listenerStatusElement.GetPort()))
 
 								// data specToModelNested StringField --> Protocol
 								if listenerStatusElement.GetProtocol() != "" {
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringValue(listenerStatusElement.GetProtocol())
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Protocol = types.StringValue(listenerStatusElement.GetProtocol())
 								} else {
 									// Empty string, set to null
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Protocol = types.StringNull()
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Protocol = types.StringNull()
 								}
 
 								// data specToModelNested StringField --> Reason
 								if listenerStatusElement.GetReason() != "" {
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringValue(listenerStatusElement.GetReason())
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Reason = types.StringValue(listenerStatusElement.GetReason())
 								} else {
 									// Empty string, set to null
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Reason = types.StringNull()
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Reason = types.StringNull()
 								}
 
 								// data specToModelNested StringField --> Status
 								if listenerStatusElement.GetStatus() != "" {
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringValue(listenerStatusElement.GetStatus())
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Status = types.StringValue(listenerStatusElement.GetStatus())
 								} else {
 									// Empty string, set to null
-									udpLoadbalancerViewsInternetVIPListenerStatusTypeModel.Status = types.StringNull()
+									udpLoadbalancerInternetVIPListenerStatusTypeModel.Status = types.StringNull()
 								}
 
-								listenerStatusElements = append(listenerStatusElements, udpLoadbalancerViewsInternetVIPListenerStatusTypeModel)
+								listenerStatusElements = append(listenerStatusElements, udpLoadbalancerInternetVIPListenerStatusTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4064,48 +3367,48 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 							if response.Diagnostics.HasError() {
 								return
 							}
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = listenerStatusListValue
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.ListenerStatus = listenerStatusListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.ListenerStatus = types.ListNull(types.ObjectType{AttrTypes: UdpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttributeMap})
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.ListenerStatus = types.ListNull(types.ObjectType{AttrTypes: UdpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttributeMap})
 						}
 
 						// data specToModelNested StringField --> Name
 						if targetGroupStatusElement.GetName() != "" {
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringValue(targetGroupStatusElement.GetName())
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Name = types.StringValue(targetGroupStatusElement.GetName())
 						} else {
 							// Empty string, set to null
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Name = types.StringNull()
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Protocol
 						if targetGroupStatusElement.GetProtocol() != "" {
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringValue(targetGroupStatusElement.GetProtocol())
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringValue(targetGroupStatusElement.GetProtocol())
 						} else {
 							// Empty string, set to null
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringNull()
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Protocol = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Reason
 						if targetGroupStatusElement.GetReason() != "" {
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringValue(targetGroupStatusElement.GetReason())
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Reason = types.StringValue(targetGroupStatusElement.GetReason())
 						} else {
 							// Empty string, set to null
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Reason = types.StringNull()
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Reason = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> Status
 						if targetGroupStatusElement.GetStatus() != "" {
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringValue(targetGroupStatusElement.GetStatus())
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Status = types.StringValue(targetGroupStatusElement.GetStatus())
 						} else {
 							// Empty string, set to null
-							udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel.Status = types.StringNull()
+							udpLoadbalancerInternetVIPTargetGroupStatusTypeModel.Status = types.StringNull()
 						}
 
-						targetGroupStatusElements = append(targetGroupStatusElements, udpLoadbalancerViewsInternetVIPTargetGroupStatusTypeModel)
+						targetGroupStatusElements = append(targetGroupStatusElements, udpLoadbalancerInternetVIPTargetGroupStatusTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4114,22 +3417,22 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 					if response.Diagnostics.HasError() {
 						return
 					}
-					udpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = targetGroupStatusListValue
+					udpLoadbalancerInternetVIPStatusModel.TargetGroupStatus = targetGroupStatusListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					udpLoadbalancerViewsInternetVIPStatusModel.TargetGroupStatus = types.ListNull(types.ObjectType{AttrTypes: UdpLoadbalancerInternetVipInfoStatusTargetGroupStatusModelAttributeMap})
+					udpLoadbalancerInternetVIPStatusModel.TargetGroupStatus = types.ListNull(types.ObjectType{AttrTypes: UdpLoadbalancerInternetVipInfoStatusTargetGroupStatusModelAttributeMap})
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				udpLoadbalancerViewsInternetVIPStatusModelObj, objDiags := types.ObjectValueFrom(ctx, UdpLoadbalancerInternetVipInfoStatusModelAttributeMap, udpLoadbalancerViewsInternetVIPStatusModel)
+				udpLoadbalancerInternetVIPStatusModelObj, objDiags := types.ObjectValueFrom(ctx, UdpLoadbalancerInternetVipInfoStatusModelAttributeMap, udpLoadbalancerInternetVIPStatusModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				udpLoadbalancerViewsInternetVIPInfoModel.Status = udpLoadbalancerViewsInternetVIPStatusModelObj
+				udpLoadbalancerInternetVIPInfoModel.Status = udpLoadbalancerInternetVIPStatusModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -4138,10 +3441,10 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 				// because the API may always return a non-nil struct (with REDACTED values) for this field,
 				// making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				udpLoadbalancerViewsInternetVIPInfoModel.Status = types.ObjectNull(UdpLoadbalancerInternetVipInfoStatusModelAttributeMap)
+				udpLoadbalancerInternetVIPInfoModel.Status = types.ObjectNull(UdpLoadbalancerInternetVipInfoStatusModelAttributeMap)
 			}
 
-			internetVipInfoElements = append(internetVipInfoElements, udpLoadbalancerViewsInternetVIPInfoModel)
+			internetVipInfoElements = append(internetVipInfoElements, udpLoadbalancerInternetVIPInfoModel)
 		}
 
 		{
@@ -4176,7 +3479,7 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 		loadbalancerTypeChoiceChoices := specData.GetLoadbalancerType()
 
 		// The model struct that will be populated by the nested template.
-		var loadbalancerTypeChoiceChoicesModel = &UdpLoadbalancerGlobalSpecTypeLoadbalancerTypeChoice{}
+		var loadbalancerTypeChoiceChoicesModel = &UdpLoadbalancerLoadbalancerTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4211,28 +3514,10 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> OriginPoolsWeights
 	if len(specData.GetOriginPoolsWeights()) > 0 {
-		originPoolsWeightsElements := make([]UdpLoadbalancerViewsOriginPoolWithWeight, 0, len(specData.GetOriginPoolsWeights()))
+		originPoolsWeightsElements := make([]UdpLoadbalancerOriginPoolWithWeight, 0, len(specData.GetOriginPoolsWeights()))
 
 		for _, originPoolsWeightsElement := range specData.GetOriginPoolsWeights() {
-			udpLoadbalancerViewsOriginPoolWithWeightModel := UdpLoadbalancerViewsOriginPoolWithWeight{}
-
-			// data specToModelNested MapOfStringField --> EndpointSubsets
-			if originPoolsWeightsElement.GetEndpointSubsets() != nil {
-				// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-				endpointSubsetsMap, endpointSubsetsDiags := utils.StringMapToTerraformMap(originPoolsWeightsElement.GetEndpointSubsets())
-				response.Diagnostics.Append(endpointSubsetsDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				// Assign the typed map to the model
-				udpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = endpointSubsetsMap
-			} else {
-				// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
-				// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
-				// API returned nil (Protobuf omits empty maps). Set to null.
-				// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-				udpLoadbalancerViewsOriginPoolWithWeightModel.EndpointSubsets = types.MapNull(types.StringType)
-			}
+			udpLoadbalancerOriginPoolWithWeightModel := UdpLoadbalancerOriginPoolWithWeight{}
 
 			// data specToModelNested RequiredOneOfField --> PoolChoice
 			// <no value>
@@ -4349,19 +3634,16 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				udpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = finalObj
+				udpLoadbalancerOriginPoolWithWeightModel.PoolChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				udpLoadbalancerViewsOriginPoolWithWeightModel.PoolChoice = types.ObjectNull(UdpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap)
+				udpLoadbalancerOriginPoolWithWeightModel.PoolChoice = types.ObjectNull(UdpLoadbalancerOriginPoolsWeightsPoolChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested UintField --> Priority
-			udpLoadbalancerViewsOriginPoolWithWeightModel.Priority = types.Int64Value(int64(originPoolsWeightsElement.GetPriority()))
+			udpLoadbalancerOriginPoolWithWeightModel.Priority = types.Int64Value(int64(originPoolsWeightsElement.GetPriority()))
 
-			// data specToModelNested UintField --> Weight
-			udpLoadbalancerViewsOriginPoolWithWeightModel.Weight = types.Int64Value(int64(originPoolsWeightsElement.GetWeight()))
-
-			originPoolsWeightsElements = append(originPoolsWeightsElements, udpLoadbalancerViewsOriginPoolWithWeightModel)
+			originPoolsWeightsElements = append(originPoolsWeightsElements, udpLoadbalancerOriginPoolWithWeightModel)
 		}
 
 		{
@@ -4396,7 +3678,7 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 		portChoiceChoices := specData.GetPortChoice()
 
 		// The model struct that will be populated by the nested template.
-		var portChoiceChoicesModel = &UdpLoadbalancerGlobalSpecTypePortChoice{}
+		var portChoiceChoicesModel = &UdpLoadbalancerGstPortChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4450,7 +3732,7 @@ func (d *DataSourceF5XCUdpLoadbalancer) Read(ctx context.Context, request dataso
 		servicePolicyChoiceChoices := specData.GetServicePolicyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var servicePolicyChoiceChoicesModel = &UdpLoadbalancerGlobalSpecTypeServicePolicyChoice{}
+		var servicePolicyChoiceChoicesModel = &UdpLoadbalancerSvcPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

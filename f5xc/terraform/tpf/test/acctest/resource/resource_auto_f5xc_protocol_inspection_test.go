@@ -28,38 +28,42 @@ func TestAccResourceAutoF5XCProtocolInspection_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-proto-inspect-" + acctest.RandString(t, 8)
+	name := "example-proto-inspect-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProtocolInspectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withDescription(name, namespace, "protocol inspection basic updated")},
+			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withDescription(name, namespace, "Updated basic protocol inspection example")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProtocolInspectionConfig_basic("example-proto-inspect", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCProtocolInspection_actionTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-proto-inspect-" + acctest.RandString(t, 8)
+	name := "example-proto-inspect-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,18 +72,18 @@ func TestAccResourceAutoF5XCProtocolInspection_actionTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withAction(name, namespace, "ALLOW")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withAction(name, namespace, "DENY")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -90,7 +94,7 @@ func TestAccResourceAutoF5XCProtocolInspection_signatureChoiceTransition(t *test
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-proto-inspect-" + acctest.RandString(t, 8)
+	name := "example-proto-inspect-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -99,18 +103,18 @@ func TestAccResourceAutoF5XCProtocolInspection_signatureChoiceTransition(t *test
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withSignatureEnabled(name, namespace, "ALLOW")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withSignatureDisabled(name, namespace, "ALLOW")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -121,8 +125,8 @@ func TestAccResourceAutoF5XCProtocolInspection_complianceChoiceTransition(t *tes
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-proto-inspect-" + acctest.RandString(t, 8)
-	complianceName := "tf-acc-dns-compliance-" + acctest.RandString(t, 8)
+	name := "example-proto-inspect-" + acctest.RandString(t, 8)
+	complianceName := "example-dns-compliance-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -131,18 +135,18 @@ func TestAccResourceAutoF5XCProtocolInspection_complianceChoiceTransition(t *tes
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withComplianceDisabled(name, namespace, "ALLOW")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_withComplianceEnabled(name, namespace, complianceName, "ALLOW")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -153,32 +157,36 @@ func TestAccResourceAutoF5XCProtocolInspection_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-proto-inspect-" + acctest.RandString(t, 8)
-	complianceName := "tf-acc-dns-compliance-" + acctest.RandString(t, 8)
+	name := "example-proto-inspect-" + acctest.RandString(t, 8)
+	complianceName := "example-dns-compliance-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProtocolInspectionDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_full(name, namespace, complianceName, "DENY", "team-a", "test")},
+			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_full(name, namespace, complianceName, "DENY", "example-team", "example")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_full(name, namespace, complianceName, "DROP", "team-b", "prod")},
+			{Config: testAccResourceAutoF5XCProtocolInspectionConfig_full(name, namespace, complianceName, "DROP", "example-team-alt", "example")},
 			{
-				ResourceName:                         "f5xc_protocol_inspection.test",
+				ResourceName:                         "f5xc_protocol_inspection.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protocol_inspection.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProtocolInspectionConfig_full("example-proto-inspect", "default", "example-dns-compliance", "DENY", "example-team", "example"),
+		})
 }
 
 func testAccCheckProtocolInspectionDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -187,7 +195,7 @@ func testAccCheckProtocolInspectionDestroyProducer(t *testing.T) func(*terraform
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name      = %q
   namespace = %q
 
@@ -210,7 +218,7 @@ resource "f5xc_protocol_inspection" "test" {
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -234,7 +242,7 @@ resource "f5xc_protocol_inspection" "test" {
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_withAction(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name      = %q
   namespace = %q
 
@@ -257,7 +265,7 @@ resource "f5xc_protocol_inspection" "test" {
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_withSignatureEnabled(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name      = %q
   namespace = %q
 
@@ -280,7 +288,7 @@ resource "f5xc_protocol_inspection" "test" {
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_withSignatureDisabled(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name      = %q
   namespace = %q
 
@@ -303,7 +311,7 @@ resource "f5xc_protocol_inspection" "test" {
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_withComplianceDisabled(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name      = %q
   namespace = %q
 
@@ -326,14 +334,14 @@ resource "f5xc_protocol_inspection" "test" {
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_withComplianceEnabled(name, namespace, complianceName, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "compliance" {
+resource "f5xc_dns_compliance_checks" "example" {
   name      = %q
   namespace = %q
 
-  domain_denylist = ["blocked-test.example"]
+  domain_denylist = ["blocked-domain.com"]
 }
 
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name      = %q
   namespace = %q
 
@@ -342,7 +350,7 @@ resource "f5xc_protocol_inspection" "test" {
   enable_disable_compliance_checks = {
     compliance_check_choice = {
       enable_compliance_checks = {
-        name      = f5xc_dns_compliance_checks.compliance.name
+        name      = f5xc_dns_compliance_checks.example.name
         namespace = %q
       }
     }
@@ -359,17 +367,17 @@ resource "f5xc_protocol_inspection" "test" {
 
 func testAccResourceAutoF5XCProtocolInspectionConfig_full(name, namespace, complianceName, action, owner, env string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_compliance_checks" "compliance" {
+resource "f5xc_dns_compliance_checks" "example" {
   name      = %q
   namespace = %q
 
-  domain_denylist = ["blocked-test.example", "forbidden-test.example"]
+  domain_denylist = ["blocked-domain.com", "forbidden-domain.com"]
 }
 
-resource "f5xc_protocol_inspection" "test" {
+resource "f5xc_protocol_inspection" "example" {
   name        = %q
   namespace   = %q
-  description = "protocol inspection full"
+  description = "Full protocol inspection example"
 
   labels = {
     env = %q
@@ -384,7 +392,7 @@ resource "f5xc_protocol_inspection" "test" {
   enable_disable_compliance_checks = {
     compliance_check_choice = {
       enable_compliance_checks = {
-        name      = f5xc_dns_compliance_checks.compliance.name
+        name      = f5xc_dns_compliance_checks.example.name
         namespace = %q
       }
     }

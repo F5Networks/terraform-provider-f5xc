@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCGeoLocationSet_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-gls-" + acctest.RandString(t, 8)
+	name := "example-gls-" + acctest.RandString(t, 8)
 	namespace := acctest.SystemNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckGeoLocationSetDestroyProducer(t),
@@ -39,33 +39,37 @@ func TestAccResourceAutoF5XCGeoLocationSet_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCGeoLocationSetConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_geo_location_set.test",
+				ResourceName:                         "f5xc_geo_location_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_geo_location_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_geo_location_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCGeoLocationSetConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_geo_location_set.test",
+				ResourceName:                         "f5xc_geo_location_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_geo_location_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_geo_location_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCGeoLocationSetConfig_basic("example-geo-location-set", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCGeoLocationSet_withCountries(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-gls-" + acctest.RandString(t, 8)
+	name := "example-gls-" + acctest.RandString(t, 8)
 	namespace := acctest.SystemNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckGeoLocationSetDestroyProducer(t),
@@ -74,14 +78,18 @@ func TestAccResourceAutoF5XCGeoLocationSet_withCountries(t *testing.T) {
 				Config: testAccResourceAutoF5XCGeoLocationSetConfig_withCountries(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_geo_location_set.test",
+				ResourceName:                         "f5xc_geo_location_set.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_geo_location_set.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_geo_location_set.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCGeoLocationSetConfig_withCountries("example-geo-location-set-countries", namespace),
+		})
 }
 
 func testAccCheckGeoLocationSetDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -90,10 +98,10 @@ func testAccCheckGeoLocationSetDestroyProducer(t *testing.T) func(*terraform.Sta
 
 func testAccResourceAutoF5XCGeoLocationSetConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_geo_location_set" "test" {
+resource "f5xc_geo_location_set" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test geo location set"
+  description = "Geo location set example"
 
   location_choice = {
     global = true
@@ -104,10 +112,10 @@ resource "f5xc_geo_location_set" "test" {
 
 func testAccResourceAutoF5XCGeoLocationSetConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_geo_location_set" "test" {
+resource "f5xc_geo_location_set" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test geo location set updated"
+  description = "Updated geo location set example"
 
   location_choice = {
     global = true
@@ -118,10 +126,10 @@ resource "f5xc_geo_location_set" "test" {
 
 func testAccResourceAutoF5XCGeoLocationSetConfig_withCountries(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_geo_location_set" "test" {
+resource "f5xc_geo_location_set" "example" {
   name        = %q
   namespace   = %q
-  description = "Geo location set with countries"
+  description = "Geo location set example with countries"
 
   location_choice = {
     custom_geo_location_selector = {

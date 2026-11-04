@@ -19,7 +19,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	acctest "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/test/acctest"
 	originPoolSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/origin_pool"
 )
@@ -29,7 +31,7 @@ import (
 // By removing t.Parallel(), tests execute sequentially and avoid backend race conditions.
 
 func TestAccResourceAutoF5XCOriginPool_basic(t *testing.T) {
-	name := "tf-acc-op-" + acctest.RandString(t, 8)
+	name := "example-op-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTestWithOptions(t, resource.TestCase{
@@ -68,7 +70,7 @@ func TestAccResourceAutoF5XCOriginPool_basic(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCOriginPool_withPublicIP(t *testing.T) {
-	name := "tf-acc-op-" + acctest.RandString(t, 8)
+	name := "example-op-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTestWithOptions(t, resource.TestCase{
@@ -107,7 +109,7 @@ func TestAccResourceAutoF5XCOriginPool_withPublicIP(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCOriginPool_withTLS(t *testing.T) {
-	name := "tf-acc-op-" + acctest.RandString(t, 8)
+	name := "example-op-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -142,7 +144,7 @@ func TestAccResourceAutoF5XCOriginPool_withTLS(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCOriginPool_withAdvancedOptions(t *testing.T) {
-	name := "tf-acc-op-" + acctest.RandString(t, 8)
+	name := "example-op-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -177,7 +179,7 @@ func TestAccResourceAutoF5XCOriginPool_withAdvancedOptions(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCOriginPool_full(t *testing.T) {
-	name := "tf-acc-op-full-" + acctest.RandString(t, 8)
+	name := "example-op-full-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTestWithOptions(t, resource.TestCase{
@@ -187,6 +189,11 @@ func TestAccResourceAutoF5XCOriginPool_full(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCOriginPoolConfig_full(name, namespace),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_origin_pool.example", "origin_servers.0.labels.env", "primary"),
+					resource.TestCheckResourceAttr("f5xc_origin_pool.example", "origin_servers.0.labels.version", "v1"),
+					resource.TestCheckNoResourceAttr("f5xc_origin_pool.example", "origin_servers.0.labels.ves.io/config-propagation-destination"),
+				),
 			},
 			{
 				ResourceName:                         "f5xc_origin_pool.example",
@@ -198,6 +205,11 @@ func TestAccResourceAutoF5XCOriginPool_full(t *testing.T) {
 			},
 			{
 				Config: testAccResourceAutoF5XCOriginPoolConfig_fullUpdated(name, namespace),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_origin_pool.example", "origin_servers.0.labels.env", "primary"),
+					resource.TestCheckResourceAttr("f5xc_origin_pool.example", "origin_servers.0.labels.version", "v2"),
+					resource.TestCheckNoResourceAttr("f5xc_origin_pool.example", "origin_servers.0.labels.ves.io/config-propagation-destination"),
+				),
 			},
 			{
 				ResourceName:                         "f5xc_origin_pool.example",
@@ -215,6 +227,81 @@ func TestAccResourceAutoF5XCOriginPool_full(t *testing.T) {
 		})
 }
 
+// XC-36815: a ref added by an in-place update has a null prior tenant, which must plan as unknown, not null.
+func TestAccResourceAutoF5XCOriginPool_withSiteLocatorTransition(t *testing.T) {
+	suffix := acctest.RandString(t, 8)
+	name := "example-op-sl-" + suffix
+	namespace := acctest.DefaultNamespace()
+	siteName := "example-op-site-" + suffix
+	vsiteName := "example-op-vsite-" + suffix
+
+	const locatorPrefix = "origin_servers.0.choice.private_ip.site_locator.choice."
+	tenantPath := func(choice string) tfjsonpath.Path {
+		return tfjsonpath.New("origin_servers").AtSliceIndex(0).
+			AtMapKey("choice").AtMapKey("private_ip").AtMapKey("site_locator").
+			AtMapKey("choice").AtMapKey(choice).AtMapKey("tenant")
+	}
+	importStep := resource.TestStep{
+		ResourceName:                         "f5xc_origin_pool.example",
+		ImportState:                          true,
+		ImportStateVerify:                    true,
+		ImportStateIdFunc:                    acctest.ImportStateID("f5xc_origin_pool.example"),
+		ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/config-propagation-destination"},
+		ImportStateVerifyIdentifierAttribute: "uid",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckOriginPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCOriginPoolConfig_withSiteLocator(name, namespace, siteName, vsiteName, "site"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_origin_pool.example", locatorPrefix+"site.name", siteName),
+					resource.TestCheckResourceAttrSet("f5xc_origin_pool.example", locatorPrefix+"site.tenant"),
+				),
+			},
+			importStep,
+			{
+				Config: testAccResourceAutoF5XCOriginPoolConfig_withSiteLocator(name, namespace, siteName, vsiteName, "virtual_site"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("f5xc_origin_pool.example", plancheck.ResourceActionUpdate),
+						plancheck.ExpectUnknownValue("f5xc_origin_pool.example", tenantPath("virtual_site")),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_origin_pool.example", locatorPrefix+"virtual_site.name", vsiteName),
+					resource.TestCheckResourceAttrSet("f5xc_origin_pool.example", locatorPrefix+"virtual_site.tenant"),
+					resource.TestCheckNoResourceAttr("f5xc_origin_pool.example", locatorPrefix+"site.name"),
+				),
+			},
+			importStep,
+			{
+				Config: testAccResourceAutoF5XCOriginPoolConfig_withSiteLocator(name, namespace, siteName, vsiteName, "site"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("f5xc_origin_pool.example", plancheck.ResourceActionUpdate),
+						plancheck.ExpectUnknownValue("f5xc_origin_pool.example", tenantPath("site")),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_origin_pool.example", locatorPrefix+"site.name", siteName),
+					resource.TestCheckResourceAttrSet("f5xc_origin_pool.example", locatorPrefix+"site.tenant"),
+					resource.TestCheckNoResourceAttr("f5xc_origin_pool.example", locatorPrefix+"virtual_site.name"),
+				),
+			},
+			{
+				Config: testAccResourceAutoF5XCOriginPoolConfig_withSiteLocator(name, namespace, siteName, vsiteName, "site"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
+				},
+			},
+		},
+	})
+}
+
 func testAccCheckOriginPoolDestroyProducer(t *testing.T) func(*terraform.State) error {
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_origin_pool", originPoolSchema.ObjectType, "origin pool")
 }
@@ -229,7 +316,7 @@ resource "f5xc_origin_pool" "example" {
   endpoint_selection     = ["LOCAL_PREFERRED"]
   
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v1"
   }
 
@@ -270,7 +357,7 @@ resource "f5xc_origin_pool" "example" {
   endpoint_selection     = ["LOCAL_PREFERRED"]
   
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v2"
   }
 
@@ -299,6 +386,96 @@ resource "f5xc_origin_pool" "example" {
   }
 }
 `, name, namespace)
+}
+
+// choice is "site" or "virtual_site"; both referenced objects exist in every step so only the origin pool changes.
+func testAccResourceAutoF5XCOriginPoolConfig_withSiteLocator(name, namespace, siteName, vsiteName, choice string) string {
+	locator := `
+              site = {
+                name      = f5xc_securemesh_site_v2.site.name
+                namespace = f5xc_securemesh_site_v2.site.namespace
+              }`
+	if choice == "virtual_site" {
+		locator = `
+              virtual_site = {
+                name      = f5xc_virtual_site.vsite.name
+                namespace = f5xc_virtual_site.vsite.namespace
+              }`
+	}
+
+	return fmt.Sprintf(`
+resource "f5xc_securemesh_site_v2" "site" {
+  name      = %q
+  namespace = "system"
+
+  logs_receiver_choice = {
+    logs_streaming_disabled = true
+  }
+
+  blocked_services_choice = {
+    block_all_services = true
+  }
+
+  provider_choice = {
+    kvm = {
+      orchestration_choice = {
+        not_managed = {}
+      }
+    }
+  }
+}
+
+resource "f5xc_virtual_site" "vsite" {
+  name      = %q
+  namespace = %q
+
+  site_selector = {
+    expressions = ["environment in (example)"]
+  }
+
+  site_type = ["CUSTOMER_EDGE"]
+}
+
+resource "f5xc_origin_pool" "example" {
+  name                   = %q
+  namespace              = %q
+  loadbalancer_algorithm = ["ROUND_ROBIN"]
+  endpoint_selection     = ["DISTRIBUTED"]
+
+  port_choice = {
+    port = 80
+  }
+
+  origin_servers = [
+    {
+      choice = {
+        private_ip = {
+          network_choice = {
+            inside_network = true
+          }
+          private_ip_choice = {
+            ip = "192.168.1.108"
+          }
+          site_locator = {
+            choice = {%s
+            }
+          }
+        }
+      }
+    }
+  ]
+
+  tls_choice = {
+    no_tls = true
+  }
+
+  upstream_conn_pool_reuse_type = {
+    map_downstream_to_upstream_conn_pool_type_choice = {
+      disable_conn_pool_reuse = true
+    }
+  }
+}
+`, siteName, vsiteName, namespace, name, namespace, locator)
 }
 
 func testAccResourceAutoF5XCOriginPoolConfig_withPublicIP(name, namespace, ip string) string {
@@ -585,7 +762,7 @@ resource "f5xc_origin_pool" "example" {
   endpoint_selection     = ["LOCAL_PREFERRED"]
 
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v2"
   }
 
@@ -604,6 +781,10 @@ resource "f5xc_origin_pool" "example" {
           dns_name         = "primary.example.com"
           refresh_interval = 300
         }
+      }
+      labels = {
+        "env"     = "primary"
+        "version" = "v1"
       }
     },
     {
@@ -692,7 +873,7 @@ resource "f5xc_origin_pool" "example" {
   endpoint_selection     = ["DISTRIBUTED"]
 
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v2"
   }
 
@@ -707,6 +888,10 @@ resource "f5xc_origin_pool" "example" {
           dns_name         = "primary.example.com"
           refresh_interval = 600
         }
+      }
+      labels = {
+        "env"     = "primary"
+        "version" = "v2"
       }
     },
     {

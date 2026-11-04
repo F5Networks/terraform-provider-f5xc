@@ -66,8 +66,8 @@ func (d *DataSourceF5XCIrule) Metadata(ctx context.Context, request datasource.M
 func (r *DataSourceF5XCIrule) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "iRule iRule object defines a traffic rule for BigIP. An iRule is a script that runs in response to network traffic coming via a BigIP iRules can be used to route, re-route, redirect, examine, modify, discard, or reject network traffic etc. going through a BIG-IP",
-		Description:         "iRule iRule object defines a traffic rule for BigIP. An iRule is a script that runs in response to network traffic coming via a BigIP iRules can be used to route, re-route, redirect, examine, modify, discard, or reject network traffic etc. going through a BIG-IP",
+		MarkdownDescription: "iRule object defines the iRule that can be used in CRUD, to create and manage iRule for manipulating the application traffic.",
+		Description:         "iRule object defines the iRule that can be used in CRUD, to create and manage iRule for manipulating the application traffic.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -205,7 +205,7 @@ func (d *DataSourceF5XCIrule) Read(ctx context.Context, request datasource.ReadR
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_bigcne_irule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "irule", err))
 		return
 	}
 

@@ -29,7 +29,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfo_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -50,7 +50,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfo_withVpcIDTransition(t *te
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -71,7 +71,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfo_withSubnetVariantTransiti
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -92,7 +92,7 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfo_withDirectConnectInfo(t *
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -113,9 +113,9 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfo_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-aws-vpc-cloud-info-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAwsVpcSiteSetCloudSiteInfoDestroyProducer(t),
@@ -127,7 +127,11 @@ func TestAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfo_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_full(name, namespace, "vpc-5678ef12", "acc-vpc-full-b", 64515),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_full(name, namespace, "vpc-1234abcd", "acc-vpc-full-a", 64514),
+		})
 }
 
 func testAccCheckAwsVpcSiteSetCloudSiteInfoDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -221,7 +225,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_basic(name, namespa
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_aws_vpc_site_set_cloud_site_info" "example" {
   name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -254,7 +258,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_withVpcName(name, n
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_aws_vpc_site_set_cloud_site_info" "example" {
   name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -288,7 +292,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_withVpcID(name, nam
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_aws_vpc_site_set_cloud_site_info" "example" {
   name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -322,7 +326,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_withDeprecatedSubne
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_aws_vpc_site_set_cloud_site_info" "example" {
   name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -344,7 +348,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_withNestedSubnetInf
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_aws_vpc_site_set_cloud_site_info" "example" {
   name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -377,7 +381,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_withDirectConnect(n
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_aws_vpc_site_set_cloud_site_info" "example" {
   name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 
@@ -416,7 +420,7 @@ func testAccResourceAutoF5XCAwsVpcSiteSetCloudSiteInfoConfig_full(name, namespac
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_aws_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_aws_vpc_site_set_cloud_site_info" "example" {
   name      = f5xc_aws_vpc_site.site.name
   namespace = %q
 

@@ -34,6 +34,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -137,8 +138,8 @@ func (r *ResourceF5XCUserIdentification) Metadata(ctx context.Context, request r
 func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a user_identification This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_identification) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a user_identification This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_identification) etc. can be fetched",
+		MarkdownDescription: "A user_identification object consists of an ordered list of rules. The rules are evaluated against the input fields that are extracted from an request API<br>to determine a user identifier. The identifier is subsequently used to apply a rate_limiter to the request. A user_identification object can be referred to<br>from virtual_host and rate_limiter objects. The rules in the most specific user_identification object are used to obtain the identifier prior to applying a<br>rate_limiter. For example, the user_identification rules from a rate_limiter are preferred over those from a virtual_host. If there no user_identification<br>objects associated with the virtual_host or the rate_limiter being applied, the client IP address is treated as the identifier.",
+		Description:         "A user_identification object consists of an ordered list of rules. The rules are evaluated against the input fields that are extracted from an request API to determine a user identifier. The identifier is subsequently used to apply a rate_limiter to the request. A user_identification object can be referred to from virtual_host and rate_limiter objects. The rules in the most specific user_identification object are used to obtain the identifier prior to applying a rate_limiter. For example, the user_identification rules from a rate_limiter are preferred over those from a virtual_host. If there no user_identification objects associated with the virtual_host or the rate_limiter being applied, the client IP address is treated as the identifier.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -467,9 +468,17 @@ func (r *ResourceF5XCUserIdentification) ModifyPlan(ctx context.Context, req res
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCUserIdentification) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCUserIdentificationModel
 
 	// Read Terraform plan data into the model
@@ -686,7 +695,7 @@ func (r *ResourceF5XCUserIdentification) Create(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -709,7 +718,7 @@ func (r *ResourceF5XCUserIdentification) Create(ctx context.Context, request res
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_user_identification.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "user_identification", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "user_identification", err),
 		)
 		return
 	}
@@ -1070,7 +1079,7 @@ func (r *ResourceF5XCUserIdentification) Read(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_user_identification.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "user_identification", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "user_identification", err),
 		)
 		return
 	}
@@ -1361,7 +1370,23 @@ func (r *ResourceF5XCUserIdentification) Read(ctx context.Context, request resou
 				userIdentificationUserIdentificationRuleModel.IdentifierChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				userIdentificationUserIdentificationRuleModel.IdentifierChoice = types.ObjectNull(UserIdentificationRulesIdentifierModelAttributeMap)
+				userIdentificationUserIdentificationRuleModel.IdentifierChoice = types.ObjectValueMust(UserIdentificationRulesIdentifierModelAttributeMap, map[string]attr.Value{
+					"client_asn":                 types.BoolNull(),
+					"client_city":                types.BoolNull(),
+					"client_country":             types.BoolNull(),
+					"client_ip":                  types.BoolValue(true),
+					"client_region":              types.BoolNull(),
+					"cookie_name":                types.StringNull(),
+					"http_header_name":           types.StringNull(),
+					"ip_and_http_header_name":    types.StringNull(),
+					"ip_and_ja4_tls_fingerprint": types.BoolNull(),
+					"ip_and_tls_fingerprint":     types.BoolNull(),
+					"ja4_tls_fingerprint":        types.BoolNull(),
+					"jwt_claim_name":             types.StringNull(),
+					"none":                       types.BoolNull(),
+					"query_param_key":            types.StringNull(),
+					"tls_fingerprint":            types.BoolNull(),
+				})
 			}
 
 			rulesElementsSpectToModel = append(rulesElementsSpectToModel, userIdentificationUserIdentificationRuleModel)
@@ -1390,6 +1415,12 @@ func (r *ResourceF5XCUserIdentification) Read(ctx context.Context, request resou
 }
 
 func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCUserIdentificationModel
@@ -1626,7 +1657,7 @@ func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1642,7 +1673,7 @@ func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request res
 	err = r.client.ReplaceObject(ctx, ves_io_schema_user_identification.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "user_identification", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "user_identification", err),
 		)
 		return
 	}
@@ -1651,7 +1682,7 @@ func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request res
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_user_identification.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "user_identification", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "user_identification", err),
 		)
 		return
 	}
@@ -2033,7 +2064,7 @@ func (r *ResourceF5XCUserIdentification) Delete(ctx context.Context, request res
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "user_identification", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "user_identification", err),
 		)
 		return
 	}

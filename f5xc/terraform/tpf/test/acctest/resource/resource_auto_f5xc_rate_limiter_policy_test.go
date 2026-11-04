@@ -27,9 +27,9 @@ import (
 func TestAccResourceAutoF5XCRateLimiterPolicy_basic(t *testing.T) {
 
 	namespace := "shared" //acctest.DefaultNamespace()
-	name := "tf-acc-rate-limiter-policy-" + acctest.RandString(t, 8)
+	name := "example-rate-limiter-policy-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckRateLimiterPolicyDestroyProducer(t),
@@ -38,30 +38,34 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withDescription(name, namespace, "rate limiter policy basic updated"),
+				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withDescription(name, namespace, "Updated basic rate limiter policy example"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCRateLimiterPolicyConfig_basic("example-rate-limiter-policy", namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCRateLimiterPolicy_withActionChoiceTransition(t *testing.T) {
 
 	namespace := "shared" //acctest.DefaultNamespace()
-	name := "tf-acc-rate-limiter-policy-" + acctest.RandString(t, 8)
+	name := "example-rate-limiter-policy-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,20 +76,20 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withActionChoiceTransition(t *test
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withActionChoice(name, namespace, "apply_rate_limiter"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withActionChoice(name, namespace, "bypass_rate_limiter"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -95,7 +99,7 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withActionChoiceTransition(t *test
 func TestAccResourceAutoF5XCRateLimiterPolicy_withCountryCodeTransition(t *testing.T) {
 
 	namespace := "shared" //acctest.DefaultNamespace()
-	name := "tf-acc-rate-limiter-policy-" + acctest.RandString(t, 8)
+	name := "example-rate-limiter-policy-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -106,20 +110,20 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withCountryCodeTransition(t *testi
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withCountryCode(name, namespace, "COUNTRY_US"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withCountryCode(name, namespace, "COUNTRY_CA"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -129,7 +133,7 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withCountryCodeTransition(t *testi
 func TestAccResourceAutoF5XCRateLimiterPolicy_withHttpMethodTransition(t *testing.T) {
 
 	namespace := "shared" //acctest.DefaultNamespace()
-	name := "tf-acc-rate-limiter-policy-" + acctest.RandString(t, 8)
+	name := "example-rate-limiter-policy-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -140,20 +144,20 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withHttpMethodTransition(t *testin
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withHttpMethod(name, namespace, "GET"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withHttpMethod(name, namespace, "POST"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -163,7 +167,7 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withHttpMethodTransition(t *testin
 func TestAccResourceAutoF5XCRateLimiterPolicy_withPathTransformerTransition(t *testing.T) {
 
 	namespace := "shared" //acctest.DefaultNamespace()
-	name := "tf-acc-rate-limiter-policy-" + acctest.RandString(t, 8)
+	name := "example-rate-limiter-policy-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -174,20 +178,20 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withPathTransformerTransition(t *t
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withPathTransformer(name, namespace, "LOWER_CASE"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_withPathTransformer(name, namespace, "URL_DECODE"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -197,35 +201,39 @@ func TestAccResourceAutoF5XCRateLimiterPolicy_withPathTransformerTransition(t *t
 func TestAccResourceAutoF5XCRateLimiterPolicy_full(t *testing.T) {
 
 	namespace := "shared" //acctest.DefaultNamespace()
-	name := "tf-acc-rate-limiter-policy-" + acctest.RandString(t, 8)
+	name := "example-rate-limiter-policy-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckRateLimiterPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_full(name, namespace, "test", "platform", "owner-a", "GET", "COUNTRY_US", "apply_rate_limiter"),
+				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_full(name, namespace, "example", "platform", "example-owner", "GET", "COUNTRY_US", "apply_rate_limiter"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_full(name, namespace, "prod", "security", "owner-b", "POST", "COUNTRY_CA", "bypass_rate_limiter"),
+				Config: testAccResourceAutoF5XCRateLimiterPolicyConfig_full(name, namespace, "example", "security", "example-owner-alt", "POST", "COUNTRY_CA", "bypass_rate_limiter"),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter_policy.test",
+				ResourceName:                         "f5xc_rate_limiter_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCRateLimiterPolicyConfig_full("example-rate-limiter-policy", namespace, "example", "platform", "example-owner", "GET", "COUNTRY_US", "apply_rate_limiter"),
+		})
 }
 
 func testAccCheckRateLimiterPolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -234,14 +242,14 @@ func testAccCheckRateLimiterPolicyDestroyProducer(t *testing.T) func(*terraform.
 
 func testAccResourceAutoF5XCRateLimiterPolicyConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter_policy" "test" {
+resource "f5xc_rate_limiter_policy" "example" {
   name      = %q
   namespace = %q
 
   rules = [
     {
       metadata = {
-        name = "rule-1"
+        name = "example-rule"
       }
       spec = {
         action_choice = {
@@ -259,7 +267,7 @@ resource "f5xc_rate_limiter_policy" "test" {
 
 func testAccResourceAutoF5XCRateLimiterPolicyConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter_policy" "test" {
+resource "f5xc_rate_limiter_policy" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -267,7 +275,7 @@ resource "f5xc_rate_limiter_policy" "test" {
   rules = [
     {
       metadata = {
-        name = "rule-1"
+        name = "example-rule"
       }
       spec = {
         action_choice = {
@@ -290,7 +298,7 @@ func testAccResourceAutoF5XCRateLimiterPolicyConfig_withActionChoice(name, names
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter_policy" "test" {
+resource "f5xc_rate_limiter_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -315,7 +323,7 @@ resource "f5xc_rate_limiter_policy" "test" {
 
 func testAccResourceAutoF5XCRateLimiterPolicyConfig_withCountryCode(name, namespace, countryCode string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter_policy" "test" {
+resource "f5xc_rate_limiter_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -342,7 +350,7 @@ resource "f5xc_rate_limiter_policy" "test" {
 
 func testAccResourceAutoF5XCRateLimiterPolicyConfig_withHttpMethod(name, namespace, method string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter_policy" "test" {
+resource "f5xc_rate_limiter_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -370,7 +378,7 @@ resource "f5xc_rate_limiter_policy" "test" {
 
 func testAccResourceAutoF5XCRateLimiterPolicyConfig_withPathTransformer(name, namespace, transformer string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter_policy" "test" {
+resource "f5xc_rate_limiter_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -387,8 +395,8 @@ resource "f5xc_rate_limiter_policy" "test" {
           any_country = true
         }
         path = {
-          exact_values  = ["/checkout"]
-          transformers  = [%q]
+          exact_values   = ["/checkout"]
+          transformers   = [%q]
           invert_matcher = false
         }
       }
@@ -405,10 +413,10 @@ func testAccResourceAutoF5XCRateLimiterPolicyConfig_full(name, namespace, env, t
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter_policy" "test" {
+resource "f5xc_rate_limiter_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "rate limiter policy full"
+  description = "Full rate limiter policy example"
 
   labels = {
     env  = %q
@@ -422,8 +430,8 @@ resource "f5xc_rate_limiter_policy" "test" {
   rules = [
     {
       metadata = {
-        name        = "rule-full"
-        description = "full rule"
+        name        = "example-rule-full"
+        description = "Full rule example"
       }
       spec = {
         action_choice = {
@@ -442,7 +450,7 @@ resource "f5xc_rate_limiter_policy" "test" {
           transformers = ["LOWER_CASE"]
         }
         domain_matcher = {
-          exact_values = ["example.com"]
+          exact_values = ["example-domain.com"]
         }
       }
     }

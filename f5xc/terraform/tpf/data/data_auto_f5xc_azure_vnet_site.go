@@ -37,29 +37,30 @@ type AzureVnetSiteSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type AzureVnetSiteSecretTypeSecretInfoChoice struct {
+type AzureVnetSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type AzureVnetSiteSecretTypeBlindfoldSecretInfo struct {
+type AzureVnetSiteBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type AzureVnetSiteSecretTypeClearSecretInfo struct {
+type AzureVnetSiteClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type AzureVnetSiteGlobalSpecTypeBlockedServicesChoice struct {
+type AzureVnetSiteBlockedServicesChoice struct {
 	BlockAllServices       types.Bool   `tfsdk:"block_all_services"`
 	BlockedServices        types.Object `tfsdk:"blocked_services"`
 	DefaultBlockedServices types.Bool   `tfsdk:"default_blocked_services"`
 }
 
-type AzureVnetSiteGlobalSpecTypeBlockedServices struct {
+type AzureVnetSiteBlockedServices struct {
 	BlockedSevice types.List `tfsdk:"blocked_sevice"`
 }
 
@@ -68,13 +69,12 @@ type AzureVnetSiteFleetBlockedServices struct {
 	NetworkType                    types.List   `tfsdk:"network_type"`
 }
 
-type AzureVnetSiteBlockedServicesBlockedServicesValueTypeChoice struct {
-	Dns              types.Bool `tfsdk:"dns"`
-	Ssh              types.Bool `tfsdk:"ssh"`
-	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
+type AzureVnetSiteBlockedServicesValueTypeChoice struct {
+	Dns types.Bool `tfsdk:"dns"`
+	Ssh types.Bool `tfsdk:"ssh"`
 }
 
-type AzureVnetSiteAzureVnetSiteAzureVnetSiteInfoType struct {
+type AzureVnetSiteAzureVnetSiteInfoType struct {
 	ExpressRouteInfo    types.Object `tfsdk:"express_route_info"`
 	NodeInfo            types.List   `tfsdk:"node_info"`
 	PrivateIps          types.List   `tfsdk:"private_ips"`
@@ -83,110 +83,110 @@ type AzureVnetSiteAzureVnetSiteAzureVnetSiteInfoType struct {
 	Vnet                types.Object `tfsdk:"vnet"`
 }
 
-type AzureVnetSiteAzureVnetSiteExpressRouteInfo struct {
+type AzureVnetSiteExpressRouteInfo struct {
 	RouteServerAsn types.Int64 `tfsdk:"route_server_asn"`
 	RouteServerIps types.List  `tfsdk:"route_server_ips"`
 }
 
-type AzureVnetSiteAzureVnetSiteNodeInstanceNameType struct {
+type AzureVnetSiteNodeInstanceNameType struct {
 	NodeId           types.String `tfsdk:"node_id"`
 	NodeInstanceName types.String `tfsdk:"node_instance_name"`
 }
 
-type AzureVnetSiteAzureVnetSiteVnetIpPrefixesType struct {
+type AzureVnetSiteVnetIpPrefixesType struct {
 	Prefixes types.List   `tfsdk:"prefixes"`
 	Vnet     types.Object `tfsdk:"vnet"`
 }
 
-type AzureVnetSiteViewsAzureVnetType struct {
+type AzureVnetSiteAzureVnetType struct {
 	ResourceGroup     types.String `tfsdk:"resource_group"`
 	RoutingTypeChoice types.Object `tfsdk:"routing_type_choice"`
 	VnetName          types.String `tfsdk:"vnet_name"`
 }
 
-type AzureVnetSiteAzureVnetTypeRoutingTypeChoice struct {
+type AzureVnetSiteRoutingTypeChoice struct {
 	F5OrchestratedRouting types.Bool `tfsdk:"f5_orchestrated_routing"`
 	ManualRouting         types.Bool `tfsdk:"manual_routing"`
 }
 
-type AzureVnetSiteAzureVnetSiteVNETInfoType struct {
+type AzureVnetSiteVNETInfoType struct {
 	ResourceId types.String `tfsdk:"resource_id"`
 	VnetName   types.String `tfsdk:"vnet_name"`
 }
 
-type AzureVnetSiteSiteCoordinates struct {
+type AzureVnetSiteCoordinates struct {
 	Latitude  types.Float32 `tfsdk:"latitude"`
 	Longitude types.Float32 `tfsdk:"longitude"`
 }
 
-type AzureVnetSiteViewsCustomDNS struct {
+type AzureVnetSiteCustomDNS struct {
 	InsideNameserver    types.String `tfsdk:"inside_nameserver"`
 	InsideNameserverV6  types.String `tfsdk:"inside_nameserver_v6"`
 	OutsideNameserver   types.String `tfsdk:"outside_nameserver"`
 	OutsideNameserverV6 types.String `tfsdk:"outside_nameserver_v6"`
 }
 
-type AzureVnetSiteGlobalSpecTypeDeploymentChoice struct {
+type AzureVnetSiteDepChoice struct {
 	AzureCred types.Object `tfsdk:"azure_cred"`
 }
 
-type AzureVnetSiteGlobalSpecTypeEncryptionChoice struct {
+type AzureVnetSiteEncryptionChoice struct {
 	DisableEncryption types.Bool   `tfsdk:"disable_encryption"`
 	EnableEncryption  types.Object `tfsdk:"enable_encryption"`
 }
 
-type AzureVnetSiteGlobalSpecTypeEnableEncryption struct {
+type AzureVnetSiteEnableEncryption struct {
 	DiskEncryptionSetId types.String `tfsdk:"disk_encryption_set_id"`
 	ResourceGroup       types.String `tfsdk:"resource_group"`
 }
 
-type AzureVnetSiteViewsKubernetesUpgradeDrain struct {
+type AzureVnetSiteK8sUpgradeDrain struct {
 	KubernetesUpgradeDrainEnableChoice types.Object `tfsdk:"kubernetes_upgrade_drain_enable_choice"`
 }
 
-type AzureVnetSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoice struct {
+type AzureVnetSiteK8sUpgradeDrainEnableChoice struct {
 	DisableUpgradeDrain types.Bool   `tfsdk:"disable_upgrade_drain"`
 	EnableUpgradeDrain  types.Object `tfsdk:"enable_upgrade_drain"`
 }
 
-type AzureVnetSiteKubernetesUpgradeDrainEnableUpgradeDrain struct {
+type AzureVnetSiteEnableUpgradeDrain struct {
 	DrainMaxUnavailableChoice types.Object `tfsdk:"drain_max_unavailable_choice"`
 	DrainNodeTimeout          types.Int64  `tfsdk:"drain_node_timeout"`
 }
 
-type AzureVnetSiteKubernetesUpgradeDrainConfigDrainMaxUnavailableChoice struct {
+type AzureVnetSiteDrainMaxUnavailableChoice struct {
 	DrainMaxUnavailableNodeCount types.Int64 `tfsdk:"drain_max_unavailable_node_count"`
 }
 
-type AzureVnetSiteGlobalSpecTypeLogsReceiverChoice struct {
+type AzureVnetSiteLogsReceiverChoice struct {
 	LogReceiver           types.Object `tfsdk:"log_receiver"`
 	LogsStreamingDisabled types.Bool   `tfsdk:"logs_streaming_disabled"`
 }
 
-type AzureVnetSiteViewsOfflineSurvivabilityModeType struct {
+type AzureVnetSiteOfflineSurvivabilityModeType struct {
 	OfflineSurvivabilityModeChoice types.Object `tfsdk:"offline_survivability_mode_choice"`
 }
 
-type AzureVnetSiteOfflineSurvivabilityModeTypeOfflineSurvivabilityModeChoice struct {
+type AzureVnetSiteOfflineSurvivabilityModeChoice struct {
 	EnableOfflineSurvivabilityMode types.Bool `tfsdk:"enable_offline_survivability_mode"`
 	NoOfflineSurvivabilityMode     types.Bool `tfsdk:"no_offline_survivability_mode"`
 }
 
-type AzureVnetSiteViewsOperatingSystemType struct {
+type AzureVnetSiteOperatingSystemType struct {
 	OperatingSystemVersionChoice types.Object `tfsdk:"operating_system_version_choice"`
 }
 
-type AzureVnetSiteOperatingSystemTypeOperatingSystemVersionChoice struct {
+type AzureVnetSiteOperatingSystemVersionChoice struct {
 	DefaultOsVersion       types.Bool   `tfsdk:"default_os_version"`
 	OperatingSystemVersion types.String `tfsdk:"operating_system_version"`
 }
 
-type AzureVnetSiteGlobalSpecTypeRegionChoice struct {
+type AzureVnetSiteRegionChoice struct {
 	AlternateRegion types.String `tfsdk:"alternate_region"`
 	AzureRegion     types.String `tfsdk:"azure_region"`
 }
 
-type AzureVnetSiteGlobalSpecTypeSiteTypeChoice struct {
+type AzureVnetSiteSiteTypeChoice struct {
 	IngressEgressGw    types.Object `tfsdk:"ingress_egress_gw"`
 	IngressEgressGwAr  types.Object `tfsdk:"ingress_egress_gw_ar"`
 	IngressGw          types.Object `tfsdk:"ingress_gw"`
@@ -195,7 +195,7 @@ type AzureVnetSiteGlobalSpecTypeSiteTypeChoice struct {
 	VoltstackClusterAr types.Object `tfsdk:"voltstack_cluster_ar"`
 }
 
-type AzureVnetSiteGlobalSpecTypeIngressEgressGw struct {
+type AzureVnetSiteIngressEgressGw struct {
 	AcceleratedNetworking      types.Object `tfsdk:"accelerated_networking"`
 	AzNodes                    types.List   `tfsdk:"az_nodes"`
 	AzureCertifiedHw           types.String `tfsdk:"azure_certified_hw"`
@@ -210,102 +210,102 @@ type AzureVnetSiteGlobalSpecTypeIngressEgressGw struct {
 	SiteMeshGroupChoice        types.Object `tfsdk:"site_mesh_group_choice"`
 }
 
-type AzureVnetSiteViewsAcceleratedNetworkingType struct {
+type AzureVnetSiteAcceleratedNetworkingType struct {
 	AcceleratedNetworkingChoice types.Object `tfsdk:"accelerated_networking_choice"`
 }
 
-type AzureVnetSiteAcceleratedNetworkingTypeAcceleratedNetworkingChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+type AzureVnetSiteAcceleratedNetworkingChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
-type AzureVnetSiteViewsAzureVnetTwoInterfaceNodeType struct {
+type AzureVnetSiteAzureVnetTwoIfaceNodeType struct {
 	AzureAz       types.String `tfsdk:"azure_az"`
 	InsideSubnet  types.Object `tfsdk:"inside_subnet"`
 	OutsideSubnet types.Object `tfsdk:"outside_subnet"`
 }
 
-type AzureVnetSiteViewsAzureSubnetChoiceType struct {
+type AzureVnetSiteAzureSubnetChoiceType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type AzureVnetSiteAzureSubnetChoiceTypeChoice struct {
+type AzureVnetSiteChoice struct {
 	Subnet      types.Object `tfsdk:"subnet"`
 	SubnetParam types.Object `tfsdk:"subnet_param"`
 }
 
-type AzureVnetSiteAzureSubnetChoiceTypeSubnet struct {
+type AzureVnetSiteSubnet struct {
 	ResourceGroupChoice types.Object `tfsdk:"resource_group_choice"`
 	SubnetName          types.String `tfsdk:"subnet_name"`
 }
 
-type AzureVnetSiteAzureSubnetTypeResourceGroupChoice struct {
+type AzureVnetSiteResGroupChoice struct {
 	SubnetResourceGrp types.String `tfsdk:"subnet_resource_grp"`
 	VnetResourceGroup types.Bool   `tfsdk:"vnet_resource_group"`
 }
 
-type AzureVnetSiteAzureSubnetChoiceTypeSubnetParam struct {
+type AzureVnetSiteSubnetParam struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeDcClusterGroupChoice struct {
+type AzureVnetSiteDcClusterGroupChoice struct {
 	DcClusterGroupInsideVn  types.Object `tfsdk:"dc_cluster_group_inside_vn"`
 	DcClusterGroupOutsideVn types.Object `tfsdk:"dc_cluster_group_outside_vn"`
 	NoDcClusterGroup        types.Bool   `tfsdk:"no_dc_cluster_group"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeForwardProxyChoice struct {
+type AzureVnetSiteForwardProxyChoice struct {
 	ActiveForwardProxyPolicies types.Object `tfsdk:"active_forward_proxy_policies"`
 	ForwardProxyAllowAll       types.Bool   `tfsdk:"forward_proxy_allow_all"`
 	NoForwardProxy             types.Bool   `tfsdk:"no_forward_proxy"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeActiveForwardProxyPolicies struct {
+type AzureVnetSiteActiveForwardProxyPolicies struct {
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeGlobalNetworkChoice struct {
+type AzureVnetSiteGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeGlobalNetworkList struct {
+type AzureVnetSiteGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
-type AzureVnetSiteViewsGlobalNetworkConnectionType struct {
+type AzureVnetSiteGlobalNetConnType struct {
 	ConnectionChoice types.Object `tfsdk:"connection_choice"`
 }
 
-type AzureVnetSiteGlobalNetworkConnectionTypeConnectionChoice struct {
+type AzureVnetSiteConnChoice struct {
 	SliToGlobalDr types.Object `tfsdk:"sli_to_global_dr"`
 	SloToGlobalDr types.Object `tfsdk:"slo_to_global_dr"`
 }
 
-type AzureVnetSiteGlobalNetworkConnectionTypeSliToGlobalDr struct {
+type AzureVnetSiteSliToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type AzureVnetSiteGlobalNetworkConnectionTypeSloToGlobalDr struct {
+type AzureVnetSiteSloToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeHubChoice struct {
+type AzureVnetSiteHubChoice struct {
 	Hub    types.Object `tfsdk:"hub"`
 	NotHub types.Bool   `tfsdk:"not_hub"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeHub struct {
+type AzureVnetSiteHub struct {
 	ExpressRouteChoice types.Object `tfsdk:"express_route_choice"`
 	SpokeVnets         types.List   `tfsdk:"spoke_vnets"`
 }
 
-type AzureVnetSiteAzureHubVnetTypeExpressRouteChoice struct {
+type AzureVnetSiteExpressRouteChoice struct {
 	ExpressRouteDisabled types.Bool   `tfsdk:"express_route_disabled"`
 	ExpressRouteEnabled  types.Object `tfsdk:"express_route_enabled"`
 }
 
-type AzureVnetSiteAzureHubVnetTypeExpressRouteEnabled struct {
+type AzureVnetSiteExpressRouteEnabled struct {
 	AsnChoice                 types.Object `tfsdk:"asn_choice"`
 	Connections               types.List   `tfsdk:"connections"`
 	ConnectivityOptionsChoice types.Object `tfsdk:"connectivity_options_choice"`
@@ -315,12 +315,12 @@ type AzureVnetSiteAzureHubVnetTypeExpressRouteEnabled struct {
 	SpokeVnetRoutesChoice     types.Object `tfsdk:"spoke_vnet_routes_choice"`
 }
 
-type AzureVnetSiteExpressRouteConfigTypeAsnChoice struct {
+type AzureVnetSiteAsnChoice struct {
 	AutoAsn   types.Bool  `tfsdk:"auto_asn"`
 	CustomAsn types.Int64 `tfsdk:"custom_asn"`
 }
 
-type AzureVnetSiteAzureVnetSiteExpressRouteConnectionType struct {
+type AzureVnetSiteExpressRouteConnType struct {
 	Metadata           types.Object `tfsdk:"metadata"`
 	SubscriptionChoice types.Object `tfsdk:"subscription_choice"`
 	Weight             types.Int64  `tfsdk:"weight"`
@@ -331,26 +331,26 @@ type AzureVnetSiteMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type AzureVnetSiteExpressRouteConnectionTypeSubscriptionChoice struct {
+type AzureVnetSiteSubscriptionChoice struct {
 	CircuitId         types.String `tfsdk:"circuit_id"`
 	OtherSubscription types.Object `tfsdk:"other_subscription"`
 }
 
-type AzureVnetSiteExpressRouteConnectionTypeOtherSubscription struct {
+type AzureVnetSiteOtherSubscription struct {
 	AuthorizedKey types.Object `tfsdk:"authorized_key"`
 	CircuitId     types.String `tfsdk:"circuit_id"`
 }
 
-type AzureVnetSiteExpressRouteConfigTypeConnectivityOptionsChoice struct {
+type AzureVnetSiteConnectivityOptionsChoice struct {
 	SiteRegistrationOverExpressRoute types.Object `tfsdk:"site_registration_over_express_route"`
 	SiteRegistrationOverInternet     types.Bool   `tfsdk:"site_registration_over_internet"`
 }
 
-type AzureVnetSiteExpressRouteConfigTypeSiteRegistrationOverExpressRoute struct {
+type AzureVnetSiteSiteRegistrationOverExpressRoute struct {
 	CloudlinkNetworkName types.String `tfsdk:"cloudlink_network_name"`
 }
 
-type AzureVnetSiteViewsAzureSubnetChoiceWithAutoType struct {
+type AzureVnetSiteAzureSubnetChoiceWithAutoType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -364,58 +364,57 @@ type AzureVnetSiteAzureSubnetChoiceWithAutoTypeSubnet struct {
 	ResourceGroupChoice types.Object `tfsdk:"resource_group_choice"`
 }
 
-type AzureVnetSiteAzureSpecialSubnetTypeResourceGroupChoice struct {
+type AzureVnetSiteAzureSpecialSubnetTypeResGroupChoice struct {
 	SubnetResourceGrp types.String `tfsdk:"subnet_resource_grp"`
 	VnetResourceGroup types.Bool   `tfsdk:"vnet_resource_group"`
 }
 
 type AzureVnetSiteAzureSubnetChoiceWithAutoTypeSubnetParam struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
-type AzureVnetSiteExpressRouteConfigTypeSkuChoice struct {
+type AzureVnetSiteSkuChoice struct {
 	SkuErgw1Az  types.Bool `tfsdk:"sku_ergw1az"`
 	SkuErgw2Az  types.Bool `tfsdk:"sku_ergw2az"`
 	SkuHighPerf types.Bool `tfsdk:"sku_high_perf"`
 	SkuStandard types.Bool `tfsdk:"sku_standard"`
 }
 
-type AzureVnetSiteExpressRouteConfigTypeSpokeVnetRoutesChoice struct {
+type AzureVnetSiteSpokeVnetRoutesChoice struct {
 	AdvertiseToRouteServer      types.Bool `tfsdk:"advertise_to_route_server"`
 	DoNotAdvertiseToRouteServer types.Bool `tfsdk:"do_not_advertise_to_route_server"`
 }
 
-type AzureVnetSiteAzureVnetSiteVnetPeeringType struct {
+type AzureVnetSiteVnetPeeringType struct {
 	Labels        types.Map    `tfsdk:"labels"`
 	RoutingChoice types.Object `tfsdk:"routing_choice"`
 	Vnet          types.Object `tfsdk:"vnet"`
 }
 
-type AzureVnetSiteVnetPeeringTypeRoutingChoice struct {
+type AzureVnetSiteRoutingChoice struct {
 	Auto   types.Bool `tfsdk:"auto"`
 	Manual types.Bool `tfsdk:"manual"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeInsideStaticRouteChoice struct {
+type AzureVnetSiteInsideStaticRouteChoice struct {
 	InsideStaticRoutes   types.Object `tfsdk:"inside_static_routes"`
 	NoInsideStaticRoutes types.Bool   `tfsdk:"no_inside_static_routes"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeInsideStaticRoutes struct {
+type AzureVnetSiteInsideStaticRoutes struct {
 	StaticRouteList types.List `tfsdk:"static_route_list"`
 }
 
-type AzureVnetSiteViewsSiteStaticRoutesType struct {
+type AzureVnetSiteSiteStaticRoutesType struct {
 	ConfigModeChoice types.Object `tfsdk:"config_mode_choice"`
 }
 
-type AzureVnetSiteSiteStaticRoutesTypeConfigModeChoice struct {
+type AzureVnetSiteConfigModeChoice struct {
 	CustomStaticRoute types.Object `tfsdk:"custom_static_route"`
 	SimpleStaticRoute types.String `tfsdk:"simple_static_route"`
 }
 
-type AzureVnetSiteSiteStaticRoutesTypeCustomStaticRoute struct {
+type AzureVnetSiteCustomStaticRoute struct {
 	Attrs   types.List   `tfsdk:"attrs"`
 	Labels  types.Map    `tfsdk:"labels"`
 	Nexthop types.Object `tfsdk:"nexthop"`
@@ -428,34 +427,29 @@ type AzureVnetSiteNextHopType struct {
 	Type           types.List   `tfsdk:"type"`
 }
 
-type AzureVnetSiteIpAddressType struct {
+type AzureVnetSiteIpAddrType struct {
 	VerChoice types.Object `tfsdk:"ver_choice"`
 }
 
-type AzureVnetSiteIpAddressTypeVerChoice struct {
+type AzureVnetSiteVerChoice struct {
 	DualStack types.Object `tfsdk:"dual_stack"`
 	Ipv4      types.Object `tfsdk:"ipv4"`
-	Ipv6      types.Object `tfsdk:"ipv6"`
 }
 
-type AzureVnetSiteIpAddressTypeDualStack struct {
+type AzureVnetSiteDualStack struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
 	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
-type AzureVnetSiteIpv4AddressType struct {
+type AzureVnetSiteIpv4AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type AzureVnetSiteIpv6AddressType struct {
+type AzureVnetSiteIpv6AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type AzureVnetSiteIpAddressTypeIpv4 struct {
-	Addr types.String `tfsdk:"addr"`
-}
-
-type AzureVnetSiteIpAddressTypeIpv6 struct {
+type AzureVnetSiteIpv4 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
@@ -465,7 +459,6 @@ type AzureVnetSiteIpSubnetType struct {
 
 type AzureVnetSiteIpSubnetTypeVerChoice struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
-	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
 type AzureVnetSiteIpSubnetTypeIpv4 struct {
@@ -473,67 +466,44 @@ type AzureVnetSiteIpSubnetTypeIpv4 struct {
 	Prefix types.String `tfsdk:"prefix"`
 }
 
-type AzureVnetSiteIpSubnetTypeIpv6 struct {
-	Plen   types.Int64  `tfsdk:"plen"`
-	Prefix types.String `tfsdk:"prefix"`
-}
-
-type AzureVnetSiteAzureVnetIngressEgressGwTypeNetworkPolicyChoice struct {
+type AzureVnetSiteNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeActiveEnhancedFirewallPolicies struct {
+type AzureVnetSiteActiveEnhancedFirewallPolicies struct {
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeActiveNetworkPolicies struct {
+type AzureVnetSiteActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeOutsideStaticRouteChoice struct {
+type AzureVnetSiteOutsideStaticRouteChoice struct {
 	NoOutsideStaticRoutes types.Bool   `tfsdk:"no_outside_static_routes"`
 	OutsideStaticRoutes   types.Object `tfsdk:"outside_static_routes"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwTypeOutsideStaticRoutes struct {
+type AzureVnetSiteOutsideStaticRoutes struct {
 	StaticRouteList types.List `tfsdk:"static_route_list"`
 }
 
-type AzureVnetSiteViewsPerformanceEnhancementModeType struct {
+type AzureVnetSitePerformanceEnhancementModeType struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
-type AzureVnetSitePerformanceEnhancementModeTypePerfModeChoice struct {
-	PerfModeL3Enhanced types.Object `tfsdk:"perf_mode_l3_enhanced"`
-	PerfModeL7Enhanced types.Object `tfsdk:"perf_mode_l7_enhanced"`
+type AzureVnetSitePerfModeChoice struct {
+	PerfModeL3Enhanced types.Bool `tfsdk:"perf_mode_l3_enhanced"`
+	PerfModeL7Enhanced types.Bool `tfsdk:"perf_mode_l7_enhanced"`
 }
 
-type AzureVnetSitePerformanceEnhancementModeTypePerfModeL3Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AzureVnetSiteL3PerformanceEnhancementTypePerfModeChoice struct {
-	Jumbo   types.Bool `tfsdk:"jumbo"`
-	NoJumbo types.Bool `tfsdk:"no_jumbo"`
-}
-
-type AzureVnetSitePerformanceEnhancementModeTypePerfModeL7Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AzureVnetSiteL7PerformanceEnhancementTypePerfModeChoice struct {
-	JumboDisabled types.Bool `tfsdk:"jumbo_disabled"`
-	JumboEnabled  types.Bool `tfsdk:"jumbo_enabled"`
-}
-
-type AzureVnetSiteAzureVnetIngressEgressGwTypeSiteMeshGroupChoice struct {
+type AzureVnetSiteSiteMeshGroupChoice struct {
 	SmConnectionPublicIp types.Bool `tfsdk:"sm_connection_public_ip"`
 	SmConnectionPvtIp    types.Bool `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type AzureVnetSiteGlobalSpecTypeIngressEgressGwAr struct {
+type AzureVnetSiteIngressEgressGwAr struct {
 	AcceleratedNetworking      types.Object `tfsdk:"accelerated_networking"`
 	AzureCertifiedHw           types.String `tfsdk:"azure_certified_hw"`
 	DcClusterGroupChoice       types.Object `tfsdk:"dc_cluster_group_choice"`
@@ -564,12 +534,12 @@ type AzureVnetSiteAzureVnetIngressEgressGwARTypeActiveForwardProxyPolicies struc
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwARTypeGlobalNetworkChoice struct {
+type AzureVnetSiteAzureVnetIngressEgressGwARTypeGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwARTypeGlobalNetworkList struct {
+type AzureVnetSiteAzureVnetIngressEgressGwARTypeGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
@@ -592,7 +562,7 @@ type AzureVnetSiteAzureVnetIngressEgressGwARTypeInsideStaticRoutes struct {
 	StaticRouteList types.List `tfsdk:"static_route_list"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwARTypeNetworkPolicyChoice struct {
+type AzureVnetSiteAzureVnetIngressEgressGwARTypeNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
@@ -602,11 +572,11 @@ type AzureVnetSiteAzureVnetIngressEgressGwARTypeActiveEnhancedFirewallPolicies s
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type AzureVnetSiteAzureVnetIngressEgressGwARTypeActiveNetworkPolicies struct {
+type AzureVnetSiteAzureVnetIngressEgressGwARTypeActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
-type AzureVnetSiteViewsAzureVnetTwoInterfaceNodeARType struct {
+type AzureVnetSiteAzureVnetTwoIfaceNodeARType struct {
 	FaultDomain   types.Int64  `tfsdk:"fault_domain"`
 	InsideSubnet  types.Object `tfsdk:"inside_subnet"`
 	NodeNumber    types.Int64  `tfsdk:"node_number"`
@@ -628,33 +598,33 @@ type AzureVnetSiteAzureVnetIngressEgressGwARTypeSiteMeshGroupChoice struct {
 	SmConnectionPvtIp    types.Bool `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type AzureVnetSiteGlobalSpecTypeIngressGw struct {
+type AzureVnetSiteIngressGw struct {
 	AcceleratedNetworking      types.Object `tfsdk:"accelerated_networking"`
 	AzNodes                    types.List   `tfsdk:"az_nodes"`
 	AzureCertifiedHw           types.String `tfsdk:"azure_certified_hw"`
 	PerformanceEnhancementMode types.Object `tfsdk:"performance_enhancement_mode"`
 }
 
-type AzureVnetSiteViewsAzureVnetOneInterfaceNodeType struct {
+type AzureVnetSiteAzureVnetOneIfaceNodeType struct {
 	AzureAz     types.String `tfsdk:"azure_az"`
 	LocalSubnet types.Object `tfsdk:"local_subnet"`
 }
 
-type AzureVnetSiteGlobalSpecTypeIngressGwAr struct {
+type AzureVnetSiteIngressGwAr struct {
 	AcceleratedNetworking      types.Object `tfsdk:"accelerated_networking"`
 	AzureCertifiedHw           types.String `tfsdk:"azure_certified_hw"`
 	Node                       types.Object `tfsdk:"node"`
 	PerformanceEnhancementMode types.Object `tfsdk:"performance_enhancement_mode"`
 }
 
-type AzureVnetSiteViewsAzureVnetOneInterfaceNodeARType struct {
+type AzureVnetSiteAzureVnetOneIfaceNodeARType struct {
 	FaultDomain  types.Int64  `tfsdk:"fault_domain"`
 	LocalSubnet  types.Object `tfsdk:"local_subnet"`
 	NodeNumber   types.Int64  `tfsdk:"node_number"`
 	UpdateDomain types.Int64  `tfsdk:"update_domain"`
 }
 
-type AzureVnetSiteGlobalSpecTypeVoltstackCluster struct {
+type AzureVnetSiteVoltstackCluster struct {
 	AcceleratedNetworking    types.Object `tfsdk:"accelerated_networking"`
 	AzNodes                  types.List   `tfsdk:"az_nodes"`
 	AzureCertifiedHw         types.String `tfsdk:"azure_certified_hw"`
@@ -683,21 +653,21 @@ type AzureVnetSiteAzureVnetVoltstackClusterTypeActiveForwardProxyPolicies struct
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterTypeGlobalNetworkChoice struct {
+type AzureVnetSiteAzureVnetVoltstackClusterTypeGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterTypeGlobalNetworkList struct {
+type AzureVnetSiteAzureVnetVoltstackClusterTypeGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterTypeK8SClusterChoice struct {
+type AzureVnetSiteK8SClusterChoice struct {
 	K8SCluster   types.Object `tfsdk:"k8s_cluster"`
 	NoK8SCluster types.Bool   `tfsdk:"no_k8s_cluster"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterTypeNetworkPolicyChoice struct {
+type AzureVnetSiteAzureVnetVoltstackClusterTypeNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
@@ -707,7 +677,7 @@ type AzureVnetSiteAzureVnetVoltstackClusterTypeActiveEnhancedFirewallPolicies st
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterTypeActiveNetworkPolicies struct {
+type AzureVnetSiteAzureVnetVoltstackClusterTypeActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
@@ -725,21 +695,21 @@ type AzureVnetSiteAzureVnetVoltstackClusterTypeSiteMeshGroupChoice struct {
 	SmConnectionPvtIp    types.Bool `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterTypeStorageClassChoice struct {
+type AzureVnetSiteStorageClassChoice struct {
 	DefaultStorage   types.Bool   `tfsdk:"default_storage"`
 	StorageClassList types.Object `tfsdk:"storage_class_list"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterTypeStorageClassList struct {
+type AzureVnetSiteStorageClassList struct {
 	StorageClasses types.List `tfsdk:"storage_classes"`
 }
 
-type AzureVnetSiteViewsStorageClassType struct {
+type AzureVnetSiteStorageClassType struct {
 	DefaultStorageClass types.Bool   `tfsdk:"default_storage_class"`
 	StorageClassName    types.String `tfsdk:"storage_class_name"`
 }
 
-type AzureVnetSiteGlobalSpecTypeVoltstackClusterAr struct {
+type AzureVnetSiteVoltstackClusterAr struct {
 	AcceleratedNetworking    types.Object `tfsdk:"accelerated_networking"`
 	AzureCertifiedHw         types.String `tfsdk:"azure_certified_hw"`
 	DcClusterGroupChoice     types.Object `tfsdk:"dc_cluster_group_choice"`
@@ -768,12 +738,12 @@ type AzureVnetSiteAzureVnetVoltstackClusterARTypeActiveForwardProxyPolicies stru
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterARTypeGlobalNetworkChoice struct {
+type AzureVnetSiteAzureVnetVoltstackClusterARTypeGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterARTypeGlobalNetworkList struct {
+type AzureVnetSiteAzureVnetVoltstackClusterARTypeGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
@@ -782,7 +752,7 @@ type AzureVnetSiteAzureVnetVoltstackClusterARTypeK8SClusterChoice struct {
 	NoK8SCluster types.Bool   `tfsdk:"no_k8s_cluster"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterARTypeNetworkPolicyChoice struct {
+type AzureVnetSiteAzureVnetVoltstackClusterARTypeNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
@@ -792,7 +762,7 @@ type AzureVnetSiteAzureVnetVoltstackClusterARTypeActiveEnhancedFirewallPolicies 
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type AzureVnetSiteAzureVnetVoltstackClusterARTypeActiveNetworkPolicies struct {
+type AzureVnetSiteAzureVnetVoltstackClusterARTypeActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
@@ -819,16 +789,16 @@ type AzureVnetSiteAzureVnetVoltstackClusterARTypeStorageClassList struct {
 	StorageClasses types.List `tfsdk:"storage_classes"`
 }
 
-type AzureVnetSiteViewsVolterraSoftwareType struct {
+type AzureVnetSiteVolterraSoftwareType struct {
 	VolterraSwVersionChoice types.Object `tfsdk:"volterra_sw_version_choice"`
 }
 
-type AzureVnetSiteVolterraSoftwareTypeVolterraSwVersionChoice struct {
+type AzureVnetSiteVolterraSwVersionChoice struct {
 	DefaultSwVersion        types.Bool   `tfsdk:"default_sw_version"`
 	VolterraSoftwareVersion types.String `tfsdk:"volterra_software_version"`
 }
 
-type AzureVnetSiteViewsAzureVnetChoiceType struct {
+type AzureVnetSiteAzureVnetChoiceType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -837,32 +807,32 @@ type AzureVnetSiteAzureVnetChoiceTypeChoice struct {
 	NewVnet      types.Object `tfsdk:"new_vnet"`
 }
 
-type AzureVnetSiteAzureVnetChoiceTypeExistingVnet struct {
+type AzureVnetSiteExistingVnet struct {
 	ResourceGroup     types.String `tfsdk:"resource_group"`
 	RoutingTypeChoice types.Object `tfsdk:"routing_type_choice"`
 	VnetName          types.String `tfsdk:"vnet_name"`
 }
 
-type AzureVnetSiteAzureVnetChoiceTypeNewVnet struct {
+type AzureVnetSiteNewVnet struct {
 	NameChoice  types.Object `tfsdk:"name_choice"`
 	PrimaryIpv4 types.String `tfsdk:"primary_ipv4"`
 }
 
-type AzureVnetSiteAzureVnetParamsTypeNameChoice struct {
+type AzureVnetSiteNameChoice struct {
 	Autogenerate types.Bool   `tfsdk:"autogenerate"`
 	Name         types.String `tfsdk:"name"`
 }
 
-type AzureVnetSiteCommonWafLiveSignaturesUpdate struct {
+type AzureVnetSiteLiveSignaturesUpdate struct {
 	SignaturesUpdateModeChoice types.Object `tfsdk:"signatures_update_mode_choice"`
 }
 
-type AzureVnetSiteLiveSignaturesUpdateSignaturesUpdateModeChoice struct {
+type AzureVnetSiteSignaturesUpdateModeChoice struct {
 	Automatic types.Bool `tfsdk:"automatic"`
 	Manual    types.Bool `tfsdk:"manual"`
 }
 
-type AzureVnetSiteGlobalSpecTypeWorkerNodesChoice struct {
+type AzureVnetSiteWorkerNodesChoice struct {
 	NoWorkerNodes types.Bool  `tfsdk:"no_worker_nodes"`
 	NodesPerAz    types.Int64 `tfsdk:"nodes_per_az"`
 	TotalNodes    types.Int64 `tfsdk:"total_nodes"`
@@ -923,6 +893,7 @@ var AzureVnetSiteAdminPasswordSecretInfoOneofModelAttributeMap = map[string]attr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AzureVnetSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -982,9 +953,8 @@ var AzureVnetSiteBlockedServicesChoiceBlockedServicesBlockedSeviceModelAttribute
 // Attribute map for OneOfField --> BlockedServicesValueTypeChoice
 var AzureVnetSiteBlockedServicesChoiceBlockedServicesBlockedSeviceBlockedServicesValueTypeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dns":                types.BoolType,
-	"ssh":                types.BoolType,
-	"web_user_interface": types.BoolType,
+	"dns": types.BoolType,
+	"ssh": types.BoolType,
 }
 
 // Attribute map for PointerField --> CloudSiteInfo
@@ -1315,7 +1285,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingModelAttributeMap =
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> AzNodes
@@ -1373,7 +1344,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetResourceG
 var AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> OutsideSubnet
@@ -1415,7 +1385,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetResource
 var AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -1710,6 +1679,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceOtherSubscriptionAuthorizedKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1781,7 +1751,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> RouteServerSubnet
@@ -1823,7 +1792,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for OneOfField --> SkuChoice
@@ -2014,9 +1982,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoute
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -2048,12 +2013,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoute
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -2068,20 +2027,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoute
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2267,9 +2216,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -2301,12 +2247,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRou
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -2321,20 +2261,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2351,42 +2281,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttribute
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
@@ -2462,7 +2358,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingModelAttributeMap
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -2749,6 +2646,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceOtherSubscriptionAuthorizedKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2820,7 +2718,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> RouteServerSubnet
@@ -2862,7 +2759,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for OneOfField --> SkuChoice
@@ -3045,9 +2941,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -3079,12 +2972,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRou
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -3099,20 +2986,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRou
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -3217,7 +3094,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetResourceGr
 var AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> OutsideSubnet
@@ -3259,7 +3135,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetResourceG
 var AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
@@ -3384,9 +3259,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticR
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -3418,12 +3290,6 @@ var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticR
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -3438,20 +3304,10 @@ var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticR
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -3468,42 +3324,8 @@ var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttribu
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
@@ -3553,7 +3375,8 @@ var AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingModelAttributeMap = map[s
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> AzNodes
@@ -3606,7 +3429,6 @@ var AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetResourceGroupCho
 var AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> PerformanceEnhancementMode
@@ -3620,42 +3442,8 @@ var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap = 
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> IngressGwAr
@@ -3695,7 +3483,8 @@ var AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingModelAttributeMap = map
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for PointerField --> Node
@@ -3750,7 +3539,6 @@ var AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetResourceGroupChoi
 var AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> PerformanceEnhancementMode
@@ -3764,42 +3552,8 @@ var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModeModelAttributeMap 
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> VoltstackCluster
@@ -3861,7 +3615,8 @@ var AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingModelAttributeMap 
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> AzNodes
@@ -3914,7 +3669,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetResourceG
 var AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -4219,9 +3973,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRo
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -4253,12 +4004,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRo
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -4273,20 +4018,10 @@ var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRo
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -4385,7 +4120,8 @@ var AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingModelAttributeMa
 // Attribute map for RequiredOneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> DcClusterGroupChoice
@@ -4620,7 +4356,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetResourceGr
 var AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
@@ -4745,9 +4480,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStatic
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -4779,12 +4511,6 @@ var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStatic
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -4799,20 +4525,10 @@ var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStatic
 	"ipv4": types.ObjectType{
 		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -4930,7 +4646,7 @@ var AzureVnetSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var AzureVnetSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -4959,8 +4675,8 @@ func (d *DataSourceF5XCAzureVnetSite) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a azure_vnet_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of azure_vnet_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a azure_vnet_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of azure_vnet_site) etc. can be fetched",
+		MarkdownDescription: "Azure VNet site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Azure VNet.<br>It can be used to automatically site creation in the Azure VNet.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "Azure VNet site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Azure VNet. It can be used to automatically site creation in the Azure VNet. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -5062,8 +4778,15 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
+										Sensitive:   true,
 									},
 								},
+							},
+							"none": schema.BoolAttribute{
+								Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
 							},
 						},
 					},
@@ -5108,12 +4831,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 												},
 												"ssh": schema.BoolAttribute{
 													Description: "SSH",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"web_user_interface": schema.BoolAttribute{
-													Description: "Web UI",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -5617,6 +5334,12 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"enable": schema.BoolAttribute{
 												Description: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												Required:    false,
@@ -5698,12 +5421,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"ipv6": schema.StringAttribute{
-																	Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
 															},
 														},
 													},
@@ -5764,12 +5481,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 															Attributes: map[string]schema.Attribute{
 																"ipv4": schema.StringAttribute{
 																	Description: "IPv4 Subnet IPv4 subnet prefix for this subnet",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"ipv6": schema.StringAttribute{
-																	Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
@@ -6169,8 +5880,15 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -6281,12 +5999,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																						Optional:    false,
 																						Computed:    true,
 																					},
-																					"ipv6": schema.StringAttribute{
-																						Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
 																				},
 																			},
 																		},
@@ -6347,12 +6059,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																				Attributes: map[string]schema.Attribute{
 																					"ipv4": schema.StringAttribute{
 																						Description: "IPv4 Subnet IPv4 subnet prefix for this subnet",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"ipv6": schema.StringAttribute{
-																						Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
@@ -6647,20 +6353,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -6701,26 +6393,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																									},
 																									"prefix": schema.StringAttribute{
 																										Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																										Required:    false,
 																										Optional:    false,
 																										Computed:    true,
@@ -6988,20 +6660,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -7048,26 +6706,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																									},
 																								},
 																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
 																						},
 																					},
 																				},
@@ -7102,61 +6740,17 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
 										},
 									},
@@ -7202,6 +6796,12 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"enable": schema.BoolAttribute{
 												Description: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												Required:    false,
@@ -7598,8 +7198,15 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -7710,12 +7317,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																						Optional:    false,
 																						Computed:    true,
 																					},
-																					"ipv6": schema.StringAttribute{
-																						Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
 																				},
 																			},
 																		},
@@ -7776,12 +7377,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																				Attributes: map[string]schema.Attribute{
 																					"ipv4": schema.StringAttribute{
 																						Description: "IPv4 Subnet IPv4 subnet prefix for this subnet",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"ipv6": schema.StringAttribute{
-																						Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
@@ -8076,20 +7671,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -8130,26 +7711,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																									},
 																									"prefix": schema.StringAttribute{
 																										Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																										Required:    false,
 																										Optional:    false,
 																										Computed:    true,
@@ -8340,12 +7901,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																Optional:    false,
 																Computed:    true,
 															},
-															"ipv6": schema.StringAttribute{
-																Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
 														},
 													},
 												},
@@ -8412,12 +7967,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 														Attributes: map[string]schema.Attribute{
 															"ipv4": schema.StringAttribute{
 																Description: "IPv4 Subnet IPv4 subnet prefix for this subnet",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"ipv6": schema.StringAttribute{
-																Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
 																Required:    false,
 																Optional:    false,
 																Computed:    true,
@@ -8583,20 +8132,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -8643,26 +8178,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																									},
 																								},
 																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
 																						},
 																					},
 																				},
@@ -8697,61 +8212,17 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
 										},
 									},
@@ -8797,6 +8268,12 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"enable": schema.BoolAttribute{
 												Description: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												Required:    false,
@@ -8878,12 +8355,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"ipv6": schema.StringAttribute{
-																	Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
 															},
 														},
 													},
@@ -8911,61 +8382,17 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
 										},
 									},
@@ -8991,6 +8418,12 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"enable": schema.BoolAttribute{
 												Description: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												Required:    false,
@@ -9077,12 +8510,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																Optional:    false,
 																Computed:    true,
 															},
-															"ipv6": schema.StringAttribute{
-																Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
 														},
 													},
 												},
@@ -9115,61 +8542,17 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"no_jumbo": schema.BoolAttribute{
-																Description: "L3 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
 										},
 									},
@@ -9195,6 +8578,12 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"enable": schema.BoolAttribute{
 												Description: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												Required:    false,
@@ -9272,12 +8661,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 															Attributes: map[string]schema.Attribute{
 																"ipv4": schema.StringAttribute{
 																	Description: "IPv4 Subnet IPv4 subnet prefix for this subnet",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"ipv6": schema.StringAttribute{
-																	Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
@@ -9774,20 +9157,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -9828,26 +9197,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																									},
 																									"prefix": schema.StringAttribute{
 																										Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																										Required:    false,
 																										Optional:    false,
 																										Computed:    true,
@@ -9960,6 +9309,12 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"enable": schema.BoolAttribute{
 												Description: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
 												Required:    false,
@@ -10376,12 +9731,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																Optional:    false,
 																Computed:    true,
 															},
-															"ipv6": schema.StringAttribute{
-																Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
 														},
 													},
 												},
@@ -10549,20 +9898,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -10603,26 +9938,6 @@ func (r *DataSourceF5XCAzureVnetSite) Schema(ctx context.Context, request dataso
 																									},
 																									"prefix": schema.StringAttribute{
 																										Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																										Required:    false,
 																										Optional:    false,
 																										Computed:    true,
@@ -10974,7 +10289,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "azure_vnet_site", err))
 		return
 	}
 
@@ -11036,12 +10351,8 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// data SpecToModelRoot PointerField --> AdminPassword
 	if specData.GetAdminPassword() != nil {
@@ -11142,6 +10453,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				}
 			}
 
+			// data specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -11206,7 +10526,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 		blockedServicesChoiceChoices := specData.GetBlockedServicesChoice()
 
 		// The model struct that will be populated by the nested template.
-		var blockedServicesChoiceChoicesModel = &AzureVnetSiteGlobalSpecTypeBlockedServicesChoice{}
+		var blockedServicesChoiceChoicesModel = &AzureVnetSiteBlockedServicesChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -11264,15 +10584,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -11368,19 +10679,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> CloudSiteInfo
 	if specData.GetCloudSiteInfo() != nil {
-		var azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel = &AzureVnetSiteAzureVnetSiteAzureVnetSiteInfoType{}
+		var azureVnetSiteAzureVnetSiteInfoTypeModel = &AzureVnetSiteAzureVnetSiteInfoType{}
 		cloudSiteInfoElement := specData.GetCloudSiteInfo()
 
 		// data specToModelNested PointerField --> ExpressRouteInfo
 		if cloudSiteInfoElement.GetExpressRouteInfo() != nil {
 			// Create the nested Go struct
-			azureVnetSiteAzureVnetSiteExpressRouteInfoModel := &AzureVnetSiteAzureVnetSiteExpressRouteInfo{}
+			azureVnetSiteExpressRouteInfoModel := &AzureVnetSiteExpressRouteInfo{}
 			expressRouteInfoElement := cloudSiteInfoElement.GetExpressRouteInfo()
 
 			// Recursively populate the nested struct
 
 			// data specToModelNested UintField --> RouteServerAsn
-			azureVnetSiteAzureVnetSiteExpressRouteInfoModel.RouteServerAsn = types.Int64Value(int64(expressRouteInfoElement.GetRouteServerAsn()))
+			azureVnetSiteExpressRouteInfoModel.RouteServerAsn = types.Int64Value(int64(expressRouteInfoElement.GetRouteServerAsn()))
 
 			// data specToModelNested ArrayOfStringField --> RouteServerIps
 			if len(expressRouteInfoElement.GetRouteServerIps()) > 0 {
@@ -11389,18 +10700,18 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				if response.Diagnostics.HasError() {
 					return
 				}
-				azureVnetSiteAzureVnetSiteExpressRouteInfoModel.RouteServerIps = listValue
+				azureVnetSiteExpressRouteInfoModel.RouteServerIps = listValue
 			} else {
-				azureVnetSiteAzureVnetSiteExpressRouteInfoModel.RouteServerIps = types.ListNull(types.StringType)
+				azureVnetSiteExpressRouteInfoModel.RouteServerIps = types.ListNull(types.StringType)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			azureVnetSiteAzureVnetSiteExpressRouteInfoModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteCloudSiteInfoExpressRouteInfoModelAttributeMap, azureVnetSiteAzureVnetSiteExpressRouteInfoModel)
+			azureVnetSiteExpressRouteInfoModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteCloudSiteInfoExpressRouteInfoModelAttributeMap, azureVnetSiteExpressRouteInfoModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.ExpressRouteInfo = azureVnetSiteAzureVnetSiteExpressRouteInfoModelObj
+			azureVnetSiteAzureVnetSiteInfoTypeModel.ExpressRouteInfo = azureVnetSiteExpressRouteInfoModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -11409,34 +10720,34 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.ExpressRouteInfo = types.ObjectNull(AzureVnetSiteCloudSiteInfoExpressRouteInfoModelAttributeMap)
+			azureVnetSiteAzureVnetSiteInfoTypeModel.ExpressRouteInfo = types.ObjectNull(AzureVnetSiteCloudSiteInfoExpressRouteInfoModelAttributeMap)
 		}
 
 		// data specToModelNested ArrayOfPointerField --> NodeInfo
 		if len(cloudSiteInfoElement.GetNodeInfo()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			nodeInfoElements := make([]AzureVnetSiteAzureVnetSiteNodeInstanceNameType, 0, len(cloudSiteInfoElement.GetNodeInfo()))
+			nodeInfoElements := make([]AzureVnetSiteNodeInstanceNameType, 0, len(cloudSiteInfoElement.GetNodeInfo()))
 			for _, nodeInfoElement := range cloudSiteInfoElement.GetNodeInfo() {
-				azureVnetSiteAzureVnetSiteNodeInstanceNameTypeModel := AzureVnetSiteAzureVnetSiteNodeInstanceNameType{}
+				azureVnetSiteNodeInstanceNameTypeModel := AzureVnetSiteNodeInstanceNameType{}
 
 				// data specToModelNested RequiredStringField --> NodeId
 				if nodeInfoElement.GetNodeId() != "" {
-					azureVnetSiteAzureVnetSiteNodeInstanceNameTypeModel.NodeId = types.StringValue(nodeInfoElement.GetNodeId())
+					azureVnetSiteNodeInstanceNameTypeModel.NodeId = types.StringValue(nodeInfoElement.GetNodeId())
 				} else {
 					// Empty string, set to null
-					azureVnetSiteAzureVnetSiteNodeInstanceNameTypeModel.NodeId = types.StringNull()
+					azureVnetSiteNodeInstanceNameTypeModel.NodeId = types.StringNull()
 				}
 
 				// data specToModelNested StringField --> NodeInstanceName
 				if nodeInfoElement.GetNodeInstanceName() != "" {
-					azureVnetSiteAzureVnetSiteNodeInstanceNameTypeModel.NodeInstanceName = types.StringValue(nodeInfoElement.GetNodeInstanceName())
+					azureVnetSiteNodeInstanceNameTypeModel.NodeInstanceName = types.StringValue(nodeInfoElement.GetNodeInstanceName())
 				} else {
 					// Empty string, set to null
-					azureVnetSiteAzureVnetSiteNodeInstanceNameTypeModel.NodeInstanceName = types.StringNull()
+					azureVnetSiteNodeInstanceNameTypeModel.NodeInstanceName = types.StringNull()
 				}
 
-				nodeInfoElements = append(nodeInfoElements, azureVnetSiteAzureVnetSiteNodeInstanceNameTypeModel)
+				nodeInfoElements = append(nodeInfoElements, azureVnetSiteNodeInstanceNameTypeModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11445,13 +10756,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			if response.Diagnostics.HasError() {
 				return
 			}
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.NodeInfo = nodeInfoListValue
+			azureVnetSiteAzureVnetSiteInfoTypeModel.NodeInfo = nodeInfoListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.NodeInfo = types.ListNull(types.ObjectType{AttrTypes: AzureVnetSiteCloudSiteInfoNodeInfoModelAttributeMap})
+			azureVnetSiteAzureVnetSiteInfoTypeModel.NodeInfo = types.ListNull(types.ObjectType{AttrTypes: AzureVnetSiteCloudSiteInfoNodeInfoModelAttributeMap})
 		}
 
 		// data specToModelNested RequiredArrayOfStringField --> PrivateIps
@@ -11461,9 +10772,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			if response.Diagnostics.HasError() {
 				return
 			}
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.PrivateIps = listValue
+			azureVnetSiteAzureVnetSiteInfoTypeModel.PrivateIps = listValue
 		} else {
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.PrivateIps = types.ListNull(types.StringType)
+			azureVnetSiteAzureVnetSiteInfoTypeModel.PrivateIps = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested RequiredArrayOfStringField --> PublicIps
@@ -11473,18 +10784,18 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			if response.Diagnostics.HasError() {
 				return
 			}
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.PublicIps = listValue
+			azureVnetSiteAzureVnetSiteInfoTypeModel.PublicIps = listValue
 		} else {
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.PublicIps = types.ListNull(types.StringType)
+			azureVnetSiteAzureVnetSiteInfoTypeModel.PublicIps = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested ArrayOfPointerField --> SpokeVnetPrefixInfo
 		if len(cloudSiteInfoElement.GetSpokeVnetPrefixInfo()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			spokeVnetPrefixInfoElements := make([]AzureVnetSiteAzureVnetSiteVnetIpPrefixesType, 0, len(cloudSiteInfoElement.GetSpokeVnetPrefixInfo()))
+			spokeVnetPrefixInfoElements := make([]AzureVnetSiteVnetIpPrefixesType, 0, len(cloudSiteInfoElement.GetSpokeVnetPrefixInfo()))
 			for _, spokeVnetPrefixInfoElement := range cloudSiteInfoElement.GetSpokeVnetPrefixInfo() {
-				azureVnetSiteAzureVnetSiteVnetIpPrefixesTypeModel := AzureVnetSiteAzureVnetSiteVnetIpPrefixesType{}
+				azureVnetSiteVnetIpPrefixesTypeModel := AzureVnetSiteVnetIpPrefixesType{}
 
 				// data specToModelNested RequiredArrayOfStringField --> Prefixes
 				if len(spokeVnetPrefixInfoElement.GetPrefixes()) > 0 {
@@ -11493,25 +10804,25 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 					if response.Diagnostics.HasError() {
 						return
 					}
-					azureVnetSiteAzureVnetSiteVnetIpPrefixesTypeModel.Prefixes = listValue
+					azureVnetSiteVnetIpPrefixesTypeModel.Prefixes = listValue
 				} else {
-					azureVnetSiteAzureVnetSiteVnetIpPrefixesTypeModel.Prefixes = types.ListNull(types.StringType)
+					azureVnetSiteVnetIpPrefixesTypeModel.Prefixes = types.ListNull(types.StringType)
 				}
 
 				// data specToModelNested PointerField --> Vnet
 				if spokeVnetPrefixInfoElement.GetVnet() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAzureVnetTypeModel := &AzureVnetSiteViewsAzureVnetType{}
+					azureVnetSiteAzureVnetTypeModel := &AzureVnetSiteAzureVnetType{}
 					vnetElement := spokeVnetPrefixInfoElement.GetVnet()
 
 					// Recursively populate the nested struct
 
 					// data specToModelNested RequiredStringField --> ResourceGroup
 					if vnetElement.GetResourceGroup() != "" {
-						azureVnetSiteViewsAzureVnetTypeModel.ResourceGroup = types.StringValue(vnetElement.GetResourceGroup())
+						azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringValue(vnetElement.GetResourceGroup())
 					} else {
 						// Empty string, set to null
-						azureVnetSiteViewsAzureVnetTypeModel.ResourceGroup = types.StringNull()
+						azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 					}
 
 					// data specToModelNested RequiredOneOfField --> RoutingType
@@ -11557,27 +10868,27 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsAzureVnetTypeModel.RoutingTypeChoice = finalObj
+						azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetRoutingTypeModelAttributeMap)
+						azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetRoutingTypeModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredStringField --> VnetName
 					if vnetElement.GetVnetName() != "" {
-						azureVnetSiteViewsAzureVnetTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
+						azureVnetSiteAzureVnetTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
 					} else {
 						// Empty string, set to null
-						azureVnetSiteViewsAzureVnetTypeModel.VnetName = types.StringNull()
+						azureVnetSiteAzureVnetTypeModel.VnetName = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAzureVnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetModelAttributeMap, azureVnetSiteViewsAzureVnetTypeModel)
+					azureVnetSiteAzureVnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetModelAttributeMap, azureVnetSiteAzureVnetTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					azureVnetSiteAzureVnetSiteVnetIpPrefixesTypeModel.Vnet = azureVnetSiteViewsAzureVnetTypeModelObj
+					azureVnetSiteVnetIpPrefixesTypeModel.Vnet = azureVnetSiteAzureVnetTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -11586,10 +10897,10 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					azureVnetSiteAzureVnetSiteVnetIpPrefixesTypeModel.Vnet = types.ObjectNull(AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetModelAttributeMap)
+					azureVnetSiteVnetIpPrefixesTypeModel.Vnet = types.ObjectNull(AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetModelAttributeMap)
 				}
 
-				spokeVnetPrefixInfoElements = append(spokeVnetPrefixInfoElements, azureVnetSiteAzureVnetSiteVnetIpPrefixesTypeModel)
+				spokeVnetPrefixInfoElements = append(spokeVnetPrefixInfoElements, azureVnetSiteVnetIpPrefixesTypeModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11598,46 +10909,42 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			if response.Diagnostics.HasError() {
 				return
 			}
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.SpokeVnetPrefixInfo = spokeVnetPrefixInfoListValue
+			azureVnetSiteAzureVnetSiteInfoTypeModel.SpokeVnetPrefixInfo = spokeVnetPrefixInfoListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.SpokeVnetPrefixInfo = types.ListNull(types.ObjectType{AttrTypes: AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoModelAttributeMap})
+			azureVnetSiteAzureVnetSiteInfoTypeModel.SpokeVnetPrefixInfo = types.ListNull(types.ObjectType{AttrTypes: AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoModelAttributeMap})
 		}
 
 		// data specToModelNested PointerField --> Vnet
 		if cloudSiteInfoElement.GetVnet() != nil {
 			// Create the nested Go struct
-			azureVnetSiteAzureVnetSiteVNETInfoTypeModel := &AzureVnetSiteAzureVnetSiteVNETInfoType{}
+			azureVnetSiteVNETInfoTypeModel := &AzureVnetSiteVNETInfoType{}
 			vnetElement := cloudSiteInfoElement.GetVnet()
 
 			// Recursively populate the nested struct
 
 			// data specToModelNested StringField --> ResourceId
-			if vnetElement.GetResourceId() != "" {
-				azureVnetSiteAzureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
-			} else {
-				// Empty string, set to null
-				azureVnetSiteAzureVnetSiteVNETInfoTypeModel.ResourceId = types.StringNull()
-			}
+			// The resource defaults this field to "", so API "" must stay "" to match it.
+			azureVnetSiteVNETInfoTypeModel.ResourceId = types.StringValue(vnetElement.GetResourceId())
 
 			// data specToModelNested StringField --> VnetName
 			if vnetElement.GetVnetName() != "" {
-				azureVnetSiteAzureVnetSiteVNETInfoTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
+				azureVnetSiteVNETInfoTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
 			} else {
 				// Empty string, set to null
-				azureVnetSiteAzureVnetSiteVNETInfoTypeModel.VnetName = types.StringNull()
+				azureVnetSiteVNETInfoTypeModel.VnetName = types.StringNull()
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			azureVnetSiteAzureVnetSiteVNETInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteCloudSiteInfoVnetModelAttributeMap, azureVnetSiteAzureVnetSiteVNETInfoTypeModel)
+			azureVnetSiteVNETInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteCloudSiteInfoVnetModelAttributeMap, azureVnetSiteVNETInfoTypeModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.Vnet = azureVnetSiteAzureVnetSiteVNETInfoTypeModelObj
+			azureVnetSiteAzureVnetSiteInfoTypeModel.Vnet = azureVnetSiteVNETInfoTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -11646,13 +10953,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel.Vnet = types.ObjectNull(AzureVnetSiteCloudSiteInfoVnetModelAttributeMap)
+			azureVnetSiteAzureVnetSiteInfoTypeModel.Vnet = types.ObjectNull(AzureVnetSiteCloudSiteInfoVnetModelAttributeMap)
 		}
 
 		cloudSiteInfoObj, cloudSiteInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteCloudSiteInfoModelAttributeMap,
-			azureVnetSiteAzureVnetSiteAzureVnetSiteInfoTypeModel,
+			azureVnetSiteAzureVnetSiteInfoTypeModel,
 		)
 		response.Diagnostics.Append(cloudSiteInfoDiags...)
 		data.CloudSiteInfo = cloudSiteInfoObj
@@ -11662,19 +10969,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> Coordinates
 	if specData.GetCoordinates() != nil {
-		var azureVnetSiteSiteCoordinatesModel = &AzureVnetSiteSiteCoordinates{}
+		var azureVnetSiteCoordinatesModel = &AzureVnetSiteCoordinates{}
 		coordinatesElement := specData.GetCoordinates()
 
 		// data specToModelNested FloatField --> Latitude
-		azureVnetSiteSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
+		azureVnetSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
 
 		// data specToModelNested FloatField --> Longitude
-		azureVnetSiteSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
+		azureVnetSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
 
 		coordinatesObj, coordinatesDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteCoordinatesModelAttributeMap,
-			azureVnetSiteSiteCoordinatesModel,
+			azureVnetSiteCoordinatesModel,
 		)
 		response.Diagnostics.Append(coordinatesDiags...)
 		data.Coordinates = coordinatesObj
@@ -11684,45 +10991,45 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> CustomDns
 	if specData.GetCustomDns() != nil {
-		var azureVnetSiteViewsCustomDNSModel = &AzureVnetSiteViewsCustomDNS{}
+		var azureVnetSiteCustomDNSModel = &AzureVnetSiteCustomDNS{}
 		customDnsElement := specData.GetCustomDns()
 
 		// data specToModelNested StringField --> InsideNameserver
 		if customDnsElement.GetInsideNameserver() != "" {
-			azureVnetSiteViewsCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
+			azureVnetSiteCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
 		} else {
 			// Empty string, set to null
-			azureVnetSiteViewsCustomDNSModel.InsideNameserver = types.StringNull()
+			azureVnetSiteCustomDNSModel.InsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> InsideNameserverV6
 		if customDnsElement.GetInsideNameserverV6() != "" {
-			azureVnetSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
+			azureVnetSiteCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			azureVnetSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringNull()
+			azureVnetSiteCustomDNSModel.InsideNameserverV6 = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserver
 		if customDnsElement.GetOutsideNameserver() != "" {
-			azureVnetSiteViewsCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
+			azureVnetSiteCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
 		} else {
 			// Empty string, set to null
-			azureVnetSiteViewsCustomDNSModel.OutsideNameserver = types.StringNull()
+			azureVnetSiteCustomDNSModel.OutsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserverV6
 		if customDnsElement.GetOutsideNameserverV6() != "" {
-			azureVnetSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
+			azureVnetSiteCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			azureVnetSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringNull()
+			azureVnetSiteCustomDNSModel.OutsideNameserverV6 = types.StringNull()
 		}
 
 		customDnsObj, customDnsDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteCustomDnsModelAttributeMap,
-			azureVnetSiteViewsCustomDNSModel,
+			azureVnetSiteCustomDNSModel,
 		)
 		response.Diagnostics.Append(customDnsDiags...)
 		data.CustomDns = customDnsObj
@@ -11740,7 +11047,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 		deploymentChoiceChoices := specData.GetDeployment()
 
 		// The model struct that will be populated by the nested template.
-		var deploymentChoiceChoicesModel = &AzureVnetSiteGlobalSpecTypeDeploymentChoice{}
+		var deploymentChoiceChoicesModel = &AzureVnetSiteDepChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -11827,7 +11134,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 		encryptionChoiceChoices := specData.GetEncryptionChoice()
 
 		// The model struct that will be populated by the nested template.
-		var encryptionChoiceChoicesModel = &AzureVnetSiteGlobalSpecTypeEncryptionChoice{}
+		var encryptionChoiceChoicesModel = &AzureVnetSiteEncryptionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -11898,16 +11205,12 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 	}
 
 	// data SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// data SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
-		var azureVnetSiteViewsKubernetesUpgradeDrainModel = &AzureVnetSiteViewsKubernetesUpgradeDrain{}
+		var azureVnetSiteK8sUpgradeDrainModel = &AzureVnetSiteK8sUpgradeDrain{}
 		kubernetesUpgradeDrainElement := specData.GetKubernetesUpgradeDrain()
 
 		// data specToModelNested RequiredOneOfField --> KubernetesUpgradeDrainEnableChoice
@@ -12009,16 +11312,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			azureVnetSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
+			azureVnetSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(AzureVnetSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
+			azureVnetSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(AzureVnetSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
 		}
 
 		kubernetesUpgradeDrainObj, kubernetesUpgradeDrainDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteKubernetesUpgradeDrainModelAttributeMap,
-			azureVnetSiteViewsKubernetesUpgradeDrainModel,
+			azureVnetSiteK8sUpgradeDrainModel,
 		)
 		response.Diagnostics.Append(kubernetesUpgradeDrainDiags...)
 		data.KubernetesUpgradeDrain = kubernetesUpgradeDrainObj
@@ -12036,7 +11339,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 		logsReceiverChoiceChoices := specData.GetLogsReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logsReceiverChoiceChoicesModel = &AzureVnetSiteGlobalSpecTypeLogsReceiverChoice{}
+		var logsReceiverChoiceChoicesModel = &AzureVnetSiteLogsReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -12124,7 +11427,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> OfflineSurvivabilityMode
 	if specData.GetOfflineSurvivabilityMode() != nil {
-		var azureVnetSiteViewsOfflineSurvivabilityModeTypeModel = &AzureVnetSiteViewsOfflineSurvivabilityModeType{}
+		var azureVnetSiteOfflineSurvivabilityModeTypeModel = &AzureVnetSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
 		// data specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
@@ -12170,16 +11473,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			azureVnetSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
+			azureVnetSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AzureVnetSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			azureVnetSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AzureVnetSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteOfflineSurvivabilityModeModelAttributeMap,
-			azureVnetSiteViewsOfflineSurvivabilityModeTypeModel,
+			azureVnetSiteOfflineSurvivabilityModeTypeModel,
 		)
 		response.Diagnostics.Append(offlineSurvivabilityModeDiags...)
 		data.OfflineSurvivabilityMode = offlineSurvivabilityModeObj
@@ -12189,7 +11492,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
-		var azureVnetSiteViewsOperatingSystemTypeModel = &AzureVnetSiteViewsOperatingSystemType{}
+		var azureVnetSiteOperatingSystemTypeModel = &AzureVnetSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
 		// data specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
@@ -12236,16 +11539,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			azureVnetSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
+			azureVnetSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AzureVnetSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			azureVnetSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AzureVnetSiteOsOperatingSystemVersionChoiceModelAttributeMap)
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteOsModelAttributeMap,
-			azureVnetSiteViewsOperatingSystemTypeModel,
+			azureVnetSiteOperatingSystemTypeModel,
 		)
 		response.Diagnostics.Append(osDiags...)
 		data.Os = osObj
@@ -12263,7 +11566,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 		regionChoiceChoices := specData.GetRegionChoice()
 
 		// The model struct that will be populated by the nested template.
-		var regionChoiceChoicesModel = &AzureVnetSiteGlobalSpecTypeRegionChoice{}
+		var regionChoiceChoicesModel = &AzureVnetSiteRegionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -12325,7 +11628,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 		siteTypeChoiceChoices := specData.GetSiteType()
 
 		// The model struct that will be populated by the nested template.
-		var siteTypeChoiceChoicesModel = &AzureVnetSiteGlobalSpecTypeSiteTypeChoice{}
+		var siteTypeChoiceChoicesModel = &AzureVnetSiteSiteTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -12342,7 +11645,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AcceleratedNetworking
 				if ingressEgressGwElement.GetAcceleratedNetworking() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAcceleratedNetworkingTypeModel := &AzureVnetSiteViewsAcceleratedNetworkingType{}
+					azureVnetSiteAcceleratedNetworkingTypeModel := &AzureVnetSiteAcceleratedNetworkingType{}
 					acceleratedNetworkingElement := ingressEgressGwElement.GetAcceleratedNetworking()
 
 					// Recursively populate the nested struct
@@ -12358,6 +11661,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -12381,19 +11693,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingModelAttributeMap, azureVnetSiteViewsAcceleratedNetworkingTypeModel)
+					azureVnetSiteAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingModelAttributeMap, azureVnetSiteAcceleratedNetworkingTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwAttributeMap["accelerated_networking"] = azureVnetSiteViewsAcceleratedNetworkingTypeModelObj
+					ingressEgressGwAttributeMap["accelerated_networking"] = azureVnetSiteAcceleratedNetworkingTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -12409,22 +11721,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				if len(ingressEgressGwElement.GetAzNodes()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					azNodesElements := make([]AzureVnetSiteViewsAzureVnetTwoInterfaceNodeType, 0, len(ingressEgressGwElement.GetAzNodes()))
+					azNodesElements := make([]AzureVnetSiteAzureVnetTwoIfaceNodeType, 0, len(ingressEgressGwElement.GetAzNodes()))
 					for _, azNodesElement := range ingressEgressGwElement.GetAzNodes() {
-						azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel := AzureVnetSiteViewsAzureVnetTwoInterfaceNodeType{}
+						azureVnetSiteAzureVnetTwoIfaceNodeTypeModel := AzureVnetSiteAzureVnetTwoIfaceNodeType{}
 
 						// data specToModelNested RequiredStringField --> AzureAz
 						if azNodesElement.GetAzureAz() != "" {
-							azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel.AzureAz = types.StringValue(azNodesElement.GetAzureAz())
+							azureVnetSiteAzureVnetTwoIfaceNodeTypeModel.AzureAz = types.StringValue(azNodesElement.GetAzureAz())
 						} else {
 							// Empty string, set to null
-							azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel.AzureAz = types.StringNull()
+							azureVnetSiteAzureVnetTwoIfaceNodeTypeModel.AzureAz = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> InsideSubnet
 						if azNodesElement.GetInsideSubnet() != nil {
 							// Create the nested Go struct
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+							azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 							insideSubnetElement := azNodesElement.GetInsideSubnet()
 
 							// Recursively populate the nested struct
@@ -12535,14 +11847,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// data specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -12567,19 +11871,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceModelAttributeMap)
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+							azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel.InsideSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+							azureVnetSiteAzureVnetTwoIfaceNodeTypeModel.InsideSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -12588,13 +11892,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel.InsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetModelAttributeMap)
+							azureVnetSiteAzureVnetTwoIfaceNodeTypeModel.InsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesInsideSubnetModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> OutsideSubnet
 						if azNodesElement.GetOutsideSubnet() != nil {
 							// Create the nested Go struct
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+							azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 							outsideSubnetElement := azNodesElement.GetOutsideSubnet()
 
 							// Recursively populate the nested struct
@@ -12705,14 +12009,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// data specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -12737,19 +12033,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceModelAttributeMap)
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+							azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel.OutsideSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+							azureVnetSiteAzureVnetTwoIfaceNodeTypeModel.OutsideSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -12758,10 +12054,10 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel.OutsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetModelAttributeMap)
+							azureVnetSiteAzureVnetTwoIfaceNodeTypeModel.OutsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetModelAttributeMap)
 						}
 
-						azNodesElements = append(azNodesElements, azureVnetSiteViewsAzureVnetTwoInterfaceNodeTypeModel)
+						azNodesElements = append(azNodesElements, azureVnetSiteAzureVnetTwoIfaceNodeTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -13063,9 +12359,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]AzureVnetSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]AzureVnetSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									azureVnetSiteViewsGlobalNetworkConnectionTypeModel := AzureVnetSiteViewsGlobalNetworkConnectionType{}
+									azureVnetSiteGlobalNetConnTypeModel := AzureVnetSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -13234,13 +12530,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -13404,9 +12700,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										if len(expressRouteEnabledElement.GetConnections()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											connectionsElements := make([]AzureVnetSiteAzureVnetSiteExpressRouteConnectionType, 0, len(expressRouteEnabledElement.GetConnections()))
+											connectionsElements := make([]AzureVnetSiteExpressRouteConnType, 0, len(expressRouteEnabledElement.GetConnections()))
 											for _, connectionsElement := range expressRouteEnabledElement.GetConnections() {
-												azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel := AzureVnetSiteAzureVnetSiteExpressRouteConnectionType{}
+												azureVnetSiteExpressRouteConnTypeModel := AzureVnetSiteExpressRouteConnType{}
 
 												// data specToModelNested RequiredPointerField --> Metadata
 												if connectionsElement.GetMetadata() != nil {
@@ -13438,7 +12734,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													if response.Diagnostics.HasError() {
 														return
 													}
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.Metadata = azureVnetSiteMessageMetaTypeModelObj
+													azureVnetSiteExpressRouteConnTypeModel.Metadata = azureVnetSiteMessageMetaTypeModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -13447,7 +12743,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// here because the API may always return a non-nil struct (with REDACTED values) for this
 													// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 													// The target is a types.Object, so we use types.ObjectNull.
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.Metadata = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsMetadataModelAttributeMap)
+													azureVnetSiteExpressRouteConnTypeModel.Metadata = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsMetadataModelAttributeMap)
 												}
 
 												// data specToModelNested OneOfField --> SubscriptionChoice
@@ -13583,6 +12879,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																		}
 																	}
 
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -13664,16 +12969,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.SubscriptionChoice = finalObj
+													azureVnetSiteExpressRouteConnTypeModel.SubscriptionChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.SubscriptionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceModelAttributeMap)
+													azureVnetSiteExpressRouteConnTypeModel.SubscriptionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceModelAttributeMap)
 												}
 
 												// data specToModelNested UintField --> Weight
-												azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.Weight = types.Int64Value(int64(connectionsElement.GetWeight()))
+												azureVnetSiteExpressRouteConnTypeModel.Weight = types.Int64Value(int64(connectionsElement.GetWeight()))
 
-												connectionsElements = append(connectionsElements, azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel)
+												connectionsElements = append(connectionsElements, azureVnetSiteExpressRouteConnTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -13762,7 +13067,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										// data specToModelNested PointerField --> GatewaySubnet
 										if expressRouteEnabledElement.GetGatewaySubnet() != nil {
 											// Create the nested Go struct
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceWithAutoType{}
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteAzureSubnetChoiceWithAutoType{}
 											gatewaySubnetElement := expressRouteEnabledElement.GetGatewaySubnet()
 
 											// Recursively populate the nested struct
@@ -13876,14 +13181,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// data specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -13908,19 +13205,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel)
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceWithAutoTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											expressRouteEnabledAttributeMap["gateway_subnet"] = azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj
+											expressRouteEnabledAttributeMap["gateway_subnet"] = azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -13935,7 +13232,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										// data specToModelNested PointerField --> RouteServerSubnet
 										if expressRouteEnabledElement.GetRouteServerSubnet() != nil {
 											// Create the nested Go struct
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceWithAutoType{}
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteAzureSubnetChoiceWithAutoType{}
 											routeServerSubnetElement := expressRouteEnabledElement.GetRouteServerSubnet()
 
 											// Recursively populate the nested struct
@@ -14049,14 +13346,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// data specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -14081,19 +13370,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel)
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceWithAutoTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											expressRouteEnabledAttributeMap["route_server_subnet"] = azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj
+											expressRouteEnabledAttributeMap["route_server_subnet"] = azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -14253,9 +13542,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(hubElement.GetSpokeVnets()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								spokeVnetsElements := make([]AzureVnetSiteAzureVnetSiteVnetPeeringType, 0, len(hubElement.GetSpokeVnets()))
+								spokeVnetsElements := make([]AzureVnetSiteVnetPeeringType, 0, len(hubElement.GetSpokeVnets()))
 								for _, spokeVnetsElement := range hubElement.GetSpokeVnets() {
-									azureVnetSiteAzureVnetSiteVnetPeeringTypeModel := AzureVnetSiteAzureVnetSiteVnetPeeringType{}
+									azureVnetSiteVnetPeeringTypeModel := AzureVnetSiteVnetPeeringType{}
 
 									// data specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
@@ -14266,13 +13555,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											return
 										}
 										// Assign the typed map to the model
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
+										azureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
+										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredOneOfField --> RoutingChoice
@@ -14318,26 +13607,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.RoutingChoice = finalObj
+										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap)
+										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested PointerField --> Vnet
 									if spokeVnetsElement.GetVnet() != nil {
 										// Create the nested Go struct
-										azureVnetSiteViewsAzureVnetTypeModel := &AzureVnetSiteViewsAzureVnetType{}
+										azureVnetSiteAzureVnetTypeModel := &AzureVnetSiteAzureVnetType{}
 										vnetElement := spokeVnetsElement.GetVnet()
 
 										// Recursively populate the nested struct
 
 										// data specToModelNested RequiredStringField --> ResourceGroup
 										if vnetElement.GetResourceGroup() != "" {
-											azureVnetSiteViewsAzureVnetTypeModel.ResourceGroup = types.StringValue(vnetElement.GetResourceGroup())
+											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringValue(vnetElement.GetResourceGroup())
 										} else {
 											// Empty string, set to null
-											azureVnetSiteViewsAzureVnetTypeModel.ResourceGroup = types.StringNull()
+											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
 										// data specToModelNested RequiredOneOfField --> RoutingType
@@ -14383,27 +13672,27 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											azureVnetSiteViewsAzureVnetTypeModel.RoutingTypeChoice = finalObj
+											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											azureVnetSiteViewsAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap)
+											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredStringField --> VnetName
 										if vnetElement.GetVnetName() != "" {
-											azureVnetSiteViewsAzureVnetTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
+											azureVnetSiteAzureVnetTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
 										} else {
 											// Empty string, set to null
-											azureVnetSiteViewsAzureVnetTypeModel.VnetName = types.StringNull()
+											azureVnetSiteAzureVnetTypeModel.VnetName = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										azureVnetSiteViewsAzureVnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetModelAttributeMap, azureVnetSiteViewsAzureVnetTypeModel)
+										azureVnetSiteAzureVnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetModelAttributeMap, azureVnetSiteAzureVnetTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Vnet = azureVnetSiteViewsAzureVnetTypeModelObj
+										azureVnetSiteVnetPeeringTypeModel.Vnet = azureVnetSiteAzureVnetTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -14412,10 +13701,10 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										// because the API may always return a non-nil struct (with REDACTED values) for this field,
 										// making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Vnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetModelAttributeMap)
+										azureVnetSiteVnetPeeringTypeModel.Vnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetModelAttributeMap)
 									}
 
-									spokeVnetsElements = append(spokeVnetsElements, azureVnetSiteAzureVnetSiteVnetPeeringTypeModel)
+									spokeVnetsElements = append(spokeVnetsElements, azureVnetSiteVnetPeeringTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -14498,9 +13787,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(insideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]AzureVnetSiteViewsSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]AzureVnetSiteSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range insideStaticRoutesElement.GetStaticRouteList() {
-									azureVnetSiteViewsSiteStaticRoutesTypeModel := AzureVnetSiteViewsSiteStaticRoutesType{}
+									azureVnetSiteSiteStaticRoutesTypeModel := AzureVnetSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -14621,7 +13910,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														azureVnetSiteIpAddressTypeModel := &AzureVnetSiteIpAddressType{}
+														azureVnetSiteIpAddrTypeModel := &AzureVnetSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -14650,26 +13939,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv4AddressTypeModel := &AzureVnetSiteIpv4AddressType{}
+																		azureVnetSiteIpv4AddrTypeModel := &AzureVnetSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddressTypeModel)
+																		azureVnetSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -14684,26 +13973,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv6AddressTypeModel := &AzureVnetSiteIpv6AddressType{}
+																		azureVnetSiteIpv6AddrTypeModel := &AzureVnetSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddressTypeModel)
+																		azureVnetSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -14755,35 +14044,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -14797,19 +14057,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															azureVnetSiteIpAddressTypeModel.VerChoice = finalObj
+															azureVnetSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															azureVnetSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															azureVnetSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														azureVnetSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddressTypeModel)
+														azureVnetSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddressTypeModelObj
+														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -14905,38 +14165,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -15008,13 +14236,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, azureVnetSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, azureVnetSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -15288,9 +14516,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(outsideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]AzureVnetSiteViewsSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]AzureVnetSiteSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range outsideStaticRoutesElement.GetStaticRouteList() {
-									azureVnetSiteViewsSiteStaticRoutesTypeModel := AzureVnetSiteViewsSiteStaticRoutesType{}
+									azureVnetSiteSiteStaticRoutesTypeModel := AzureVnetSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -15411,7 +14639,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														azureVnetSiteIpAddressTypeModel := &AzureVnetSiteIpAddressType{}
+														azureVnetSiteIpAddrTypeModel := &AzureVnetSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -15440,26 +14668,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv4AddressTypeModel := &AzureVnetSiteIpv4AddressType{}
+																		azureVnetSiteIpv4AddrTypeModel := &AzureVnetSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddressTypeModel)
+																		azureVnetSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -15474,26 +14702,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv6AddressTypeModel := &AzureVnetSiteIpv6AddressType{}
+																		azureVnetSiteIpv6AddrTypeModel := &AzureVnetSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddressTypeModel)
+																		azureVnetSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -15545,35 +14773,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -15587,19 +14786,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															azureVnetSiteIpAddressTypeModel.VerChoice = finalObj
+															azureVnetSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															azureVnetSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															azureVnetSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														azureVnetSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddressTypeModel)
+														azureVnetSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddressTypeModelObj
+														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -15695,38 +14894,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -15798,13 +14965,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, azureVnetSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, azureVnetSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -15855,7 +15022,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> PerformanceEnhancementMode
 				if ingressEgressGwElement.GetPerformanceEnhancementMode() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModel := &AzureVnetSiteViewsPerformanceEnhancementModeType{}
+					azureVnetSitePerformanceEnhancementModeTypeModel := &AzureVnetSitePerformanceEnhancementModeType{}
 					performanceEnhancementModeElement := ingressEgressGwElement.GetPerformanceEnhancementMode()
 
 					// Recursively populate the nested struct
@@ -15872,144 +15039,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -16025,19 +15070,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap, azureVnetSiteViewsPerformanceEnhancementModeTypeModel)
+					azureVnetSitePerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap, azureVnetSitePerformanceEnhancementModeTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwAttributeMap["performance_enhancement_mode"] = azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj
+					ingressEgressGwAttributeMap["performance_enhancement_mode"] = azureVnetSitePerformanceEnhancementModeTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -16122,7 +15167,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AcceleratedNetworking
 				if ingressEgressGwArElement.GetAcceleratedNetworking() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAcceleratedNetworkingTypeModel := &AzureVnetSiteViewsAcceleratedNetworkingType{}
+					azureVnetSiteAcceleratedNetworkingTypeModel := &AzureVnetSiteAcceleratedNetworkingType{}
 					acceleratedNetworkingElement := ingressEgressGwArElement.GetAcceleratedNetworking()
 
 					// Recursively populate the nested struct
@@ -16138,6 +15183,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -16161,19 +15215,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingModelAttributeMap, azureVnetSiteViewsAcceleratedNetworkingTypeModel)
+					azureVnetSiteAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingModelAttributeMap, azureVnetSiteAcceleratedNetworkingTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwArAttributeMap["accelerated_networking"] = azureVnetSiteViewsAcceleratedNetworkingTypeModelObj
+					ingressEgressGwArAttributeMap["accelerated_networking"] = azureVnetSiteAcceleratedNetworkingTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -16469,9 +15523,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]AzureVnetSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]AzureVnetSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									azureVnetSiteViewsGlobalNetworkConnectionTypeModel := AzureVnetSiteViewsGlobalNetworkConnectionType{}
+									azureVnetSiteGlobalNetConnTypeModel := AzureVnetSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -16640,13 +15694,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -16810,9 +15864,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										if len(expressRouteEnabledElement.GetConnections()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											connectionsElements := make([]AzureVnetSiteAzureVnetSiteExpressRouteConnectionType, 0, len(expressRouteEnabledElement.GetConnections()))
+											connectionsElements := make([]AzureVnetSiteExpressRouteConnType, 0, len(expressRouteEnabledElement.GetConnections()))
 											for _, connectionsElement := range expressRouteEnabledElement.GetConnections() {
-												azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel := AzureVnetSiteAzureVnetSiteExpressRouteConnectionType{}
+												azureVnetSiteExpressRouteConnTypeModel := AzureVnetSiteExpressRouteConnType{}
 
 												// data specToModelNested RequiredPointerField --> Metadata
 												if connectionsElement.GetMetadata() != nil {
@@ -16844,7 +15898,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													if response.Diagnostics.HasError() {
 														return
 													}
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.Metadata = azureVnetSiteMessageMetaTypeModelObj
+													azureVnetSiteExpressRouteConnTypeModel.Metadata = azureVnetSiteMessageMetaTypeModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -16853,7 +15907,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// here because the API may always return a non-nil struct (with REDACTED values) for this
 													// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 													// The target is a types.Object, so we use types.ObjectNull.
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.Metadata = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsMetadataModelAttributeMap)
+													azureVnetSiteExpressRouteConnTypeModel.Metadata = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsMetadataModelAttributeMap)
 												}
 
 												// data specToModelNested OneOfField --> SubscriptionChoice
@@ -16989,6 +16043,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																		}
 																	}
 
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := authorizedKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		authorizedKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -17070,16 +16133,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.SubscriptionChoice = finalObj
+													azureVnetSiteExpressRouteConnTypeModel.SubscriptionChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.SubscriptionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceModelAttributeMap)
+													azureVnetSiteExpressRouteConnTypeModel.SubscriptionChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledConnectionsSubscriptionChoiceModelAttributeMap)
 												}
 
 												// data specToModelNested UintField --> Weight
-												azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel.Weight = types.Int64Value(int64(connectionsElement.GetWeight()))
+												azureVnetSiteExpressRouteConnTypeModel.Weight = types.Int64Value(int64(connectionsElement.GetWeight()))
 
-												connectionsElements = append(connectionsElements, azureVnetSiteAzureVnetSiteExpressRouteConnectionTypeModel)
+												connectionsElements = append(connectionsElements, azureVnetSiteExpressRouteConnTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -17168,7 +16231,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										// data specToModelNested PointerField --> GatewaySubnet
 										if expressRouteEnabledElement.GetGatewaySubnet() != nil {
 											// Create the nested Go struct
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceWithAutoType{}
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteAzureSubnetChoiceWithAutoType{}
 											gatewaySubnetElement := expressRouteEnabledElement.GetGatewaySubnet()
 
 											// Recursively populate the nested struct
@@ -17282,14 +16345,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// data specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -17314,19 +16369,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel)
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceWithAutoTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											expressRouteEnabledAttributeMap["gateway_subnet"] = azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj
+											expressRouteEnabledAttributeMap["gateway_subnet"] = azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -17341,7 +16396,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										// data specToModelNested PointerField --> RouteServerSubnet
 										if expressRouteEnabledElement.GetRouteServerSubnet() != nil {
 											// Create the nested Go struct
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceWithAutoType{}
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModel := &AzureVnetSiteAzureSubnetChoiceWithAutoType{}
 											routeServerSubnetElement := expressRouteEnabledElement.GetRouteServerSubnet()
 
 											// Recursively populate the nested struct
@@ -17455,14 +16510,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															subnetParamAttributeMap["ipv4"] = types.StringNull()
 														}
 
-														// data specToModelNested StringField --> Ipv6
-														if subnetParamElement.GetIpv6() != "" {
-															subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-														} else {
-															// Empty string, set to null
-															subnetParamAttributeMap["ipv6"] = types.StringNull()
-														}
-
 														subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 														response.Diagnostics.Append(subnetParamObjDiags...)
 														if response.Diagnostics.HasError() {
@@ -17487,19 +16534,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 												}
 
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap)
+												azureVnetSiteAzureSubnetChoiceWithAutoTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap)
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModel)
+											azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceWithAutoTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											expressRouteEnabledAttributeMap["route_server_subnet"] = azureVnetSiteViewsAzureSubnetChoiceWithAutoTypeModelObj
+											expressRouteEnabledAttributeMap["route_server_subnet"] = azureVnetSiteAzureSubnetChoiceWithAutoTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -17659,9 +16706,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(hubElement.GetSpokeVnets()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								spokeVnetsElements := make([]AzureVnetSiteAzureVnetSiteVnetPeeringType, 0, len(hubElement.GetSpokeVnets()))
+								spokeVnetsElements := make([]AzureVnetSiteVnetPeeringType, 0, len(hubElement.GetSpokeVnets()))
 								for _, spokeVnetsElement := range hubElement.GetSpokeVnets() {
-									azureVnetSiteAzureVnetSiteVnetPeeringTypeModel := AzureVnetSiteAzureVnetSiteVnetPeeringType{}
+									azureVnetSiteVnetPeeringTypeModel := AzureVnetSiteVnetPeeringType{}
 
 									// data specToModelNested MapOfStringField --> Labels
 									if spokeVnetsElement.GetLabels() != nil {
@@ -17672,13 +16719,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											return
 										}
 										// Assign the typed map to the model
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
+										azureVnetSiteVnetPeeringTypeModel.Labels = labelsMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
+										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
 									// data specToModelNested RequiredOneOfField --> RoutingChoice
@@ -17724,26 +16771,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.RoutingChoice = finalObj
+										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap)
+										azureVnetSiteVnetPeeringTypeModel.RoutingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested PointerField --> Vnet
 									if spokeVnetsElement.GetVnet() != nil {
 										// Create the nested Go struct
-										azureVnetSiteViewsAzureVnetTypeModel := &AzureVnetSiteViewsAzureVnetType{}
+										azureVnetSiteAzureVnetTypeModel := &AzureVnetSiteAzureVnetType{}
 										vnetElement := spokeVnetsElement.GetVnet()
 
 										// Recursively populate the nested struct
 
 										// data specToModelNested RequiredStringField --> ResourceGroup
 										if vnetElement.GetResourceGroup() != "" {
-											azureVnetSiteViewsAzureVnetTypeModel.ResourceGroup = types.StringValue(vnetElement.GetResourceGroup())
+											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringValue(vnetElement.GetResourceGroup())
 										} else {
 											// Empty string, set to null
-											azureVnetSiteViewsAzureVnetTypeModel.ResourceGroup = types.StringNull()
+											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
 										// data specToModelNested RequiredOneOfField --> RoutingType
@@ -17789,27 +16836,27 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											}
 
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											azureVnetSiteViewsAzureVnetTypeModel.RoutingTypeChoice = finalObj
+											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											azureVnetSiteViewsAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap)
+											azureVnetSiteAzureVnetTypeModel.RoutingTypeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap)
 										}
 
 										// data specToModelNested RequiredStringField --> VnetName
 										if vnetElement.GetVnetName() != "" {
-											azureVnetSiteViewsAzureVnetTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
+											azureVnetSiteAzureVnetTypeModel.VnetName = types.StringValue(vnetElement.GetVnetName())
 										} else {
 											// Empty string, set to null
-											azureVnetSiteViewsAzureVnetTypeModel.VnetName = types.StringNull()
+											azureVnetSiteAzureVnetTypeModel.VnetName = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										azureVnetSiteViewsAzureVnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetModelAttributeMap, azureVnetSiteViewsAzureVnetTypeModel)
+										azureVnetSiteAzureVnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetModelAttributeMap, azureVnetSiteAzureVnetTypeModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Vnet = azureVnetSiteViewsAzureVnetTypeModelObj
+										azureVnetSiteVnetPeeringTypeModel.Vnet = azureVnetSiteAzureVnetTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -17818,10 +16865,10 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										// because the API may always return a non-nil struct (with REDACTED values) for this field,
 										// making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										azureVnetSiteAzureVnetSiteVnetPeeringTypeModel.Vnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetModelAttributeMap)
+										azureVnetSiteVnetPeeringTypeModel.Vnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetModelAttributeMap)
 									}
 
-									spokeVnetsElements = append(spokeVnetsElements, azureVnetSiteAzureVnetSiteVnetPeeringTypeModel)
+									spokeVnetsElements = append(spokeVnetsElements, azureVnetSiteVnetPeeringTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -17904,9 +16951,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(insideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]AzureVnetSiteViewsSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]AzureVnetSiteSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range insideStaticRoutesElement.GetStaticRouteList() {
-									azureVnetSiteViewsSiteStaticRoutesTypeModel := AzureVnetSiteViewsSiteStaticRoutesType{}
+									azureVnetSiteSiteStaticRoutesTypeModel := AzureVnetSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -18027,7 +17074,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														azureVnetSiteIpAddressTypeModel := &AzureVnetSiteIpAddressType{}
+														azureVnetSiteIpAddrTypeModel := &AzureVnetSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -18056,26 +17103,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv4AddressTypeModel := &AzureVnetSiteIpv4AddressType{}
+																		azureVnetSiteIpv4AddrTypeModel := &AzureVnetSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddressTypeModel)
+																		azureVnetSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -18090,26 +17137,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv6AddressTypeModel := &AzureVnetSiteIpv6AddressType{}
+																		azureVnetSiteIpv6AddrTypeModel := &AzureVnetSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddressTypeModel)
+																		azureVnetSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -18161,35 +17208,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -18203,19 +17221,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															azureVnetSiteIpAddressTypeModel.VerChoice = finalObj
+															azureVnetSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															azureVnetSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															azureVnetSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														azureVnetSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddressTypeModel)
+														azureVnetSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddressTypeModelObj
+														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -18311,38 +17329,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -18414,13 +17400,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, azureVnetSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, azureVnetSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -18662,18 +17648,18 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> Node
 				if ingressEgressGwArElement.GetNode() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel := &AzureVnetSiteViewsAzureVnetTwoInterfaceNodeARType{}
+					azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel := &AzureVnetSiteAzureVnetTwoIfaceNodeARType{}
 					nodeElement := ingressEgressGwArElement.GetNode()
 
 					// Recursively populate the nested struct
 
 					// data specToModelNested UintField --> FaultDomain
-					azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel.FaultDomain = types.Int64Value(int64(nodeElement.GetFaultDomain()))
+					azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel.FaultDomain = types.Int64Value(int64(nodeElement.GetFaultDomain()))
 
 					// data specToModelNested PointerField --> InsideSubnet
 					if nodeElement.GetInsideSubnet() != nil {
 						// Create the nested Go struct
-						azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+						azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 						insideSubnetElement := nodeElement.GetInsideSubnet()
 
 						// Recursively populate the nested struct
@@ -18784,14 +17770,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// data specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -18816,19 +17794,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceModelAttributeMap)
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+						azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel.InsideSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+						azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel.InsideSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -18837,16 +17815,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel.InsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetModelAttributeMap)
+						azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel.InsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeInsideSubnetModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredUintField --> NodeNumber
-					azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel.NodeNumber = types.Int64Value(int64(nodeElement.GetNodeNumber()))
+					azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel.NodeNumber = types.Int64Value(int64(nodeElement.GetNodeNumber()))
 
 					// data specToModelNested PointerField --> OutsideSubnet
 					if nodeElement.GetOutsideSubnet() != nil {
 						// Create the nested Go struct
-						azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+						azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 						outsideSubnetElement := nodeElement.GetOutsideSubnet()
 
 						// Recursively populate the nested struct
@@ -18957,14 +17935,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// data specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -18989,19 +17959,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceModelAttributeMap)
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+						azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel.OutsideSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+						azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel.OutsideSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -19010,19 +17980,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel.OutsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetModelAttributeMap)
+						azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel.OutsideSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetModelAttributeMap)
 					}
 
 					// data specToModelNested UintField --> UpdateDomain
-					azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel.UpdateDomain = types.Int64Value(int64(nodeElement.GetUpdateDomain()))
+					azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel.UpdateDomain = types.Int64Value(int64(nodeElement.GetUpdateDomain()))
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArNodeModelAttributeMap, azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModel)
+					azureVnetSiteAzureVnetTwoIfaceNodeARTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArNodeModelAttributeMap, azureVnetSiteAzureVnetTwoIfaceNodeARTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwArAttributeMap["node"] = azureVnetSiteViewsAzureVnetTwoInterfaceNodeARTypeModelObj
+					ingressEgressGwArAttributeMap["node"] = azureVnetSiteAzureVnetTwoIfaceNodeARTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -19069,9 +18039,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(outsideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]AzureVnetSiteViewsSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]AzureVnetSiteSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range outsideStaticRoutesElement.GetStaticRouteList() {
-									azureVnetSiteViewsSiteStaticRoutesTypeModel := AzureVnetSiteViewsSiteStaticRoutesType{}
+									azureVnetSiteSiteStaticRoutesTypeModel := AzureVnetSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -19192,7 +18162,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														azureVnetSiteIpAddressTypeModel := &AzureVnetSiteIpAddressType{}
+														azureVnetSiteIpAddrTypeModel := &AzureVnetSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -19221,26 +18191,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv4AddressTypeModel := &AzureVnetSiteIpv4AddressType{}
+																		azureVnetSiteIpv4AddrTypeModel := &AzureVnetSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddressTypeModel)
+																		azureVnetSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -19255,26 +18225,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv6AddressTypeModel := &AzureVnetSiteIpv6AddressType{}
+																		azureVnetSiteIpv6AddrTypeModel := &AzureVnetSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddressTypeModel)
+																		azureVnetSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -19326,35 +18296,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -19368,19 +18309,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															azureVnetSiteIpAddressTypeModel.VerChoice = finalObj
+															azureVnetSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															azureVnetSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															azureVnetSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														azureVnetSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddressTypeModel)
+														azureVnetSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddressTypeModelObj
+														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -19476,38 +18417,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -19579,13 +18488,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, azureVnetSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, azureVnetSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -19636,7 +18545,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> PerformanceEnhancementMode
 				if ingressEgressGwArElement.GetPerformanceEnhancementMode() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModel := &AzureVnetSiteViewsPerformanceEnhancementModeType{}
+					azureVnetSitePerformanceEnhancementModeTypeModel := &AzureVnetSitePerformanceEnhancementModeType{}
 					performanceEnhancementModeElement := ingressEgressGwArElement.GetPerformanceEnhancementMode()
 
 					// Recursively populate the nested struct
@@ -19653,144 +18562,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -19806,19 +18593,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttributeMap, azureVnetSiteViewsPerformanceEnhancementModeTypeModel)
+					azureVnetSitePerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttributeMap, azureVnetSitePerformanceEnhancementModeTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwArAttributeMap["performance_enhancement_mode"] = azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj
+					ingressEgressGwArAttributeMap["performance_enhancement_mode"] = azureVnetSitePerformanceEnhancementModeTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -19903,7 +18690,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AcceleratedNetworking
 				if ingressGwElement.GetAcceleratedNetworking() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAcceleratedNetworkingTypeModel := &AzureVnetSiteViewsAcceleratedNetworkingType{}
+					azureVnetSiteAcceleratedNetworkingTypeModel := &AzureVnetSiteAcceleratedNetworkingType{}
 					acceleratedNetworkingElement := ingressGwElement.GetAcceleratedNetworking()
 
 					// Recursively populate the nested struct
@@ -19919,6 +18706,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -19942,19 +18738,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingModelAttributeMap, azureVnetSiteViewsAcceleratedNetworkingTypeModel)
+					azureVnetSiteAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingModelAttributeMap, azureVnetSiteAcceleratedNetworkingTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwAttributeMap["accelerated_networking"] = azureVnetSiteViewsAcceleratedNetworkingTypeModelObj
+					ingressGwAttributeMap["accelerated_networking"] = azureVnetSiteAcceleratedNetworkingTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -19970,22 +18766,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				if len(ingressGwElement.GetAzNodes()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					azNodesElements := make([]AzureVnetSiteViewsAzureVnetOneInterfaceNodeType, 0, len(ingressGwElement.GetAzNodes()))
+					azNodesElements := make([]AzureVnetSiteAzureVnetOneIfaceNodeType, 0, len(ingressGwElement.GetAzNodes()))
 					for _, azNodesElement := range ingressGwElement.GetAzNodes() {
-						azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel := AzureVnetSiteViewsAzureVnetOneInterfaceNodeType{}
+						azureVnetSiteAzureVnetOneIfaceNodeTypeModel := AzureVnetSiteAzureVnetOneIfaceNodeType{}
 
 						// data specToModelNested RequiredStringField --> AzureAz
 						if azNodesElement.GetAzureAz() != "" {
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.AzureAz = types.StringValue(azNodesElement.GetAzureAz())
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.AzureAz = types.StringValue(azNodesElement.GetAzureAz())
 						} else {
 							// Empty string, set to null
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.AzureAz = types.StringNull()
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.AzureAz = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> LocalSubnet
 						if azNodesElement.GetLocalSubnet() != nil {
 							// Create the nested Go struct
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+							azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 							localSubnetElement := azNodesElement.GetLocalSubnet()
 
 							// Recursively populate the nested struct
@@ -20096,14 +18892,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// data specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -20128,19 +18916,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceModelAttributeMap)
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+							azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.LocalSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.LocalSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -20149,10 +18937,10 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetModelAttributeMap)
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwAzNodesLocalSubnetModelAttributeMap)
 						}
 
-						azNodesElements = append(azNodesElements, azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel)
+						azNodesElements = append(azNodesElements, azureVnetSiteAzureVnetOneIfaceNodeTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -20181,7 +18969,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> PerformanceEnhancementMode
 				if ingressGwElement.GetPerformanceEnhancementMode() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModel := &AzureVnetSiteViewsPerformanceEnhancementModeType{}
+					azureVnetSitePerformanceEnhancementModeTypeModel := &AzureVnetSitePerformanceEnhancementModeType{}
 					performanceEnhancementModeElement := ingressGwElement.GetPerformanceEnhancementMode()
 
 					// Recursively populate the nested struct
@@ -20198,144 +18986,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -20351,19 +19017,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap, azureVnetSiteViewsPerformanceEnhancementModeTypeModel)
+					azureVnetSitePerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap, azureVnetSitePerformanceEnhancementModeTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwAttributeMap["performance_enhancement_mode"] = azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj
+					ingressGwAttributeMap["performance_enhancement_mode"] = azureVnetSitePerformanceEnhancementModeTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -20399,7 +19065,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AcceleratedNetworking
 				if ingressGwArElement.GetAcceleratedNetworking() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAcceleratedNetworkingTypeModel := &AzureVnetSiteViewsAcceleratedNetworkingType{}
+					azureVnetSiteAcceleratedNetworkingTypeModel := &AzureVnetSiteAcceleratedNetworkingType{}
 					acceleratedNetworkingElement := ingressGwArElement.GetAcceleratedNetworking()
 
 					// Recursively populate the nested struct
@@ -20415,6 +19081,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -20438,19 +19113,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingModelAttributeMap, azureVnetSiteViewsAcceleratedNetworkingTypeModel)
+					azureVnetSiteAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingModelAttributeMap, azureVnetSiteAcceleratedNetworkingTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwArAttributeMap["accelerated_networking"] = azureVnetSiteViewsAcceleratedNetworkingTypeModelObj
+					ingressGwArAttributeMap["accelerated_networking"] = azureVnetSiteAcceleratedNetworkingTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -20473,18 +19148,18 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> Node
 				if ingressGwArElement.GetNode() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel := &AzureVnetSiteViewsAzureVnetOneInterfaceNodeARType{}
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel := &AzureVnetSiteAzureVnetOneIfaceNodeARType{}
 					nodeElement := ingressGwArElement.GetNode()
 
 					// Recursively populate the nested struct
 
 					// data specToModelNested UintField --> FaultDomain
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.FaultDomain = types.Int64Value(int64(nodeElement.GetFaultDomain()))
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.FaultDomain = types.Int64Value(int64(nodeElement.GetFaultDomain()))
 
 					// data specToModelNested PointerField --> LocalSubnet
 					if nodeElement.GetLocalSubnet() != nil {
 						// Create the nested Go struct
-						azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+						azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 						localSubnetElement := nodeElement.GetLocalSubnet()
 
 						// Recursively populate the nested struct
@@ -20595,14 +19270,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// data specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -20627,19 +19294,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceModelAttributeMap)
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+						azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.LocalSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+						azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.LocalSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -20648,22 +19315,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetModelAttributeMap)
+						azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArNodeLocalSubnetModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredUintField --> NodeNumber
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.NodeNumber = types.Int64Value(int64(nodeElement.GetNodeNumber()))
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.NodeNumber = types.Int64Value(int64(nodeElement.GetNodeNumber()))
 
 					// data specToModelNested UintField --> UpdateDomain
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.UpdateDomain = types.Int64Value(int64(nodeElement.GetUpdateDomain()))
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.UpdateDomain = types.Int64Value(int64(nodeElement.GetUpdateDomain()))
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArNodeModelAttributeMap, azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel)
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArNodeModelAttributeMap, azureVnetSiteAzureVnetOneIfaceNodeARTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwArAttributeMap["node"] = azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModelObj
+					ingressGwArAttributeMap["node"] = azureVnetSiteAzureVnetOneIfaceNodeARTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -20678,7 +19345,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> PerformanceEnhancementMode
 				if ingressGwArElement.GetPerformanceEnhancementMode() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModel := &AzureVnetSiteViewsPerformanceEnhancementModeType{}
+					azureVnetSitePerformanceEnhancementModeTypeModel := &AzureVnetSitePerformanceEnhancementModeType{}
 					performanceEnhancementModeElement := ingressGwArElement.GetPerformanceEnhancementMode()
 
 					// Recursively populate the nested struct
@@ -20695,144 +19362,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-							perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+						_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> Jumbo
-									_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-									if isJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> NoJumbo
-									_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-									if isNoJumbo {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-									} else {
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-							}
+						if isPerfModeL3Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 						}
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -20848,19 +19393,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						azureVnetSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModeModelAttributeMap, azureVnetSiteViewsPerformanceEnhancementModeTypeModel)
+					azureVnetSitePerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModeModelAttributeMap, azureVnetSitePerformanceEnhancementModeTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwArAttributeMap["performance_enhancement_mode"] = azureVnetSiteViewsPerformanceEnhancementModeTypeModelObj
+					ingressGwArAttributeMap["performance_enhancement_mode"] = azureVnetSitePerformanceEnhancementModeTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -20896,7 +19441,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AcceleratedNetworking
 				if voltstackClusterElement.GetAcceleratedNetworking() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAcceleratedNetworkingTypeModel := &AzureVnetSiteViewsAcceleratedNetworkingType{}
+					azureVnetSiteAcceleratedNetworkingTypeModel := &AzureVnetSiteAcceleratedNetworkingType{}
 					acceleratedNetworkingElement := voltstackClusterElement.GetAcceleratedNetworking()
 
 					// Recursively populate the nested struct
@@ -20912,6 +19457,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -20935,19 +19489,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingModelAttributeMap, azureVnetSiteViewsAcceleratedNetworkingTypeModel)
+					azureVnetSiteAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingModelAttributeMap, azureVnetSiteAcceleratedNetworkingTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					voltstackClusterAttributeMap["accelerated_networking"] = azureVnetSiteViewsAcceleratedNetworkingTypeModelObj
+					voltstackClusterAttributeMap["accelerated_networking"] = azureVnetSiteAcceleratedNetworkingTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -20963,22 +19517,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				if len(voltstackClusterElement.GetAzNodes()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					azNodesElements := make([]AzureVnetSiteViewsAzureVnetOneInterfaceNodeType, 0, len(voltstackClusterElement.GetAzNodes()))
+					azNodesElements := make([]AzureVnetSiteAzureVnetOneIfaceNodeType, 0, len(voltstackClusterElement.GetAzNodes()))
 					for _, azNodesElement := range voltstackClusterElement.GetAzNodes() {
-						azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel := AzureVnetSiteViewsAzureVnetOneInterfaceNodeType{}
+						azureVnetSiteAzureVnetOneIfaceNodeTypeModel := AzureVnetSiteAzureVnetOneIfaceNodeType{}
 
 						// data specToModelNested RequiredStringField --> AzureAz
 						if azNodesElement.GetAzureAz() != "" {
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.AzureAz = types.StringValue(azNodesElement.GetAzureAz())
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.AzureAz = types.StringValue(azNodesElement.GetAzureAz())
 						} else {
 							// Empty string, set to null
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.AzureAz = types.StringNull()
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.AzureAz = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> LocalSubnet
 						if azNodesElement.GetLocalSubnet() != nil {
 							// Create the nested Go struct
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+							azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 							localSubnetElement := azNodesElement.GetLocalSubnet()
 
 							// Recursively populate the nested struct
@@ -21089,14 +19643,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// data specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -21121,19 +19667,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceModelAttributeMap)
+								azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+							azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.LocalSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.LocalSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -21142,10 +19688,10 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetModelAttributeMap)
+							azureVnetSiteAzureVnetOneIfaceNodeTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetModelAttributeMap)
 						}
 
-						azNodesElements = append(azNodesElements, azureVnetSiteViewsAzureVnetOneInterfaceNodeTypeModel)
+						azNodesElements = append(azNodesElements, azureVnetSiteAzureVnetOneIfaceNodeTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -21402,9 +19948,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]AzureVnetSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]AzureVnetSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									azureVnetSiteViewsGlobalNetworkConnectionTypeModel := AzureVnetSiteViewsGlobalNetworkConnectionType{}
+									azureVnetSiteGlobalNetConnTypeModel := AzureVnetSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -21573,13 +20119,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -21938,9 +20484,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(outsideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]AzureVnetSiteViewsSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]AzureVnetSiteSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range outsideStaticRoutesElement.GetStaticRouteList() {
-									azureVnetSiteViewsSiteStaticRoutesTypeModel := AzureVnetSiteViewsSiteStaticRoutesType{}
+									azureVnetSiteSiteStaticRoutesTypeModel := AzureVnetSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -22061,7 +20607,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														azureVnetSiteIpAddressTypeModel := &AzureVnetSiteIpAddressType{}
+														azureVnetSiteIpAddrTypeModel := &AzureVnetSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -22090,26 +20636,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv4AddressTypeModel := &AzureVnetSiteIpv4AddressType{}
+																		azureVnetSiteIpv4AddrTypeModel := &AzureVnetSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddressTypeModel)
+																		azureVnetSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -22124,26 +20670,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv6AddressTypeModel := &AzureVnetSiteIpv6AddressType{}
+																		azureVnetSiteIpv6AddrTypeModel := &AzureVnetSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddressTypeModel)
+																		azureVnetSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -22195,35 +20741,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -22237,19 +20754,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															azureVnetSiteIpAddressTypeModel.VerChoice = finalObj
+															azureVnetSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															azureVnetSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															azureVnetSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														azureVnetSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddressTypeModel)
+														azureVnetSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddressTypeModelObj
+														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -22345,38 +20862,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -22448,13 +20933,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, azureVnetSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, azureVnetSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -22586,22 +21071,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(storageClassListElement.GetStorageClasses()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								storageClassesElements := make([]AzureVnetSiteViewsStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
+								storageClassesElements := make([]AzureVnetSiteStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
 								for _, storageClassesElement := range storageClassListElement.GetStorageClasses() {
-									azureVnetSiteViewsStorageClassTypeModel := AzureVnetSiteViewsStorageClassType{}
+									azureVnetSiteStorageClassTypeModel := AzureVnetSiteStorageClassType{}
 
 									// data specToModelNested BoolField --> DefaultStorageClass
-									azureVnetSiteViewsStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
+									azureVnetSiteStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
 
 									// data specToModelNested RequiredStringField --> StorageClassName
 									if storageClassesElement.GetStorageClassName() != "" {
-										azureVnetSiteViewsStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
+										azureVnetSiteStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
 									} else {
 										// Empty string, set to null
-										azureVnetSiteViewsStorageClassTypeModel.StorageClassName = types.StringNull()
+										azureVnetSiteStorageClassTypeModel.StorageClassName = types.StringNull()
 									}
 
-									storageClassesElements = append(storageClassesElements, azureVnetSiteViewsStorageClassTypeModel)
+									storageClassesElements = append(storageClassesElements, azureVnetSiteStorageClassTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -22673,7 +21158,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AcceleratedNetworking
 				if voltstackClusterArElement.GetAcceleratedNetworking() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAcceleratedNetworkingTypeModel := &AzureVnetSiteViewsAcceleratedNetworkingType{}
+					azureVnetSiteAcceleratedNetworkingTypeModel := &AzureVnetSiteAcceleratedNetworkingType{}
 					acceleratedNetworkingElement := voltstackClusterArElement.GetAcceleratedNetworking()
 
 					// Recursively populate the nested struct
@@ -22689,6 +21174,15 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						acceleratedNetworkingacceleratedNetworkingChoiceChoices := acceleratedNetworkingElement.GetAcceleratedNetworking()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Disable)
+
+						if isDisable {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Enable
 						_, isEnable := acceleratedNetworkingacceleratedNetworkingChoiceChoices.(*ves_io_schema_views.AcceleratedNetworkingType_Enable)
@@ -22712,19 +21206,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						azureVnetSiteViewsAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
+						azureVnetSiteAcceleratedNetworkingTypeModel.AcceleratedNetworkingChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingModelAttributeMap, azureVnetSiteViewsAcceleratedNetworkingTypeModel)
+					azureVnetSiteAcceleratedNetworkingTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingModelAttributeMap, azureVnetSiteAcceleratedNetworkingTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					voltstackClusterArAttributeMap["accelerated_networking"] = azureVnetSiteViewsAcceleratedNetworkingTypeModelObj
+					voltstackClusterArAttributeMap["accelerated_networking"] = azureVnetSiteAcceleratedNetworkingTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -22975,9 +21469,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]AzureVnetSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]AzureVnetSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									azureVnetSiteViewsGlobalNetworkConnectionTypeModel := AzureVnetSiteViewsGlobalNetworkConnectionType{}
+									azureVnetSiteGlobalNetConnTypeModel := AzureVnetSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -23146,13 +21640,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										azureVnetSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, azureVnetSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -23479,18 +21973,18 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> Node
 				if voltstackClusterArElement.GetNode() != nil {
 					// Create the nested Go struct
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel := &AzureVnetSiteViewsAzureVnetOneInterfaceNodeARType{}
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel := &AzureVnetSiteAzureVnetOneIfaceNodeARType{}
 					nodeElement := voltstackClusterArElement.GetNode()
 
 					// Recursively populate the nested struct
 
 					// data specToModelNested UintField --> FaultDomain
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.FaultDomain = types.Int64Value(int64(nodeElement.GetFaultDomain()))
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.FaultDomain = types.Int64Value(int64(nodeElement.GetFaultDomain()))
 
 					// data specToModelNested PointerField --> LocalSubnet
 					if nodeElement.GetLocalSubnet() != nil {
 						// Create the nested Go struct
-						azureVnetSiteViewsAzureSubnetChoiceTypeModel := &AzureVnetSiteViewsAzureSubnetChoiceType{}
+						azureVnetSiteAzureSubnetChoiceTypeModel := &AzureVnetSiteAzureSubnetChoiceType{}
 						localSubnetElement := nodeElement.GetLocalSubnet()
 
 						// Recursively populate the nested struct
@@ -23601,14 +22095,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										subnetParamAttributeMap["ipv4"] = types.StringNull()
 									}
 
-									// data specToModelNested StringField --> Ipv6
-									if subnetParamElement.GetIpv6() != "" {
-										subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-									} else {
-										// Empty string, set to null
-										subnetParamAttributeMap["ipv6"] = types.StringNull()
-									}
-
 									subnetParamObj, subnetParamObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 									response.Diagnostics.Append(subnetParamObjDiags...)
 									if response.Diagnostics.HasError() {
@@ -23633,19 +22119,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = finalObj
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							azureVnetSiteViewsAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceModelAttributeMap)
+							azureVnetSiteAzureSubnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						azureVnetSiteViewsAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetModelAttributeMap, azureVnetSiteViewsAzureSubnetChoiceTypeModel)
+						azureVnetSiteAzureSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetModelAttributeMap, azureVnetSiteAzureSubnetChoiceTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.LocalSubnet = azureVnetSiteViewsAzureSubnetChoiceTypeModelObj
+						azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.LocalSubnet = azureVnetSiteAzureSubnetChoiceTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -23654,22 +22140,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetModelAttributeMap)
+						azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.LocalSubnet = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredUintField --> NodeNumber
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.NodeNumber = types.Int64Value(int64(nodeElement.GetNodeNumber()))
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.NodeNumber = types.Int64Value(int64(nodeElement.GetNodeNumber()))
 
 					// data specToModelNested UintField --> UpdateDomain
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel.UpdateDomain = types.Int64Value(int64(nodeElement.GetUpdateDomain()))
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModel.UpdateDomain = types.Int64Value(int64(nodeElement.GetUpdateDomain()))
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArNodeModelAttributeMap, azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModel)
+					azureVnetSiteAzureVnetOneIfaceNodeARTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArNodeModelAttributeMap, azureVnetSiteAzureVnetOneIfaceNodeARTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					voltstackClusterArAttributeMap["node"] = azureVnetSiteViewsAzureVnetOneInterfaceNodeARTypeModelObj
+					voltstackClusterArAttributeMap["node"] = azureVnetSiteAzureVnetOneIfaceNodeARTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -23716,9 +22202,9 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(outsideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]AzureVnetSiteViewsSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]AzureVnetSiteSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range outsideStaticRoutesElement.GetStaticRouteList() {
-									azureVnetSiteViewsSiteStaticRoutesTypeModel := AzureVnetSiteViewsSiteStaticRoutesType{}
+									azureVnetSiteSiteStaticRoutesTypeModel := AzureVnetSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -23839,7 +22325,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														azureVnetSiteIpAddressTypeModel := &AzureVnetSiteIpAddressType{}
+														azureVnetSiteIpAddrTypeModel := &AzureVnetSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -23868,26 +22354,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv4AddressTypeModel := &AzureVnetSiteIpv4AddressType{}
+																		azureVnetSiteIpv4AddrTypeModel := &AzureVnetSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddressTypeModel)
+																		azureVnetSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, azureVnetSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = azureVnetSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -23902,26 +22388,26 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		azureVnetSiteIpv6AddressTypeModel := &AzureVnetSiteIpv6AddressType{}
+																		azureVnetSiteIpv6AddrTypeModel := &AzureVnetSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			azureVnetSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			azureVnetSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		azureVnetSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddressTypeModel)
+																		azureVnetSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, azureVnetSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = azureVnetSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -23973,35 +22459,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -24015,19 +22472,19 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															azureVnetSiteIpAddressTypeModel.VerChoice = finalObj
+															azureVnetSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															azureVnetSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															azureVnetSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														azureVnetSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddressTypeModel)
+														azureVnetSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, azureVnetSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddressTypeModelObj
+														azureVnetSiteNextHopTypeModel.NexthopAddress = azureVnetSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -24123,38 +22580,6 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -24226,13 +22651,13 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										azureVnetSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										azureVnetSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, azureVnetSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, azureVnetSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -24364,22 +22789,22 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 							if len(storageClassListElement.GetStorageClasses()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								storageClassesElements := make([]AzureVnetSiteViewsStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
+								storageClassesElements := make([]AzureVnetSiteStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
 								for _, storageClassesElement := range storageClassListElement.GetStorageClasses() {
-									azureVnetSiteViewsStorageClassTypeModel := AzureVnetSiteViewsStorageClassType{}
+									azureVnetSiteStorageClassTypeModel := AzureVnetSiteStorageClassType{}
 
 									// data specToModelNested BoolField --> DefaultStorageClass
-									azureVnetSiteViewsStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
+									azureVnetSiteStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
 
 									// data specToModelNested RequiredStringField --> StorageClassName
 									if storageClassesElement.GetStorageClassName() != "" {
-										azureVnetSiteViewsStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
+										azureVnetSiteStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
 									} else {
 										// Empty string, set to null
-										azureVnetSiteViewsStorageClassTypeModel.StorageClassName = types.StringNull()
+										azureVnetSiteStorageClassTypeModel.StorageClassName = types.StringNull()
 									}
 
-									storageClassesElements = append(storageClassesElements, azureVnetSiteViewsStorageClassTypeModel)
+									storageClassesElements = append(storageClassesElements, azureVnetSiteStorageClassTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -24467,16 +22892,12 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 	}
 
 	// data SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// data SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
-		var azureVnetSiteViewsVolterraSoftwareTypeModel = &AzureVnetSiteViewsVolterraSoftwareType{}
+		var azureVnetSiteVolterraSoftwareTypeModel = &AzureVnetSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
 		// data specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
@@ -24523,16 +22944,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			azureVnetSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
+			azureVnetSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AzureVnetSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			azureVnetSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AzureVnetSiteSwVolterraSwVersionChoiceModelAttributeMap)
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteSwModelAttributeMap,
-			azureVnetSiteViewsVolterraSoftwareTypeModel,
+			azureVnetSiteVolterraSoftwareTypeModel,
 		)
 		response.Diagnostics.Append(swDiags...)
 		data.Sw = swObj
@@ -24569,7 +22990,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot RequiredPointerField --> Vnet
 	if specData.GetVnet() != nil {
-		var azureVnetSiteViewsAzureVnetChoiceTypeModel = &AzureVnetSiteViewsAzureVnetChoiceType{}
+		var azureVnetSiteAzureVnetChoiceTypeModel = &AzureVnetSiteAzureVnetChoiceType{}
 		vnetElement := specData.GetVnet()
 
 		// data specToModelNested RequiredOneOfField --> Choice
@@ -24762,16 +23183,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			azureVnetSiteViewsAzureVnetChoiceTypeModel.Choice = finalObj
+			azureVnetSiteAzureVnetChoiceTypeModel.Choice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteViewsAzureVnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteVnetChoiceModelAttributeMap)
+			azureVnetSiteAzureVnetChoiceTypeModel.Choice = types.ObjectNull(AzureVnetSiteVnetChoiceModelAttributeMap)
 		}
 
 		vnetObj, vnetDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteVnetModelAttributeMap,
-			azureVnetSiteViewsAzureVnetChoiceTypeModel,
+			azureVnetSiteAzureVnetChoiceTypeModel,
 		)
 		response.Diagnostics.Append(vnetDiags...)
 		if response.Diagnostics.HasError() {
@@ -24784,10 +23205,11 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 
 	// data SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
-		var azureVnetSiteCommonWafLiveSignaturesUpdateModel = &AzureVnetSiteCommonWafLiveSignaturesUpdate{}
+		var azureVnetSiteLiveSignaturesUpdateModel = &AzureVnetSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// data specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// data specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24829,16 +23251,16 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			azureVnetSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
+			azureVnetSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			azureVnetSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AzureVnetSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			azureVnetSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AzureVnetSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
 			ctx,
 			AzureVnetSiteWafSignaturesModelAttributeMap,
-			azureVnetSiteCommonWafLiveSignaturesUpdateModel,
+			azureVnetSiteLiveSignaturesUpdateModel,
 		)
 		response.Diagnostics.Append(wafSignaturesDiags...)
 		data.WafSignatures = wafSignaturesObj
@@ -24856,7 +23278,7 @@ func (d *DataSourceF5XCAzureVnetSite) Read(ctx context.Context, request datasour
 		workerNodesChoiceChoices := specData.GetWorkerNodes()
 
 		// The model struct that will be populated by the nested template.
-		var workerNodesChoiceChoicesModel = &AzureVnetSiteGlobalSpecTypeWorkerNodesChoice{}
+		var workerNodesChoiceChoicesModel = &AzureVnetSiteWorkerNodesChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

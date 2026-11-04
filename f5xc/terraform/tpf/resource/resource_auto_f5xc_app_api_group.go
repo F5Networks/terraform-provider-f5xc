@@ -32,6 +32,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -42,6 +43,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_api_group_element "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_group_element"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -188,8 +190,8 @@ func (r *ResourceF5XCAppApiGroup) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a app_api_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of app_api_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a app_api_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of app_api_group) etc. can be fetched",
+		MarkdownDescription: "The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order<br>to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for<br>internal use by data path and other services.<br><br>An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all<br>elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it<br>matches at least one element in the api group.<br><br>The App API Group may be created using API Group Builder which defines path filter and label selectors to match<br>API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled<br>then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members.<br><br>The view creates the following child objects:<br>* api_group",
+		Description:         "The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for internal use by data path and other services. An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it matches at least one element in the api group. The App API Group may be created using API Group Builder which defines path filter and label selectors to match API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members. The view creates the following child objects: api_group",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -245,7 +247,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"shared", "user"}...),
+					namespacetypevalidator.AllowedIn("shared", "user"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -285,6 +287,8 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 							Computed:            false,
 							Validators: []validator.List{
 								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}...)),
+								listvalidator.SizeAtLeast(1),
+								listvalidator.UniqueValues(),
 							},
 						},
 						"path_regex": schema.StringAttribute{
@@ -349,7 +353,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -391,7 +395,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -433,7 +437,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -504,9 +508,17 @@ func (r *ResourceF5XCAppApiGroup) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAppApiGroup) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAppApiGroupModel
 
 	// Read Terraform plan data into the model
@@ -753,7 +765,7 @@ func (r *ResourceF5XCAppApiGroup) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -776,7 +788,7 @@ func (r *ResourceF5XCAppApiGroup) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_app_api_group.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "app_api_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "app_api_group", err),
 		)
 		return
 	}
@@ -1251,7 +1263,7 @@ func (r *ResourceF5XCAppApiGroup) Read(ctx context.Context, request resource.Rea
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_app_api_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "app_api_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "app_api_group", err),
 		)
 		return
 	}
@@ -1685,6 +1697,12 @@ func (r *ResourceF5XCAppApiGroup) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCAppApiGroup) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAppApiGroupModel
@@ -1951,7 +1969,7 @@ func (r *ResourceF5XCAppApiGroup) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1967,7 +1985,7 @@ func (r *ResourceF5XCAppApiGroup) Update(ctx context.Context, request resource.U
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_app_api_group.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "app_api_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "app_api_group", err),
 		)
 		return
 	}
@@ -1976,7 +1994,7 @@ func (r *ResourceF5XCAppApiGroup) Update(ctx context.Context, request resource.U
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_app_api_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "app_api_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "app_api_group", err),
 		)
 		return
 	}
@@ -2472,7 +2490,7 @@ func (r *ResourceF5XCAppApiGroup) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "app_api_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "app_api_group", err),
 		)
 		return
 	}

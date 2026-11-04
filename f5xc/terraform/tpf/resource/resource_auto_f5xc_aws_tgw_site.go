@@ -40,6 +40,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -52,6 +53,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_fleet "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/fleet"
 	ves_io_schema_network_firewall "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_firewall"
@@ -90,6 +92,7 @@ type AwsTgwSiteSecretType struct {
 type AwsTgwSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type AwsTgwSiteBlindfoldSecretInfo struct {
@@ -126,7 +129,6 @@ type AwsTgwSiteCloudSubnetTypeChoice struct {
 
 type AwsTgwSiteSubnetParam struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
 type AwsTgwSiteCloudSubnetType struct {
@@ -208,7 +210,6 @@ type AwsTgwSiteTgwCidrChoice struct {
 
 type AwsTgwSiteTgwCidr struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
 type AwsTgwSiteWorkerNodesChoice struct {
@@ -233,9 +234,8 @@ type AwsTgwSiteFleetBlockedServices struct {
 }
 
 type AwsTgwSiteBlockedServicesValueTypeChoice struct {
-	Dns              types.Bool `tfsdk:"dns"`
-	Ssh              types.Bool `tfsdk:"ssh"`
-	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
+	Dns types.Bool `tfsdk:"dns"`
+	Ssh types.Bool `tfsdk:"ssh"`
 }
 
 type AwsTgwSiteCoordinates struct {
@@ -257,10 +257,8 @@ type AwsTgwSiteDirectConnectChoice struct {
 }
 
 type AwsTgwSiteDirectConnectEnabled struct {
-	AsnChoice                 types.Object `tfsdk:"asn_choice"`
-	CloudAggregatedPrefix     types.List   `tfsdk:"cloud_aggregated_prefix"`
-	DcConnectAggregatedPrefix types.List   `tfsdk:"dc_connect_aggregated_prefix"`
-	VifChoice                 types.Object `tfsdk:"vif_choice"`
+	AsnChoice types.Object `tfsdk:"asn_choice"`
+	VifChoice types.Object `tfsdk:"vif_choice"`
 }
 
 type AwsTgwSiteDirectConnectConfigTypeAsnChoice struct {
@@ -358,26 +356,8 @@ type AwsTgwSitePerformanceEnhancementModeType struct {
 }
 
 type AwsTgwSitePerfModeChoice struct {
-	PerfModeL3Enhanced types.Object `tfsdk:"perf_mode_l3_enhanced"`
-	PerfModeL7Enhanced types.Object `tfsdk:"perf_mode_l7_enhanced"`
-}
-
-type AwsTgwSitePerfModeL3Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AwsTgwSiteL3PerformanceEnhancementTypePerfModeChoice struct {
-	Jumbo   types.Bool `tfsdk:"jumbo"`
-	NoJumbo types.Bool `tfsdk:"no_jumbo"`
-}
-
-type AwsTgwSitePerfModeL7Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AwsTgwSiteL7PerformanceEnhancementTypePerfModeChoice struct {
-	JumboDisabled types.Bool `tfsdk:"jumbo_disabled"`
-	JumboEnabled  types.Bool `tfsdk:"jumbo_enabled"`
+	PerfModeL3Enhanced types.Bool `tfsdk:"perf_mode_l3_enhanced"`
+	PerfModeL7Enhanced types.Bool `tfsdk:"perf_mode_l7_enhanced"`
 }
 
 type AwsTgwSiteVolterraSoftwareType struct {
@@ -560,7 +540,6 @@ type AwsTgwSiteIpAddrType struct {
 type AwsTgwSiteVerChoice struct {
 	DualStack types.Object `tfsdk:"dual_stack"`
 	Ipv4      types.Object `tfsdk:"ipv4"`
-	Ipv6      types.Object `tfsdk:"ipv6"`
 }
 
 type AwsTgwSiteDualStack struct {
@@ -580,25 +559,15 @@ type AwsTgwSiteIpv4 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type AwsTgwSiteIpv6 struct {
-	Addr types.String `tfsdk:"addr"`
-}
-
 type AwsTgwSiteIpSubnetType struct {
 	VerChoice types.Object `tfsdk:"ver_choice"`
 }
 
 type AwsTgwSiteIpSubnetTypeVerChoice struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
-	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
 type AwsTgwSiteIpSubnetTypeIpv4 struct {
-	Plen   types.Int64  `tfsdk:"plen"`
-	Prefix types.String `tfsdk:"prefix"`
-}
-
-type AwsTgwSiteIpSubnetTypeIpv6 struct {
 	Plen   types.Int64  `tfsdk:"plen"`
 	Prefix types.String `tfsdk:"prefix"`
 }
@@ -755,6 +724,7 @@ var AwsTgwSiteAwsParametersAdminPasswordSecretInfoOneofModelAttributeMap = map[s
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AwsTgwSiteAwsParametersAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -821,7 +791,6 @@ var AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceModelAttributeMap = ma
 var AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredPointerField --> OutsideSubnet
@@ -845,7 +814,6 @@ var AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceModelAttributeMap = map[str
 var AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> WorkloadSubnet
@@ -869,7 +837,6 @@ var AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceModelAttributeMap = map[st
 var AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> Deployment
@@ -1007,7 +974,6 @@ var AwsTgwSiteAwsParametersTgwCidrChoiceModelAttributeMap = map[string]attr.Type
 var AwsTgwSiteAwsParametersTgwCidrChoiceTgwCidrModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> WorkerNodes
@@ -1060,9 +1026,8 @@ var AwsTgwSiteBlockedServicesChoiceBlockedServicesBlockedSeviceModelAttributeMap
 // Attribute map for OneOfField --> BlockedServicesValueTypeChoice
 var AwsTgwSiteBlockedServicesChoiceBlockedServicesBlockedSeviceBlockedServicesValueTypeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dns":                types.BoolType,
-	"ssh":                types.BoolType,
-	"web_user_interface": types.BoolType,
+	"dns": types.BoolType,
+	"ssh": types.BoolType,
 }
 
 // Attribute map for PointerField --> Coordinates
@@ -1098,12 +1063,6 @@ var AwsTgwSiteDirectConnectChoiceDirectConnectEnabledModelAttributeMap = map[str
 
 	"asn_choice": types.ObjectType{
 		AttrTypes: AwsTgwSiteDirectConnectChoiceDirectConnectEnabledAsnChoiceModelAttributeMap,
-	},
-	"cloud_aggregated_prefix": types.ListType{
-		ElemType: types.StringType,
-	},
-	"dc_connect_aggregated_prefix": types.ListType{
-		ElemType: types.StringType,
 	},
 	"vif_choice": types.ObjectType{
 		AttrTypes: AwsTgwSiteDirectConnectChoiceDirectConnectEnabledVifChoiceModelAttributeMap,
@@ -1291,42 +1250,8 @@ var AwsTgwSitePerformanceEnhancementModeModelAttributeMap = map[string]attr.Type
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AwsTgwSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerField --> Sw
@@ -1909,9 +1834,6 @@ var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListCo
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -1943,12 +1865,6 @@ var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListCo
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -1963,20 +1879,10 @@ var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListCo
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2104,9 +2010,6 @@ var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteList
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -2138,12 +2041,6 @@ var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteList
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -2158,20 +2055,10 @@ var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteList
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2217,7 +2104,7 @@ var AwsTgwSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var AwsTgwSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -2235,8 +2122,8 @@ func (r *ResourceF5XCAwsTgwSite) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
+		MarkdownDescription: "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC.<br>It can be used to automatically site creation in the AWS TGW.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC. It can be used to automatically site creation in the AWS TGW. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2292,7 +2179,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -2329,6 +2216,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 									exactlyoneofvalidator.RequiredExactlyOneOf(
 										"blindfold_secret_info",
 										"clear_secret_info",
+										"none",
 									),
 								},
 								Attributes: map[string]schema.Attribute{
@@ -2352,6 +2240,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
+												WriteOnly:           true,
 												Validators: []validator.String{
 													stringvalidator.RegexMatches(
 														regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -2404,6 +2293,16 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 													),
 												},
 											},
+										},
+									},
+									"none": schema.BoolAttribute{
+										Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+										MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.Bool{
+											boolvalidator.Equals(true),
 										},
 									},
 								},
@@ -2506,19 +2405,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																		),
 																	},
 																},
-																"ipv6": schema.StringAttribute{
-																	Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.String{
-																		stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																			"must be a valid IPv6 prefix (CIDR notation)",
-																		),
-																	},
-																},
 															},
 														},
 													},
@@ -2595,19 +2481,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																),
 															},
 														},
-														"ipv6": schema.StringAttribute{
-															Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-															MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																	"must be a valid IPv6 prefix (CIDR notation)",
-																),
-															},
-														},
 													},
 												},
 											},
@@ -2672,19 +2545,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																),
 															},
 														},
-														"ipv6": schema.StringAttribute{
-															Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-															MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-																	"must be a valid IPv6 prefix (CIDR notation)",
-																),
-															},
-														},
 													},
 												},
 											},
@@ -2734,7 +2594,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -3176,19 +3036,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 											),
 										},
 									},
-									"ipv6": schema.StringAttribute{
-										Description:         "IPv6 Subnet IPv6 subnet prefix for this subnet",
-										MarkdownDescription: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.String{
-											stringvalidator.RegexMatches(
-												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
-												"must be a valid IPv6 prefix (CIDR notation)",
-											),
-										},
-									},
 								},
 							},
 						},
@@ -3293,7 +3140,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 												exactlyoneofvalidator.ExactlyOneOf(
 													"dns",
 													"ssh",
-													"web_user_interface",
 												),
 											},
 											Attributes: map[string]schema.Attribute{
@@ -3310,16 +3156,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 												"ssh": schema.BoolAttribute{
 													Description:         "SSH",
 													MarkdownDescription: "SSH",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.Bool{
-														boolvalidator.Equals(true),
-													},
-												},
-												"web_user_interface": schema.BoolAttribute{
-													Description:         "Web UI",
-													MarkdownDescription: "Web UI",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3367,7 +3203,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"latitude": schema.Float32Attribute{
@@ -3513,38 +3349,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 									},
 								},
 							},
-							"cloud_aggregated_prefix": schema.ListAttribute{
-								Description:         "Cloud Aggregated Prefix Aggregated prefix from cloud to be advertised for DC side",
-								MarkdownDescription: "Cloud Aggregated Prefix Aggregated prefix from cloud to be advertised for DC side",
-								ElementType:         types.StringType,
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.List{
-									listvalidator.SizeAtMost(16),
-									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$`),
-										"must be a valid IPv4 prefix",
-									)),
-									listvalidator.UniqueValues(),
-								},
-							},
-							"dc_connect_aggregated_prefix": schema.ListAttribute{
-								Description:         "Direct Connect Aggregate Prefixes Aggregated prefix from direct connect to be advertised for Cloud side",
-								MarkdownDescription: "Direct Connect Aggregate Prefixes Aggregated prefix from direct connect to be advertised for Cloud side",
-								ElementType:         types.StringType,
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.List{
-									listvalidator.SizeAtMost(16),
-									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$`),
-										"must be a valid IPv4 prefix",
-									)),
-									listvalidator.UniqueValues(),
-								},
-							},
 							"vif_choice": schema.SingleNestedAttribute{
 								Description:         "AWS Direct Connect VIF Configuration AWS Direct Connect VIF Configuration",
 								MarkdownDescription: "AWS Direct Connect VIF Configuration AWS Direct Connect VIF Configuration",
@@ -3649,7 +3453,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"other_region": schema.StringAttribute{
 																	Description:         "Other Region Other Region",
-																	MarkdownDescription: "Other Region Other Region",
+																	MarkdownDescription: "Other Region Other Region<br>**Allowed Values (choose one):** `['af-south-1', 'ap-east-1', 'ap-northeast-1', 'ap-northeast-2', 'ap-south-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-southeast-3', 'ca-central-1', 'eu-central-1', 'eu-north-1', 'eu-south-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'me-south-1', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']`",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3723,7 +3527,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -3771,47 +3575,39 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 				Description:         "Direct Connect information Direct Connect information obtained after creating the site and TGW",
 				MarkdownDescription: "Direct Connect information Direct Connect information obtained after creating the site and TGW",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				Attributes: map[string]schema.Attribute{
 					"asn": schema.Int64Attribute{
 						Description:         "AWS Side ASN The autonomous system (AS) number on the AWS side for Border Gateway Protocol (BGP) configuration",
 						MarkdownDescription: "AWS Side ASN The autonomous system (AS) number on the AWS side for Border Gateway Protocol (BGP) configuration",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Int64{
-							int64validator.Between(1, 4294967294),
-						},
+						Optional:            false,
+						Computed:            true,
 					},
 					"direct_connect_gateway_id": schema.StringAttribute{
 						Description:         "DirectConnect Gateway ID DirectConnect Gateway ID",
 						MarkdownDescription: "DirectConnect Gateway ID DirectConnect Gateway ID",
-						Required:            true,
+						Required:            false,
 						Optional:            false,
-						Computed:            false,
+						Computed:            true,
 					},
 					"vgw_id": schema.StringAttribute{
 						Description:         "Virtual Private Gateway ID Virtual Private Gateway ID",
 						MarkdownDescription: "Virtual Private Gateway ID Virtual Private Gateway ID",
-						Required:            true,
+						Required:            false,
 						Optional:            false,
-						Computed:            false,
-						Validators: []validator.String{
-							stringvalidator.RegexMatches(
-								regexp.MustCompile(`^(vgw-)([a-z0-9]{8}|[a-z0-9]{17})$`),
-								"must match pattern `^(vgw-)([a-z0-9]{8}|[a-z0-9]{17})$`",
-							),
-						},
+						Computed:            true,
 					},
 				},
 			},
 			"error_description": schema.StringAttribute{
 				Description:         "error_description Description of error on site",
-				MarkdownDescription: "error_description Description of error on site",
+				MarkdownDescription: "error_description Description of error on site<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"kubernetes_upgrade_drain": schema.SingleNestedAttribute{
 				Description:         "Enable Drain Enable Kubernetes Drain during OS or SW upgrade",
@@ -3968,7 +3764,10 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 				MarkdownDescription: "Operating System Operating System Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"operating_system_version_choice": schema.SingleNestedAttribute{
 						Description:         "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
@@ -4027,92 +3826,24 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 							),
 						},
 						Attributes: map[string]schema.Attribute{
-							"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+							"perf_mode_l3_enhanced": schema.BoolAttribute{
 								Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 								MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"perf_mode_choice": schema.SingleNestedAttribute{
-										Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-										MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
-												"jumbo",
-												"no_jumbo",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"jumbo": schema.BoolAttribute{
-												Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-												MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-											"no_jumbo": schema.BoolAttribute{
-												Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-												MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-										},
-									},
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
 								},
 							},
-							"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+							"perf_mode_l7_enhanced": schema.BoolAttribute{
 								Description:         "Default Performance Mode Site optimized for L7 traffic processing",
 								MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"perf_mode_choice": schema.SingleNestedAttribute{
-										Description:         "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-										MarkdownDescription: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
-												"jumbo_disabled",
-												"jumbo_enabled",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"jumbo_disabled": schema.BoolAttribute{
-												Description:         "L7 Mode Enhanced Performance with no jumbo frame support",
-												MarkdownDescription: "L7 Mode Enhanced Performance with no jumbo frame support",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-											"jumbo_enabled": schema.BoolAttribute{
-												Description:         "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-												MarkdownDescription: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-										},
-									},
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
 								},
 							},
 						},
@@ -4121,17 +3852,21 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 			},
 			"suggested_action": schema.StringAttribute{
 				Description:         "suggested_action Suggested action for customer on error",
-				MarkdownDescription: "suggested_action Suggested action for customer on error",
+				MarkdownDescription: "suggested_action Suggested action for customer on error<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"sw": schema.SingleNestedAttribute{
 				Description:         "F5XC Software F5XC Software Details",
 				MarkdownDescription: "F5XC Software F5XC Software Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"volterra_sw_version_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
@@ -4470,7 +4205,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -4553,7 +4288,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -4636,7 +4371,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -4683,7 +4418,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -4732,110 +4467,62 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 				Description:         "VIP Params Per Az VIP Parameters Per AZ.",
 				MarkdownDescription: "VIP Params Per Az VIP Parameters Per AZ.",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Validators: []validator.List{
-					listvalidator.SizeBetween(0, 3),
-					listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
-				},
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"az_name": schema.StringAttribute{
 							Description:         "AZ Name Name of the Availability zone",
 							MarkdownDescription: "AZ Name Name of the Availability zone",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.RegexMatches(
-									regexp.MustCompile(`^[1-5]{1}$|^AzureAlternateRegion$|^[a-z]{2}-(?:gov-)?[a-z0-9]{4,20}-[a-z0-9]{2}$|^[a-z]{4,15}-[a-z0-9]{4,20}-[a-z]{1}$`),
-									"must match pattern `^[1-5]{1}$|^AzureAlternateRegion$|^[a-z]{2}-(?:gov-)?[a-z0-9]{4,20}-[a-z0-9]{2}$|^[a-z]{4,15}-[a-z0-9]{4,20}-[a-z]{1}$`",
-								),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 						"inside_vip": schema.ListAttribute{
 							Description:         "Inside VIP(s) List of Inside VIPs for an AZ",
 							MarkdownDescription: "Inside VIP(s) List of Inside VIPs for an AZ",
 							ElementType:         types.StringType,
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.SizeAtMost(3),
-								listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-									regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
-									"must be a valid IPv4 address",
-								)),
-								listvalidator.UniqueValues(),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 						"inside_vip_cname": schema.StringAttribute{
 							Description:         "Inside VIP CNAME CNAME value for the inside VIP, These are usually public cloud generated CNAME",
 							MarkdownDescription: "Inside VIP CNAME CNAME value for the inside VIP, These are usually public cloud generated CNAME<br>**Validation:** `Length LengthAtMost(256)`",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.LengthAtMost(256),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 						"inside_vip_v6": schema.ListAttribute{
 							Description:         "Inside IPv6 VIP(s) Optional list of Inside IPv6 VIPs for an AZ",
 							MarkdownDescription: "Inside IPv6 VIP(s) Optional list of Inside IPv6 VIPs for an AZ",
 							ElementType:         types.StringType,
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.SizeAtMost(3),
-								listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-									regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-									"must be a valid IPv6 address",
-								)),
-								listvalidator.UniqueValues(),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 						"outside_vip": schema.ListAttribute{
 							Description:         "Outside VIP(s) List of Outside VIPs for an AZ",
 							MarkdownDescription: "Outside VIP(s) List of Outside VIPs for an AZ",
 							ElementType:         types.StringType,
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.SizeBetween(1, 3),
-								listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-									regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
-									"must be a valid IPv4 address",
-								)),
-								listvalidator.UniqueValues(),
-							},
+							Computed:            true,
 						},
 						"outside_vip_cname": schema.StringAttribute{
 							Description:         "Outside VIP CNAME CNAME value for the outside VIP These are usually public cloud generated CNAME",
 							MarkdownDescription: "Outside VIP CNAME CNAME value for the outside VIP These are usually public cloud generated CNAME<br>**Validation:** `Length LengthAtMost(256)`",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.LengthAtMost(256),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 						"outside_vip_v6": schema.ListAttribute{
 							Description:         "Outside IPv6 VIP(s) Optional list of Outside IPv6 VIPs for an AZ",
 							MarkdownDescription: "Outside IPv6 VIP(s) Optional list of Outside IPv6 VIPs for an AZ",
 							ElementType:         types.StringType,
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.SizeAtMost(3),
-								listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-									regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-									"must be a valid IPv6 address",
-								)),
-								listvalidator.UniqueValues(),
-							},
+							Optional:            false,
+							Computed:            true,
 						},
 					},
 				},
@@ -5061,7 +4748,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -5094,7 +4781,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -5190,7 +4877,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																			Optional:            false,
 																			Computed:            true,
 																			PlanModifiers: []planmodifier.String{
-																				stringplanmodifier.UseStateForUnknown(),
+																				stringplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																		},
 																	},
@@ -5232,7 +4919,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																			Optional:            false,
 																			Computed:            true,
 																			PlanModifiers: []planmodifier.String{
-																				stringplanmodifier.UseStateForUnknown(),
+																				stringplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																		},
 																	},
@@ -5311,14 +4998,14 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"attrs": schema.ListAttribute{
 																	Description:         "Attributes List of route attributes associated with the static route",
-																	MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																	MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																	ElementType:         types.StringType,
 																	Required:            false,
 																	Optional:            true,
-																	Computed:            true,
-																	Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																	Computed:            false,
 																	Validators: []validator.List{
 																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																		listvalidator.SizeAtMost(4),
 																	},
 																},
 																"labels": schema.MapAttribute{
@@ -5368,7 +5055,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																						Optional:            false,
 																						Computed:            true,
 																						PlanModifiers: []planmodifier.String{
-																							stringplanmodifier.UseStateForUnknown(),
+																							stringplanmodifier.UseNonNullStateForUnknown(),
 																						},
 																					},
 																				},
@@ -5391,7 +5078,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																						exactlyoneofvalidator.ExactlyOneOf(
 																							"dual_stack",
 																							"ipv4",
-																							"ipv6",
 																						),
 																					},
 																					Attributes: map[string]schema.Attribute{
@@ -5470,28 +5156,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																								},
 																							},
 																						},
-																						"ipv6": schema.SingleNestedAttribute{
-																							Description:         "IPv6 ADDRESS IPv6 Address",
-																							MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																							Required:            false,
-																							Optional:            true,
-																							Computed:            false,
-																							Attributes: map[string]schema.Attribute{
-																								"addr": schema.StringAttribute{
-																									Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																									MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Validators: []validator.String{
-																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																											"must be a valid IPv6 address",
-																										),
-																									},
-																								},
-																							},
-																						},
 																					},
 																				},
 																			},
@@ -5531,7 +5195,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																				Validators: []validator.Object{
 																					exactlyoneofvalidator.RequiredExactlyOneOf(
 																						"ipv4",
-																						"ipv6",
 																					),
 																				},
 																				Attributes: map[string]schema.Attribute{
@@ -5562,38 +5225,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																									stringvalidator.RegexMatches(
 																										regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																										"must be a valid IPv4 address",
-																									),
-																								},
-																							},
-																						},
-																					},
-																					"ipv6": schema.SingleNestedAttribute{
-																						Description:         "IPv6 Subnet IPv6 Subnet Address",
-																						MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																						Attributes: map[string]schema.Attribute{
-																							"plen": schema.Int64Attribute{
-																								Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																								MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Validators: []validator.Int64{
-																									int64validator.AtMost(128),
-																								},
-																							},
-																							"prefix": schema.StringAttribute{
-																								Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																								MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Validators: []validator.String{
-																									stringvalidator.RegexMatches(
-																										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																										"must be a valid IPv6 address",
 																									),
 																								},
 																							},
@@ -5701,14 +5332,14 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"attrs": schema.ListAttribute{
 																	Description:         "Attributes List of route attributes associated with the static route",
-																	MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																	MarkdownDescription: "Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																	ElementType:         types.StringType,
 																	Required:            false,
 																	Optional:            true,
-																	Computed:            true,
-																	Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																	Computed:            false,
 																	Validators: []validator.List{
 																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																		listvalidator.SizeAtMost(4),
 																	},
 																},
 																"labels": schema.MapAttribute{
@@ -5758,7 +5389,7 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																						Optional:            false,
 																						Computed:            true,
 																						PlanModifiers: []planmodifier.String{
-																							stringplanmodifier.UseStateForUnknown(),
+																							stringplanmodifier.UseNonNullStateForUnknown(),
 																						},
 																					},
 																				},
@@ -5781,7 +5412,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																						exactlyoneofvalidator.ExactlyOneOf(
 																							"dual_stack",
 																							"ipv4",
-																							"ipv6",
 																						),
 																					},
 																					Attributes: map[string]schema.Attribute{
@@ -5860,28 +5490,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																								},
 																							},
 																						},
-																						"ipv6": schema.SingleNestedAttribute{
-																							Description:         "IPv6 ADDRESS IPv6 Address",
-																							MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
-																							Required:            false,
-																							Optional:            true,
-																							Computed:            false,
-																							Attributes: map[string]schema.Attribute{
-																								"addr": schema.StringAttribute{
-																									Description:         "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																									MarkdownDescription: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Validators: []validator.String{
-																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																											"must be a valid IPv6 address",
-																										),
-																									},
-																								},
-																							},
-																						},
 																					},
 																				},
 																			},
@@ -5921,7 +5529,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																				Validators: []validator.Object{
 																					exactlyoneofvalidator.RequiredExactlyOneOf(
 																						"ipv4",
-																						"ipv6",
 																					),
 																				},
 																				Attributes: map[string]schema.Attribute{
@@ -5952,38 +5559,6 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 																									stringvalidator.RegexMatches(
 																										regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 																										"must be a valid IPv4 address",
-																									),
-																								},
-																							},
-																						},
-																					},
-																					"ipv6": schema.SingleNestedAttribute{
-																						Description:         "IPv6 Subnet IPv6 Subnet Address",
-																						MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																						Attributes: map[string]schema.Attribute{
-																							"plen": schema.Int64Attribute{
-																								Description:         "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																								MarkdownDescription: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Validators: []validator.Int64{
-																									int64validator.AtMost(128),
-																								},
-																							},
-																							"prefix": schema.StringAttribute{
-																								Description:         "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																								MarkdownDescription: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
-																								Required:            false,
-																								Optional:            true,
-																								Computed:            false,
-																								Validators: []validator.String{
-																									stringvalidator.RegexMatches(
-																										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-																										"must be a valid IPv6 address",
 																									),
 																								},
 																							},
@@ -6110,11 +5685,11 @@ func (r *ResourceF5XCAwsTgwSite) Schema(ctx context.Context, request resource.Sc
 					"signatures_update_mode_choice": schema.SingleNestedAttribute{
 						Description:         "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
 						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						Required:            false,
-						Optional:            true,
+						Required:            true,
+						Optional:            false,
 						Computed:            false,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.ExactlyOneOf(
+							exactlyoneofvalidator.RequiredExactlyOneOf(
 								"automatic",
 								"manual",
 							),
@@ -6206,9 +5781,17 @@ func (r *ResourceF5XCAwsTgwSite) ModifyPlan(ctx context.Context, req resource.Mo
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAwsTgwSiteModel
 
 	// Read Terraform plan data into the model
@@ -6216,6 +5799,17 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCAwsTgwSiteModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.AwsParameters.IsNull() && !configData.AwsParameters.IsUnknown() {
+		data.AwsParameters = configData.AwsParameters
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -6373,6 +5967,13 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !adminPasswordSecretInfoChoiceModel.None.IsNull() && !adminPasswordSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						adminPasswordSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -6457,11 +6058,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 										subnetParamOneOfSpec.SubnetParam.Ipv4 = string(awsTgwSiteSubnetParamModel.Ipv4.ValueString())
 									}
 
-									// resource modelToSpecNested StringField --> Ipv6
-									if !awsTgwSiteSubnetParamModel.Ipv6.IsNull() && !awsTgwSiteSubnetParamModel.Ipv6.IsUnknown() {
-										subnetParamOneOfSpec.SubnetParam.Ipv6 = string(awsTgwSiteSubnetParamModel.Ipv6.ValueString())
-									}
-
 								}
 
 							}
@@ -6519,11 +6115,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(awsTgwSiteSubnetParamModel.Ipv4.ValueString())
 								}
 
-								// resource modelToSpecNested StringField --> Ipv6
-								if !awsTgwSiteSubnetParamModel.Ipv6.IsNull() && !awsTgwSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(awsTgwSiteSubnetParamModel.Ipv6.ValueString())
-								}
-
 							}
 
 						}
@@ -6570,11 +6161,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 								// resource modelToSpecNested RequiredStringField --> Ipv4
 								if !awsTgwSiteSubnetParamModel.Ipv4.IsNull() && !awsTgwSiteSubnetParamModel.Ipv4.IsUnknown() {
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(awsTgwSiteSubnetParamModel.Ipv4.ValueString())
-								}
-
-								// resource modelToSpecNested StringField --> Ipv6
-								if !awsTgwSiteSubnetParamModel.Ipv6.IsNull() && !awsTgwSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(awsTgwSiteSubnetParamModel.Ipv6.ValueString())
 								}
 
 							}
@@ -6916,11 +6502,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 						tgwCidrOneOfSpec.TgwCidr.Ipv4 = string(awsTgwSiteTgwCidrModel.Ipv4.ValueString())
 					}
 
-					// resource modelToSpecNested StringField --> Ipv6
-					if !awsTgwSiteTgwCidrModel.Ipv6.IsNull() && !awsTgwSiteTgwCidrModel.Ipv6.IsUnknown() {
-						tgwCidrOneOfSpec.TgwCidr.Ipv6 = string(awsTgwSiteTgwCidrModel.Ipv6.ValueString())
-					}
-
 				}
 
 			}
@@ -7025,13 +6606,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 							sshSpecBool := &ves_io_schema_fleet.BlockedServices_Ssh{}
 							sshSpecBool.Ssh = &ves_io_schema.Empty{}
 							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = sshSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> WebUserInterface
-						if !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsNull() && !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsUnknown() {
-							webUserInterfaceSpecBool := &ves_io_schema_fleet.BlockedServices_WebUserInterface{}
-							webUserInterfaceSpecBool.WebUserInterface = &ves_io_schema.Empty{}
-							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = webUserInterfaceSpecBool
 						}
 
 					}
@@ -7186,32 +6760,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 					directConnectEnabledOneOfSpec.DirectConnectEnabled.AsnChoice = customAsnSpecUint
 				}
 
-			}
-
-			// resource modelToSpecNested ArrayOfStringField --> CloudAggregatedPrefix
-			if !awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.IsNull() && !awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.IsUnknown() {
-				{
-					elements := make([]string, 0, len(awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.Elements()))
-					diags = awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					directConnectEnabledOneOfSpec.DirectConnectEnabled.CloudAggregatedPrefix = elements
-				}
-			}
-
-			// resource modelToSpecNested ArrayOfStringField --> DcConnectAggregatedPrefix
-			if !awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.IsNull() && !awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.IsUnknown() {
-				{
-					elements := make([]string, 0, len(awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.Elements()))
-					diags = awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					directConnectEnabledOneOfSpec.DirectConnectEnabled.DcConnectAggregatedPrefix = elements
-				}
 			}
 
 			// resource modelToSpecNested RequiredOneOfField --> VifChoice
@@ -7433,6 +6981,9 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -7583,78 +7134,24 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 					return
 				}
 
-				// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+				// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 				if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-					var awsTgwSitePerfModeL3EnhancedModel AwsTgwSitePerfModeL3Enhanced
-					response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &awsTgwSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
+					perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+					perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+					perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+						NoJumbo: &ves_io_schema.Empty{},
 					}
-					perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-					perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-					performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-					if !awsTgwSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !awsTgwSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-						perfModeL3EnhancedPerfModeChoiceModel := AwsTgwSiteL3PerformanceEnhancementTypePerfModeChoice{}
-						response.Diagnostics.Append(awsTgwSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-						if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-							jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-							jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-							perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-						if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-							noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-							noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-							perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-						}
-
-					}
-
+					performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 				}
 
-				// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+				// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 				if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-					var awsTgwSitePerfModeL7EnhancedModel AwsTgwSitePerfModeL7Enhanced
-					response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &awsTgwSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
+					perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+					perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+					perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+						JumboDisabled: &ves_io_schema.Empty{},
 					}
-					perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-					perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-					performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-					if !awsTgwSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !awsTgwSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-						perfModeL7EnhancedPerfModeChoiceModel := AwsTgwSiteL7PerformanceEnhancementTypePerfModeChoice{}
-						response.Diagnostics.Append(awsTgwSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-						if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-							jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-							jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-							perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-						if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-							jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-							jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-							perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-						}
-
-					}
-
+					performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 				}
 
 			}
@@ -8235,6 +7732,9 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -8425,6 +7925,13 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -8561,24 +8068,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpv6Model AwsTgwSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !awsTgwSiteIpv6Model.Addr.IsNull() && !awsTgwSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(awsTgwSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -8656,29 +8145,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 													// resource modelToSpecNested StringField --> Prefix
 													if !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(awsTgwSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpSubnetTypeIpv6Model AwsTgwSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(awsTgwSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(awsTgwSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -8811,6 +8277,13 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -8947,24 +8420,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpv6Model AwsTgwSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !awsTgwSiteIpv6Model.Addr.IsNull() && !awsTgwSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(awsTgwSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -9042,29 +8497,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 													// resource modelToSpecNested StringField --> Prefix
 													if !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(awsTgwSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpSubnetTypeIpv6Model AwsTgwSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(awsTgwSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(awsTgwSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -9161,6 +8593,13 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 						if response.Diagnostics.HasError() {
 							return
 						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
+						}
 
 						vpcListSpec[i].Labels = mapOfString
 					} else {
@@ -9192,7 +8631,7 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AwsTgwSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9222,7 +8661,7 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -9245,7 +8684,7 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_aws_tgw_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "aws_tgw_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "aws_tgw_site", err),
 		)
 		return
 	}
@@ -9469,6 +8908,15 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> None
+				_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+				if isNone {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+				} else {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -9590,14 +9038,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -9714,14 +9154,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
 								}
 
-								// resource specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
-								}
-
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 								response.Diagnostics.Append(subnetParamObjDiags...)
 								if response.Diagnostics.HasError() {
@@ -9815,14 +9247,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 								} else {
 									// Empty string, set to null
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
 								}
 
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -10484,14 +9908,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 						tgwCidrAttributeMap["ipv4"] = types.StringNull()
 					}
 
-					// resource specToModelNested StringField --> Ipv6
-					if tgwCidrElement.GetIpv6() != "" {
-						tgwCidrAttributeMap["ipv6"] = types.StringValue(tgwCidrElement.GetIpv6())
-					} else {
-						// Empty string, set to null
-						tgwCidrAttributeMap["ipv6"] = types.StringNull()
-					}
-
 					tgwCidrObj, tgwCidrObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersTgwCidrChoiceTgwCidrModelAttributeMap, tgwCidrAttributeMap)
 					response.Diagnostics.Append(tgwCidrObjDiags...)
 					if response.Diagnostics.HasError() {
@@ -10661,15 +10077,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -10936,34 +10343,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					directConnectEnabledAttributeMap["asn_choice"] = types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledAsnChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested ArrayOfStringField --> CloudAggregatedPrefix
-				{
-					if len(directConnectEnabledElement.GetCloudAggregatedPrefix()) > 0 {
-						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetCloudAggregatedPrefix())
-						response.Diagnostics.Append(listDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = listValue
-					} else {
-						directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = types.ListNull(types.StringType)
-					}
-				}
-
-				// resource specToModelNested ArrayOfStringField --> DcConnectAggregatedPrefix
-				{
-					if len(directConnectEnabledElement.GetDcConnectAggregatedPrefix()) > 0 {
-						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetDcConnectAggregatedPrefix())
-						response.Diagnostics.Append(listDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = listValue
-					} else {
-						directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = types.ListNull(types.StringType)
-					}
 				}
 
 				// resource specToModelNested RequiredOneOfField --> VifChoice
@@ -11366,12 +10745,8 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 	}
 
 	// resource SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
@@ -11690,142 +11065,22 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-			// GlobalSpecType
-			// false
-			{
-				perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-				perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+			// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+			_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-				if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-					perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
-					if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-						_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-						if isJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-						_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-						if isNoJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-				}
+			if isPerfModeL3Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 			}
 
-			// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-			// GlobalSpecType
-			// false
-			{
-				perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-				perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+			// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+			_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
-					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-						_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-						if isJumboDisabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-						_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-						if isJumboEnabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-				}
+			if isPerfModeL7Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -11862,12 +11117,8 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 	}
 
 	// resource SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// resource SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
@@ -11949,8 +11200,7 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 		// Assign the typed map to the model
 		data.Tags = tagsMap
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.Tags.IsNull() || data.Tags.IsUnknown() {
 			data.Tags = types.MapNull(types.StringType)
 		} else {
@@ -12817,14 +12067,12 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 			AttrTypes: AwsTgwSiteVipParamsPerAzModelAttributeMap,
 		}
 		nullVipParamsPerAzList := basetypes.NewListNull(vipParamsPerAzObjectType)
-		var priorValVipParamsPerAz types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("vip_params_per_az"), &priorValVipParamsPerAz)
-		if !priorValVipParamsPerAz.IsNull() && !priorValVipParamsPerAz.IsUnknown() {
-			data.VipParamsPerAz = priorValVipParamsPerAz
+		if !data.VipParamsPerAz.IsNull() && !data.VipParamsPerAz.IsUnknown() && len(data.VipParamsPerAz.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VipParamsPerAz = basetypes.NewListValueMust(vipParamsPerAzObjectType, nil)
 		} else {
 			data.VipParamsPerAz = nullVipParamsPerAzList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> VnConfig
@@ -13531,15 +12779,16 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 
 										// resource specToModelNested MapOfStringField --> Labels
 										if customStaticRouteElement.GetLabels() != nil {
-											// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-											// They will be picked up during the next Read.
-											filteredMap := make(map[string]string)
+											// Filter out configured omitted map keys across all operations so backend-injected
+											// forbidden keys never enter or vanish from Terraform state.
+											filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 											for k, v := range customStaticRouteElement.GetLabels() {
-												if !strings.HasPrefix(k, "ves.io/") {
-													filteredMap[k] = v
-												}
+												filteredMap[k] = v
 											}
-
+											delete(filteredMap, "ves.io/config-propagation-destination")
+											delete(filteredMap, "ves.io/app_type")
+											delete(filteredMap, "ves.io/api-scope")
+											delete(filteredMap, "ves.io/provider")
 											if len(filteredMap) > 0 {
 												labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 												response.Diagnostics.Append(labelsDiags...)
@@ -13750,35 +12999,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 														}
 													}
 
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -13898,38 +13118,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 														} else {
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-														}
-													}
-
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// resource specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 														}
 													}
 
@@ -14148,15 +13336,16 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 
 										// resource specToModelNested MapOfStringField --> Labels
 										if customStaticRouteElement.GetLabels() != nil {
-											// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-											// They will be picked up during the next Read.
-											filteredMap := make(map[string]string)
+											// Filter out configured omitted map keys across all operations so backend-injected
+											// forbidden keys never enter or vanish from Terraform state.
+											filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 											for k, v := range customStaticRouteElement.GetLabels() {
-												if !strings.HasPrefix(k, "ves.io/") {
-													filteredMap[k] = v
-												}
+												filteredMap[k] = v
 											}
-
+											delete(filteredMap, "ves.io/config-propagation-destination")
+											delete(filteredMap, "ves.io/app_type")
+											delete(filteredMap, "ves.io/api-scope")
+											delete(filteredMap, "ves.io/provider")
 											if len(filteredMap) > 0 {
 												labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 												response.Diagnostics.Append(labelsDiags...)
@@ -14367,35 +13556,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 														}
 													}
 
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -14515,38 +13675,6 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 														} else {
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-														}
-													}
-
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// resource specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 														}
 													}
 
@@ -14752,15 +13880,16 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 
 				// resource specToModelNested MapOfStringField --> Labels
 				if vpcListElement.GetLabels() != nil {
-					// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-					// They will be picked up during the next Read.
-					filteredMap := make(map[string]string)
+					// Filter out configured omitted map keys across all operations so backend-injected
+					// forbidden keys never enter or vanish from Terraform state.
+					filteredMap := make(map[string]string, len(vpcListElement.GetLabels()))
 					for k, v := range vpcListElement.GetLabels() {
-						if !strings.HasPrefix(k, "ves.io/") {
-							filteredMap[k] = v
-						}
+						filteredMap[k] = v
 					}
-
+					delete(filteredMap, "ves.io/config-propagation-destination")
+					delete(filteredMap, "ves.io/app_type")
+					delete(filteredMap, "ves.io/api-scope")
+					delete(filteredMap, "ves.io/provider")
 					if len(filteredMap) > 0 {
 						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 						response.Diagnostics.Append(labelsDiags...)
@@ -14822,7 +13951,8 @@ func (r *ResourceF5XCAwsTgwSite) Create(ctx context.Context, request resource.Cr
 		var awsTgwSiteLiveSignaturesUpdateModel = &AwsTgwSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// GlobalSpecType
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14934,7 +14064,7 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_aws_tgw_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "aws_tgw_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "aws_tgw_site", err),
 		)
 		return
 	}
@@ -15158,6 +14288,15 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> None
+				_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+				if isNone {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+				} else {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -15291,14 +14430,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -15365,7 +14496,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.Choice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.Choice = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesChoiceModelAttributeMap)
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.Choice = types.ObjectValueMust(AwsTgwSiteAwsParametersAzNodesChoiceModelAttributeMap, map[string]attr.Value{
+						"inside_subnet":          types.ObjectNull(AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetModelAttributeMap),
+						"reserved_inside_subnet": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredPointerField --> OutsideSubnet
@@ -15413,14 +14547,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 								} else {
 									// Empty string, set to null
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
 								}
 
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -15516,14 +14642,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 								} else {
 									// Empty string, set to null
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
 								}
 
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -15790,7 +14908,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteServicesVPCTypeModel.InternetVipChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteServicesVPCTypeModel.InternetVipChoice = types.ObjectNull(AwsTgwSiteAwsParametersInternetVipChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.InternetVipChoice = types.ObjectValueMust(AwsTgwSiteAwsParametersInternetVipChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_internet_vip": types.BoolValue(true),
+				"enable_internet_vip":  types.BoolNull(),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> SecurityGroupChoice
@@ -15866,7 +14987,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteServicesVPCTypeModel.SecurityGroupChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteServicesVPCTypeModel.SecurityGroupChoice = types.ObjectNull(AwsTgwSiteAwsParametersSecurityGroupChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.SecurityGroupChoice = types.ObjectValueMust(AwsTgwSiteAwsParametersSecurityGroupChoiceModelAttributeMap, map[string]attr.Value{
+				"custom_security_group": types.ObjectNull(AwsTgwSiteAwsParametersSecurityGroupChoiceCustomSecurityGroupModelAttributeMap),
+				"f5xc_security_group":   types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> ServiceVpcChoice
@@ -15936,7 +15060,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 						newVpcAttributeMap["name_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						newVpcAttributeMap["name_choice"] = types.ObjectNull(AwsTgwSiteAwsParametersServiceVpcChoiceNewVpcNameChoiceModelAttributeMap)
+						newVpcAttributeMap["name_choice"] = types.ObjectValueMust(AwsTgwSiteAwsParametersServiceVpcChoiceNewVpcNameChoiceModelAttributeMap, map[string]attr.Value{
+							"autogenerate": types.BoolValue(true),
+							"name_tag":     types.StringNull(),
+						})
 					}
 
 					// resource specToModelNested RequiredStringField --> PrimaryIpv4
@@ -16114,7 +15241,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 						newTgwAttributeMap["asn_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						newTgwAttributeMap["asn_choice"] = types.ObjectNull(AwsTgwSiteAwsParametersTgwChoiceNewTgwAsnChoiceModelAttributeMap)
+						newTgwAttributeMap["asn_choice"] = types.ObjectValueMust(AwsTgwSiteAwsParametersTgwChoiceNewTgwAsnChoiceModelAttributeMap, map[string]attr.Value{
+							"system_generated": types.BoolValue(true),
+							"user_assigned":    types.ObjectNull(AwsTgwSiteAwsParametersTgwChoiceNewTgwAsnChoiceUserAssignedModelAttributeMap),
+						})
 					}
 
 					newTgwObj, newTgwObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersTgwChoiceNewTgwModelAttributeMap, newTgwAttributeMap)
@@ -16144,7 +15274,15 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteServicesVPCTypeModel.TgwChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteServicesVPCTypeModel.TgwChoice = types.ObjectNull(AwsTgwSiteAwsParametersTgwChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.TgwChoice = types.ObjectValueMust(AwsTgwSiteAwsParametersTgwChoiceModelAttributeMap, map[string]attr.Value{
+				"existing_tgw": types.ObjectNull(AwsTgwSiteAwsParametersTgwChoiceExistingTgwModelAttributeMap),
+				"new_tgw": types.ObjectValueMust(AwsTgwSiteAwsParametersTgwChoiceNewTgwModelAttributeMap, map[string]attr.Value{
+					"asn_choice": types.ObjectValueMust(AwsTgwSiteAwsParametersTgwChoiceNewTgwAsnChoiceModelAttributeMap, map[string]attr.Value{
+						"system_generated": types.BoolValue(true),
+						"user_assigned":    types.ObjectNull(AwsTgwSiteAwsParametersTgwChoiceNewTgwAsnChoiceUserAssignedModelAttributeMap),
+					}),
+				}),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> TgwCidrChoice
@@ -16185,14 +15323,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 						tgwCidrAttributeMap["ipv4"] = types.StringNull()
 					}
 
-					// resource specToModelNested StringField --> Ipv6
-					if tgwCidrElement.GetIpv6() != "" {
-						tgwCidrAttributeMap["ipv6"] = types.StringValue(tgwCidrElement.GetIpv6())
-					} else {
-						// Empty string, set to null
-						tgwCidrAttributeMap["ipv6"] = types.StringNull()
-					}
-
 					tgwCidrObj, tgwCidrObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersTgwCidrChoiceTgwCidrModelAttributeMap, tgwCidrAttributeMap)
 					response.Diagnostics.Append(tgwCidrObjDiags...)
 					if response.Diagnostics.HasError() {
@@ -16220,7 +15350,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteServicesVPCTypeModel.TgwCidrChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteServicesVPCTypeModel.TgwCidrChoice = types.ObjectNull(AwsTgwSiteAwsParametersTgwCidrChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.TgwCidrChoice = types.ObjectValueMust(AwsTgwSiteAwsParametersTgwCidrChoiceModelAttributeMap, map[string]attr.Value{
+				"reserved_tgw_cidr": types.BoolValue(true),
+				"tgw_cidr":          types.ObjectNull(AwsTgwSiteAwsParametersTgwCidrChoiceTgwCidrModelAttributeMap),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> WorkerNodes
@@ -16279,7 +15412,11 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteServicesVPCTypeModel.WorkerNodesChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteServicesVPCTypeModel.WorkerNodesChoice = types.ObjectNull(AwsTgwSiteAwsParametersWorkerNodesModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.WorkerNodesChoice = types.ObjectValueMust(AwsTgwSiteAwsParametersWorkerNodesModelAttributeMap, map[string]attr.Value{
+				"no_worker_nodes": types.BoolValue(true),
+				"nodes_per_az":    types.Int64Null(),
+				"total_nodes":     types.Int64Null(),
+			})
 		}
 
 		awsParametersObj, awsParametersDiags := utils.GoStructToObjectValue(
@@ -16362,15 +15499,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -16465,7 +15593,14 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.BlockedServicesChoice = types.ObjectNull(AwsTgwSiteBlockedServicesChoiceModelAttributeMap)
+
+		if data.BlockedServicesChoice.IsNull() || data.BlockedServicesChoice.IsUnknown() || ((data.BlockedServicesChoice.Attributes()["block_all_services"].IsNull() || data.BlockedServicesChoice.Attributes()["block_all_services"].IsUnknown()) && (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsUnknown() || (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsUnknown())) && (data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsNull() || data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsUnknown())) {
+			data.BlockedServicesChoice = types.ObjectValueMust(AwsTgwSiteBlockedServicesChoiceModelAttributeMap, map[string]attr.Value{
+				"block_all_services":       types.BoolValue(true),
+				"blocked_services":         types.ObjectNull(AwsTgwSiteBlockedServicesChoiceBlockedServicesModelAttributeMap),
+				"default_blocked_services": types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> Coordinates
@@ -16653,35 +15788,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 					directConnectEnabledAttributeMap["asn_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					directConnectEnabledAttributeMap["asn_choice"] = types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledAsnChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested ArrayOfStringField --> CloudAggregatedPrefix
-				{
-					if len(directConnectEnabledElement.GetCloudAggregatedPrefix()) > 0 {
-						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetCloudAggregatedPrefix())
-						response.Diagnostics.Append(listDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = listValue
-					} else {
-						directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = types.ListNull(types.StringType)
-					}
-				}
-
-				// resource specToModelNested ArrayOfStringField --> DcConnectAggregatedPrefix
-				{
-					if len(directConnectEnabledElement.GetDcConnectAggregatedPrefix()) > 0 {
-						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetDcConnectAggregatedPrefix())
-						response.Diagnostics.Append(listDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = listValue
-					} else {
-						directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = types.ListNull(types.StringType)
-					}
+					directConnectEnabledAttributeMap["asn_choice"] = types.ObjectValueMust(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledAsnChoiceModelAttributeMap, map[string]attr.Value{
+						"auto_asn":   types.BoolValue(true),
+						"custom_asn": types.Int64Null(),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> VifChoice
@@ -16834,7 +15944,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 										awsTgwSiteVifRegionConfigModel.VifRegionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										awsTgwSiteVifRegionConfigModel.VifRegionChoice = types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledVifChoiceHostedVifsVifListVifRegionChoiceModelAttributeMap)
+										awsTgwSiteVifRegionConfigModel.VifRegionChoice = types.ObjectValueMust(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledVifChoiceHostedVifsVifListVifRegionChoiceModelAttributeMap, map[string]attr.Value{
+											"other_region":        types.StringNull(),
+											"same_as_site_region": types.BoolValue(true),
+										})
 									}
 
 									vifListElements = append(vifListElements, awsTgwSiteVifRegionConfigModel)
@@ -17042,7 +16155,14 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.DirectConnectChoice = types.ObjectNull(AwsTgwSiteDirectConnectChoiceModelAttributeMap)
+
+		if data.DirectConnectChoice.IsNull() || data.DirectConnectChoice.IsUnknown() || ((data.DirectConnectChoice.Attributes()["direct_connect_disabled"].IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_disabled"].IsUnknown()) && (data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["asn_choice"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["asn_choice"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["asn_choice"].(types.Object).Attributes()["auto_asn"].IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["asn_choice"].(types.Object).Attributes()["auto_asn"].IsUnknown()) && (data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["asn_choice"].(types.Object).Attributes()["custom_asn"].IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["asn_choice"].(types.Object).Attributes()["custom_asn"].IsUnknown()))) && (data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).Attributes()["site_registration_over_direct_connect"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).Attributes()["site_registration_over_direct_connect"].(types.Object).IsUnknown() || (data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).Attributes()["site_registration_over_direct_connect"].(types.Object).Attributes()["cloudlink_network_name"].IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).Attributes()["site_registration_over_direct_connect"].(types.Object).Attributes()["cloudlink_network_name"].IsUnknown())) && (data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).Attributes()["site_registration_over_internet"].IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["connectivity_options_choice"].(types.Object).Attributes()["site_registration_over_internet"].IsUnknown()))) && (data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["vif_list"].IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["hosted_vifs"].(types.Object).Attributes()["vif_list"].IsUnknown()))) && (data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["standard_vifs"].IsNull() || data.DirectConnectChoice.Attributes()["direct_connect_enabled"].(types.Object).Attributes()["vif_choice"].(types.Object).Attributes()["standard_vifs"].IsUnknown()))))) && (data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["name"].IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["name"].IsUnknown()) && (data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["namespace"].IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["tenant"].IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).IsUnknown() || ((data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["inside"].IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["inside"].IsUnknown()) && (data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["outside"].IsNull() || data.DirectConnectChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["outside"].IsUnknown())))))) {
+			data.DirectConnectChoice = types.ObjectValueMust(AwsTgwSiteDirectConnectChoiceModelAttributeMap, map[string]attr.Value{
+				"direct_connect_disabled": types.BoolValue(true),
+				"direct_connect_enabled":  types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledModelAttributeMap),
+				"private_connectivity":    types.ObjectNull(AwsTgwSiteDirectConnectChoicePrivateConnectivityModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> DirectConnectInfo
@@ -17084,12 +16204,8 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 	}
 
 	// resource SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
@@ -17163,7 +16279,9 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectNull(AwsTgwSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap)
+						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectValueMust(AwsTgwSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap, map[string]attr.Value{
+							"drain_max_unavailable_node_count": types.Int64Value(1),
+						})
 					}
 
 					// resource specToModelNested RequiredUintField --> DrainNodeTimeout
@@ -17254,7 +16372,12 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LogsReceiverChoice = types.ObjectNull(AwsTgwSiteLogsReceiverChoiceModelAttributeMap)
+
+		if data.LogsReceiverChoice.IsNull() || data.LogsReceiverChoice.IsUnknown() || (data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsNull() || data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsUnknown()) {
+			data.LogsReceiverChoice = types.ObjectValueMust(AwsTgwSiteLogsReceiverChoiceModelAttributeMap, map[string]attr.Value{
+				"logs_streaming_disabled": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> OfflineSurvivabilityMode
@@ -17307,7 +16430,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AwsTgwSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			awsTgwSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectValueMust(AwsTgwSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap, map[string]attr.Value{
+				"enable_offline_survivability_mode": types.BoolNull(),
+				"no_offline_survivability_mode":     types.BoolValue(true),
+			})
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
@@ -17375,7 +16501,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AwsTgwSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			awsTgwSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectValueMust(AwsTgwSiteOsOperatingSystemVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_os_version":       types.BoolValue(true),
+				"operating_system_version": types.StringNull(),
+			})
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
@@ -17408,142 +16537,22 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-			// <no value>
-			// false
-			{
-				perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-				perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+			// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+			_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-				if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-					perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
-					if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-						_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-						if isJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-						_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-						if isNoJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-				}
+			if isPerfModeL3Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 			}
 
-			// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-			// <no value>
-			// false
-			{
-				perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-				perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+			// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+			_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
-					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-						_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-						if isJumboDisabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-						_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-						if isJumboEnabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-				}
+			if isPerfModeL7Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -17562,7 +16571,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+			awsTgwSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectValueMust(AwsTgwSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap, map[string]attr.Value{
+				"perf_mode_l3_enhanced": types.BoolNull(),
+				"perf_mode_l7_enhanced": types.BoolValue(true),
+			})
 		}
 
 		performanceEnhancementModeObj, performanceEnhancementModeDiags := utils.GoStructToObjectValue(
@@ -17580,12 +16592,8 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 	}
 
 	// resource SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// resource SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
@@ -17638,7 +16646,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AwsTgwSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			awsTgwSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectValueMust(AwsTgwSiteSwVolterraSwVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_sw_version":        types.BoolValue(true),
+				"volterra_software_version": types.StringNull(),
+			})
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
@@ -17667,8 +16678,7 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 		// Assign the typed map to the model
 		data.Tags = tagsMap
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.Tags.IsNull() || data.Tags.IsUnknown() {
 			data.Tags = types.MapNull(types.StringType)
 		} else {
@@ -18076,7 +17086,11 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteSecConfigTypeModel.EastWestServicePolicyChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteSecConfigTypeModel.EastWestServicePolicyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityEastWestServicePolicyChoiceModelAttributeMap)
+			awsTgwSiteSecConfigTypeModel.EastWestServicePolicyChoice = types.ObjectValueMust(AwsTgwSiteTgwSecurityEastWestServicePolicyChoiceModelAttributeMap, map[string]attr.Value{
+				"active_east_west_service_policies":  types.ObjectNull(AwsTgwSiteTgwSecurityEastWestServicePolicyChoiceActiveEastWestServicePoliciesModelAttributeMap),
+				"east_west_service_policy_allow_all": types.BoolNull(),
+				"no_east_west_policy":                types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
@@ -18195,7 +17209,11 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteSecConfigTypeModel.ForwardProxyChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteSecConfigTypeModel.ForwardProxyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityForwardProxyChoiceModelAttributeMap)
+			awsTgwSiteSecConfigTypeModel.ForwardProxyChoice = types.ObjectValueMust(AwsTgwSiteTgwSecurityForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+				"active_forward_proxy_policies": types.ObjectNull(AwsTgwSiteTgwSecurityForwardProxyChoiceActiveForwardProxyPoliciesModelAttributeMap),
+				"forward_proxy_allow_all":       types.BoolNull(),
+				"no_forward_proxy":              types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
@@ -18376,7 +17394,11 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteSecConfigTypeModel.NetworkPolicyChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteSecConfigTypeModel.NetworkPolicyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityNetworkPolicyChoiceModelAttributeMap)
+			awsTgwSiteSecConfigTypeModel.NetworkPolicyChoice = types.ObjectValueMust(AwsTgwSiteTgwSecurityNetworkPolicyChoiceModelAttributeMap, map[string]attr.Value{
+				"active_enhanced_firewall_policies": types.ObjectNull(AwsTgwSiteTgwSecurityNetworkPolicyChoiceActiveEnhancedFirewallPoliciesModelAttributeMap),
+				"active_network_policies":           types.ObjectNull(AwsTgwSiteTgwSecurityNetworkPolicyChoiceActiveNetworkPoliciesModelAttributeMap),
+				"no_network_policy":                 types.BoolValue(true),
+			})
 		}
 
 		tgwSecurityObj, tgwSecurityDiags := utils.GoStructToObjectValue(
@@ -18535,14 +17557,12 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			AttrTypes: AwsTgwSiteVipParamsPerAzModelAttributeMap,
 		}
 		nullVipParamsPerAzList := basetypes.NewListNull(vipParamsPerAzObjectType)
-		var priorValVipParamsPerAz types.List
-		_ = request.State.GetAttribute(ctx, path.Root("vip_params_per_az"), &priorValVipParamsPerAz)
-		if !priorValVipParamsPerAz.IsNull() && !priorValVipParamsPerAz.IsUnknown() {
-			data.VipParamsPerAz = priorValVipParamsPerAz
+		if !data.VipParamsPerAz.IsNull() && !data.VipParamsPerAz.IsUnknown() && len(data.VipParamsPerAz.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VipParamsPerAz = basetypes.NewListValueMust(vipParamsPerAzObjectType, nil)
 		} else {
 			data.VipParamsPerAz = nullVipParamsPerAzList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> VnConfig
@@ -18916,7 +17936,11 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteVnCfgModel.DcClusterGroupChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteVnCfgModel.DcClusterGroupChoice = types.ObjectNull(AwsTgwSiteVnConfigDcClusterGroupChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.DcClusterGroupChoice = types.ObjectValueMust(AwsTgwSiteVnConfigDcClusterGroupChoiceModelAttributeMap, map[string]attr.Value{
+				"dc_cluster_group_inside_vn":  types.ObjectNull(AwsTgwSiteVnConfigDcClusterGroupChoiceDcClusterGroupInsideVnModelAttributeMap),
+				"dc_cluster_group_outside_vn": types.ObjectNull(AwsTgwSiteVnConfigDcClusterGroupChoiceDcClusterGroupOutsideVnModelAttributeMap),
+				"no_dc_cluster_group":         types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
@@ -19174,7 +18198,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteVnCfgModel.GlobalNetworkChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteVnCfgModel.GlobalNetworkChoice = types.ObjectNull(AwsTgwSiteVnConfigGlobalNetworkChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.GlobalNetworkChoice = types.ObjectValueMust(AwsTgwSiteVnConfigGlobalNetworkChoiceModelAttributeMap, map[string]attr.Value{
+				"global_network_list": types.ObjectNull(AwsTgwSiteVnConfigGlobalNetworkChoiceGlobalNetworkListModelAttributeMap),
+				"no_global_network":   types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
@@ -19249,13 +18276,26 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 
 										// resource specToModelNested MapOfStringField --> Labels
 										if customStaticRouteElement.GetLabels() != nil {
-											// READ operation: keep backend-injected keys so they enter the state.
-											labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-											response.Diagnostics.Append(labelsDiags...)
-											if response.Diagnostics.HasError() {
-												return
+											// Filter out configured omitted map keys across all operations so backend-injected
+											// forbidden keys never enter or vanish from Terraform state.
+											filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+											for k, v := range customStaticRouteElement.GetLabels() {
+												filteredMap[k] = v
 											}
-											customStaticRouteAttributeMap["labels"] = labelsMap
+											delete(filteredMap, "ves.io/config-propagation-destination")
+											delete(filteredMap, "ves.io/app_type")
+											delete(filteredMap, "ves.io/api-scope")
+											delete(filteredMap, "ves.io/provider")
+											if len(filteredMap) > 0 {
+												labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+												response.Diagnostics.Append(labelsDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												customStaticRouteAttributeMap["labels"] = labelsMap
+											} else {
+												customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+											}
 										} else {
 											// API returned nil (Protobuf omits empty maps). Set to null.
 											// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -19456,35 +18496,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 														}
 													}
 
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -19604,38 +18615,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 														} else {
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-														}
-													}
-
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// resource specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 														}
 													}
 
@@ -19770,7 +18749,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteVnCfgModel.InsideStaticRouteChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteVnCfgModel.InsideStaticRouteChoice = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.InsideStaticRouteChoice = types.ObjectValueMust(AwsTgwSiteVnConfigInsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+				"inside_static_routes":    types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesModelAttributeMap),
+				"no_inside_static_routes": types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
@@ -19854,13 +18836,26 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 
 										// resource specToModelNested MapOfStringField --> Labels
 										if customStaticRouteElement.GetLabels() != nil {
-											// READ operation: keep backend-injected keys so they enter the state.
-											labelsMap, labelsDiags := utils.StringMapToTerraformMap(customStaticRouteElement.GetLabels())
-											response.Diagnostics.Append(labelsDiags...)
-											if response.Diagnostics.HasError() {
-												return
+											// Filter out configured omitted map keys across all operations so backend-injected
+											// forbidden keys never enter or vanish from Terraform state.
+											filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
+											for k, v := range customStaticRouteElement.GetLabels() {
+												filteredMap[k] = v
 											}
-											customStaticRouteAttributeMap["labels"] = labelsMap
+											delete(filteredMap, "ves.io/config-propagation-destination")
+											delete(filteredMap, "ves.io/app_type")
+											delete(filteredMap, "ves.io/api-scope")
+											delete(filteredMap, "ves.io/provider")
+											if len(filteredMap) > 0 {
+												labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+												response.Diagnostics.Append(labelsDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												customStaticRouteAttributeMap["labels"] = labelsMap
+											} else {
+												customStaticRouteAttributeMap["labels"] = types.MapNull(types.StringType)
+											}
 										} else {
 											// API returned nil (Protobuf omits empty maps). Set to null.
 											// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -20061,35 +19056,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 														}
 													}
 
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -20209,38 +19175,6 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 														} else {
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-														}
-													}
-
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// resource specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 														}
 													}
 
@@ -20366,7 +19300,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteVnCfgModel.OutsideStaticRouteChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteVnCfgModel.OutsideStaticRouteChoice = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.OutsideStaticRouteChoice = types.ObjectValueMust(AwsTgwSiteVnConfigOutsideStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+				"no_outside_static_routes": types.BoolValue(true),
+				"outside_static_routes":    types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesModelAttributeMap),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
@@ -20414,7 +19351,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteVnCfgModel.SiteMeshGroupChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteVnCfgModel.SiteMeshGroupChoice = types.ObjectNull(AwsTgwSiteVnConfigSiteMeshGroupChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.SiteMeshGroupChoice = types.ObjectValueMust(AwsTgwSiteVnConfigSiteMeshGroupChoiceModelAttributeMap, map[string]attr.Value{
+				"sm_connection_public_ip": types.BoolValue(true),
+				"sm_connection_pvt_ip":    types.BoolNull(),
+			})
 		}
 
 		vnConfigObj, vnConfigDiags := utils.GoStructToObjectValue(
@@ -20446,13 +19386,26 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 
 				// resource specToModelNested MapOfStringField --> Labels
 				if vpcListElement.GetLabels() != nil {
-					// READ operation: keep backend-injected keys so they enter the state.
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(vpcListElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
+					// Filter out configured omitted map keys across all operations so backend-injected
+					// forbidden keys never enter or vanish from Terraform state.
+					filteredMap := make(map[string]string, len(vpcListElement.GetLabels()))
+					for k, v := range vpcListElement.GetLabels() {
+						filteredMap[k] = v
 					}
-					awsTgwSiteVPCAttachmentTypeModel.Labels = labelsMap
+					delete(filteredMap, "ves.io/config-propagation-destination")
+					delete(filteredMap, "ves.io/app_type")
+					delete(filteredMap, "ves.io/api-scope")
+					delete(filteredMap, "ves.io/provider")
+					if len(filteredMap) > 0 {
+						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+						response.Diagnostics.Append(labelsDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						awsTgwSiteVPCAttachmentTypeModel.Labels = labelsMap
+					} else {
+						awsTgwSiteVPCAttachmentTypeModel.Labels = types.MapNull(types.StringType)
+					}
 				} else {
 					// API returned nil (Protobuf omits empty maps). Set to null.
 					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -20504,7 +19457,8 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 		var awsTgwSiteLiveSignaturesUpdateModel = &AwsTgwSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20548,7 +19502,10 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 			awsTgwSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AwsTgwSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			awsTgwSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectValueMust(AwsTgwSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap, map[string]attr.Value{
+				"automatic": types.BoolNull(),
+				"manual":    types.BoolValue(true),
+			})
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
@@ -20580,6 +19537,12 @@ func (r *ResourceF5XCAwsTgwSite) Read(ctx context.Context, request resource.Read
 }
 
 func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAwsTgwSiteModel
@@ -20589,6 +19552,7 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planAwsParameters := data.AwsParameters
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -20608,7 +19572,11 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planAwsParameters := data.AwsParameters
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.AwsParameters.IsNull() && !configData.AwsParameters.IsUnknown() {
+		data.AwsParameters = configData.AwsParameters
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -20775,11 +19743,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 										subnetParamOneOfSpec.SubnetParam.Ipv4 = string(awsTgwSiteSubnetParamModel.Ipv4.ValueString())
 									}
 
-									// resource modelToSpecNested StringField --> Ipv6
-									if !awsTgwSiteSubnetParamModel.Ipv6.IsNull() && !awsTgwSiteSubnetParamModel.Ipv6.IsUnknown() {
-										subnetParamOneOfSpec.SubnetParam.Ipv6 = string(awsTgwSiteSubnetParamModel.Ipv6.ValueString())
-									}
-
 								}
 
 							}
@@ -20837,11 +19800,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(awsTgwSiteSubnetParamModel.Ipv4.ValueString())
 								}
 
-								// resource modelToSpecNested StringField --> Ipv6
-								if !awsTgwSiteSubnetParamModel.Ipv6.IsNull() && !awsTgwSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(awsTgwSiteSubnetParamModel.Ipv6.ValueString())
-								}
-
 							}
 
 						}
@@ -20888,11 +19846,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 								// resource modelToSpecNested RequiredStringField --> Ipv4
 								if !awsTgwSiteSubnetParamModel.Ipv4.IsNull() && !awsTgwSiteSubnetParamModel.Ipv4.IsUnknown() {
 									subnetParamOneOfSpec.SubnetParam.Ipv4 = string(awsTgwSiteSubnetParamModel.Ipv4.ValueString())
-								}
-
-								// resource modelToSpecNested StringField --> Ipv6
-								if !awsTgwSiteSubnetParamModel.Ipv6.IsNull() && !awsTgwSiteSubnetParamModel.Ipv6.IsUnknown() {
-									subnetParamOneOfSpec.SubnetParam.Ipv6 = string(awsTgwSiteSubnetParamModel.Ipv6.ValueString())
 								}
 
 							}
@@ -21270,13 +20223,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = sshSpecBool
 						}
 
-						// resource modelToSpecNested BoolOfOneOfPointerField --> WebUserInterface
-						if !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsNull() && !blockedSeviceBlockedServicesValueTypeChoiceModel.WebUserInterface.IsUnknown() {
-							webUserInterfaceSpecBool := &ves_io_schema_fleet.BlockedServices_WebUserInterface{}
-							webUserInterfaceSpecBool.WebUserInterface = &ves_io_schema.Empty{}
-							blockedServicesOneOfSpec.BlockedServices.BlockedSevice[i].BlockedServicesValueTypeChoice = webUserInterfaceSpecBool
-						}
-
 					}
 
 					// resource modelToSpecNested EnumField --> NetworkType
@@ -21429,32 +20375,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 					directConnectEnabledOneOfSpec.DirectConnectEnabled.AsnChoice = customAsnSpecUint
 				}
 
-			}
-
-			// resource modelToSpecNested ArrayOfStringField --> CloudAggregatedPrefix
-			if !awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.IsNull() && !awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.IsUnknown() {
-				{
-					elements := make([]string, 0, len(awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.Elements()))
-					diags = awsTgwSiteDirectConnectEnabledModel.CloudAggregatedPrefix.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					directConnectEnabledOneOfSpec.DirectConnectEnabled.CloudAggregatedPrefix = elements
-				}
-			}
-
-			// resource modelToSpecNested ArrayOfStringField --> DcConnectAggregatedPrefix
-			if !awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.IsNull() && !awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.IsUnknown() {
-				{
-					elements := make([]string, 0, len(awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.Elements()))
-					diags = awsTgwSiteDirectConnectEnabledModel.DcConnectAggregatedPrefix.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					directConnectEnabledOneOfSpec.DirectConnectEnabled.DcConnectAggregatedPrefix = elements
-				}
 			}
 
 			// resource modelToSpecNested RequiredOneOfField --> VifChoice
@@ -21676,6 +20596,9 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -21785,78 +20708,24 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 					return
 				}
 
-				// resource modelToSpecNested PointerOfOneOfField --> PerfModeL3Enhanced
+				// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
 				if !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.IsUnknown() {
-					var awsTgwSitePerfModeL3EnhancedModel AwsTgwSitePerfModeL3Enhanced
-					response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL3Enhanced.As(ctx, &awsTgwSitePerfModeL3EnhancedModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
+					perfModeL3EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
+					perfModeL3EnhancedSpecBool.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+					perfModeL3EnhancedSpecBool.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+						NoJumbo: &ves_io_schema.Empty{},
 					}
-					perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
-					perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
-					performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-					if !awsTgwSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !awsTgwSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
-						perfModeL3EnhancedPerfModeChoiceModel := AwsTgwSiteL3PerformanceEnhancementTypePerfModeChoice{}
-						response.Diagnostics.Append(awsTgwSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> Jumbo
-						if !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.Jumbo.IsUnknown() {
-							jumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_Jumbo{}
-							jumboSpecBool.Jumbo = &ves_io_schema.Empty{}
-							perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = jumboSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> NoJumbo
-						if !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsNull() && !perfModeL3EnhancedPerfModeChoiceModel.NoJumbo.IsUnknown() {
-							noJumboSpecBool := &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{}
-							noJumboSpecBool.NoJumbo = &ves_io_schema.Empty{}
-							perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = noJumboSpecBool
-						}
-
-					}
-
+					performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedSpecBool
 				}
 
-				// resource modelToSpecNested PointerOfOneOfField --> PerfModeL7Enhanced
+				// resource modelToSpecNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
 				if !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsNull() && !performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.IsUnknown() {
-					var awsTgwSitePerfModeL7EnhancedModel AwsTgwSitePerfModeL7Enhanced
-					response.Diagnostics.Append(performanceEnhancementModePerfModeChoiceModel.PerfModeL7Enhanced.As(ctx, &awsTgwSitePerfModeL7EnhancedModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
+					perfModeL7EnhancedSpecBool := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
+					perfModeL7EnhancedSpecBool.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+					perfModeL7EnhancedSpecBool.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+						JumboDisabled: &ves_io_schema.Empty{},
 					}
-					perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
-					perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
-					performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
-					if !awsTgwSitePerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !awsTgwSitePerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
-						perfModeL7EnhancedPerfModeChoiceModel := AwsTgwSiteL7PerformanceEnhancementTypePerfModeChoice{}
-						response.Diagnostics.Append(awsTgwSitePerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> JumboDisabled
-						if !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboDisabled.IsUnknown() {
-							jumboDisabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{}
-							jumboDisabledSpecBool.JumboDisabled = &ves_io_schema.Empty{}
-							perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboDisabledSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> JumboEnabled
-						if !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsNull() && !perfModeL7EnhancedPerfModeChoiceModel.JumboEnabled.IsUnknown() {
-							jumboEnabledSpecBool := &ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled{}
-							jumboEnabledSpecBool.JumboEnabled = &ves_io_schema.Empty{}
-							perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = jumboEnabledSpecBool
-						}
-
-					}
-
+					performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedSpecBool
 				}
 
 			}
@@ -22381,6 +21250,9 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -22571,6 +21443,13 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -22707,24 +21586,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpv6Model AwsTgwSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !awsTgwSiteIpv6Model.Addr.IsNull() && !awsTgwSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(awsTgwSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -22802,29 +21663,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 													// resource modelToSpecNested StringField --> Prefix
 													if !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(awsTgwSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpSubnetTypeIpv6Model AwsTgwSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(awsTgwSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(awsTgwSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -22957,6 +21795,13 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 										if response.Diagnostics.HasError() {
 											return
 										}
+										delete(mapOfString, "ves.io/config-propagation-destination")
+										delete(mapOfString, "ves.io/app_type")
+										delete(mapOfString, "ves.io/api-scope")
+										delete(mapOfString, "ves.io/provider")
+										if len(mapOfString) == 0 {
+											mapOfString = nil
+										}
 
 										customStaticRouteOneOfSpec.CustomStaticRoute.Labels = mapOfString
 									} else {
@@ -23093,24 +21938,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 
 												}
 
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !nexthopAddressVerChoiceModel.Ipv6.IsNull() && !nexthopAddressVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpv6Model AwsTgwSiteIpv6
-													response.Diagnostics.Append(nexthopAddressVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpAddressType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6AddressType{}
-													nexthopAddressSpec.Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested StringField --> Addr
-													if !awsTgwSiteIpv6Model.Addr.IsNull() && !awsTgwSiteIpv6Model.Addr.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Addr = string(awsTgwSiteIpv6Model.Addr.ValueString())
-													}
-
-												}
-
 											}
 
 										}
@@ -23188,29 +22015,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 													// resource modelToSpecNested StringField --> Prefix
 													if !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv4Model.Prefix.IsUnknown() {
 														ipv4OneOfSpec.Ipv4.Prefix = string(awsTgwSiteIpSubnetTypeIpv4Model.Prefix.ValueString())
-													}
-
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> Ipv6
-												if !subnetsVerChoiceModel.Ipv6.IsNull() && !subnetsVerChoiceModel.Ipv6.IsUnknown() {
-													var awsTgwSiteIpSubnetTypeIpv6Model AwsTgwSiteIpSubnetTypeIpv6
-													response.Diagnostics.Append(subnetsVerChoiceModel.Ipv6.As(ctx, &awsTgwSiteIpSubnetTypeIpv6Model, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													ipv6OneOfSpec := &ves_io_schema.IpSubnetType_Ipv6{}
-													ipv6OneOfSpec.Ipv6 = &ves_io_schema.Ipv6SubnetType{}
-													customStaticRouteOneOfSpec.CustomStaticRoute.Subnets[ii].Ver = ipv6OneOfSpec
-
-													// resource modelToSpecNested UintField --> Plen
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Plen.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Plen = uint32(uint32(awsTgwSiteIpSubnetTypeIpv6Model.Plen.ValueInt64()))
-													}
-
-													// resource modelToSpecNested StringField --> Prefix
-													if !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsNull() && !awsTgwSiteIpSubnetTypeIpv6Model.Prefix.IsUnknown() {
-														ipv6OneOfSpec.Ipv6.Prefix = string(awsTgwSiteIpSubnetTypeIpv6Model.Prefix.ValueString())
 													}
 
 												}
@@ -23307,6 +22111,13 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 						if response.Diagnostics.HasError() {
 							return
 						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
+						}
 
 						vpcListSpec[i].Labels = mapOfString
 					} else {
@@ -23338,7 +22149,7 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 				return
 			}
 
-			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AwsTgwSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23368,7 +22179,7 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -23384,7 +22195,7 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_aws_tgw_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "aws_tgw_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "aws_tgw_site", err),
 		)
 		return
 	}
@@ -23393,7 +22204,7 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_aws_tgw_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "aws_tgw_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "aws_tgw_site", err),
 		)
 		return
 	}
@@ -23616,6 +22427,15 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> None
+				_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+				if isNone {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+				} else {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -23737,14 +22557,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
-										}
-
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 										response.Diagnostics.Append(subnetParamObjDiags...)
 										if response.Diagnostics.HasError() {
@@ -23861,14 +22673,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
 								}
 
-								// resource specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
-								}
-
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 								response.Diagnostics.Append(subnetParamObjDiags...)
 								if response.Diagnostics.HasError() {
@@ -23962,14 +22766,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 								} else {
 									// Empty string, set to null
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
 								}
 
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -24631,14 +23427,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 						tgwCidrAttributeMap["ipv4"] = types.StringNull()
 					}
 
-					// resource specToModelNested StringField --> Ipv6
-					if tgwCidrElement.GetIpv6() != "" {
-						tgwCidrAttributeMap["ipv6"] = types.StringValue(tgwCidrElement.GetIpv6())
-					} else {
-						// Empty string, set to null
-						tgwCidrAttributeMap["ipv6"] = types.StringNull()
-					}
-
 					tgwCidrObj, tgwCidrObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersTgwCidrChoiceTgwCidrModelAttributeMap, tgwCidrAttributeMap)
 					response.Diagnostics.Append(tgwCidrObjDiags...)
 					if response.Diagnostics.HasError() {
@@ -24808,15 +23596,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// resource specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -25083,34 +23862,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					directConnectEnabledAttributeMap["asn_choice"] = types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledAsnChoiceModelAttributeMap)
-				}
-
-				// resource specToModelNested ArrayOfStringField --> CloudAggregatedPrefix
-				{
-					if len(directConnectEnabledElement.GetCloudAggregatedPrefix()) > 0 {
-						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetCloudAggregatedPrefix())
-						response.Diagnostics.Append(listDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = listValue
-					} else {
-						directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = types.ListNull(types.StringType)
-					}
-				}
-
-				// resource specToModelNested ArrayOfStringField --> DcConnectAggregatedPrefix
-				{
-					if len(directConnectEnabledElement.GetDcConnectAggregatedPrefix()) > 0 {
-						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetDcConnectAggregatedPrefix())
-						response.Diagnostics.Append(listDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = listValue
-					} else {
-						directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = types.ListNull(types.StringType)
-					}
 				}
 
 				// resource specToModelNested RequiredOneOfField --> VifChoice
@@ -25513,12 +24264,8 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	}
 
 	// resource SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
@@ -25837,142 +24584,22 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-			// GlobalSpecType
-			// false
-			{
-				perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-				perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+			// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+			_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-				if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-					perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
-					if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Jumbo
-						_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-						if isJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> NoJumbo
-						_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-						if isNoJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-				}
+			if isPerfModeL3Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 			}
 
-			// resource specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-			// GlobalSpecType
-			// false
-			{
-				perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-				perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+			// resource specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+			_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
-					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-						_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-						if isJumboDisabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-						_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-						if isJumboEnabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-				}
+			if isPerfModeL7Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -26009,12 +24636,8 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	}
 
 	// resource SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// resource SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
@@ -26096,8 +24719,7 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 		// Assign the typed map to the model
 		data.Tags = tagsMap
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.Tags.IsNull() || data.Tags.IsUnknown() {
 			data.Tags = types.MapNull(types.StringType)
 		} else {
@@ -26964,14 +25586,12 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 			AttrTypes: AwsTgwSiteVipParamsPerAzModelAttributeMap,
 		}
 		nullVipParamsPerAzList := basetypes.NewListNull(vipParamsPerAzObjectType)
-		var priorValVipParamsPerAz types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("vip_params_per_az"), &priorValVipParamsPerAz)
-		if !priorValVipParamsPerAz.IsNull() && !priorValVipParamsPerAz.IsUnknown() {
-			data.VipParamsPerAz = priorValVipParamsPerAz
+		if !data.VipParamsPerAz.IsNull() && !data.VipParamsPerAz.IsUnknown() && len(data.VipParamsPerAz.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VipParamsPerAz = basetypes.NewListValueMust(vipParamsPerAzObjectType, nil)
 		} else {
 			data.VipParamsPerAz = nullVipParamsPerAzList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> VnConfig
@@ -27678,15 +26298,16 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 
 										// resource specToModelNested MapOfStringField --> Labels
 										if customStaticRouteElement.GetLabels() != nil {
-											// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-											// They will be picked up during the next Read.
-											filteredMap := make(map[string]string)
+											// Filter out configured omitted map keys across all operations so backend-injected
+											// forbidden keys never enter or vanish from Terraform state.
+											filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 											for k, v := range customStaticRouteElement.GetLabels() {
-												if !strings.HasPrefix(k, "ves.io/") {
-													filteredMap[k] = v
-												}
+												filteredMap[k] = v
 											}
-
+											delete(filteredMap, "ves.io/config-propagation-destination")
+											delete(filteredMap, "ves.io/app_type")
+											delete(filteredMap, "ves.io/api-scope")
+											delete(filteredMap, "ves.io/provider")
 											if len(filteredMap) > 0 {
 												labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 												response.Diagnostics.Append(labelsDiags...)
@@ -27897,35 +26518,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 														}
 													}
 
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -28045,38 +26637,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 														} else {
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-														}
-													}
-
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// resource specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 														}
 													}
 
@@ -28295,15 +26855,16 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 
 										// resource specToModelNested MapOfStringField --> Labels
 										if customStaticRouteElement.GetLabels() != nil {
-											// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-											// They will be picked up during the next Read.
-											filteredMap := make(map[string]string)
+											// Filter out configured omitted map keys across all operations so backend-injected
+											// forbidden keys never enter or vanish from Terraform state.
+											filteredMap := make(map[string]string, len(customStaticRouteElement.GetLabels()))
 											for k, v := range customStaticRouteElement.GetLabels() {
-												if !strings.HasPrefix(k, "ves.io/") {
-													filteredMap[k] = v
-												}
+												filteredMap[k] = v
 											}
-
+											delete(filteredMap, "ves.io/config-propagation-destination")
+											delete(filteredMap, "ves.io/app_type")
+											delete(filteredMap, "ves.io/api-scope")
+											delete(filteredMap, "ves.io/provider")
 											if len(filteredMap) > 0 {
 												labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 												response.Diagnostics.Append(labelsDiags...)
@@ -28514,35 +27075,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 														}
 													}
 
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -28662,38 +27194,6 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
 														} else {
 															subnetsverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap)
-														}
-													}
-
-													// resource specToModelNested PointerOfOneOfField --> Ipv6
-													// GlobalSpecType
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// resource specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// resource specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
 														}
 													}
 
@@ -28899,15 +27399,16 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 
 				// resource specToModelNested MapOfStringField --> Labels
 				if vpcListElement.GetLabels() != nil {
-					// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-					// They will be picked up during the next Read.
-					filteredMap := make(map[string]string)
+					// Filter out configured omitted map keys across all operations so backend-injected
+					// forbidden keys never enter or vanish from Terraform state.
+					filteredMap := make(map[string]string, len(vpcListElement.GetLabels()))
 					for k, v := range vpcListElement.GetLabels() {
-						if !strings.HasPrefix(k, "ves.io/") {
-							filteredMap[k] = v
-						}
+						filteredMap[k] = v
 					}
-
+					delete(filteredMap, "ves.io/config-propagation-destination")
+					delete(filteredMap, "ves.io/app_type")
+					delete(filteredMap, "ves.io/api-scope")
+					delete(filteredMap, "ves.io/provider")
 					if len(filteredMap) > 0 {
 						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 						response.Diagnostics.Append(labelsDiags...)
@@ -28969,7 +27470,8 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 		var awsTgwSiteLiveSignaturesUpdateModel = &AwsTgwSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// GlobalSpecType
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29057,7 +27559,7 @@ func (r *ResourceF5XCAwsTgwSite) Update(ctx context.Context, request resource.Up
 	}
 	// Restore plan value for AwsParameters. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.AwsParameters = planAwsParameters
+	data.AwsParameters = utils.ResolveUnknowns(planAwsParameters, data.AwsParameters)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -29105,7 +27607,7 @@ func (r *ResourceF5XCAwsTgwSite) Delete(ctx context.Context, request resource.De
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "aws_tgw_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "aws_tgw_site", err),
 		)
 		return
 	}

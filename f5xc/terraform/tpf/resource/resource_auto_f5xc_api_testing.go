@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -85,6 +86,7 @@ type ApiTestingSecretType struct {
 type ApiTestingSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type ApiTestingBlindfoldSecretInfo struct {
@@ -227,6 +229,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofModel
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -272,6 +275,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneo
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -316,6 +320,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceBearerTokenTokenSecretInfoOneof
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceBearerTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -365,6 +370,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceLoginEndpointJsonPayloadSecretI
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceLoginEndpointJsonPayloadSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -408,8 +414,8 @@ func (r *ResourceF5XCApiTesting) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a api_testing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_testing) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a api_testing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_testing) etc. can be fetched",
+		MarkdownDescription: "This is the api testing type",
+		Description:         "This is the api testing type",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -477,12 +483,17 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 			},
 			"custom_header_value": schema.StringAttribute{
 				Description:         "Custom Header Value",
-				MarkdownDescription: "Custom Header Value<br>**Validation:** `Length LengthAtMost(128)`",
+				MarkdownDescription: "Custom Header Value<br>**Validation:** `Length LengthAtMost(128)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(128),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[^\x00-\x08\x0A-\x1F\x7F]*$`),
+						"must match pattern `^[^\\x00-\\x08\\x0A-\\x1F\\x7F]*$`",
+					),
 				},
 			},
 			"domains": schema.ListNestedAttribute{
@@ -520,6 +531,10 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 										Computed:            false,
 										Validators: []validator.String{
 											stringvalidator.LengthAtMost(64),
+											stringvalidator.RegexMatches(
+												regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.-]*$`),
+												"must match pattern `^[a-zA-Z0-9][a-zA-Z0-9_.-]*$`",
+											),
 										},
 									},
 									"credentials_choice": schema.SingleNestedAttribute{
@@ -552,11 +567,15 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 														Computed:            false,
 														Validators: []validator.String{
 															stringvalidator.LengthAtMost(128),
+															stringvalidator.RegexMatches(
+																regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.-]*$`),
+																"must match pattern `^[a-zA-Z0-9][a-zA-Z0-9_.-]*$`",
+															),
 														},
 													},
 													"value": schema.SingleNestedAttribute{
-														Description:         "Api Key Value",
-														MarkdownDescription: "Api Key Value",
+														Description:         "API Key Value",
+														MarkdownDescription: "API Key Value",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -571,6 +590,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	exactlyoneofvalidator.RequiredExactlyOneOf(
 																		"blindfold_secret_info",
 																		"clear_secret_info",
+																		"none",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
@@ -594,6 +614,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
+																				WriteOnly:           true,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
 																						regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -646,6 +667,16 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																					),
 																				},
 																			},
+																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.Bool{
+																			boolvalidator.Equals(true),
 																		},
 																	},
 																},
@@ -678,6 +709,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	exactlyoneofvalidator.RequiredExactlyOneOf(
 																		"blindfold_secret_info",
 																		"clear_secret_info",
+																		"none",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
@@ -701,6 +733,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
+																				WriteOnly:           true,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
 																						regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -753,6 +786,16 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																					),
 																				},
 																			},
+																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.Bool{
+																			boolvalidator.Equals(true),
 																		},
 																	},
 																},
@@ -795,6 +838,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	exactlyoneofvalidator.RequiredExactlyOneOf(
 																		"blindfold_secret_info",
 																		"clear_secret_info",
+																		"none",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
@@ -818,6 +862,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
+																				WriteOnly:           true,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
 																						regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -870,6 +915,16 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																					),
 																				},
 																			},
+																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.Bool{
+																			boolvalidator.Equals(true),
 																		},
 																	},
 																},
@@ -902,6 +957,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	exactlyoneofvalidator.RequiredExactlyOneOf(
 																		"blindfold_secret_info",
 																		"clear_secret_info",
+																		"none",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
@@ -925,6 +981,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
+																				WriteOnly:           true,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
 																						regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -977,6 +1034,16 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																					),
 																				},
 																			},
+																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.Bool{
+																			boolvalidator.Equals(true),
 																		},
 																	},
 																},
@@ -1183,9 +1250,17 @@ func (r *ResourceF5XCApiTesting) ModifyPlan(ctx context.Context, req resource.Mo
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCApiTestingModel
 
 	// Read Terraform plan data into the model
@@ -1193,6 +1268,17 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCApiTestingModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Domains.IsNull() && !configData.Domains.IsUnknown() {
+		data.Domains = configData.Domains
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1410,6 +1496,13 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !valueSecretInfoChoiceModel.None.IsNull() && !valueSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										valueSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -1495,6 +1588,13 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(apiTestingClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										passwordSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -1589,6 +1689,13 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										tokenSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -1674,6 +1781,13 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(apiTestingClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !jsonPayloadSecretInfoChoiceModel.None.IsNull() && !jsonPayloadSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										jsonPayloadSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -1788,7 +1902,7 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1811,7 +1925,7 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "api_testing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "api_testing", err),
 		)
 		return
 	}
@@ -1930,12 +2044,8 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> CustomHeaderValue
-	if specData.GetCustomHeaderValue() != "" {
-		data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.CustomHeaderValue = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
 
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> Domains
 	{
@@ -2092,6 +2202,15 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 											} else {
 												valuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := valuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -2251,6 +2370,15 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 											} else {
 												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -2420,6 +2548,15 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 											}
 										}
 
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+										}
+
 										// --- End of Choices ---
 
 										// Create the final ObjectValue for this OneOf field
@@ -2577,6 +2714,15 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 											} else {
 												jsonPayloadsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceLoginEndpointJsonPayloadSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := jsonPayloadsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -2884,7 +3030,7 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "api_testing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "api_testing", err),
 		)
 		return
 	}
@@ -3003,12 +3149,8 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> CustomHeaderValue
-	if specData.GetCustomHeaderValue() != "" {
-		data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.CustomHeaderValue = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
 
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> Domains
 	{
@@ -3165,6 +3307,15 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 											} else {
 												valuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := valuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -3336,6 +3487,15 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 											} else {
 												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -3517,6 +3677,15 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 											}
 										}
 
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+										}
+
 										// --- End of Choices ---
 
 										// Create the final ObjectValue for this OneOf field
@@ -3688,6 +3857,15 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 											}
 										}
 
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := jsonPayloadsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+										}
+
 										// --- End of Choices ---
 
 										// Create the final ObjectValue for this OneOf field
@@ -3844,7 +4022,10 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 						apiTestingCredentialsModel.RoleChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiTestingCredentialsModel.RoleChoice = types.ObjectNull(ApiTestingDomainsCredentialsRoleChoiceModelAttributeMap)
+						apiTestingCredentialsModel.RoleChoice = types.ObjectValueMust(ApiTestingDomainsCredentialsRoleChoiceModelAttributeMap, map[string]attr.Value{
+							"admin":    types.BoolNull(),
+							"standard": types.BoolValue(true),
+						})
 					}
 
 					credentialsElements = append(credentialsElements, apiTestingCredentialsModel)
@@ -3951,7 +4132,14 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.FrequencyChoice = types.ObjectNull(ApiTestingFrequencyChoiceModelAttributeMap)
+
+		if data.FrequencyChoice.IsNull() || data.FrequencyChoice.IsUnknown() || ((data.FrequencyChoice.Attributes()["every_day"].IsNull() || data.FrequencyChoice.Attributes()["every_day"].IsUnknown()) && (data.FrequencyChoice.Attributes()["every_month"].IsNull() || data.FrequencyChoice.Attributes()["every_month"].IsUnknown()) && (data.FrequencyChoice.Attributes()["every_week"].IsNull() || data.FrequencyChoice.Attributes()["every_week"].IsUnknown())) {
+			data.FrequencyChoice = types.ObjectValueMust(ApiTestingFrequencyChoiceModelAttributeMap, map[string]attr.Value{
+				"every_day":   types.BoolNull(),
+				"every_month": types.BoolNull(),
+				"every_week":  types.BoolValue(true),
+			})
+		}
 	}
 
 	// Restore prior state for Domains. The API redacts sensitive fields
@@ -3969,6 +4157,12 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 }
 
 func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCApiTestingModel
@@ -3978,6 +4172,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planDomains := data.Domains
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -3997,7 +4192,11 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planDomains := data.Domains
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.Domains.IsNull() && !configData.Domains.IsUnknown() {
+		data.Domains = configData.Domains
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -4214,6 +4413,13 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !valueSecretInfoChoiceModel.None.IsNull() && !valueSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										valueSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -4299,6 +4505,13 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(apiTestingClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										passwordSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -4393,6 +4606,13 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										tokenSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -4478,6 +4698,13 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(apiTestingClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !jsonPayloadSecretInfoChoiceModel.None.IsNull() && !jsonPayloadSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										jsonPayloadSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -4592,7 +4819,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4608,7 +4835,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "api_testing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "api_testing", err),
 		)
 		return
 	}
@@ -4617,7 +4844,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "api_testing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "api_testing", err),
 		)
 		return
 	}
@@ -4735,12 +4962,8 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> CustomHeaderValue
-	if specData.GetCustomHeaderValue() != "" {
-		data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.CustomHeaderValue = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
 
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> Domains
 	{
@@ -4897,6 +5120,15 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 											} else {
 												valuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := valuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -5056,6 +5288,15 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 											} else {
 												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -5225,6 +5466,15 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 											}
 										}
 
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+										}
+
 										// --- End of Choices ---
 
 										// Create the final ObjectValue for this OneOf field
@@ -5382,6 +5632,15 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 											} else {
 												jsonPayloadsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceLoginEndpointJsonPayloadSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := jsonPayloadsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -5665,7 +5924,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	}
 	// Restore plan value for Domains. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.Domains = planDomains
+	data.Domains = utils.ResolveUnknowns(planDomains, data.Domains)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -5713,7 +5972,7 @@ func (r *ResourceF5XCApiTesting) Delete(ctx context.Context, request resource.De
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "api_testing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "api_testing", err),
 		)
 		return
 	}

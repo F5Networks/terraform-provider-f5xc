@@ -33,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -43,6 +44,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_geo_location_set "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/geo_location_set"
 )
@@ -120,8 +122,8 @@ func (r *ResourceF5XCGeoLocationSet) Metadata(ctx context.Context, request resou
 func (r *ResourceF5XCGeoLocationSet) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a geo_location_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of geo_location_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a geo_location_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of geo_location_set) etc. can be fetched",
+		MarkdownDescription: "Defines the geo_location_set created by user",
+		Description:         "Defines the geo_location_set created by user",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -177,7 +179,7 @@ func (r *ResourceF5XCGeoLocationSet) Schema(ctx context.Context, request resourc
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -194,23 +196,23 @@ func (r *ResourceF5XCGeoLocationSet) Schema(ctx context.Context, request resourc
 				Description:         "backward reference object list a list of dns load balancers associated with this geo location set",
 				MarkdownDescription: "backward reference object list a list of dns load balancers associated with this geo location set",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
@@ -218,9 +220,6 @@ func (r *ResourceF5XCGeoLocationSet) Schema(ctx context.Context, request resourc
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 					},
 				},
@@ -333,9 +332,17 @@ func (r *ResourceF5XCGeoLocationSet) ModifyPlan(ctx context.Context, req resourc
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCGeoLocationSetModel
 
 	// Read Terraform plan data into the model
@@ -459,7 +466,7 @@ func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resourc
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -482,7 +489,7 @@ func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resourc
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_geo_location_set.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "geo_location_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "geo_location_set", err),
 		)
 		return
 	}
@@ -652,14 +659,12 @@ func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resourc
 			AttrTypes: GeoLocationSetDnsLoadBalancersObjectRefModelAttributeMap,
 		}
 		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		var priorValDnsLoadBalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
-		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
-			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		if !data.DnsLoadBalancers.IsNull() && !data.DnsLoadBalancers.IsUnknown() && len(data.DnsLoadBalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLoadBalancers = basetypes.NewListValueMust(dnsLoadBalancersObjectType, nil)
 		} else {
 			data.DnsLoadBalancers = nullDnsLoadBalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LocationChoice
@@ -791,7 +796,7 @@ func (r *ResourceF5XCGeoLocationSet) Read(ctx context.Context, request resource.
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_geo_location_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "geo_location_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "geo_location_set", err),
 		)
 		return
 	}
@@ -961,14 +966,12 @@ func (r *ResourceF5XCGeoLocationSet) Read(ctx context.Context, request resource.
 			AttrTypes: GeoLocationSetDnsLoadBalancersObjectRefModelAttributeMap,
 		}
 		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		var priorValDnsLoadBalancers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
-		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
-			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		if !data.DnsLoadBalancers.IsNull() && !data.DnsLoadBalancers.IsUnknown() && len(data.DnsLoadBalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLoadBalancers = basetypes.NewListValueMust(dnsLoadBalancersObjectType, nil)
 		} else {
 			data.DnsLoadBalancers = nullDnsLoadBalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LocationChoice
@@ -1047,7 +1050,13 @@ func (r *ResourceF5XCGeoLocationSet) Read(ctx context.Context, request resource.
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LocationChoice = types.ObjectNull(GeoLocationSetLocationChoiceModelAttributeMap)
+
+		if data.LocationChoice.IsNull() || data.LocationChoice.IsUnknown() || ((data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).IsNull() || data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).IsUnknown() || (data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).Attributes()["expressions"].IsNull() || data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).Attributes()["expressions"].IsUnknown())) && (data.LocationChoice.Attributes()["global"].IsNull() || data.LocationChoice.Attributes()["global"].IsUnknown())) {
+			data.LocationChoice = types.ObjectValueMust(GeoLocationSetLocationChoiceModelAttributeMap, map[string]attr.Value{
+				"custom_geo_location_selector": types.ObjectNull(GeoLocationSetLocationChoiceCustomGeoLocationSelectorModelAttributeMap),
+				"global":                       types.BoolValue(true),
+			})
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1059,6 +1068,12 @@ func (r *ResourceF5XCGeoLocationSet) Read(ctx context.Context, request resource.
 }
 
 func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCGeoLocationSetModel
@@ -1202,7 +1217,7 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1218,7 +1233,7 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 	err = r.client.ReplaceObject(ctx, ves_io_schema_geo_location_set.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "geo_location_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "geo_location_set", err),
 		)
 		return
 	}
@@ -1227,7 +1242,7 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_geo_location_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "geo_location_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "geo_location_set", err),
 		)
 		return
 	}
@@ -1396,14 +1411,12 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 			AttrTypes: GeoLocationSetDnsLoadBalancersObjectRefModelAttributeMap,
 		}
 		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		var priorValDnsLoadBalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
-		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
-			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		if !data.DnsLoadBalancers.IsNull() && !data.DnsLoadBalancers.IsUnknown() && len(data.DnsLoadBalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLoadBalancers = basetypes.NewListValueMust(dnsLoadBalancersObjectType, nil)
 		} else {
 			data.DnsLoadBalancers = nullDnsLoadBalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LocationChoice
@@ -1557,7 +1570,7 @@ func (r *ResourceF5XCGeoLocationSet) Delete(ctx context.Context, request resourc
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "geo_location_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "geo_location_set", err),
 		)
 		return
 	}

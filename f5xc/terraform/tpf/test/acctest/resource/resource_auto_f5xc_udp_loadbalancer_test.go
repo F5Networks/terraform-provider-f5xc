@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCUdpLoadbalancer_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-udp-lb-" + acctest.RandString(t, 8)
+	name := "example-udp-lb-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,10 +39,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -50,10 +50,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -61,10 +61,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceAutoF5XCUdpLoadbalancer_hashPolicyTransition(t *testing.T) {
+func TestAccResourceAutoF5XCUdpLoadbalancer_hashPolicy(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-udp-lb-hash-" + acctest.RandString(t, 8)
+	name := "example-udp-lb-hash-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,10 +76,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_hashPolicyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withHashPolicy(name, namespace, "hash_policy_choice_random"),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -87,10 +87,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_hashPolicyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withHashPolicy(name, namespace, "hash_policy_choice_round_robin"),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -98,10 +98,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_hashPolicyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withHashPolicy(name, namespace, "hash_policy_choice_source_ip_stickiness"),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -109,10 +109,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_hashPolicyTransition(t *testing.T) {
 	})
 }
 
-func TestAccResourceAutoF5XCUdpLoadbalancer_portChoiceTransition(t *testing.T) {
+func TestAccResourceAutoF5XCUdpLoadbalancer_portChoice(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-udp-lb-port-" + acctest.RandString(t, 8)
+	name := "example-udp-lb-port-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 	basePort := testAccUdpBasePort(name)
 
@@ -125,10 +125,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_portChoiceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withPortChoice(name, namespace, fmt.Sprintf("listen_port = %d", basePort)),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -136,10 +136,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_portChoiceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withPortChoice(name, namespace, fmt.Sprintf("port_ranges = \"%d,%d,%d-%d\"", basePort+10, basePort+20, basePort+100, basePort+120)),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -147,10 +147,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_portChoiceTransition(t *testing.T) {
 	})
 }
 
-func TestAccResourceAutoF5XCUdpLoadbalancer_advertiseChoiceTransition(t *testing.T) {
+func TestAccResourceAutoF5XCUdpLoadbalancer_advertiseChoice(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-udp-lb-adv-" + acctest.RandString(t, 8)
+	name := "example-udp-lb-adv-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -162,10 +162,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_advertiseChoiceTransition(t *testing
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withAdvertiseChoice(name, namespace, "do_not_advertise = true"),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -173,10 +173,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_advertiseChoiceTransition(t *testing
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withAdvertiseChoice(name, namespace, "advertise_on_public_default_vip = true"),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -184,10 +184,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_advertiseChoiceTransition(t *testing
 	})
 }
 
-func TestAccResourceAutoF5XCUdpLoadbalancer_servicePolicyTransition(t *testing.T) {
+func TestAccResourceAutoF5XCUdpLoadbalancer_servicePolicy(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-udp-lb-svc-" + acctest.RandString(t, 8)
+	name := "example-udp-lb-svc-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -199,10 +199,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_servicePolicyTransition(t *testing.T
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withServicePolicy(name, namespace, "no_service_policies = true"),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -210,10 +210,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_servicePolicyTransition(t *testing.T
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_withServicePolicy(name, namespace, "service_policies_from_namespace = true"),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -224,10 +224,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_servicePolicyTransition(t *testing.T
 func TestAccResourceAutoF5XCUdpLoadbalancer_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-udp-lb-full-" + acctest.RandString(t, 8)
+	name := "example-udp-lb-full-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckUdpLoadbalancerDestroyProducer(t),
@@ -236,10 +236,10 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -247,15 +247,20 @@ func TestAccResourceAutoF5XCUdpLoadbalancer_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCUdpLoadbalancerConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_udp_loadbalancer.test",
+				ResourceName:                         "f5xc_udp_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_udp_loadbalancer.example"),
 				ImportStateVerifyIgnore:              testAccUdpLoadbalancerImportStateVerifyIgnore(),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCUdpLoadbalancerConfig_fullUpdated(name, "default"),
+		},
+	)
 }
 
 func testAccCheckUdpLoadbalancerDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -284,7 +289,7 @@ func testAccUdpBasePort(name string) int {
 
 func testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_origin_pool" "test" {
+resource "f5xc_origin_pool" "example" {
 	name                   = %q
 	namespace              = %q
 	loadbalancer_algorithm = ["ROUND_ROBIN"]
@@ -307,6 +312,12 @@ resource "f5xc_origin_pool" "test" {
 	tls_choice = {
 		no_tls = true
 	}
+
+	upstream_conn_pool_reuse_type = {
+		map_downstream_to_upstream_conn_pool_type_choice = {
+			disable_conn_pool_reuse = true
+		}
+	}
 }
 
 `, originPoolName, namespace)
@@ -316,7 +327,7 @@ func testAccResourceAutoF5XCUdpLoadbalancerConfig_basic(name, namespace string) 
 	originPoolName := fmt.Sprintf("%s-op", name)
 	listenPort := testAccUdpBasePort(name)
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
 	name                   = %q
 	namespace              = %q
 	loadbalancer_type_choice = {
@@ -329,14 +340,14 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 		}
 	]
 	advertise_choice = {
-		advertise_on_public_default_vip = true
+		do_not_advertise = true
 	}
 	hash_policy_choice = {
 		hash_policy_choice_random = true
@@ -352,10 +363,10 @@ func testAccResourceAutoF5XCUdpLoadbalancerConfig_basicUpdated(name, namespace s
 	originPoolName := fmt.Sprintf("%s-op", name)
 	listenPort := testAccUdpBasePort(name) + 1
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
 	name                   = %q
 	namespace              = %q
-	description            = "udp loadbalancer basic updated"
+	description            = "udp loadbalancer updated example"
 	loadbalancer_type_choice = {
 		udp = true
 	}
@@ -366,15 +377,15 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 			weight = 2
 		}
 	]
 	advertise_choice = {
-		advertise_on_public_default_vip = true
+		do_not_advertise = true
 	}
 	hash_policy_choice = {
 		hash_policy_choice_round_robin = true
@@ -390,7 +401,7 @@ func testAccResourceAutoF5XCUdpLoadbalancerConfig_withHashPolicy(name, namespace
 	originPoolName := fmt.Sprintf("%s-op", name)
 	listenPort := testAccUdpBasePort(name)
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
 	name                   = %q
 	namespace              = %q
 	loadbalancer_type_choice = {
@@ -403,14 +414,14 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 		}
 	]
 	advertise_choice = {
-    advertise_on_public_default_vip = true
+		do_not_advertise = true
 	}
 	hash_policy_choice = {
 		%s = true
@@ -425,7 +436,7 @@ resource "f5xc_udp_loadbalancer" "test" {
 func testAccResourceAutoF5XCUdpLoadbalancerConfig_withPortChoice(name, namespace, portChoice string) string {
 	originPoolName := fmt.Sprintf("%s-op", name)
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
 	name                   = %q
 	namespace              = %q
 	loadbalancer_type_choice = {
@@ -438,14 +449,14 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 		}
 	]
 	advertise_choice = {
-    advertise_on_public_default_vip = true
+		do_not_advertise = true
 	}
 	hash_policy_choice = {
 		hash_policy_choice_round_robin = true
@@ -459,9 +470,9 @@ resource "f5xc_udp_loadbalancer" "test" {
 
 func testAccResourceAutoF5XCUdpLoadbalancerConfig_withAdvertiseChoice(name, namespace, advertiseChoice string) string {
 	originPoolName := fmt.Sprintf("%s-op", name)
-	listenPort := testAccUdpBasePort(name)
+	listenPort := 2053
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
 	name                   = %q
 	namespace              = %q
 	loadbalancer_type_choice = {
@@ -474,8 +485,8 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 		}
@@ -497,7 +508,7 @@ func testAccResourceAutoF5XCUdpLoadbalancerConfig_withServicePolicy(name, namesp
 	originPoolName := fmt.Sprintf("%s-op", name)
 	listenPort := testAccUdpBasePort(name)
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
 	name                   = %q
 	namespace              = %q
 	loadbalancer_type_choice = {
@@ -510,14 +521,14 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 		}
 	]
 	advertise_choice = {
-    advertise_on_public_default_vip = true
+		do_not_advertise = true
 	}
 	hash_policy_choice = {
     hash_policy_choice_round_robin = true
@@ -533,7 +544,7 @@ func testAccResourceAutoF5XCUdpLoadbalancerConfig_full(name, namespace string) s
 	originPoolName := fmt.Sprintf("%s-op", name)
 	listenPort := testAccUdpBasePort(name)
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
 	name        = %q
 	namespace   = %q
 	description = "udp loadbalancer full"
@@ -560,8 +571,8 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 			weight   = 2
@@ -569,7 +580,7 @@ resource "f5xc_udp_loadbalancer" "test" {
 		}
 	]
 	advertise_choice = {
-    advertise_on_public_default_vip = true
+		do_not_advertise = true
 	}
 	hash_policy_choice = {
 		hash_policy_choice_source_ip_stickiness = true
@@ -585,10 +596,10 @@ func testAccResourceAutoF5XCUdpLoadbalancerConfig_fullUpdated(name, namespace st
 	originPoolName := fmt.Sprintf("%s-op", name)
 	listenPort := testAccUdpBasePort(name) + 1
 	return testAccResourceAutoF5XCUdpLoadbalancerOriginPoolConfig(originPoolName, namespace) + fmt.Sprintf(`
-resource "f5xc_udp_loadbalancer" "test" {
+resource "f5xc_udp_loadbalancer" "example" {
   name        = %q
   namespace   = %q
-	description = "udp loadbalancer full updated"
+	description = "udp loadbalancer updated full example"
 
   labels = {
 		env  = "acc"
@@ -612,8 +623,8 @@ resource "f5xc_udp_loadbalancer" "test" {
 		{
 			pool_choice = {
 				pool = {
-					name      = f5xc_origin_pool.test.name
-					namespace = f5xc_origin_pool.test.namespace
+					name      = f5xc_origin_pool.example.name
+					namespace = f5xc_origin_pool.example.namespace
 				}
 			}
 			weight   = 3
@@ -621,7 +632,7 @@ resource "f5xc_udp_loadbalancer" "test" {
 		}
 	]
 	advertise_choice = {
-    advertise_on_public_default_vip = true
+		do_not_advertise = true
 	}
 	hash_policy_choice = {
 		hash_policy_choice_round_robin = true

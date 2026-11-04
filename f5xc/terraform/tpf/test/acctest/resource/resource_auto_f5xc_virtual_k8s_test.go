@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	acctest "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/test/acctest"
 	virtualK8sSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_k8s"
@@ -26,10 +27,9 @@ import (
 )
 
 func TestAccResourceAutoF5XCVirtualK8S_basic(t *testing.T) {
-	t.Parallel()
 	suffix := testAccRunSuffix(t)
-	name := "tf-acc-vk8s-" + suffix
-	namespace := "tf-acc-vk8s-ns-" + suffix
+	name := "example-vk8s-" + suffix
+	namespace := "example-vk8s-ns-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -40,18 +40,18 @@ func TestAccResourceAutoF5XCVirtualK8S_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCVirtualK8SConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCVirtualK8SConfig_withDescription(name, namespace, "virtual k8s basic updated")},
+			{Config: testAccResourceAutoF5XCVirtualK8SConfig_withDescription(name, namespace, "virtual k8s updated example")},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -59,10 +59,9 @@ func TestAccResourceAutoF5XCVirtualK8S_basic(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCVirtualK8S_serviceIsolationTransition(t *testing.T) {
-	t.Parallel()
 	suffix := testAccRunSuffix(t)
-	name := "tf-acc-vk8s-" + suffix
-	namespace := "tf-acc-vk8s-ns-" + suffix
+	name := "example-vk8s-" + suffix
+	namespace := "example-vk8s-ns-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -73,31 +72,80 @@ func TestAccResourceAutoF5XCVirtualK8S_serviceIsolationTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCVirtualK8SConfig_withServiceIsolationDisabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCVirtualK8SConfig_withServiceIsolationIsolated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCVirtualK8S_vsiteRefsTransition(t *testing.T) {
-	t.Parallel()
+func TestAccResourceAutoF5XCVirtualK8S_vsiteRefs(t *testing.T) {
 	suffix := testAccRunSuffix(t)
-	name := "tf-acc-vk8s-" + suffix
-	namespace := "tf-acc-vk8s-ns-" + suffix
-	vsiteNameA := "tf-acc-vsite-a-" + suffix
-	vsiteNameB := "tf-acc-vsite-b-" + suffix
+	name := "example-vk8s-" + suffix
+	namespace := "example-vk8s-ns-" + suffix
+	vsiteNameA := "example-vsite-a-" + suffix
+	vsiteNameB := "example-vsite-b-" + suffix
+
+	acctest.VcrTestWithOptions(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckVirtualK8SDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefA(name, namespace, vsiteNameA),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.#", "1"),
+					resource.TestCheckResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.0.name", vsiteNameA),
+					resource.TestCheckResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.0.namespace", namespace),
+				),
+			},
+			{
+				ResourceName:                         "f5xc_virtual_k8s.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefB(name, namespace, vsiteNameA, vsiteNameB),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.#", "1"),
+					resource.TestCheckResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.0.name", vsiteNameB),
+					resource.TestCheckResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.0.namespace", namespace),
+				),
+			},
+			{
+				ResourceName:                         "f5xc_virtual_k8s.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefA("example-virtual-k8s", "example-namespace", "example-virtual-site-a"),
+		})
+}
+
+// Guards noopplan's config fingerprint: removing an Optional+Computed block must plan an update.
+func TestAccResourceAutoF5XCVirtualK8S_vsiteRefsRemoved(t *testing.T) {
+	suffix := testAccRunSuffix(t)
+	name := "example-vk8s-" + suffix
+	namespace := "example-vk8s-ns-" + suffix
+	vsiteNameA := "example-vsite-a-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -105,44 +153,26 @@ func TestAccResourceAutoF5XCVirtualK8S_vsiteRefsTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckVirtualK8SDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefA(name, namespace, vsiteNameA, vsiteNameB),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_virtual_k8s.test", "vsite_refs.#", "1"),
-					resource.TestCheckResourceAttr("f5xc_virtual_k8s.test", "vsite_refs.0.name", vsiteNameA),
-					resource.TestCheckResourceAttr("f5xc_virtual_k8s.test", "vsite_refs.0.namespace", namespace),
-				),
+				Config: testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefA(name, namespace, vsiteNameA),
+				Check:  resource.TestCheckResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.0.name", vsiteNameA),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
-				ImportState:                          true,
-				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
-				ImportStateVerifyIdentifierAttribute: "uid",
-			},
-			{
-				Config: testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefB(name, namespace, vsiteNameA, vsiteNameB),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_virtual_k8s.test", "vsite_refs.#", "1"),
-					resource.TestCheckResourceAttr("f5xc_virtual_k8s.test", "vsite_refs.0.name", vsiteNameB),
-					resource.TestCheckResourceAttr("f5xc_virtual_k8s.test", "vsite_refs.0.namespace", namespace),
-				),
-			},
-			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
-				ImportState:                          true,
-				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
-				ImportStateVerifyIdentifierAttribute: "uid",
+				Config: testAccResourceAutoF5XCVirtualK8SConfig_withVsiteAWithoutRef(name, namespace, vsiteNameA),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("f5xc_virtual_k8s.example", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.TestCheckNoResourceAttr("f5xc_virtual_k8s.example", "vsite_refs.0.name"),
 			},
 		},
 	})
 }
 
 func TestAccResourceAutoF5XCVirtualK8S_withLabelsAnnotations(t *testing.T) {
-	t.Parallel()
 	suffix := testAccRunSuffix(t)
-	name := "tf-acc-vk8s-" + suffix
-	namespace := "tf-acc-vk8s-ns-" + suffix
+	name := "example-vk8s-" + suffix
+	namespace := "example-vk8s-ns-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -150,21 +180,21 @@ func TestAccResourceAutoF5XCVirtualK8S_withLabelsAnnotations(t *testing.T) {
 		CheckDestroy:             testAccCheckVirtualK8SDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCVirtualK8SConfig_withLabelsAnnotations(name, namespace, "team-a", "test"),
+				Config: testAccResourceAutoF5XCVirtualK8SConfig_withLabelsAnnotations(name, namespace, "example-team", "example"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCVirtualK8SConfig_withLabelsAnnotations(name, namespace, "team-b", "prod")},
+			{Config: testAccResourceAutoF5XCVirtualK8SConfig_withLabelsAnnotations(name, namespace, "example-team-alt", "example")},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -172,36 +202,39 @@ func TestAccResourceAutoF5XCVirtualK8S_withLabelsAnnotations(t *testing.T) {
 }
 
 func TestAccResourceAutoF5XCVirtualK8S_full(t *testing.T) {
-	t.Parallel()
 	suffix := testAccRunSuffix(t)
-	name := "tf-acc-vk8s-" + suffix
-	namespace := "tf-acc-vk8s-ns-" + suffix
+	name := "example-vk8s-" + suffix
+	namespace := "example-vk8s-ns-" + suffix
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckVirtualK8SDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCVirtualK8SConfig_full(name, namespace, "team-a", "test", true),
+				Config: testAccResourceAutoF5XCVirtualK8SConfig_full(name, namespace, "example-team", "example", true),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCVirtualK8SConfig_full(name, namespace, "team-b", "prod", false)},
+			{Config: testAccResourceAutoF5XCVirtualK8SConfig_full(name, namespace, "example-team-alt", "example", false)},
 			{
-				ResourceName:                         "f5xc_virtual_k8s.test",
+				ResourceName:                         "f5xc_virtual_k8s.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_k8s.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCVirtualK8SConfig_full("example-virtual-k8s", "example-namespace", "example-team", "example", true),
+		})
 }
 
 func testAccCheckVirtualK8SDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -229,12 +262,12 @@ func testAccPreConfigDeleteVirtualK8SAndVsites(t *testing.T, namespace, name, vs
 func testAccResourceAutoF5XCVirtualK8SConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
-resource "f5xc_virtual_k8s" "test" {
+resource "f5xc_virtual_k8s" "example" {
   name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+  namespace = f5xc_namespace.test_namespace.name
 }
 `, namespace, name)
 }
@@ -242,12 +275,12 @@ resource "f5xc_virtual_k8s" "test" {
 func testAccResourceAutoF5XCVirtualK8SConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
-resource "f5xc_virtual_k8s" "test" {
+resource "f5xc_virtual_k8s" "example" {
   name        = %q
-	namespace   = f5xc_namespace.test_namespace.name
+  namespace   = f5xc_namespace.test_namespace.name
   description = %q
 }
 `, namespace, name, description)
@@ -256,12 +289,12 @@ resource "f5xc_virtual_k8s" "test" {
 func testAccResourceAutoF5XCVirtualK8SConfig_withServiceIsolationDisabled(name, namespace string) string {
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
-resource "f5xc_virtual_k8s" "test" {
+resource "f5xc_virtual_k8s" "example" {
   name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+  namespace = f5xc_namespace.test_namespace.name
 
   service_isolation_choice = {
     disabled = true
@@ -273,12 +306,12 @@ resource "f5xc_virtual_k8s" "test" {
 func testAccResourceAutoF5XCVirtualK8SConfig_withServiceIsolationIsolated(name, namespace string) string {
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
-resource "f5xc_virtual_k8s" "test" {
+resource "f5xc_virtual_k8s" "example" {
   name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+  namespace = f5xc_namespace.test_namespace.name
 
   service_isolation_choice = {
     isolated = true
@@ -290,12 +323,12 @@ resource "f5xc_virtual_k8s" "test" {
 func testAccResourceAutoF5XCVirtualK8SConfig_withLabelsAnnotations(name, namespace, owner, env string) string {
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
-resource "f5xc_virtual_k8s" "test" {
+resource "f5xc_virtual_k8s" "example" {
   name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+  namespace = f5xc_namespace.test_namespace.name
 
   labels = {
     env = %q
@@ -316,13 +349,13 @@ func testAccResourceAutoF5XCVirtualK8SConfig_full(name, namespace, owner, env st
 
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
-resource "f5xc_virtual_k8s" "test" {
+resource "f5xc_virtual_k8s" "example" {
   name        = %q
-	namespace   = f5xc_namespace.test_namespace.name
-  description = "virtual k8s full"
+  namespace   = f5xc_namespace.test_namespace.name
+  description = "Virtual k8s full example"
 
   labels = {
     env = %q
@@ -339,82 +372,96 @@ resource "f5xc_virtual_k8s" "test" {
 `, namespace, name, env, owner, serviceIsolation)
 }
 
-func testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefA(name, namespace, vsiteNameA, vsiteNameB string) string {
+func testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefA(name, namespace, vsiteNameA string) string {
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
 resource "f5xc_virtual_site" "test_vsite_a" {
-	name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+  name      = %q
+  namespace = f5xc_namespace.test_namespace.name
 
-	site_selector = {
-		expressions = ["environment in (prod)"]
-	}
+  site_selector = {
+    expressions = ["environment in (example)"]
+  }
 
-	site_type = ["REGIONAL_EDGE"]
+  site_type = ["REGIONAL_EDGE"]
 }
 
-resource "f5xc_virtual_site" "test_vsite_b" {
-	name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+resource "f5xc_virtual_k8s" "example" {
+  name      = %q
+  namespace = f5xc_namespace.test_namespace.name
 
-	site_selector = {
-		expressions = ["environment in (dev)"]
-	}
-
-	site_type = ["REGIONAL_EDGE"]
+  vsite_refs = [{
+    name      = f5xc_virtual_site.test_vsite_a.name
+    namespace = f5xc_virtual_site.test_vsite_a.namespace
+  }]
+}
+`, namespace, vsiteNameA, name)
 }
 
-resource "f5xc_virtual_k8s" "test" {
-	name      = %q
-	namespace = f5xc_namespace.test_namespace.name
-
-	vsite_refs = [{
-		name      = f5xc_virtual_site.test_vsite_a.name
-		namespace = f5xc_virtual_site.test_vsite_a.namespace
-	}]
+// Same as withVsiteRefA but without vsite_refs, so the virtual site stays and only the block is removed.
+func testAccResourceAutoF5XCVirtualK8SConfig_withVsiteAWithoutRef(name, namespace, vsiteNameA string) string {
+	return fmt.Sprintf(`
+resource "f5xc_namespace" "test_namespace" {
+  name = %q
 }
-`, namespace, vsiteNameA, vsiteNameB, name)
+
+resource "f5xc_virtual_site" "test_vsite_a" {
+  name      = %q
+  namespace = f5xc_namespace.test_namespace.name
+
+  site_selector = {
+    expressions = ["environment in (example)"]
+  }
+
+  site_type = ["REGIONAL_EDGE"]
+}
+
+resource "f5xc_virtual_k8s" "example" {
+  name      = %q
+  namespace = f5xc_namespace.test_namespace.name
+}
+`, namespace, vsiteNameA, name)
 }
 
 func testAccResourceAutoF5XCVirtualK8SConfig_withVsiteRefB(name, namespace, vsiteNameA, vsiteNameB string) string {
 	return fmt.Sprintf(`
 resource "f5xc_namespace" "test_namespace" {
-	name = %q
+  name = %q
 }
 
 resource "f5xc_virtual_site" "test_vsite_a" {
-	name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+  name      = %q
+  namespace = f5xc_namespace.test_namespace.name
 
-	site_selector = {
-		expressions = ["environment in (prod)"]
-	}
+  site_selector = {
+    expressions = ["environment in (example)"]
+  }
 
-	site_type = ["REGIONAL_EDGE"]
+  site_type = ["REGIONAL_EDGE"]
 }
 
 resource "f5xc_virtual_site" "test_vsite_b" {
-	name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+  name      = %q
+  namespace = f5xc_namespace.test_namespace.name
 
-	site_selector = {
-		expressions = ["environment in (dev)"]
-	}
+  site_selector = {
+    expressions = ["environment in (dev)"]
+  }
 
-	site_type = ["REGIONAL_EDGE"]
+  site_type = ["REGIONAL_EDGE"]
 }
 
-resource "f5xc_virtual_k8s" "test" {
-	name      = %q
-	namespace = f5xc_namespace.test_namespace.name
+resource "f5xc_virtual_k8s" "example" {
+  name      = %q
+  namespace = f5xc_namespace.test_namespace.name
 
-	vsite_refs = [{
-		name      = f5xc_virtual_site.test_vsite_b.name
-		namespace = f5xc_virtual_site.test_vsite_b.namespace
-	}]
+  vsite_refs = [{
+    name      = f5xc_virtual_site.test_vsite_b.name
+    namespace = f5xc_virtual_site.test_vsite_b.namespace
+  }]
 }
 `, namespace, vsiteNameA, vsiteNameB, name)
 }

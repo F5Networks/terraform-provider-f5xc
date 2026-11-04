@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCCdnCacheRule_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cdn-cache-rule-" + acctest.RandString(t, 8)
+	name := "example-cdn-cache-rule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,18 +37,18 @@ func TestAccResourceAutoF5XCCdnCacheRule_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -59,7 +59,7 @@ func TestAccResourceAutoF5XCCdnCacheRule_withCacheActionTransition(t *testing.T)
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cdn-cache-rule-" + acctest.RandString(t, 8)
+	name := "example-cdn-cache-rule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,26 +68,26 @@ func TestAccResourceAutoF5XCCdnCacheRule_withCacheActionTransition(t *testing.T)
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withCacheBypass(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withEligibleSchemeProxyHostURI(name, namespace, "10m")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withEligibleSchemeProxyHostRequestURI(name, namespace, "20m")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCCdnCacheRule_withPathOperatorTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cdn-cache-rule-" + acctest.RandString(t, 8)
+	name := "example-cdn-cache-rule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -107,26 +107,26 @@ func TestAccResourceAutoF5XCCdnCacheRule_withPathOperatorTransition(t *testing.T
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withPathOperator(name, namespace, "equals", "/assets")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withPathOperator(name, namespace, "contains", "images")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withPathOperator(name, namespace, "match_regex", "^/assets/.*")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -137,7 +137,7 @@ func TestAccResourceAutoF5XCCdnCacheRule_withQueryOperatorTransition(t *testing.
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cdn-cache-rule-" + acctest.RandString(t, 8)
+	name := "example-cdn-cache-rule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -146,26 +146,26 @@ func TestAccResourceAutoF5XCCdnCacheRule_withQueryOperatorTransition(t *testing.
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withQueryOperator(name, namespace, "equals", "promo")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withQueryOperator(name, namespace, "does_not_equal", "internal")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withQueryOperator(name, namespace, "match_regex", "^(promo|sale)$")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -176,7 +176,7 @@ func TestAccResourceAutoF5XCCdnCacheRule_withHeaderOptionTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cdn-cache-rule-" + acctest.RandString(t, 8)
+	name := "example-cdn-cache-rule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -185,26 +185,26 @@ func TestAccResourceAutoF5XCCdnCacheRule_withHeaderOptionTransition(t *testing.T
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withHeaderMatcher(name, namespace, "PROXY_HOST", "equals", "origin.example.com")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withHeaderMatcher(name, namespace, "REFERER", "contains", "partner")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_withHeaderMatcher(name, namespace, "USER_AGENT", "match_regex", "^Mozilla.*")},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -215,31 +215,35 @@ func TestAccResourceAutoF5XCCdnCacheRule_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-cdn-cache-rule-" + acctest.RandString(t, 8)
+	name := "example-cdn-cache-rule-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCdnCacheRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCdnCacheRuleConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_cdn_cache_rule.test",
+				ResourceName:                         "f5xc_cdn_cache_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_cache_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCdnCacheRuleConfig_full("example-cdn-cache-rule", "default"),
+		})
 }
 
 func testAccCheckCdnCacheRuleDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -248,7 +252,7 @@ func testAccCheckCdnCacheRuleDestroyProducer(t *testing.T) func(*terraform.State
 
 func testAccResourceAutoF5XCCdnCacheRuleConfig_base(name, namespace, expressionBlock, actionBlock, extra string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cdn_cache_rule" "test" {
+resource "f5xc_cdn_cache_rule" "example" {
   name      = %q
   namespace = %q
 %s
@@ -462,7 +466,7 @@ func testAccResourceAutoF5XCCdnCacheRuleConfig_full(name, namespace string) stri
     }`
 	extra := `  description = "CDN cache rule full"
   labels = {
-    env = "test"
+    env = "example"
   }
   annotations = {
     owner = "edge"
@@ -520,9 +524,9 @@ func testAccResourceAutoF5XCCdnCacheRuleConfig_fullUpdated(name, namespace strin
         }
       }
     }`
-	extra := `  description = "CDN cache rule full updated"
+	extra := `  description = "CDN cache rule updated full example"
   labels = {
-    env = "prod"
+    env = "example"
   }
   annotations = {
     owner = "edge-platform"

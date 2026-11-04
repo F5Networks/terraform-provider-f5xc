@@ -6,9 +6,9 @@ resource "f5xc_origin_pool" "example" {
   description            = "Origin pool example"
   loadbalancer_algorithm = ["ROUND_ROBIN"]
   endpoint_selection     = ["LOCAL_PREFERRED"]
-  
+
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v1"
   }
 

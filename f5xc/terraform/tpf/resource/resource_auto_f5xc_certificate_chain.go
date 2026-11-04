@@ -23,7 +23,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -34,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -108,8 +108,8 @@ func (r *ResourceF5XCCertificateChain) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCCertificateChain) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a certificate_chain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of certificate_chain) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a certificate_chain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of certificate_chain) etc. can be fetched",
+		MarkdownDescription: "Certificate chain is list of certificates used to establish chain of trust from server or client certificate to trusted CA root certificates.",
+		Description:         "Certificate chain is list of certificates used to establish chain of trust from server or client certificate to trusted CA root certificates.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -193,56 +193,53 @@ func (r *ResourceF5XCCertificateChain) Schema(ctx context.Context, request resou
 				Description:         "Information Information about certificate chain.",
 				MarkdownDescription: "Information Information about certificate chain.",
 				Required:            false,
-				Optional:            true,
+				Optional:            false,
 				Computed:            true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"common_name": schema.StringAttribute{
 							Description:         "Common Name Common Name (CN) of this certificate.",
 							MarkdownDescription: "Common Name Common Name (CN) of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"expiry": schema.StringAttribute{
 							Description:         "Expiry Timestamp Expiry timestamp of this certificate.",
 							MarkdownDescription: "Expiry Timestamp Expiry timestamp of this certificate.",
 							CustomType:          timetypes.RFC3339Type{},
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"issuer": schema.StringAttribute{
 							Description:         "Issuer Issuer of this certificate.",
 							MarkdownDescription: "Issuer Issuer of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"organization": schema.StringAttribute{
 							Description:         "Organization Organization of this certificate.",
 							MarkdownDescription: "Organization Organization of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"public_key_algorithm": schema.StringAttribute{
 							Description:         "Public Key Algorithm Public Key Algorithm of this certificate.",
 							MarkdownDescription: "Public Key Algorithm Public Key Algorithm of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"subject_alternative_names": schema.ListAttribute{
 							Description:         "Subject Alternative Names Subject Alternative Names of this certificate.",
 							MarkdownDescription: "Subject Alternative Names Subject Alternative Names of this certificate.",
 							ElementType:         types.StringType,
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 					},
 				},
@@ -309,9 +306,17 @@ func (r *ResourceF5XCCertificateChain) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCertificateChain) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCertificateChainModel
 
 	// Read Terraform plan data into the model
@@ -398,7 +403,7 @@ func (r *ResourceF5XCCertificateChain) Create(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -421,7 +426,7 @@ func (r *ResourceF5XCCertificateChain) Create(ctx context.Context, request resou
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_certificate_chain.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "certificate_chain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "certificate_chain", err),
 		)
 		return
 	}
@@ -628,14 +633,12 @@ func (r *ResourceF5XCCertificateChain) Create(ctx context.Context, request resou
 			AttrTypes: CertificateChainInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -688,7 +691,7 @@ func (r *ResourceF5XCCertificateChain) Read(ctx context.Context, request resourc
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate_chain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "certificate_chain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "certificate_chain", err),
 		)
 		return
 	}
@@ -895,14 +898,12 @@ func (r *ResourceF5XCCertificateChain) Read(ctx context.Context, request resourc
 			AttrTypes: CertificateChainInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.State.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -914,6 +915,12 @@ func (r *ResourceF5XCCertificateChain) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCCertificateChain) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCertificateChainModel
@@ -1017,7 +1024,7 @@ func (r *ResourceF5XCCertificateChain) Update(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1033,7 +1040,7 @@ func (r *ResourceF5XCCertificateChain) Update(ctx context.Context, request resou
 	err = r.client.ReplaceObject(ctx, ves_io_schema_certificate_chain.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "certificate_chain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "certificate_chain", err),
 		)
 		return
 	}
@@ -1042,7 +1049,7 @@ func (r *ResourceF5XCCertificateChain) Update(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate_chain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "certificate_chain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "certificate_chain", err),
 		)
 		return
 	}
@@ -1248,14 +1255,12 @@ func (r *ResourceF5XCCertificateChain) Update(ctx context.Context, request resou
 			AttrTypes: CertificateChainInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -1330,7 +1335,7 @@ func (r *ResourceF5XCCertificateChain) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "certificate_chain", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "certificate_chain", err),
 		)
 		return
 	}

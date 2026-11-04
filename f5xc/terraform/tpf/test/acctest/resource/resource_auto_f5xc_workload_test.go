@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCWorkload_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-workload-" + acctest.RandString(t, 8)
+	name := "example-workload-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCWorkload_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCWorkloadConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_description(name, namespace, "workload basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCWorkload_withAdvertiseChoiceTransition(t *testing.T)
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-workload-" + acctest.RandString(t, 8)
+	name := "example-workload-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCWorkload_withAdvertiseChoiceTransition(t *testing.T)
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_advertise(name, namespace, true, "", 0),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_description(name, namespace, "advertise update without lb child objects"),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCWorkload_withImagePullPolicyTransition(t *testing.T)
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-workload-" + acctest.RandString(t, 8)
+	name := "example-workload-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCWorkload_withImagePullPolicyTransition(t *testing.T)
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_pull_policy(name, namespace, "IMAGE_PULL_POLICY_IF_NOT_PRESENT"),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_pull_policy(name, namespace, "IMAGE_PULL_POLICY_ALWAYS"),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCWorkload_withFlavorChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-workload-" + acctest.RandString(t, 8)
+	name := "example-workload-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCWorkload_withFlavorChoiceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_default_flavor(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_flavor(name, namespace, "CONTAINER_FLAVOR_TYPE_MEDIUM"),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +168,7 @@ func TestAccResourceAutoF5XCWorkload_withPersistenceChoiceTransition(t *testing.
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-workload-" + acctest.RandString(t, 8)
+	name := "example-workload-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +179,20 @@ func TestAccResourceAutoF5XCWorkload_withPersistenceChoiceTransition(t *testing.
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_persistence_disabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadConfig_with_description(name, namespace, "persistence update without enabled path"),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,9 +203,9 @@ func TestAccResourceAutoF5XCWorkload_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-workload-" + acctest.RandString(t, 8)
+	name := "example-workload-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckWorkloadDestroyProducer(t),
@@ -214,24 +214,28 @@ func TestAccResourceAutoF5XCWorkload_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCWorkloadConfig_full(name, namespace, "CONTAINER_FLAVOR_TYPE_LARGE", "IMAGE_PULL_POLICY_NEVER", "full-a.example.test", 19090),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWorkloadConfig_full(name, namespace, "CONTAINER_FLAVOR_TYPE_TINY", "IMAGE_PULL_POLICY_DEFAULT", "full-b.example.test", 20080),
 			},
 			{
-				ResourceName:                         "f5xc_workload.test",
+				ResourceName:                         "f5xc_workload.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_workload.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCWorkloadConfig_full("example-workload", "default", "CONTAINER_FLAVOR_TYPE_LARGE", "IMAGE_PULL_POLICY_NEVER", "full-a.example.test", 19090),
+		})
 }
 
 func testAccCheckWorkloadDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -240,61 +244,61 @@ func testAccCheckWorkloadDestroyProducer(t *testing.T) func(*terraform.State) er
 
 func testAccResourceAutoF5XCWorkloadConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_workload" "example" {
+  name      = %q
+  namespace = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-						pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
-				}
-			}
-			advertise_choice = {
-				do_not_advertise = true
-			}
-			persistence_choice = {
-				disabled = true
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
+        }
+      }
+      advertise_choice = {
+        do_not_advertise = true
+      }
+      persistence_choice = {
+        disabled = true
+      }
+    }
+  }
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCWorkloadConfig_with_description(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name        = %q
-	namespace   = %q
-	description = %q
+resource "f5xc_workload" "example" {
+  name        = %q
+  namespace   = %q
+  description = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-						pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
-				}
-			}
-			advertise_choice = {
-				do_not_advertise = true
-			}
-			persistence_choice = {
-				disabled = true
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
+        }
+      }
+      advertise_choice = {
+        do_not_advertise = true
+      }
+      persistence_choice = {
+        disabled = true
+      }
+    }
+  }
 }
 `, name, namespace, description)
 }
@@ -303,204 +307,204 @@ func testAccResourceAutoF5XCWorkloadConfig_with_advertise(name, namespace string
 	advertiseBlock := "do_not_advertise = true"
 	if !doNotAdvertise {
 		advertiseBlock = fmt.Sprintf(`simple_advertise = {
-        domains      = [%q]
-        service_port = %d
-      }`, domain, servicePort)
+          domains      = [%q]
+          service_port = %d
+        }`, domain, servicePort)
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_workload" "example" {
+  name      = %q
+  namespace = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-						pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
-				}
-			}
-			advertise_choice = {
-				%s
-			}
-			persistence_choice = {
-				disabled = true
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
+        }
+      }
+      advertise_choice = {
+        %s
+      }
+      persistence_choice = {
+        disabled = true
+      }
+    }
+  }
 }
 `, name, namespace, advertiseBlock)
 }
 
 func testAccResourceAutoF5XCWorkloadConfig_with_pull_policy(name, namespace, pullPolicy string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_workload" "example" {
+  name      = %q
+  namespace = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-					pull_policy = [%q]
-				}
-			}
-			advertise_choice = {
-				do_not_advertise = true
-			}
-			persistence_choice = {
-				disabled = true
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = [%q]
+        }
+      }
+      advertise_choice = {
+        do_not_advertise = true
+      }
+      persistence_choice = {
+        disabled = true
+      }
+    }
+  }
 }
 `, name, namespace, pullPolicy)
 }
 
 func testAccResourceAutoF5XCWorkloadConfig_with_default_flavor(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_workload" "example" {
+  name      = %q
+  namespace = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-						pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
-				}
-				flavor_choice = {
-					default_flavor = true
-				}
-			}
-			advertise_choice = {
-				do_not_advertise = true
-			}
-			persistence_choice = {
-				disabled = true
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
+        }
+        flavor_choice = {
+          default_flavor = true
+        }
+      }
+      advertise_choice = {
+        do_not_advertise = true
+      }
+      persistence_choice = {
+        disabled = true
+      }
+    }
+  }
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCWorkloadConfig_with_flavor(name, namespace, flavor string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_workload" "example" {
+  name      = %q
+  namespace = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-						pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
-				}
-				flavor_choice = {
-					flavor = [%q]
-				}
-			}
-			advertise_choice = {
-				do_not_advertise = true
-			}
-			persistence_choice = {
-				disabled = true
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
+        }
+        flavor_choice = {
+          flavor = [%q]
+        }
+      }
+      advertise_choice = {
+        do_not_advertise = true
+      }
+      persistence_choice = {
+        disabled = true
+      }
+    }
+  }
 }
 `, name, namespace, flavor)
 }
 
 func testAccResourceAutoF5XCWorkloadConfig_with_persistence_disabled(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_workload" "example" {
+  name      = %q
+  namespace = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-						pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
-				}
-			}
-			advertise_choice = {
-				do_not_advertise = true
-			}
-			persistence_choice = {
-				disabled = true
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
+        }
+      }
+      advertise_choice = {
+        do_not_advertise = true
+      }
+      persistence_choice = {
+        disabled = true
+      }
+    }
+  }
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCWorkloadConfig_with_persistence_enabled(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_workload" "example" {
+  name      = %q
+  namespace = %q
 
-	workload_choice = {
-		simple_service = {
-			container = {
-				name = "web"
-				image = {
-					name = "nginx:1.25"
-					registry_choice = {
-						public = true
-					}
-						pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
-				}
-			}
-			advertise_choice = {
-				do_not_advertise = true
-			}
-			persistence_choice = {
-				enabled = {
-					name = "workload-pv"
-					persistent_volume = {
-						storage = {
-							class_name_choice = {
-								default = true
-							}
-						}
-						mount = {
-							mount_path = "/var/lib/workload"
-						}
-					}
-				}
-			}
-		}
-	}
+  workload_choice = {
+    simple_service = {
+      container = {
+        name = "web"
+        image = {
+          name = "nginx:1.25"
+          registry_choice = {
+            public = true
+          }
+          pull_policy = ["IMAGE_PULL_POLICY_DEFAULT"]
+        }
+      }
+      advertise_choice = {
+        do_not_advertise = true
+      }
+      persistence_choice = {
+        enabled = {
+          name = "workload-pv"
+          persistent_volume = {
+            storage = {
+              class_name_choice = {
+                default = true
+              }
+            }
+            mount = {
+              mount_path = "/var/lib/workload"
+            }
+          }
+        }
+      }
+    }
+  }
 }
 `, name, namespace)
 }
@@ -521,16 +525,16 @@ func testAccResourceAutoF5XCWorkloadConfig_full(name, namespace, flavor, pullPol
 	advertiseBlock := `do_not_advertise = true`
 
 	extraTop := `
-  description = "workload full"
+  description = "Workload full example"
   labels = {
-    env = "test"
+    env = "example"
   }
   annotations = {
     owner = "platform"
   }`
 
 	return fmt.Sprintf(`
-resource "f5xc_workload" "test" {
+resource "f5xc_workload" "example" {
   name      = %q
   namespace = %q%s
 

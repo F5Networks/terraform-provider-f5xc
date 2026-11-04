@@ -47,9 +47,10 @@ func (m rrsetListMergeModifier) MarkdownDescription(ctx context.Context) string 
 //
 // How:
 //   - config unknown: leave the framework plan untouched.
-//   - config null + state null: plan null (nothing configured, nothing stored).
-//   - config null + state present: plan unknown, forcing a re-read so a removed
-//     list (and any backend defaults) reconcile through the merge helpers.
+//   - config null + state null (or non-computed `rr_set_group` list): plan null.
+//   - config null + state present (for Optional+Computed `default_rr_set_group`):
+//     plan unknown, forcing a re-read so a removed list (and any backend defaults)
+//     reconcile through the merge helpers.
 //   - config present: keep the framework-computed plan (falling back to config),
 //     so backend-side additions/deletions/edits surface as normal drift.
 func (m rrsetListMergeModifier) PlanModifyList(ctx context.Context, req planmodifier.ListRequest, resp *planmodifier.ListResponse) {
@@ -70,7 +71,7 @@ func (m rrsetListMergeModifier) PlanModifyList(ctx context.Context, req planmodi
 	elementType := determineElementType(ctx, req)
 
 	if req.ConfigValue.IsNull() {
-		if req.StateValue.IsNull() {
+		if req.StateValue.IsNull() || isRRSetGroupElementType(elementType) {
 			resp.PlanValue = types.ListNull(elementType)
 			return
 		}
@@ -117,4 +118,40 @@ func determineElementType(ctx context.Context, req planmodifier.ListRequest) att
 		return elemType
 	}
 	return req.PlanValue.ElementType(ctx)
+}
+
+// isRRSetGroupElementType checks whether the given list element type represents a named
+// RRSetGroup object (`rr_set_group`).
+//
+// Why: In `f5xc_dns_zone`, `rr_set_group` is defined with `Optional: true, Computed: false`,
+// whereas `default_rr_set_group` is `Optional: true, Computed: true`. When a user removes
+// `rr_set_group` from HCL (`req.ConfigValue.IsNull()`), setting `resp.PlanValue` to
+// `types.ListUnknown` causes Terraform to fail with an invalid unknown plan value on a
+// non-computed attribute. Detecting `rr_set_group` allows planning `types.ListNull` instead.
+//
+// How: It inspects whether `elemType` is a `types.ObjectType` that defines both `"metadata"`
+// and `"rr_set"` attributes.
+//
+// Parameters:
+//   - elemType: the list element type extracted from the plan modifier request.
+//
+// Returns:
+//   - bool: `true` if `elemType` represents an `rr_set_group` object element, `false` otherwise.
+//
+// Example:
+//
+//	if isRRSetGroupElementType(elementType) {
+//	    resp.PlanValue = types.ListNull(elementType)
+//	}
+func isRRSetGroupElementType(elemType attr.Type) bool {
+	if elemType == nil {
+		return false
+	}
+	objType, ok := elemType.(types.ObjectType)
+	if !ok {
+		return false
+	}
+	_, hasMeta := objType.AttrTypes["metadata"]
+	_, hasRRSet := objType.AttrTypes["rr_set"]
+	return hasMeta && hasRRSet
 }

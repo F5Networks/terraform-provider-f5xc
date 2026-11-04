@@ -35,7 +35,7 @@ func TestAccResourceAutoF5XCContainerRegistry_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-container-registry-" + testAccRunSuffix(t)
+	name := "example-container-registry-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -46,22 +46,22 @@ func TestAccResourceAutoF5XCContainerRegistry_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -72,7 +72,7 @@ func TestAccResourceAutoF5XCContainerRegistry_withPasswordChoiceTransition(t *te
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-container-registry-" + testAccRunSuffix(t)
+	name := "example-container-registry-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -83,22 +83,22 @@ func TestAccResourceAutoF5XCContainerRegistry_withPasswordChoiceTransition(t *te
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_withPasswordChoice(name, namespace, "clear", ""),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_withPasswordChoice(name, namespace, "blindfold", "string:///"+blindFoldKeyB64(t)),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -109,7 +109,7 @@ func TestAccResourceAutoF5XCContainerRegistry_withRegistryTransition(t *testing.
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-container-registry-" + testAccRunSuffix(t)
+	name := "example-container-registry-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -120,22 +120,22 @@ func TestAccResourceAutoF5XCContainerRegistry_withRegistryTransition(t *testing.
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_withRegistry(name, namespace, "registry-one.example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_withRegistry(name, namespace, "registry-two.example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -146,7 +146,7 @@ func TestAccResourceAutoF5XCContainerRegistry_withEmailTransition(t *testing.T) 
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-container-registry-" + testAccRunSuffix(t)
+	name := "example-container-registry-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -157,22 +157,22 @@ func TestAccResourceAutoF5XCContainerRegistry_withEmailTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_withEmail(name, namespace, "registry-user-one@example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_withEmail(name, namespace, "registry-user-two@example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -183,7 +183,7 @@ func TestAccResourceAutoF5XCContainerRegistry_withMetadataTransition(t *testing.
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-container-registry-" + testAccRunSuffix(t)
+	name := "example-container-registry-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -191,25 +191,25 @@ func TestAccResourceAutoF5XCContainerRegistry_withMetadataTransition(t *testing.
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_container_registry", containerRegistrySchema.ObjectType, "container registry"),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCContainerRegistryConfig_withMetadata(name, namespace, "test", "team-a"),
+				Config: testAccResourceAutoF5XCContainerRegistryConfig_withMetadata(name, namespace, "example", "example-team"),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCContainerRegistryConfig_withMetadata(name, namespace, "prod", "team-b"),
+				Config: testAccResourceAutoF5XCContainerRegistryConfig_withMetadata(name, namespace, "example", "example-team-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -220,9 +220,9 @@ func TestAccResourceAutoF5XCContainerRegistry_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-container-registry-" + testAccRunSuffix(t)
+	name := "example-container-registry-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_container_registry", containerRegistrySchema.ObjectType, "container registry"),
@@ -231,31 +231,35 @@ func TestAccResourceAutoF5XCContainerRegistry_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCContainerRegistryConfig_fullUpdated(name, namespace, "string:///"+blindFoldKeyB64(t)),
 			},
 			{
-				ResourceName:                         "f5xc_container_registry.test",
+				ResourceName:                         "f5xc_container_registry.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCContainerRegistryPasswordImportVerifyIgnore,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_container_registry.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCContainerRegistryConfig_full("example-container-registry", "shared"),
+		})
 }
 
 func testAccResourceAutoF5XCContainerRegistryConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name      = %q
   namespace = %q
   registry  = "registry.example.com"
@@ -274,10 +278,10 @@ resource "f5xc_container_registry" "test" {
 
 func testAccResourceAutoF5XCContainerRegistryConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name        = %q
   namespace   = %q
-  description = "container registry updated"
+  description = "Container registry example updated"
   registry    = "registry.example.com"
   user_name   = "registry-user-updated"
 
@@ -306,7 +310,7 @@ func testAccResourceAutoF5XCContainerRegistryConfig_withPasswordChoice(name, nam
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name      = %q
   namespace = %q
   registry  = "registry.example.com"
@@ -323,7 +327,7 @@ resource "f5xc_container_registry" "test" {
 
 func testAccResourceAutoF5XCContainerRegistryConfig_withRegistry(name, namespace, registry string) string {
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name      = %q
   namespace = %q
   registry  = %q
@@ -342,7 +346,7 @@ resource "f5xc_container_registry" "test" {
 
 func testAccResourceAutoF5XCContainerRegistryConfig_withEmail(name, namespace, email string) string {
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name      = %q
   namespace = %q
   registry  = "registry.example.com"
@@ -362,7 +366,7 @@ resource "f5xc_container_registry" "test" {
 
 func testAccResourceAutoF5XCContainerRegistryConfig_withMetadata(name, namespace, env, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name      = %q
   namespace = %q
   registry  = "registry.example.com"
@@ -389,16 +393,16 @@ resource "f5xc_container_registry" "test" {
 
 func testAccResourceAutoF5XCContainerRegistryConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name        = %q
   namespace   = %q
-  description = "container registry full"
+  description = "Container registry example"
   registry    = "registry.example.com"
   user_name   = "registry-user"
   email       = "registry@example.com"
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "shared"
   }
 
@@ -424,16 +428,16 @@ func testAccResourceAutoF5XCContainerRegistryConfig_fullUpdated(name, namespace,
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_container_registry" "test" {
+resource "f5xc_container_registry" "example" {
   name        = %q
   namespace   = %q
-  description = "container registry full updated"
+  description = "Container registry example updated"
   registry    = "registry-updated.example.com"
   user_name   = "registry-user-updated"
   email       = "registry-updated@example.com"
 
   labels = {
-    env  = "prod"
+    env  = "example"
     tier = "edge"
   }
 

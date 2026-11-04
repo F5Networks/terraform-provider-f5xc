@@ -28,9 +28,9 @@ func TestAccResourceAutoF5XCProtectedApplication_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-protected-application-" + acctest.RandString(t, 8)
+	name := "example-protected-application-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProtectedApplicationDestroyProducer(t),
@@ -40,31 +40,35 @@ func TestAccResourceAutoF5XCProtectedApplication_basic(t *testing.T) {
 				Config:    testAccResourceAutoF5XCProtectedApplicationConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCProtectedApplicationConfig_withDescription(name, namespace, "protected application basic updated"),
+				Config: testAccResourceAutoF5XCProtectedApplicationConfig_withDescription(name, namespace, "Updated basic protected application example"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProtectedApplicationConfig_basic("example-protected-application", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCProtectedApplication_withRegionTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-protected-application-" + acctest.RandString(t, 8)
+	name := "example-protected-application-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -76,20 +80,20 @@ func TestAccResourceAutoF5XCProtectedApplication_withRegionTransition(t *testing
 				Config:    testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "US", "big_ip_iapp"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "EU", "big_ip_iapp"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -100,7 +104,7 @@ func TestAccResourceAutoF5XCProtectedApplication_withConnectorVariantA(t *testin
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-protected-application-" + acctest.RandString(t, 8)
+	name := "example-protected-application-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -112,20 +116,20 @@ func TestAccResourceAutoF5XCProtectedApplication_withConnectorVariantA(t *testin
 				Config:    testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "US", "big_ip_iapp"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "US", "custom_connector"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -136,7 +140,7 @@ func TestAccResourceAutoF5XCProtectedApplication_withConnectorVariantB(t *testin
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-protected-application-" + acctest.RandString(t, 8)
+	name := "example-protected-application-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -148,20 +152,20 @@ func TestAccResourceAutoF5XCProtectedApplication_withConnectorVariantB(t *testin
 				Config:    testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "ASIA", "adobe_commerce_connector"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "EU", "salesforce_commerce_connector"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -172,7 +176,7 @@ func TestAccResourceAutoF5XCProtectedApplication_withConnectorVariantC(t *testin
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-protected-application-" + acctest.RandString(t, 8)
+	name := "example-protected-application-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -184,20 +188,20 @@ func TestAccResourceAutoF5XCProtectedApplication_withConnectorVariantC(t *testin
 				Config:    testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "EU", "f5_big_ip"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region(name, namespace, "EU", "custom_connector"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -208,36 +212,40 @@ func TestAccResourceAutoF5XCProtectedApplication_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-protected-application-" + acctest.RandString(t, 8)
+	name := "example-protected-application-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProtectedApplicationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				PreConfig: acctest.DeleteIfExists(t, protectedApplicationSchema.ObjectType, namespace, name),
-				Config:    testAccResourceAutoF5XCProtectedApplicationConfig_full(name, namespace, "US", "custom_connector", "test", "platform", "owner-a"),
+				Config:    testAccResourceAutoF5XCProtectedApplicationConfig_full(name, namespace, "US", "custom_connector", "example", "platform", "example-owner"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCProtectedApplicationConfig_full(name, namespace, "EU", "f5_big_ip", "prod", "security", "owner-b"),
+				Config: testAccResourceAutoF5XCProtectedApplicationConfig_full(name, namespace, "EU", "f5_big_ip", "example", "security", "example-owner-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_protected_application.test",
+				ResourceName:                         "f5xc_protected_application.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_protected_application.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProtectedApplicationConfig_full("example-protected-application", "default", "US", "custom_connector", "example", "platform", "example-owner"),
+		})
 }
 
 func testAccCheckProtectedApplicationDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -250,7 +258,7 @@ func testAccResourceAutoF5XCProtectedApplicationConfig_basic(name, namespace str
 
 func testAccResourceAutoF5XCProtectedApplicationConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_protected_application" "test" {
+resource "f5xc_protected_application" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -280,7 +288,7 @@ func testAccResourceAutoF5XCProtectedApplicationConfig_with_connector_and_region
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_protected_application" "test" {
+resource "f5xc_protected_application" "example" {
   name      = %q
   namespace = %q
   region    = [%q]
@@ -303,10 +311,10 @@ func testAccResourceAutoF5XCProtectedApplicationConfig_full(name, namespace, reg
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_protected_application" "test" {
+resource "f5xc_protected_application" "example" {
   name        = %q
   namespace   = %q
-  description = "protected application full"
+  description = "Full protected application example"
   region      = [%q]
 
   labels = {

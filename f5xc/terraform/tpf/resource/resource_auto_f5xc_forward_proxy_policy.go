@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -46,6 +47,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -872,8 +874,8 @@ func (r *ResourceF5XCForwardProxyPolicy) Metadata(ctx context.Context, request r
 func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Forward Proxy Policy Hits ID ForwardProxyPolicyHitsId uniquely identifies an entry in the response to forward proxy policy hits request. Forward proxy policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
-		Description:         "Forward Proxy Policy Hits ID ForwardProxyPolicyHitsId uniquely identifies an entry in the response to forward proxy policy hits request. Forward proxy policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		MarkdownDescription: "Forward Proxy policy defines access control rules for connections going via forward<br>Proxy. It is view type of config object that uses service policy mechanism to achieve<br>Required functionality.<br><br>View will create following child objects.<br><br>* Service Policy<br>* Service Policy Rule",
+		Description:         "Forward Proxy policy defines access control rules for connections going via forward Proxy. It is view type of config object that uses service policy mechanism to achieve Required functionality. View will create following child objects. Service Policy Service Policy Rule",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1002,7 +1004,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
@@ -1130,7 +1132,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 											Validators: []validator.List{
 												listvalidator.SizeAtMost(32),
 												listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+													regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 													"must be a valid IPv6 prefix",
 												)),
 												listvalidator.UniqueValues(),
@@ -1446,7 +1448,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 											Validators: []validator.List{
 												listvalidator.SizeAtMost(32),
 												listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+													regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 													"must be a valid IPv6 prefix",
 												)),
 												listvalidator.UniqueValues(),
@@ -1796,7 +1798,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -1829,7 +1831,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -1872,7 +1874,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -2133,6 +2135,8 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 															Computed:            false,
 															Validators: []validator.List{
 																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ABORTION", "ABUSED_DRUGS", "ADULT_AND_PORNOGRAPHY", "ALCOHOL_AND_TOBACCO", "AUCTIONS", "BOT_NETS", "BUSINESS_AND_ECONOMY", "CHEATING", "COMPUTER_AND_INTERNET_INFO", "COMPUTER_AND_INTERNET_SECURITY", "CONFIRMED_SPAM_SOURCES", "CONTENT_DELIVERY_NETWORKS", "CULT_AND_OCCULT", "DATING", "DEAD_SITES", "DYNAMICALLY_GENERATED_CONTENT", "EDUCATIONAL_INSTITUTIONS", "ENTERTAINMENT_AND_ARTS", "FASHION_AND_BEAUTY", "FINANCIAL_SERVICES", "GAMBLING", "GAMES", "GOVERNMENT", "GROSS", "HACKING", "HATE_AND_RACISM", "HEALTH_AND_MEDICINE", "HOME_AND_GARDEN", "HUNTING_AND_FISHING", "ILLEGAL", "IMAGE_AND_VIDEO_SEARCH", "INDIVIDUAL_STOCK_ADVICE_AND_TOOLS", "INTERNET_COMMUNICATIONS", "INTERNET_PORTALS", "JOB_SEARCH", "KEYLOGGERS_AND_MONITORING", "KIDS", "LEGAL", "LOCAL_INFORMATION", "MALWARE_SITES", "MARIJUANA", "MILITARY", "MOTOR_VEHICLES", "MUSIC", "NEWS_AND_MEDIA", "NUDITY", "ONLINE_GREETING_CARDS", "OPEN_HTTP_PROXIES", "PARKED_DOMAINS", "PAY_TO_SURF", "PEER_TO_PEER", "PERSONAL_SITES_AND_BLOGS", "PERSONAL_STORAGE", "PHILOSOPHY_AND_POLITICAL_ADVOCACY", "PHISHING_AND_OTHER_FRAUDS", "PRIVATE_IP_ADDRESSES", "PROXY_AVOIDANCE_AND_ANONYMIZERS", "QUESTIONABLE", "REAL_ESTATE", "RECREATION_AND_HOBBIES", "REFERENCE_AND_RESEARCH", "RELIGION", "SEARCH_ENGINES", "SEX_EDUCATION", "SHAREWARE_AND_FREEWARE", "SHOPPING", "SOCIAL_NETWORKING", "SOCIETY", "SPAM_URLS", "SPORTS", "SPYWARE_AND_ADWARE", "STREAMING_MEDIA", "SWIMSUITS_AND_INTIMATE_APPAREL", "TRAINING_AND_TOOLS", "TRANSLATION", "TRAVEL", "UNCATEGORIZED", "UNCONFIRMED_SPAM_SOURCES", "VIOLENCE", "WEAPONS", "WEB_ADVERTISEMENTS", "WEB_BASED_EMAIL", "WEB_HOSTING"}...)),
+																listvalidator.SizeAtMost(128),
+																listvalidator.UniqueValues(),
 															},
 														},
 													},
@@ -2283,7 +2287,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -2326,7 +2330,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -2426,7 +2430,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2505,7 +2509,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Schema(ctx context.Context, request res
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2579,9 +2583,17 @@ func (r *ResourceF5XCForwardProxyPolicy) ModifyPlan(ctx context.Context, req res
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCForwardProxyPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCForwardProxyPolicyModel
 
 	// Read Terraform plan data into the model
@@ -3982,7 +3994,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Create(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4005,7 +4017,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Create(ctx context.Context, request res
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "forward_proxy_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "forward_proxy_policy", err),
 		)
 		return
 	}
@@ -6280,7 +6292,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "forward_proxy_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "forward_proxy_policy", err),
 		)
 		return
 	}
@@ -6528,7 +6540,15 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.ProxyChoice = types.ObjectNull(ForwardProxyPolicyProxyChoiceModelAttributeMap)
+
+		if data.ProxyChoice.IsNull() || data.ProxyChoice.IsUnknown() || ((data.ProxyChoice.Attributes()["any_proxy"].IsNull() || data.ProxyChoice.Attributes()["any_proxy"].IsUnknown()) && (data.ProxyChoice.Attributes()["drp_http_connect"].IsNull() || data.ProxyChoice.Attributes()["drp_http_connect"].IsUnknown()) && (data.ProxyChoice.Attributes()["network_connector"].(types.Object).IsNull() || data.ProxyChoice.Attributes()["network_connector"].(types.Object).IsUnknown() || ((data.ProxyChoice.Attributes()["network_connector"].(types.Object).Attributes()["name"].IsNull() || data.ProxyChoice.Attributes()["network_connector"].(types.Object).Attributes()["name"].IsUnknown()) && (data.ProxyChoice.Attributes()["network_connector"].(types.Object).Attributes()["namespace"].IsNull() || data.ProxyChoice.Attributes()["network_connector"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.ProxyChoice.Attributes()["network_connector"].(types.Object).Attributes()["tenant"].IsNull() || data.ProxyChoice.Attributes()["network_connector"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.ProxyChoice.Attributes()["proxy_label_selector"].(types.Object).IsNull() || data.ProxyChoice.Attributes()["proxy_label_selector"].(types.Object).IsUnknown() || (data.ProxyChoice.Attributes()["proxy_label_selector"].(types.Object).Attributes()["expressions"].IsNull() || data.ProxyChoice.Attributes()["proxy_label_selector"].(types.Object).Attributes()["expressions"].IsUnknown()))) {
+			data.ProxyChoice = types.ObjectValueMust(ForwardProxyPolicyProxyChoiceModelAttributeMap, map[string]attr.Value{
+				"any_proxy":            types.BoolValue(true),
+				"drp_http_connect":     types.BoolNull(),
+				"network_connector":    types.ObjectNull(ForwardProxyPolicyProxyChoiceNetworkConnectorModelAttributeMap),
+				"proxy_label_selector": types.ObjectNull(ForwardProxyPolicyProxyChoiceProxyLabelSelectorModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> RuleChoice
@@ -6617,7 +6637,11 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 					allowListAttributeMap["default_action_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					allowListAttributeMap["default_action_choice"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap)
+					allowListAttributeMap["default_action_choice"] = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceAllowListDefaultActionChoiceModelAttributeMap, map[string]attr.Value{
+						"default_action_allow":       types.BoolNull(),
+						"default_action_deny":        types.BoolNull(),
+						"default_action_next_policy": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested ArrayOfPointerField --> DestList
@@ -6816,7 +6840,12 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 							forwardProxyPolicyURLTypeModel.PathChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListHttpListPathChoiceModelAttributeMap)
+							forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceAllowListHttpListPathChoiceModelAttributeMap, map[string]attr.Value{
+								"any_path":          types.BoolValue(true),
+								"path_exact_value":  types.StringNull(),
+								"path_prefix_value": types.StringNull(),
+								"path_regex_value":  types.StringNull(),
+							})
 						}
 
 						httpListElements = append(httpListElements, forwardProxyPolicyURLTypeModel)
@@ -6998,7 +7027,11 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 					denyListAttributeMap["default_action_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					denyListAttributeMap["default_action_choice"] = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListDefaultActionChoiceModelAttributeMap)
+					denyListAttributeMap["default_action_choice"] = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceDenyListDefaultActionChoiceModelAttributeMap, map[string]attr.Value{
+						"default_action_allow":       types.BoolNull(),
+						"default_action_deny":        types.BoolNull(),
+						"default_action_next_policy": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested ArrayOfPointerField --> DestList
@@ -7197,7 +7230,12 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 							forwardProxyPolicyURLTypeModel.PathChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListHttpListPathChoiceModelAttributeMap)
+							forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceDenyListHttpListPathChoiceModelAttributeMap, map[string]attr.Value{
+								"any_path":          types.BoolValue(true),
+								"path_exact_value":  types.StringNull(),
+								"path_prefix_value": types.StringNull(),
+								"path_regex_value":  types.StringNull(),
+							})
 						}
 
 						httpListElements = append(httpListElements, forwardProxyPolicyURLTypeModel)
@@ -7723,7 +7761,12 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 												forwardProxyPolicyURLTypeModel.PathChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap)
+												forwardProxyPolicyURLTypeModel.PathChoice = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap, map[string]attr.Value{
+													"any_path":          types.BoolValue(true),
+													"path_exact_value":  types.StringNull(),
+													"path_prefix_value": types.StringNull(),
+													"path_regex_value":  types.StringNull(),
+												})
 											}
 
 											httpListElements = append(httpListElements, forwardProxyPolicyURLTypeModel)
@@ -7919,7 +7962,17 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.DestinationChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap)
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.DestinationChoice = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap, map[string]attr.Value{
+								"all_destinations":   types.BoolValue(true),
+								"dst_asn_list":       types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnListModelAttributeMap),
+								"dst_asn_set":        types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstAsnSetModelAttributeMap),
+								"dst_ip_prefix_set":  types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstIpPrefixSetModelAttributeMap),
+								"dst_label_selector": types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstLabelSelectorModelAttributeMap),
+								"dst_prefix_list":    types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceDstPrefixListModelAttributeMap),
+								"http_list":          types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceHttpListModelAttributeMap),
+								"tls_list":           types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceTlsListModelAttributeMap),
+								"url_category_list":  types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesDestinationChoiceUrlCategoryListModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested OneOfField --> HttpConnectChoice
@@ -8205,7 +8258,12 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
+							forwardProxyPolicyForwardProxyAdvancedRuleTypeModel.SourceChoice = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap, map[string]attr.Value{
+								"all_sources":    types.BoolValue(true),
+								"ip_prefix_set":  types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceIpPrefixSetModelAttributeMap),
+								"label_selector": types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoiceLabelSelectorModelAttributeMap),
+								"prefix_list":    types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListRulesSourceChoicePrefixListModelAttributeMap),
+							})
 						}
 
 						rulesElements = append(rulesElements, forwardProxyPolicyForwardProxyAdvancedRuleTypeModel)
@@ -8256,7 +8314,15 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.RuleChoice = types.ObjectNull(ForwardProxyPolicyRuleChoiceModelAttributeMap)
+
+		if data.RuleChoice.IsNull() || data.RuleChoice.IsUnknown() || ((data.RuleChoice.Attributes()["allow_all"].IsNull() || data.RuleChoice.Attributes()["allow_all"].IsUnknown()) && (data.RuleChoice.Attributes()["allow_list"].(types.Object).IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_allow"].IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_allow"].IsUnknown()) && (data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_deny"].IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_deny"].IsUnknown()) && (data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_next_policy"].IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_next_policy"].IsUnknown()))) && (data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["dest_list"].IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["dest_list"].IsUnknown()) && (data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["http_list"].IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["http_list"].IsUnknown()) && (data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["tls_list"].IsNull() || data.RuleChoice.Attributes()["allow_list"].(types.Object).Attributes()["tls_list"].IsUnknown()))) && (data.RuleChoice.Attributes()["deny_list"].(types.Object).IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_allow"].IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_allow"].IsUnknown()) && (data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_deny"].IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_deny"].IsUnknown()) && (data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_next_policy"].IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["default_action_choice"].(types.Object).Attributes()["default_action_next_policy"].IsUnknown()))) && (data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["dest_list"].IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["dest_list"].IsUnknown()) && (data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["http_list"].IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["http_list"].IsUnknown()) && (data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["tls_list"].IsNull() || data.RuleChoice.Attributes()["deny_list"].(types.Object).Attributes()["tls_list"].IsUnknown()))) && (data.RuleChoice.Attributes()["rule_list"].(types.Object).IsNull() || data.RuleChoice.Attributes()["rule_list"].(types.Object).IsUnknown() || (data.RuleChoice.Attributes()["rule_list"].(types.Object).Attributes()["rules"].IsNull() || data.RuleChoice.Attributes()["rule_list"].(types.Object).Attributes()["rules"].IsUnknown()))) {
+			data.RuleChoice = types.ObjectValueMust(ForwardProxyPolicyRuleChoiceModelAttributeMap, map[string]attr.Value{
+				"allow_all":  types.BoolValue(true),
+				"allow_list": types.ObjectNull(ForwardProxyPolicyRuleChoiceAllowListModelAttributeMap),
+				"deny_list":  types.ObjectNull(ForwardProxyPolicyRuleChoiceDenyListModelAttributeMap),
+				"rule_list":  types.ObjectNull(ForwardProxyPolicyRuleChoiceRuleListModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> SegmentPolicy
@@ -8514,6 +8580,12 @@ func (r *ResourceF5XCForwardProxyPolicy) Read(ctx context.Context, request resou
 }
 
 func (r *ResourceF5XCForwardProxyPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCForwardProxyPolicyModel
@@ -9934,7 +10006,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Update(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -9950,7 +10022,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Update(ctx context.Context, request res
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "forward_proxy_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "forward_proxy_policy", err),
 		)
 		return
 	}
@@ -9959,7 +10031,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Update(ctx context.Context, request res
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "forward_proxy_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "forward_proxy_policy", err),
 		)
 		return
 	}
@@ -12245,8 +12317,26 @@ func (r *ResourceF5XCForwardProxyPolicy) Delete(ctx context.Context, request res
 	// Standard Delete Logic
 	opts := []vesapi.CallOpt{}
 	opts = append(opts, vesapi.WithFailIfReferred())
+	deleteFn := func() error {
+		return r.client.DeleteObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	}
 
-	err = r.client.DeleteObject(ctx, ves_io_schema_views_forward_proxy_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	err = deleteFn()
+	if err != nil && strings.Contains(err.Error(), "is still being referred by") {
+		// The object is still referenced by a parent object (e.g. the user is deleting it
+		// and re-pointing the parent to another object in the same apply). Reactively
+		// detach it from any referring parents Terraform manages, then retry.
+		tflog.Info(ctx, fmt.Sprintf("[hook] forward_proxy_policy delete hit 409, attempting reactive unbind: %s", err))
+		if unbindErr := hook.ForwardProxyPolicyUnbindReferencingObjects(ctx, r.client, data.Namespace.ValueString(), data.Name.ValueString(), err.Error()); unbindErr != nil {
+			tflog.Warn(ctx, fmt.Sprintf("[hook] forward_proxy_policy reactive unbind failed: %s", unbindErr))
+		}
+		// Retry immediately: the unbind above (when it applies) removes the reference
+		// that caused the conflict, so there is nothing to gain from sleeping first.
+		err = deleteFn()
+	}
+	if err != nil {
+		err = utils.DeleteWithTransientRetry(ctx, "forward_proxy_policy", deleteFn)
+	}
 
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") || strings.Contains(err.Error(), "NotFound") {
@@ -12255,7 +12345,7 @@ func (r *ResourceF5XCForwardProxyPolicy) Delete(ctx context.Context, request res
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "forward_proxy_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "forward_proxy_policy", err),
 		)
 		return
 	}

@@ -32,6 +32,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -106,8 +107,8 @@ func (r *ResourceF5XCTrustedCaList) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCTrustedCaList) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a trusted_ca_list This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of trusted_ca_list) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a trusted_ca_list This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of trusted_ca_list) etc. can be fetched",
+		MarkdownDescription: "A Root CA Certificate represents list of trusted root CAs",
+		Description:         "A Root CA Certificate represents list of trusted root CAs",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -177,63 +178,64 @@ func (r *ResourceF5XCTrustedCaList) Schema(ctx context.Context, request resource
 				Description:         "Information Information about Trusted CA certificates.",
 				MarkdownDescription: "Information Information about Trusted CA certificates.",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"common_name": schema.StringAttribute{
 							Description:         "Common Name Common Name (CN) of this certificate.",
 							MarkdownDescription: "Common Name Common Name (CN) of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"expiry": schema.StringAttribute{
 							Description:         "Expiry Timestamp Expiry timestamp of this certificate.",
 							MarkdownDescription: "Expiry Timestamp Expiry timestamp of this certificate.",
 							CustomType:          timetypes.RFC3339Type{},
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"issuer": schema.StringAttribute{
 							Description:         "Issuer Issuer of this certificate.",
 							MarkdownDescription: "Issuer Issuer of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"organization": schema.StringAttribute{
 							Description:         "Organization Organization of this certificate.",
 							MarkdownDescription: "Organization Organization of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"public_key_algorithm": schema.StringAttribute{
 							Description:         "Public Key Algorithm Public Key Algorithm of this certificate.",
 							MarkdownDescription: "Public Key Algorithm Public Key Algorithm of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"subject_alternative_names": schema.ListAttribute{
 							Description:         "Subject Alternative Names Subject Alternative Names of this certificate.",
 							MarkdownDescription: "Subject Alternative Names Subject Alternative Names of this certificate.",
 							ElementType:         types.StringType,
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 					},
 				},
 			},
 			"trusted_ca_url": schema.StringAttribute{
 				Description:         "Trusted CA URL Trusted CA certificates for validating certificates",
-				MarkdownDescription: "Trusted CA URL Trusted CA certificates for validating certificates<br>**Validation:** `Length LengthAtMost(512000)`",
+				MarkdownDescription: "Trusted CA URL Trusted CA certificates for validating certificates<br>**Validation:** `Length LengthAtMost(512000)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(512000),
 				},
@@ -300,9 +302,17 @@ func (r *ResourceF5XCTrustedCaList) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCTrustedCaList) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCTrustedCaListModel
 
 	// Read Terraform plan data into the model
@@ -391,7 +401,7 @@ func (r *ResourceF5XCTrustedCaList) Create(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -414,7 +424,7 @@ func (r *ResourceF5XCTrustedCaList) Create(ctx context.Context, request resource
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "trusted_ca_list", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "trusted_ca_list", err),
 		)
 		return
 	}
@@ -613,23 +623,17 @@ func (r *ResourceF5XCTrustedCaList) Create(ctx context.Context, request resource
 			AttrTypes: TrustedCaListInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	// resource SpecToModelRoot StringField --> TrustedCaUrl
-	if specData.GetTrustedCaUrl() != "" {
-		data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TrustedCaUrl = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
 
 	if response.Diagnostics.HasError() {
 		return
@@ -681,7 +685,7 @@ func (r *ResourceF5XCTrustedCaList) Read(ctx context.Context, request resource.R
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "trusted_ca_list", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "trusted_ca_list", err),
 		)
 		return
 	}
@@ -880,23 +884,17 @@ func (r *ResourceF5XCTrustedCaList) Read(ctx context.Context, request resource.R
 			AttrTypes: TrustedCaListInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.State.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	// resource SpecToModelRoot StringField --> TrustedCaUrl
-	if specData.GetTrustedCaUrl() != "" {
-		data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TrustedCaUrl = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
 
 	if response.Diagnostics.HasError() {
 		return
@@ -907,6 +905,12 @@ func (r *ResourceF5XCTrustedCaList) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCTrustedCaList) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCTrustedCaListModel
@@ -1015,7 +1019,7 @@ func (r *ResourceF5XCTrustedCaList) Update(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1031,7 +1035,7 @@ func (r *ResourceF5XCTrustedCaList) Update(ctx context.Context, request resource
 	err = r.client.ReplaceObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "trusted_ca_list", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "trusted_ca_list", err),
 		)
 		return
 	}
@@ -1040,7 +1044,7 @@ func (r *ResourceF5XCTrustedCaList) Update(ctx context.Context, request resource
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "trusted_ca_list", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "trusted_ca_list", err),
 		)
 		return
 	}
@@ -1238,23 +1242,17 @@ func (r *ResourceF5XCTrustedCaList) Update(ctx context.Context, request resource
 			AttrTypes: TrustedCaListInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	// resource SpecToModelRoot StringField --> TrustedCaUrl
-	if specData.GetTrustedCaUrl() != "" {
-		data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TrustedCaUrl = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.TrustedCaUrl = types.StringValue(specData.GetTrustedCaUrl())
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
 	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
@@ -1328,7 +1326,7 @@ func (r *ResourceF5XCTrustedCaList) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "trusted_ca_list", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "trusted_ca_list", err),
 		)
 		return
 	}

@@ -37,29 +37,30 @@ type GcpVpcSiteSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type GcpVpcSiteSecretTypeSecretInfoChoice struct {
+type GcpVpcSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type GcpVpcSiteSecretTypeBlindfoldSecretInfo struct {
+type GcpVpcSiteBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type GcpVpcSiteSecretTypeClearSecretInfo struct {
+type GcpVpcSiteClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type GcpVpcSiteGlobalSpecTypeBlockedServicesChoice struct {
+type GcpVpcSiteBlockedServicesChoice struct {
 	BlockAllServices       types.Bool   `tfsdk:"block_all_services"`
 	BlockedServices        types.Object `tfsdk:"blocked_services"`
 	DefaultBlockedServices types.Bool   `tfsdk:"default_blocked_services"`
 }
 
-type GcpVpcSiteGlobalSpecTypeBlockedServices struct {
+type GcpVpcSiteBlockedServices struct {
 	BlockedSevice types.List `tfsdk:"blocked_sevice"`
 }
 
@@ -68,106 +69,105 @@ type GcpVpcSiteFleetBlockedServices struct {
 	NetworkType                    types.List   `tfsdk:"network_type"`
 }
 
-type GcpVpcSiteBlockedServicesBlockedServicesValueTypeChoice struct {
-	Dns              types.Bool `tfsdk:"dns"`
-	Ssh              types.Bool `tfsdk:"ssh"`
-	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
+type GcpVpcSiteBlockedServicesValueTypeChoice struct {
+	Dns types.Bool `tfsdk:"dns"`
+	Ssh types.Bool `tfsdk:"ssh"`
 }
 
-type GcpVpcSiteGcpVpcSiteGCPVPCSiteInfoType struct {
+type GcpVpcSiteGCPVPCSiteInfoType struct {
 	PrivateIps types.List `tfsdk:"private_ips"`
 	PublicIps  types.List `tfsdk:"public_ips"`
 }
 
-type GcpVpcSiteSiteCoordinates struct {
+type GcpVpcSiteCoordinates struct {
 	Latitude  types.Float32 `tfsdk:"latitude"`
 	Longitude types.Float32 `tfsdk:"longitude"`
 }
 
-type GcpVpcSiteViewsCustomDNS struct {
+type GcpVpcSiteCustomDNS struct {
 	InsideNameserver    types.String `tfsdk:"inside_nameserver"`
 	InsideNameserverV6  types.String `tfsdk:"inside_nameserver_v6"`
 	OutsideNameserver   types.String `tfsdk:"outside_nameserver"`
 	OutsideNameserverV6 types.String `tfsdk:"outside_nameserver_v6"`
 }
 
-type GcpVpcSiteGlobalSpecTypeDeploymentChoice struct {
+type GcpVpcSiteDepChoice struct {
 	CloudCredentials types.Object `tfsdk:"cloud_credentials"`
 }
 
-type GcpVpcSiteGlobalSpecTypeEncryptionChoice struct {
+type GcpVpcSiteEncryptionChoice struct {
 	DisableEncryption types.Bool   `tfsdk:"disable_encryption"`
 	EnableEncryption  types.Object `tfsdk:"enable_encryption"`
 }
 
-type GcpVpcSiteGlobalSpecTypeEnableEncryption struct {
+type GcpVpcSiteEnableEncryption struct {
 	KmsKeyResourceId types.String `tfsdk:"kms_key_resource_id"`
 	KmsKeyRingId     types.String `tfsdk:"kms_key_ring_id"`
 }
 
-type GcpVpcSiteViewsKubernetesUpgradeDrain struct {
+type GcpVpcSiteK8sUpgradeDrain struct {
 	KubernetesUpgradeDrainEnableChoice types.Object `tfsdk:"kubernetes_upgrade_drain_enable_choice"`
 }
 
-type GcpVpcSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoice struct {
+type GcpVpcSiteK8sUpgradeDrainEnableChoice struct {
 	DisableUpgradeDrain types.Bool   `tfsdk:"disable_upgrade_drain"`
 	EnableUpgradeDrain  types.Object `tfsdk:"enable_upgrade_drain"`
 }
 
-type GcpVpcSiteKubernetesUpgradeDrainEnableUpgradeDrain struct {
+type GcpVpcSiteEnableUpgradeDrain struct {
 	DrainMaxUnavailableChoice types.Object `tfsdk:"drain_max_unavailable_choice"`
 	DrainNodeTimeout          types.Int64  `tfsdk:"drain_node_timeout"`
 }
 
-type GcpVpcSiteKubernetesUpgradeDrainConfigDrainMaxUnavailableChoice struct {
+type GcpVpcSiteDrainMaxUnavailableChoice struct {
 	DrainMaxUnavailableNodeCount types.Int64 `tfsdk:"drain_max_unavailable_node_count"`
 }
 
-type GcpVpcSiteGlobalSpecTypeLogsReceiverChoice struct {
+type GcpVpcSiteLogsReceiverChoice struct {
 	LogReceiver           types.Object `tfsdk:"log_receiver"`
 	LogsStreamingDisabled types.Bool   `tfsdk:"logs_streaming_disabled"`
 }
 
-type GcpVpcSiteViewsOfflineSurvivabilityModeType struct {
+type GcpVpcSiteOfflineSurvivabilityModeType struct {
 	OfflineSurvivabilityModeChoice types.Object `tfsdk:"offline_survivability_mode_choice"`
 }
 
-type GcpVpcSiteOfflineSurvivabilityModeTypeOfflineSurvivabilityModeChoice struct {
+type GcpVpcSiteOfflineSurvivabilityModeChoice struct {
 	EnableOfflineSurvivabilityMode types.Bool `tfsdk:"enable_offline_survivability_mode"`
 	NoOfflineSurvivabilityMode     types.Bool `tfsdk:"no_offline_survivability_mode"`
 }
 
-type GcpVpcSiteViewsOperatingSystemType struct {
+type GcpVpcSiteOperatingSystemType struct {
 	OperatingSystemVersionChoice types.Object `tfsdk:"operating_system_version_choice"`
 }
 
-type GcpVpcSiteOperatingSystemTypeOperatingSystemVersionChoice struct {
+type GcpVpcSiteOperatingSystemVersionChoice struct {
 	DefaultOsVersion       types.Bool   `tfsdk:"default_os_version"`
 	OperatingSystemVersion types.String `tfsdk:"operating_system_version"`
 }
 
-type GcpVpcSiteGlobalSpecTypePrivateConnectivityChoice struct {
+type GcpVpcSitePrivateConnectivityChoice struct {
 	PrivateConnectDisabled types.Bool   `tfsdk:"private_connect_disabled"`
 	PrivateConnectivity    types.Object `tfsdk:"private_connectivity"`
 }
 
-type GcpVpcSiteGlobalSpecTypePrivateConnectivity struct {
+type GcpVpcSitePrivateConnectivity struct {
 	CloudLink            types.Object `tfsdk:"cloud_link"`
 	NetworkOptionsChoice types.Object `tfsdk:"network_options_choice"`
 }
 
-type GcpVpcSitePrivateConnectConfigTypeNetworkOptionsChoice struct {
+type GcpVpcSiteNetOptionsChoice struct {
 	Inside  types.Bool `tfsdk:"inside"`
 	Outside types.Bool `tfsdk:"outside"`
 }
 
-type GcpVpcSiteGlobalSpecTypeSiteTypeChoice struct {
+type GcpVpcSiteSiteTypeChoice struct {
 	IngressEgressGw  types.Object `tfsdk:"ingress_egress_gw"`
 	IngressGw        types.Object `tfsdk:"ingress_gw"`
 	VoltstackCluster types.Object `tfsdk:"voltstack_cluster"`
 }
 
-type GcpVpcSiteGlobalSpecTypeIngressEgressGw struct {
+type GcpVpcSiteIngressEgressGw struct {
 	DcClusterGroupChoice       types.Object `tfsdk:"dc_cluster_group_choice"`
 	ForwardProxyChoice         types.Object `tfsdk:"forward_proxy_choice"`
 	GcpCertifiedHw             types.String `tfsdk:"gcp_certified_hw"`
@@ -185,84 +185,84 @@ type GcpVpcSiteGlobalSpecTypeIngressEgressGw struct {
 	SiteMeshGroupChoice        types.Object `tfsdk:"site_mesh_group_choice"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeDcClusterGroupChoice struct {
+type GcpVpcSiteDcClusterGroupChoice struct {
 	DcClusterGroupInsideVn  types.Object `tfsdk:"dc_cluster_group_inside_vn"`
 	DcClusterGroupOutsideVn types.Object `tfsdk:"dc_cluster_group_outside_vn"`
 	NoDcClusterGroup        types.Bool   `tfsdk:"no_dc_cluster_group"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeForwardProxyChoice struct {
+type GcpVpcSiteForwardProxyChoice struct {
 	ActiveForwardProxyPolicies types.Object `tfsdk:"active_forward_proxy_policies"`
 	ForwardProxyAllowAll       types.Bool   `tfsdk:"forward_proxy_allow_all"`
 	NoForwardProxy             types.Bool   `tfsdk:"no_forward_proxy"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeActiveForwardProxyPolicies struct {
+type GcpVpcSiteActiveForwardProxyPolicies struct {
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeGlobalNetworkChoice struct {
+type GcpVpcSiteGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeGlobalNetworkList struct {
+type GcpVpcSiteGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
-type GcpVpcSiteViewsGlobalNetworkConnectionType struct {
+type GcpVpcSiteGlobalNetConnType struct {
 	ConnectionChoice types.Object `tfsdk:"connection_choice"`
 }
 
-type GcpVpcSiteGlobalNetworkConnectionTypeConnectionChoice struct {
+type GcpVpcSiteConnChoice struct {
 	SliToGlobalDr types.Object `tfsdk:"sli_to_global_dr"`
 	SloToGlobalDr types.Object `tfsdk:"slo_to_global_dr"`
 }
 
-type GcpVpcSiteGlobalNetworkConnectionTypeSliToGlobalDr struct {
+type GcpVpcSiteSliToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type GcpVpcSiteGlobalNetworkConnectionTypeSloToGlobalDr struct {
+type GcpVpcSiteSloToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type GcpVpcSiteViewsGCPVPCNetworkChoiceType struct {
+type GcpVpcSiteGCPVPCNetChoiceType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type GcpVpcSiteGCPVPCNetworkChoiceTypeChoice struct {
+type GcpVpcSiteChoice struct {
 	ExistingNetwork types.Object `tfsdk:"existing_network"`
 	NewNetwork      types.Object `tfsdk:"new_network"`
 }
 
-type GcpVpcSiteGCPVPCNetworkChoiceTypeExistingNetwork struct {
+type GcpVpcSiteExistingNet struct {
 	Name types.String `tfsdk:"name"`
 }
 
-type GcpVpcSiteGCPVPCNetworkChoiceTypeNewNetwork struct {
+type GcpVpcSiteNewNet struct {
 	Name types.String `tfsdk:"name"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeInsideStaticRouteChoice struct {
+type GcpVpcSiteInsideStaticRouteChoice struct {
 	InsideStaticRoutes   types.Object `tfsdk:"inside_static_routes"`
 	NoInsideStaticRoutes types.Bool   `tfsdk:"no_inside_static_routes"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeInsideStaticRoutes struct {
+type GcpVpcSiteInsideStaticRoutes struct {
 	StaticRouteList types.List `tfsdk:"static_route_list"`
 }
 
-type GcpVpcSiteViewsSiteStaticRoutesType struct {
+type GcpVpcSiteSiteStaticRoutesType struct {
 	ConfigModeChoice types.Object `tfsdk:"config_mode_choice"`
 }
 
-type GcpVpcSiteSiteStaticRoutesTypeConfigModeChoice struct {
+type GcpVpcSiteConfigModeChoice struct {
 	CustomStaticRoute types.Object `tfsdk:"custom_static_route"`
 	SimpleStaticRoute types.String `tfsdk:"simple_static_route"`
 }
 
-type GcpVpcSiteSiteStaticRoutesTypeCustomStaticRoute struct {
+type GcpVpcSiteCustomStaticRoute struct {
 	Attrs   types.List   `tfsdk:"attrs"`
 	Labels  types.Map    `tfsdk:"labels"`
 	Nexthop types.Object `tfsdk:"nexthop"`
@@ -275,34 +275,29 @@ type GcpVpcSiteNextHopType struct {
 	Type           types.List   `tfsdk:"type"`
 }
 
-type GcpVpcSiteIpAddressType struct {
+type GcpVpcSiteIpAddrType struct {
 	VerChoice types.Object `tfsdk:"ver_choice"`
 }
 
-type GcpVpcSiteIpAddressTypeVerChoice struct {
+type GcpVpcSiteVerChoice struct {
 	DualStack types.Object `tfsdk:"dual_stack"`
 	Ipv4      types.Object `tfsdk:"ipv4"`
-	Ipv6      types.Object `tfsdk:"ipv6"`
 }
 
-type GcpVpcSiteIpAddressTypeDualStack struct {
+type GcpVpcSiteDualStack struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
 	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
-type GcpVpcSiteIpv4AddressType struct {
+type GcpVpcSiteIpv4AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type GcpVpcSiteIpv6AddressType struct {
+type GcpVpcSiteIpv6AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type GcpVpcSiteIpAddressTypeIpv4 struct {
-	Addr types.String `tfsdk:"addr"`
-}
-
-type GcpVpcSiteIpAddressTypeIpv6 struct {
+type GcpVpcSiteIpv4 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
@@ -312,7 +307,6 @@ type GcpVpcSiteIpSubnetType struct {
 
 type GcpVpcSiteIpSubnetTypeVerChoice struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
-	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
 type GcpVpcSiteIpSubnetTypeIpv4 struct {
@@ -320,12 +314,7 @@ type GcpVpcSiteIpSubnetTypeIpv4 struct {
 	Prefix types.String `tfsdk:"prefix"`
 }
 
-type GcpVpcSiteIpSubnetTypeIpv6 struct {
-	Plen   types.Int64  `tfsdk:"plen"`
-	Prefix types.String `tfsdk:"prefix"`
-}
-
-type GcpVpcSiteViewsGCPVPCSubnetChoiceType struct {
+type GcpVpcSiteGCPVPCSubnetChoiceType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -334,48 +323,48 @@ type GcpVpcSiteGCPVPCSubnetChoiceTypeChoice struct {
 	NewSubnet      types.Object `tfsdk:"new_subnet"`
 }
 
-type GcpVpcSiteGCPVPCSubnetChoiceTypeExistingSubnet struct {
+type GcpVpcSiteExistingSubnet struct {
 	SubnetName types.String `tfsdk:"subnet_name"`
 }
 
-type GcpVpcSiteGCPVPCSubnetChoiceTypeNewSubnet struct {
+type GcpVpcSiteNewSubnet struct {
 	PrimaryIpv4 types.String `tfsdk:"primary_ipv4"`
 	SubnetName  types.String `tfsdk:"subnet_name"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeNetworkPolicyChoice struct {
+type GcpVpcSiteNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeActiveEnhancedFirewallPolicies struct {
+type GcpVpcSiteActiveEnhancedFirewallPolicies struct {
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeActiveNetworkPolicies struct {
+type GcpVpcSiteActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeOutsideStaticRouteChoice struct {
+type GcpVpcSiteOutsideStaticRouteChoice struct {
 	NoOutsideStaticRoutes types.Bool   `tfsdk:"no_outside_static_routes"`
 	OutsideStaticRoutes   types.Object `tfsdk:"outside_static_routes"`
 }
 
-type GcpVpcSiteGCPVPCIngressEgressGwTypeOutsideStaticRoutes struct {
+type GcpVpcSiteOutsideStaticRoutes struct {
 	StaticRouteList types.List `tfsdk:"static_route_list"`
 }
 
-type GcpVpcSiteViewsPerformanceEnhancementModeType struct {
+type GcpVpcSitePerformanceEnhancementModeType struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
-type GcpVpcSitePerformanceEnhancementModeTypePerfModeChoice struct {
+type GcpVpcSitePerfModeChoice struct {
 	PerfModeL3Enhanced types.Object `tfsdk:"perf_mode_l3_enhanced"`
-	PerfModeL7Enhanced types.Object `tfsdk:"perf_mode_l7_enhanced"`
+	PerfModeL7Enhanced types.Bool   `tfsdk:"perf_mode_l7_enhanced"`
 }
 
-type GcpVpcSitePerformanceEnhancementModeTypePerfModeL3Enhanced struct {
+type GcpVpcSitePerfModeL3Enhanced struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
@@ -384,21 +373,12 @@ type GcpVpcSiteL3PerformanceEnhancementTypePerfModeChoice struct {
 	NoJumbo types.Bool `tfsdk:"no_jumbo"`
 }
 
-type GcpVpcSitePerformanceEnhancementModeTypePerfModeL7Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type GcpVpcSiteL7PerformanceEnhancementTypePerfModeChoice struct {
-	JumboDisabled types.Bool `tfsdk:"jumbo_disabled"`
-	JumboEnabled  types.Bool `tfsdk:"jumbo_enabled"`
-}
-
-type GcpVpcSiteGCPVPCIngressEgressGwTypeSiteMeshGroupChoice struct {
+type GcpVpcSiteSiteMeshGroupChoice struct {
 	SmConnectionPublicIp types.Bool `tfsdk:"sm_connection_public_ip"`
 	SmConnectionPvtIp    types.Bool `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type GcpVpcSiteGlobalSpecTypeIngressGw struct {
+type GcpVpcSiteIngressGw struct {
 	GcpCertifiedHw             types.String `tfsdk:"gcp_certified_hw"`
 	GcpZoneNames               types.List   `tfsdk:"gcp_zone_names"`
 	LocalNetwork               types.Object `tfsdk:"local_network"`
@@ -407,7 +387,7 @@ type GcpVpcSiteGlobalSpecTypeIngressGw struct {
 	PerformanceEnhancementMode types.Object `tfsdk:"performance_enhancement_mode"`
 }
 
-type GcpVpcSiteGlobalSpecTypeVoltstackCluster struct {
+type GcpVpcSiteVoltstackCluster struct {
 	DcClusterGroupChoice     types.Object `tfsdk:"dc_cluster_group_choice"`
 	ForwardProxyChoice       types.Object `tfsdk:"forward_proxy_choice"`
 	GcpCertifiedHw           types.String `tfsdk:"gcp_certified_hw"`
@@ -438,21 +418,21 @@ type GcpVpcSiteGCPVPCVoltstackClusterTypeActiveForwardProxyPolicies struct {
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type GcpVpcSiteGCPVPCVoltstackClusterTypeGlobalNetworkChoice struct {
+type GcpVpcSiteGCPVPCVoltstackClusterTypeGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type GcpVpcSiteGCPVPCVoltstackClusterTypeGlobalNetworkList struct {
+type GcpVpcSiteGCPVPCVoltstackClusterTypeGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
-type GcpVpcSiteGCPVPCVoltstackClusterTypeK8SClusterChoice struct {
+type GcpVpcSiteK8SClusterChoice struct {
 	K8SCluster   types.Object `tfsdk:"k8s_cluster"`
 	NoK8SCluster types.Bool   `tfsdk:"no_k8s_cluster"`
 }
 
-type GcpVpcSiteGCPVPCVoltstackClusterTypeNetworkPolicyChoice struct {
+type GcpVpcSiteGCPVPCVoltstackClusterTypeNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
@@ -462,7 +442,7 @@ type GcpVpcSiteGCPVPCVoltstackClusterTypeActiveEnhancedFirewallPolicies struct {
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type GcpVpcSiteGCPVPCVoltstackClusterTypeActiveNetworkPolicies struct {
+type GcpVpcSiteGCPVPCVoltstackClusterTypeActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
@@ -480,34 +460,34 @@ type GcpVpcSiteGCPVPCVoltstackClusterTypeSiteMeshGroupChoice struct {
 	SmConnectionPvtIp    types.Bool `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type GcpVpcSiteGCPVPCVoltstackClusterTypeStorageClassChoice struct {
+type GcpVpcSiteStorageClassChoice struct {
 	DefaultStorage   types.Bool   `tfsdk:"default_storage"`
 	StorageClassList types.Object `tfsdk:"storage_class_list"`
 }
 
-type GcpVpcSiteGCPVPCVoltstackClusterTypeStorageClassList struct {
+type GcpVpcSiteStorageClassList struct {
 	StorageClasses types.List `tfsdk:"storage_classes"`
 }
 
-type GcpVpcSiteViewsStorageClassType struct {
+type GcpVpcSiteStorageClassType struct {
 	DefaultStorageClass types.Bool   `tfsdk:"default_storage_class"`
 	StorageClassName    types.String `tfsdk:"storage_class_name"`
 }
 
-type GcpVpcSiteViewsVolterraSoftwareType struct {
+type GcpVpcSiteVolterraSoftwareType struct {
 	VolterraSwVersionChoice types.Object `tfsdk:"volterra_sw_version_choice"`
 }
 
-type GcpVpcSiteVolterraSoftwareTypeVolterraSwVersionChoice struct {
+type GcpVpcSiteVolterraSwVersionChoice struct {
 	DefaultSwVersion        types.Bool   `tfsdk:"default_sw_version"`
 	VolterraSoftwareVersion types.String `tfsdk:"volterra_software_version"`
 }
 
-type GcpVpcSiteCommonWafLiveSignaturesUpdate struct {
+type GcpVpcSiteLiveSignaturesUpdate struct {
 	SignaturesUpdateModeChoice types.Object `tfsdk:"signatures_update_mode_choice"`
 }
 
-type GcpVpcSiteLiveSignaturesUpdateSignaturesUpdateModeChoice struct {
+type GcpVpcSiteSignaturesUpdateModeChoice struct {
 	Automatic types.Bool `tfsdk:"automatic"`
 	Manual    types.Bool `tfsdk:"manual"`
 }
@@ -565,6 +545,7 @@ var GcpVpcSiteAdminPasswordSecretInfoOneofModelAttributeMap = map[string]attr.Ty
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GcpVpcSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -624,9 +605,8 @@ var GcpVpcSiteBlockedServicesChoiceBlockedServicesBlockedSeviceModelAttributeMap
 // Attribute map for OneOfField --> BlockedServicesValueTypeChoice
 var GcpVpcSiteBlockedServicesChoiceBlockedServicesBlockedSeviceBlockedServicesValueTypeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dns":                types.BoolType,
-	"ssh":                types.BoolType,
-	"web_user_interface": types.BoolType,
+	"dns": types.BoolType,
+	"ssh": types.BoolType,
 }
 
 // Attribute map for PointerField --> CloudSiteInfo
@@ -1175,9 +1155,6 @@ var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesSt
 	"ipv4": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -1209,12 +1186,6 @@ var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesSt
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -1229,20 +1200,10 @@ var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesSt
 	"ipv4": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -1491,9 +1452,6 @@ var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutes
 	"ipv4": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -1525,12 +1483,6 @@ var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutes
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -1545,20 +1497,10 @@ var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutes
 	"ipv4": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -1610,9 +1552,7 @@ var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceMod
 	"perf_mode_l3_enhanced": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
 	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
@@ -1628,21 +1568,6 @@ var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePer
 
 	"jumbo":    types.BoolType,
 	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
@@ -1754,9 +1679,7 @@ var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttr
 	"perf_mode_l3_enhanced": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
 	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
@@ -1772,21 +1695,6 @@ var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL
 
 	"jumbo":    types.BoolType,
 	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> VoltstackCluster
@@ -2135,9 +2043,6 @@ var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoute
 	"ipv4": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -2169,12 +2074,6 @@ var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoute
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -2189,20 +2088,10 @@ var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoute
 	"ipv4": types.ObjectType{
 		AttrTypes: GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2331,7 +2220,7 @@ var GcpVpcSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var GcpVpcSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -2352,8 +2241,8 @@ func (d *DataSourceF5XCGcpVpcSite) Metadata(ctx context.Context, request datasou
 func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a gcp_vpc_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of gcp_vpc_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a gcp_vpc_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of gcp_vpc_site) etc. can be fetched",
+		MarkdownDescription: "GCP VPC site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in GCP VPC.<br>It can be used to automatically site creation in the GCP VPC.",
+		Description:         "GCP VPC site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in GCP VPC. It can be used to automatically site creation in the GCP VPC.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2455,8 +2344,15 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
+										Sensitive:   true,
 									},
 								},
+							},
+							"none": schema.BoolAttribute{
+								Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
 							},
 						},
 					},
@@ -2501,12 +2397,6 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 												},
 												"ssh": schema.BoolAttribute{
 													Description: "SSH",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"web_user_interface": schema.BoolAttribute{
-													Description: "Web UI",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -3361,20 +3251,6 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -3415,26 +3291,6 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 																									},
 																									"prefix": schema.StringAttribute{
 																										Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																										Required:    false,
 																										Optional:    false,
 																										Computed:    true,
@@ -3802,20 +3658,6 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -3856,26 +3698,6 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 																									},
 																									"prefix": schema.StringAttribute{
 																										Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																										Required:    false,
 																										Optional:    false,
 																										Computed:    true,
@@ -3994,33 +3816,11 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 													},
 												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
 										},
 									},
@@ -4207,33 +4007,11 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 													},
 												},
 											},
-											"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description: "Default Performance Mode Site optimized for L7 traffic processing",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"perf_mode_choice": schema.SingleNestedAttribute{
-														Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"jumbo_disabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"jumbo_enabled": schema.BoolAttribute{
-																Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
 											},
 										},
 									},
@@ -4743,20 +4521,6 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 																										},
 																									},
 																								},
-																								"ipv6": schema.SingleNestedAttribute{
-																									Description: "IPv6 ADDRESS IPv6 Address",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																									Attributes: map[string]schema.Attribute{
-																										"addr": schema.StringAttribute{
-																											Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																											Required:    false,
-																											Optional:    false,
-																											Computed:    true,
-																										},
-																									},
-																								},
 																							},
 																						},
 																					},
@@ -4797,26 +4561,6 @@ func (r *DataSourceF5XCGcpVpcSite) Schema(ctx context.Context, request datasourc
 																									},
 																									"prefix": schema.StringAttribute{
 																										Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																								},
-																							},
-																							"ipv6": schema.SingleNestedAttribute{
-																								Description: "IPv6 Subnet IPv6 Subnet Address",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																								Attributes: map[string]schema.Attribute{
-																									"plen": schema.Int64Attribute{
-																										Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																										Required:    false,
-																										Optional:    false,
-																										Computed:    true,
-																									},
-																									"prefix": schema.StringAttribute{
-																										Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																										Required:    false,
 																										Optional:    false,
 																										Computed:    true,
@@ -5139,7 +4883,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_gcp_vpc_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "gcp_vpc_site", err))
 		return
 	}
 
@@ -5201,12 +4945,8 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// data SpecToModelRoot PointerField --> AdminPassword
 	if specData.GetAdminPassword() != nil {
@@ -5307,6 +5047,15 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				}
 			}
 
+			// data specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -5371,7 +5120,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 		blockedServicesChoiceChoices := specData.GetBlockedServicesChoice()
 
 		// The model struct that will be populated by the nested template.
-		var blockedServicesChoiceChoicesModel = &GcpVpcSiteGlobalSpecTypeBlockedServicesChoice{}
+		var blockedServicesChoiceChoicesModel = &GcpVpcSiteBlockedServicesChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5429,15 +5178,6 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -5533,7 +5273,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> CloudSiteInfo
 	if specData.GetCloudSiteInfo() != nil {
-		var gcpVpcSiteGcpVpcSiteGCPVPCSiteInfoTypeModel = &GcpVpcSiteGcpVpcSiteGCPVPCSiteInfoType{}
+		var gcpVpcSiteGCPVPCSiteInfoTypeModel = &GcpVpcSiteGCPVPCSiteInfoType{}
 		cloudSiteInfoElement := specData.GetCloudSiteInfo()
 
 		// data specToModelNested RequiredArrayOfStringField --> PrivateIps
@@ -5543,9 +5283,9 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			gcpVpcSiteGcpVpcSiteGCPVPCSiteInfoTypeModel.PrivateIps = listValue
+			gcpVpcSiteGCPVPCSiteInfoTypeModel.PrivateIps = listValue
 		} else {
-			gcpVpcSiteGcpVpcSiteGCPVPCSiteInfoTypeModel.PrivateIps = types.ListNull(types.StringType)
+			gcpVpcSiteGCPVPCSiteInfoTypeModel.PrivateIps = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested RequiredArrayOfStringField --> PublicIps
@@ -5555,15 +5295,15 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			gcpVpcSiteGcpVpcSiteGCPVPCSiteInfoTypeModel.PublicIps = listValue
+			gcpVpcSiteGCPVPCSiteInfoTypeModel.PublicIps = listValue
 		} else {
-			gcpVpcSiteGcpVpcSiteGCPVPCSiteInfoTypeModel.PublicIps = types.ListNull(types.StringType)
+			gcpVpcSiteGCPVPCSiteInfoTypeModel.PublicIps = types.ListNull(types.StringType)
 		}
 
 		cloudSiteInfoObj, cloudSiteInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteCloudSiteInfoModelAttributeMap,
-			gcpVpcSiteGcpVpcSiteGCPVPCSiteInfoTypeModel,
+			gcpVpcSiteGCPVPCSiteInfoTypeModel,
 		)
 		response.Diagnostics.Append(cloudSiteInfoDiags...)
 		data.CloudSiteInfo = cloudSiteInfoObj
@@ -5573,19 +5313,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> Coordinates
 	if specData.GetCoordinates() != nil {
-		var gcpVpcSiteSiteCoordinatesModel = &GcpVpcSiteSiteCoordinates{}
+		var gcpVpcSiteCoordinatesModel = &GcpVpcSiteCoordinates{}
 		coordinatesElement := specData.GetCoordinates()
 
 		// data specToModelNested FloatField --> Latitude
-		gcpVpcSiteSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
+		gcpVpcSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
 
 		// data specToModelNested FloatField --> Longitude
-		gcpVpcSiteSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
+		gcpVpcSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
 
 		coordinatesObj, coordinatesDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteCoordinatesModelAttributeMap,
-			gcpVpcSiteSiteCoordinatesModel,
+			gcpVpcSiteCoordinatesModel,
 		)
 		response.Diagnostics.Append(coordinatesDiags...)
 		data.Coordinates = coordinatesObj
@@ -5595,45 +5335,45 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> CustomDns
 	if specData.GetCustomDns() != nil {
-		var gcpVpcSiteViewsCustomDNSModel = &GcpVpcSiteViewsCustomDNS{}
+		var gcpVpcSiteCustomDNSModel = &GcpVpcSiteCustomDNS{}
 		customDnsElement := specData.GetCustomDns()
 
 		// data specToModelNested StringField --> InsideNameserver
 		if customDnsElement.GetInsideNameserver() != "" {
-			gcpVpcSiteViewsCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
+			gcpVpcSiteCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
 		} else {
 			// Empty string, set to null
-			gcpVpcSiteViewsCustomDNSModel.InsideNameserver = types.StringNull()
+			gcpVpcSiteCustomDNSModel.InsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> InsideNameserverV6
 		if customDnsElement.GetInsideNameserverV6() != "" {
-			gcpVpcSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
+			gcpVpcSiteCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			gcpVpcSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringNull()
+			gcpVpcSiteCustomDNSModel.InsideNameserverV6 = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserver
 		if customDnsElement.GetOutsideNameserver() != "" {
-			gcpVpcSiteViewsCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
+			gcpVpcSiteCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
 		} else {
 			// Empty string, set to null
-			gcpVpcSiteViewsCustomDNSModel.OutsideNameserver = types.StringNull()
+			gcpVpcSiteCustomDNSModel.OutsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserverV6
 		if customDnsElement.GetOutsideNameserverV6() != "" {
-			gcpVpcSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
+			gcpVpcSiteCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			gcpVpcSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringNull()
+			gcpVpcSiteCustomDNSModel.OutsideNameserverV6 = types.StringNull()
 		}
 
 		customDnsObj, customDnsDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteCustomDnsModelAttributeMap,
-			gcpVpcSiteViewsCustomDNSModel,
+			gcpVpcSiteCustomDNSModel,
 		)
 		response.Diagnostics.Append(customDnsDiags...)
 		data.CustomDns = customDnsObj
@@ -5651,7 +5391,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 		deploymentChoiceChoices := specData.GetDeployment()
 
 		// The model struct that will be populated by the nested template.
-		var deploymentChoiceChoicesModel = &GcpVpcSiteGlobalSpecTypeDeploymentChoice{}
+		var deploymentChoiceChoicesModel = &GcpVpcSiteDepChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5738,7 +5478,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 		encryptionChoiceChoices := specData.GetEncryptionChoice()
 
 		// The model struct that will be populated by the nested template.
-		var encryptionChoiceChoicesModel = &GcpVpcSiteGlobalSpecTypeEncryptionChoice{}
+		var encryptionChoiceChoicesModel = &GcpVpcSiteEncryptionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5809,12 +5549,8 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 	}
 
 	// data SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// data SpecToModelRoot MapOfStringField --> GcpLabels
 	if specData.GetGcpLabels() != nil {
@@ -5844,7 +5580,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
-		var gcpVpcSiteViewsKubernetesUpgradeDrainModel = &GcpVpcSiteViewsKubernetesUpgradeDrain{}
+		var gcpVpcSiteK8sUpgradeDrainModel = &GcpVpcSiteK8sUpgradeDrain{}
 		kubernetesUpgradeDrainElement := specData.GetKubernetesUpgradeDrain()
 
 		// data specToModelNested RequiredOneOfField --> KubernetesUpgradeDrainEnableChoice
@@ -5946,16 +5682,16 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			gcpVpcSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
+			gcpVpcSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			gcpVpcSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(GcpVpcSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
+			gcpVpcSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(GcpVpcSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
 		}
 
 		kubernetesUpgradeDrainObj, kubernetesUpgradeDrainDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteKubernetesUpgradeDrainModelAttributeMap,
-			gcpVpcSiteViewsKubernetesUpgradeDrainModel,
+			gcpVpcSiteK8sUpgradeDrainModel,
 		)
 		response.Diagnostics.Append(kubernetesUpgradeDrainDiags...)
 		data.KubernetesUpgradeDrain = kubernetesUpgradeDrainObj
@@ -5973,7 +5709,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 		logsReceiverChoiceChoices := specData.GetLogsReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logsReceiverChoiceChoicesModel = &GcpVpcSiteGlobalSpecTypeLogsReceiverChoice{}
+		var logsReceiverChoiceChoicesModel = &GcpVpcSiteLogsReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6053,7 +5789,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> OfflineSurvivabilityMode
 	if specData.GetOfflineSurvivabilityMode() != nil {
-		var gcpVpcSiteViewsOfflineSurvivabilityModeTypeModel = &GcpVpcSiteViewsOfflineSurvivabilityModeType{}
+		var gcpVpcSiteOfflineSurvivabilityModeTypeModel = &GcpVpcSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
 		// data specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
@@ -6099,16 +5835,16 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			gcpVpcSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
+			gcpVpcSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			gcpVpcSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(GcpVpcSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			gcpVpcSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(GcpVpcSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteOfflineSurvivabilityModeModelAttributeMap,
-			gcpVpcSiteViewsOfflineSurvivabilityModeTypeModel,
+			gcpVpcSiteOfflineSurvivabilityModeTypeModel,
 		)
 		response.Diagnostics.Append(offlineSurvivabilityModeDiags...)
 		data.OfflineSurvivabilityMode = offlineSurvivabilityModeObj
@@ -6118,7 +5854,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
-		var gcpVpcSiteViewsOperatingSystemTypeModel = &GcpVpcSiteViewsOperatingSystemType{}
+		var gcpVpcSiteOperatingSystemTypeModel = &GcpVpcSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
 		// data specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
@@ -6165,16 +5901,16 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			gcpVpcSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
+			gcpVpcSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			gcpVpcSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(GcpVpcSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			gcpVpcSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(GcpVpcSiteOsOperatingSystemVersionChoiceModelAttributeMap)
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteOsModelAttributeMap,
-			gcpVpcSiteViewsOperatingSystemTypeModel,
+			gcpVpcSiteOperatingSystemTypeModel,
 		)
 		response.Diagnostics.Append(osDiags...)
 		data.Os = osObj
@@ -6192,7 +5928,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 		privateConnectivityChoiceChoices := specData.GetPrivateConnectivityChoice()
 
 		// The model struct that will be populated by the nested template.
-		var privateConnectivityChoiceChoicesModel = &GcpVpcSiteGlobalSpecTypePrivateConnectivityChoice{}
+		var privateConnectivityChoiceChoicesModel = &GcpVpcSitePrivateConnectivityChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6354,7 +6090,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 		siteTypeChoiceChoices := specData.GetSiteType()
 
 		// The model struct that will be populated by the nested template.
-		var siteTypeChoiceChoicesModel = &GcpVpcSiteGlobalSpecTypeSiteTypeChoice{}
+		var siteTypeChoiceChoicesModel = &GcpVpcSiteSiteTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6664,9 +6400,9 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]GcpVpcSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]GcpVpcSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									gcpVpcSiteViewsGlobalNetworkConnectionTypeModel := GcpVpcSiteViewsGlobalNetworkConnectionType{}
+									gcpVpcSiteGlobalNetConnTypeModel := GcpVpcSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -6835,13 +6571,13 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										gcpVpcSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										gcpVpcSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										gcpVpcSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										gcpVpcSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, gcpVpcSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, gcpVpcSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6901,7 +6637,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> InsideNetwork
 				if ingressEgressGwElement.GetInsideNetwork() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel := &GcpVpcSiteViewsGCPVPCNetworkChoiceType{}
+					gcpVpcSiteGCPVPCNetChoiceTypeModel := &GcpVpcSiteGCPVPCNetChoiceType{}
 					insideNetworkElement := ingressEgressGwElement.GetInsideNetwork()
 
 					// Recursively populate the nested struct
@@ -6989,19 +6725,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkModelAttributeMap, gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel)
+					gcpVpcSiteGCPVPCNetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkModelAttributeMap, gcpVpcSiteGCPVPCNetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwAttributeMap["inside_network"] = gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj
+					ingressEgressGwAttributeMap["inside_network"] = gcpVpcSiteGCPVPCNetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7039,9 +6775,9 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							if len(insideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]GcpVpcSiteViewsSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]GcpVpcSiteSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range insideStaticRoutesElement.GetStaticRouteList() {
-									gcpVpcSiteViewsSiteStaticRoutesTypeModel := GcpVpcSiteViewsSiteStaticRoutesType{}
+									gcpVpcSiteSiteStaticRoutesTypeModel := GcpVpcSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -7162,7 +6898,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														gcpVpcSiteIpAddressTypeModel := &GcpVpcSiteIpAddressType{}
+														gcpVpcSiteIpAddrTypeModel := &GcpVpcSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -7191,26 +6927,26 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		gcpVpcSiteIpv4AddressTypeModel := &GcpVpcSiteIpv4AddressType{}
+																		gcpVpcSiteIpv4AddrTypeModel := &GcpVpcSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			gcpVpcSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			gcpVpcSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			gcpVpcSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			gcpVpcSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		gcpVpcSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, gcpVpcSiteIpv4AddressTypeModel)
+																		gcpVpcSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, gcpVpcSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = gcpVpcSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = gcpVpcSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -7225,26 +6961,26 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		gcpVpcSiteIpv6AddressTypeModel := &GcpVpcSiteIpv6AddressType{}
+																		gcpVpcSiteIpv6AddrTypeModel := &GcpVpcSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			gcpVpcSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			gcpVpcSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			gcpVpcSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			gcpVpcSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		gcpVpcSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, gcpVpcSiteIpv6AddressTypeModel)
+																		gcpVpcSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, gcpVpcSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = gcpVpcSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = gcpVpcSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -7296,35 +7032,6 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -7338,19 +7045,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															gcpVpcSiteIpAddressTypeModel.VerChoice = finalObj
+															gcpVpcSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															gcpVpcSiteIpAddressTypeModel.VerChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															gcpVpcSiteIpAddrTypeModel.VerChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														gcpVpcSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, gcpVpcSiteIpAddressTypeModel)
+														gcpVpcSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, gcpVpcSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														gcpVpcSiteNextHopTypeModel.NexthopAddress = gcpVpcSiteIpAddressTypeModelObj
+														gcpVpcSiteNextHopTypeModel.NexthopAddress = gcpVpcSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -7446,38 +7153,6 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -7549,13 +7224,13 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										gcpVpcSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										gcpVpcSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										gcpVpcSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										gcpVpcSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, gcpVpcSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, gcpVpcSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7615,7 +7290,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> InsideSubnet
 				if ingressEgressGwElement.GetInsideSubnet() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteViewsGCPVPCSubnetChoiceType{}
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteGCPVPCSubnetChoiceType{}
 					insideSubnetElement := ingressEgressGwElement.GetInsideSubnet()
 
 					// Recursively populate the nested struct
@@ -7711,19 +7386,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetModelAttributeMap, gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel)
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetModelAttributeMap, gcpVpcSiteGCPVPCSubnetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwAttributeMap["inside_subnet"] = gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj
+					ingressEgressGwAttributeMap["inside_subnet"] = gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7923,7 +7598,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> OutsideNetwork
 				if ingressEgressGwElement.GetOutsideNetwork() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel := &GcpVpcSiteViewsGCPVPCNetworkChoiceType{}
+					gcpVpcSiteGCPVPCNetChoiceTypeModel := &GcpVpcSiteGCPVPCNetChoiceType{}
 					outsideNetworkElement := ingressEgressGwElement.GetOutsideNetwork()
 
 					// Recursively populate the nested struct
@@ -8011,19 +7686,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkModelAttributeMap, gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel)
+					gcpVpcSiteGCPVPCNetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkModelAttributeMap, gcpVpcSiteGCPVPCNetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwAttributeMap["outside_network"] = gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj
+					ingressEgressGwAttributeMap["outside_network"] = gcpVpcSiteGCPVPCNetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -8070,9 +7745,9 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							if len(outsideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]GcpVpcSiteViewsSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]GcpVpcSiteSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range outsideStaticRoutesElement.GetStaticRouteList() {
-									gcpVpcSiteViewsSiteStaticRoutesTypeModel := GcpVpcSiteViewsSiteStaticRoutesType{}
+									gcpVpcSiteSiteStaticRoutesTypeModel := GcpVpcSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -8193,7 +7868,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														gcpVpcSiteIpAddressTypeModel := &GcpVpcSiteIpAddressType{}
+														gcpVpcSiteIpAddrTypeModel := &GcpVpcSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -8222,26 +7897,26 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		gcpVpcSiteIpv4AddressTypeModel := &GcpVpcSiteIpv4AddressType{}
+																		gcpVpcSiteIpv4AddrTypeModel := &GcpVpcSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			gcpVpcSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			gcpVpcSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			gcpVpcSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			gcpVpcSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		gcpVpcSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, gcpVpcSiteIpv4AddressTypeModel)
+																		gcpVpcSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, gcpVpcSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = gcpVpcSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = gcpVpcSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -8256,26 +7931,26 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		gcpVpcSiteIpv6AddressTypeModel := &GcpVpcSiteIpv6AddressType{}
+																		gcpVpcSiteIpv6AddrTypeModel := &GcpVpcSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			gcpVpcSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			gcpVpcSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			gcpVpcSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			gcpVpcSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		gcpVpcSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, gcpVpcSiteIpv6AddressTypeModel)
+																		gcpVpcSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, gcpVpcSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = gcpVpcSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = gcpVpcSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -8327,35 +8002,6 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -8369,19 +8015,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															gcpVpcSiteIpAddressTypeModel.VerChoice = finalObj
+															gcpVpcSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															gcpVpcSiteIpAddressTypeModel.VerChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															gcpVpcSiteIpAddrTypeModel.VerChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														gcpVpcSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, gcpVpcSiteIpAddressTypeModel)
+														gcpVpcSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, gcpVpcSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														gcpVpcSiteNextHopTypeModel.NexthopAddress = gcpVpcSiteIpAddressTypeModelObj
+														gcpVpcSiteNextHopTypeModel.NexthopAddress = gcpVpcSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -8477,38 +8123,6 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -8580,13 +8194,13 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										gcpVpcSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										gcpVpcSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										gcpVpcSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										gcpVpcSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, gcpVpcSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, gcpVpcSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8637,7 +8251,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> OutsideSubnet
 				if ingressEgressGwElement.GetOutsideSubnet() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteViewsGCPVPCSubnetChoiceType{}
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteGCPVPCSubnetChoiceType{}
 					outsideSubnetElement := ingressEgressGwElement.GetOutsideSubnet()
 
 					// Recursively populate the nested struct
@@ -8733,19 +8347,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideSubnetChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideSubnetChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideSubnetModelAttributeMap, gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel)
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwOutsideSubnetModelAttributeMap, gcpVpcSiteGCPVPCSubnetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwAttributeMap["outside_subnet"] = gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj
+					ingressEgressGwAttributeMap["outside_subnet"] = gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -8760,7 +8374,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> PerformanceEnhancementMode
 				if ingressEgressGwElement.GetPerformanceEnhancementMode() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsPerformanceEnhancementModeTypeModel := &GcpVpcSiteViewsPerformanceEnhancementModeType{}
+					gcpVpcSitePerformanceEnhancementModeTypeModel := &GcpVpcSitePerformanceEnhancementModeType{}
 					performanceEnhancementModeElement := ingressEgressGwElement.GetPerformanceEnhancementMode()
 
 					// Recursively populate the nested struct
@@ -8847,74 +8461,13 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							}
 						}
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -8930,19 +8483,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+						gcpVpcSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						gcpVpcSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsPerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap, gcpVpcSiteViewsPerformanceEnhancementModeTypeModel)
+					gcpVpcSitePerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap, gcpVpcSitePerformanceEnhancementModeTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressEgressGwAttributeMap["performance_enhancement_mode"] = gcpVpcSiteViewsPerformanceEnhancementModeTypeModelObj
+					ingressEgressGwAttributeMap["performance_enhancement_mode"] = gcpVpcSitePerformanceEnhancementModeTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -9047,7 +8600,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> LocalNetwork
 				if ingressGwElement.GetLocalNetwork() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel := &GcpVpcSiteViewsGCPVPCNetworkChoiceType{}
+					gcpVpcSiteGCPVPCNetChoiceTypeModel := &GcpVpcSiteGCPVPCNetChoiceType{}
 					localNetworkElement := ingressGwElement.GetLocalNetwork()
 
 					// Recursively populate the nested struct
@@ -9135,19 +8688,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwLocalNetworkChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwLocalNetworkChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressGwLocalNetworkModelAttributeMap, gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel)
+					gcpVpcSiteGCPVPCNetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressGwLocalNetworkModelAttributeMap, gcpVpcSiteGCPVPCNetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwAttributeMap["local_network"] = gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj
+					ingressGwAttributeMap["local_network"] = gcpVpcSiteGCPVPCNetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -9162,7 +8715,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> LocalSubnet
 				if ingressGwElement.GetLocalSubnet() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteViewsGCPVPCSubnetChoiceType{}
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteGCPVPCSubnetChoiceType{}
 					localSubnetElement := ingressGwElement.GetLocalSubnet()
 
 					// Recursively populate the nested struct
@@ -9258,19 +8811,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwLocalSubnetChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwLocalSubnetChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressGwLocalSubnetModelAttributeMap, gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel)
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressGwLocalSubnetModelAttributeMap, gcpVpcSiteGCPVPCSubnetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwAttributeMap["local_subnet"] = gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj
+					ingressGwAttributeMap["local_subnet"] = gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -9288,7 +8841,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> PerformanceEnhancementMode
 				if ingressGwElement.GetPerformanceEnhancementMode() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsPerformanceEnhancementModeTypeModel := &GcpVpcSiteViewsPerformanceEnhancementModeType{}
+					gcpVpcSitePerformanceEnhancementModeTypeModel := &GcpVpcSitePerformanceEnhancementModeType{}
 					performanceEnhancementModeElement := ingressGwElement.GetPerformanceEnhancementMode()
 
 					// Recursively populate the nested struct
@@ -9375,74 +8928,13 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							}
 						}
 
-						// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-						// <no value>
-						// false
-						{
-							perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-							perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+						// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+						_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-							if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-								perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-								// data specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
-								if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-									_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-									if isJumboDisabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-									_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-									if isJumboEnabled {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-									} else {
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-										GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-								}
-
-								perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-								response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-							} else {
-								performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-							}
+						if isPerfModeL7Enhanced {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+						} else {
+							performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -9458,19 +8950,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+						gcpVpcSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+						gcpVpcSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsPerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap, gcpVpcSiteViewsPerformanceEnhancementModeTypeModel)
+					gcpVpcSitePerformanceEnhancementModeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap, gcpVpcSitePerformanceEnhancementModeTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					ingressGwAttributeMap["performance_enhancement_mode"] = gcpVpcSiteViewsPerformanceEnhancementModeTypeModelObj
+					ingressGwAttributeMap["performance_enhancement_mode"] = gcpVpcSitePerformanceEnhancementModeTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -9754,9 +9246,9 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]GcpVpcSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]GcpVpcSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									gcpVpcSiteViewsGlobalNetworkConnectionTypeModel := GcpVpcSiteViewsGlobalNetworkConnectionType{}
+									gcpVpcSiteGlobalNetConnTypeModel := GcpVpcSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -9925,13 +9417,13 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										gcpVpcSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										gcpVpcSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										gcpVpcSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										gcpVpcSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, gcpVpcSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, gcpVpcSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10293,9 +9785,9 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							if len(outsideStaticRoutesElement.GetStaticRouteList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								staticRouteListElements := make([]GcpVpcSiteViewsSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
+								staticRouteListElements := make([]GcpVpcSiteSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
 								for _, staticRouteListElement := range outsideStaticRoutesElement.GetStaticRouteList() {
-									gcpVpcSiteViewsSiteStaticRoutesTypeModel := GcpVpcSiteViewsSiteStaticRoutesType{}
+									gcpVpcSiteSiteStaticRoutesTypeModel := GcpVpcSiteSiteStaticRoutesType{}
 
 									// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 									// <no value>
@@ -10416,7 +9908,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 													// data specToModelNested PointerField --> NexthopAddress
 													if nexthopElement.GetNexthopAddress() != nil {
 														// Create the nested Go struct
-														gcpVpcSiteIpAddressTypeModel := &GcpVpcSiteIpAddressType{}
+														gcpVpcSiteIpAddrTypeModel := &GcpVpcSiteIpAddrType{}
 														nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 														// Recursively populate the nested struct
@@ -10445,26 +9937,26 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																	// data specToModelNested PointerField --> Ipv4
 																	if dualStackElement.GetIpv4() != nil {
 																		// Create the nested Go struct
-																		gcpVpcSiteIpv4AddressTypeModel := &GcpVpcSiteIpv4AddressType{}
+																		gcpVpcSiteIpv4AddrTypeModel := &GcpVpcSiteIpv4AddrType{}
 																		ipv4Element := dualStackElement.GetIpv4()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv4Element.GetAddr() != "" {
-																			gcpVpcSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																			gcpVpcSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			gcpVpcSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																			gcpVpcSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		gcpVpcSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, gcpVpcSiteIpv4AddressTypeModel)
+																		gcpVpcSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, gcpVpcSiteIpv4AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv4"] = gcpVpcSiteIpv4AddressTypeModelObj
+																		dualStackAttributeMap["ipv4"] = gcpVpcSiteIpv4AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -10479,26 +9971,26 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																	// data specToModelNested PointerField --> Ipv6
 																	if dualStackElement.GetIpv6() != nil {
 																		// Create the nested Go struct
-																		gcpVpcSiteIpv6AddressTypeModel := &GcpVpcSiteIpv6AddressType{}
+																		gcpVpcSiteIpv6AddrTypeModel := &GcpVpcSiteIpv6AddrType{}
 																		ipv6Element := dualStackElement.GetIpv6()
 
 																		// Recursively populate the nested struct
 
 																		// data specToModelNested StringField --> Addr
 																		if ipv6Element.GetAddr() != "" {
-																			gcpVpcSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																			gcpVpcSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																		} else {
 																			// Empty string, set to null
-																			gcpVpcSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																			gcpVpcSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																		}
 
 																		// This field needs to be converted to a types.ObjectValue before assignment.
-																		gcpVpcSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, gcpVpcSiteIpv6AddressTypeModel)
+																		gcpVpcSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, gcpVpcSiteIpv6AddrTypeModel)
 																		response.Diagnostics.Append(objDiags...)
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		dualStackAttributeMap["ipv6"] = gcpVpcSiteIpv6AddressTypeModelObj
+																		dualStackAttributeMap["ipv6"] = gcpVpcSiteIpv6AddrTypeModelObj
 
 																	} else {
 																		// The source field is nil (e.g. redacted by the API).
@@ -10550,35 +10042,6 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested StringField --> Addr
-																	if ipv6Element.GetAddr() != "" {
-																		ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["addr"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -10592,19 +10055,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 															}
 
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
-															gcpVpcSiteIpAddressTypeModel.VerChoice = finalObj
+															gcpVpcSiteIpAddrTypeModel.VerChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															gcpVpcSiteIpAddressTypeModel.VerChoice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+															gcpVpcSiteIpAddrTypeModel.VerChoice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 														}
 
 														// This field needs to be converted to a types.ObjectValue before assignment.
-														gcpVpcSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, gcpVpcSiteIpAddressTypeModel)
+														gcpVpcSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, gcpVpcSiteIpAddrTypeModel)
 														response.Diagnostics.Append(objDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														gcpVpcSiteNextHopTypeModel.NexthopAddress = gcpVpcSiteIpAddressTypeModelObj
+														gcpVpcSiteNextHopTypeModel.NexthopAddress = gcpVpcSiteIpAddrTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -10700,38 +10163,6 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 																}
 															}
 
-															// data specToModelNested PointerOfOneOfField --> Ipv6
-															// <no value>
-															// false
-															{
-																ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-																ipv6AttributeMap := make(map[string]attr.Value)
-
-																if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-																	ipv6Element := ipv6OptionsWrapper.Ipv6
-
-																	// data specToModelNested UintField --> Plen
-																	ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-																	// data specToModelNested StringField --> Prefix
-																	if ipv6Element.GetPrefix() != "" {
-																		ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-																	} else {
-																		// Empty string, set to null
-																		ipv6AttributeMap["prefix"] = types.StringNull()
-																	}
-
-																	ipv6Obj, ipv6ObjDiags := types.ObjectValue(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-																	response.Diagnostics.Append(ipv6ObjDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-																} else {
-																	subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-																}
-															}
-
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -10803,13 +10234,13 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										gcpVpcSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+										gcpVpcSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										gcpVpcSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+										gcpVpcSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 									}
 
-									staticRouteListElements = append(staticRouteListElements, gcpVpcSiteViewsSiteStaticRoutesTypeModel)
+									staticRouteListElements = append(staticRouteListElements, gcpVpcSiteSiteStaticRoutesTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10860,7 +10291,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> SiteLocalNetwork
 				if voltstackClusterElement.GetSiteLocalNetwork() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel := &GcpVpcSiteViewsGCPVPCNetworkChoiceType{}
+					gcpVpcSiteGCPVPCNetChoiceTypeModel := &GcpVpcSiteGCPVPCNetChoiceType{}
 					siteLocalNetworkElement := voltstackClusterElement.GetSiteLocalNetwork()
 
 					// Recursively populate the nested struct
@@ -10948,19 +10379,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteLocalNetworkChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCNetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteLocalNetworkChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterSiteLocalNetworkModelAttributeMap, gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModel)
+					gcpVpcSiteGCPVPCNetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterSiteLocalNetworkModelAttributeMap, gcpVpcSiteGCPVPCNetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					voltstackClusterAttributeMap["site_local_network"] = gcpVpcSiteViewsGCPVPCNetworkChoiceTypeModelObj
+					voltstackClusterAttributeMap["site_local_network"] = gcpVpcSiteGCPVPCNetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -10975,7 +10406,7 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 				// data specToModelNested PointerField --> SiteLocalSubnet
 				if voltstackClusterElement.GetSiteLocalSubnet() != nil {
 					// Create the nested Go struct
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteViewsGCPVPCSubnetChoiceType{}
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModel := &GcpVpcSiteGCPVPCSubnetChoiceType{}
 					siteLocalSubnetElement := voltstackClusterElement.GetSiteLocalSubnet()
 
 					// Recursively populate the nested struct
@@ -11071,19 +10502,19 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = finalObj
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetChoiceModelAttributeMap)
+						gcpVpcSiteGCPVPCSubnetChoiceTypeModel.Choice = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetModelAttributeMap, gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModel)
+					gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetModelAttributeMap, gcpVpcSiteGCPVPCSubnetChoiceTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					voltstackClusterAttributeMap["site_local_subnet"] = gcpVpcSiteViewsGCPVPCSubnetChoiceTypeModelObj
+					voltstackClusterAttributeMap["site_local_subnet"] = gcpVpcSiteGCPVPCSubnetChoiceTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -11179,22 +10610,22 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 							if len(storageClassListElement.GetStorageClasses()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								storageClassesElements := make([]GcpVpcSiteViewsStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
+								storageClassesElements := make([]GcpVpcSiteStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
 								for _, storageClassesElement := range storageClassListElement.GetStorageClasses() {
-									gcpVpcSiteViewsStorageClassTypeModel := GcpVpcSiteViewsStorageClassType{}
+									gcpVpcSiteStorageClassTypeModel := GcpVpcSiteStorageClassType{}
 
 									// data specToModelNested BoolField --> DefaultStorageClass
-									gcpVpcSiteViewsStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
+									gcpVpcSiteStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
 
 									// data specToModelNested RequiredStringField --> StorageClassName
 									if storageClassesElement.GetStorageClassName() != "" {
-										gcpVpcSiteViewsStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
+										gcpVpcSiteStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
 									} else {
 										// Empty string, set to null
-										gcpVpcSiteViewsStorageClassTypeModel.StorageClassName = types.StringNull()
+										gcpVpcSiteStorageClassTypeModel.StorageClassName = types.StringNull()
 									}
 
-									storageClassesElements = append(storageClassesElements, gcpVpcSiteViewsStorageClassTypeModel)
+									storageClassesElements = append(storageClassesElements, gcpVpcSiteStorageClassTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11282,16 +10713,12 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 	}
 
 	// data SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// data SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
-		var gcpVpcSiteViewsVolterraSoftwareTypeModel = &GcpVpcSiteViewsVolterraSoftwareType{}
+		var gcpVpcSiteVolterraSoftwareTypeModel = &GcpVpcSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
 		// data specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
@@ -11338,16 +10765,16 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			gcpVpcSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
+			gcpVpcSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			gcpVpcSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(GcpVpcSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			gcpVpcSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(GcpVpcSiteSwVolterraSwVersionChoiceModelAttributeMap)
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteSwModelAttributeMap,
-			gcpVpcSiteViewsVolterraSoftwareTypeModel,
+			gcpVpcSiteVolterraSoftwareTypeModel,
 		)
 		response.Diagnostics.Append(swDiags...)
 		data.Sw = swObj
@@ -11374,10 +10801,11 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
-		var gcpVpcSiteCommonWafLiveSignaturesUpdateModel = &GcpVpcSiteCommonWafLiveSignaturesUpdate{}
+		var gcpVpcSiteLiveSignaturesUpdateModel = &GcpVpcSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// data specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// data specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11419,16 +10847,16 @@ func (d *DataSourceF5XCGcpVpcSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			gcpVpcSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
+			gcpVpcSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			gcpVpcSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(GcpVpcSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			gcpVpcSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(GcpVpcSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
 			ctx,
 			GcpVpcSiteWafSignaturesModelAttributeMap,
-			gcpVpcSiteCommonWafLiveSignaturesUpdateModel,
+			gcpVpcSiteLiveSignaturesUpdateModel,
 		)
 		response.Diagnostics.Append(wafSignaturesDiags...)
 		data.WafSignatures = wafSignaturesObj

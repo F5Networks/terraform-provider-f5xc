@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCIke1_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ike1-" + acctest.RandString(t, 8)
+	name := "example-ike1-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,18 +37,18 @@ func TestAccResourceAutoF5XCIke1_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCIke1Config_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_ike1.test",
+				ResourceName:                         "f5xc_ike1.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCIke1Config_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_ike1.test",
+				ResourceName:                         "f5xc_ike1.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -59,31 +59,35 @@ func TestAccResourceAutoF5XCIke1_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-ike1-" + acctest.RandString(t, 8)
+	name := "example-ike1-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckIke1DestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCIke1Config_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_ike1.test",
+				ResourceName:                         "f5xc_ike1.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCIke1Config_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_ike1.test",
+				ResourceName:                         "f5xc_ike1.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_ike1.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCIke1Config_full("example-ike1", "default"),
+		})
 }
 
 func testAccCheckIke1DestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -92,7 +96,7 @@ func testAccCheckIke1DestroyProducer(t *testing.T) func(*terraform.State) error 
 
 func testAccResourceAutoF5XCIke1Config_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike1" "test" {
+resource "f5xc_ike1" "example" {
   name      = %q
   namespace = %q
 }
@@ -101,23 +105,23 @@ resource "f5xc_ike1" "test" {
 
 func testAccResourceAutoF5XCIke1Config_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike1" "test" {
+resource "f5xc_ike1" "example" {
   name        = %q
   namespace   = %q
-  description = "ike1 updated"
+  description = "Updated ike1 example"
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCIke1Config_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike1" "test" {
+resource "f5xc_ike1" "example" {
   name        = %q
   namespace   = %q
-  description = "ike1 full"
+  description = "Full ike1 example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -129,13 +133,13 @@ resource "f5xc_ike1" "test" {
 
 func testAccResourceAutoF5XCIke1Config_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_ike1" "test" {
+resource "f5xc_ike1" "example" {
   name        = %q
   namespace   = %q
-  description = "ike1 full updated"
+  description = "Updated full ike1 example"
 
   labels = {
-    env  = "prod"
+    env  = "example"
     tier = "shared"
   }
 

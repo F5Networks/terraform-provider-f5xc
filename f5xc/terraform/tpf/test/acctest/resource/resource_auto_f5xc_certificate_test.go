@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCCertificate_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cert-" + acctest.RandString(t, 8)
+	name := "example-certificate-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCertificateDestroyProducer(t),
@@ -39,32 +39,36 @@ func TestAccResourceAutoF5XCCertificate_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCCertificateConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_certificate.test",
+				ResourceName:                         "f5xc_certificate.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"private_key"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCertificateConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_certificate.test",
+				ResourceName:                         "f5xc_certificate.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"private_key"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCertificateConfig_basic("example-certificate", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCCertificate_withPrivateKey(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cert-" + acctest.RandString(t, 8)
+	name := "example-certificate-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,11 +80,11 @@ func TestAccResourceAutoF5XCCertificate_withPrivateKey(t *testing.T) {
 				Config: testAccResourceAutoF5XCCertificateConfig_withPrivateKey(t, name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_certificate.test",
+				ResourceName:                         "f5xc_certificate.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"private_key"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -93,10 +97,10 @@ func testAccCheckCertificateDestroyProducer(t *testing.T) func(*terraform.State)
 
 func testAccResourceAutoF5XCCertificateConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_certificate" "test" {
+resource "f5xc_certificate" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test certificate"
+  description = "Certificate example"
 
   certificate_url = "string:///%s"
 
@@ -108,15 +112,15 @@ resource "f5xc_certificate" "test" {
     }
   }
 }
-`, name, namespace, testCertB64, testKeyB64)
+`, name, namespace, TestCertB64, TestKeyB64)
 }
 
 func testAccResourceAutoF5XCCertificateConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_certificate" "test" {
+resource "f5xc_certificate" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test certificate updated"
+  description = "Certificate example updated"
 
   certificate_url = "string:///%s"
 
@@ -128,12 +132,12 @@ resource "f5xc_certificate" "test" {
     }
   }
 }
-`, name, namespace, testCertB64, testKeyB64)
+`, name, namespace, TestCertB64, TestKeyB64)
 }
 
 func testAccResourceAutoF5XCCertificateConfig_withPrivateKey(t testing.TB, name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_certificate" "test" {
+resource "f5xc_certificate" "example" {
   name        = %q
   namespace   = %q
   description = "Certificate with blindfold private key"
@@ -148,5 +152,5 @@ resource "f5xc_certificate" "test" {
     }
   }
 }
-`, name, namespace, testCertB64, blindFoldKeyB64(t))
+`, name, namespace, TestCertB64, blindFoldKeyB64(t))
 }

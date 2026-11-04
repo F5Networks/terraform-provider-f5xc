@@ -30,6 +30,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
@@ -40,6 +41,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_infraprotect_firewall_rule_group "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/infraprotect_firewall_rule_group"
 )
@@ -91,8 +93,8 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Metadata(ctx context.Context
 func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_firewall_rule_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_firewall_rule_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a infraprotect_firewall_rule_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_firewall_rule_group) etc. can be fetched",
+		MarkdownDescription: "DDoS transit Firewall Rule Group",
+		Description:         "DDoS transit Firewall Rule Group",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -148,7 +150,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Schema(ctx context.Context, 
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -188,7 +190,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Schema(ctx context.Context, 
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
-							MarkdownDescription: "",
+							MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -203,7 +205,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Schema(ctx context.Context, 
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -271,9 +273,17 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) ModifyPlan(ctx context.Conte
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCInfraprotectFirewallRuleGroupModel
 
 	// Read Terraform plan data into the model
@@ -383,7 +393,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Create(ctx context.Context, 
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "infraprotect_firewall_rule_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "infraprotect_firewall_rule_group", err),
 		)
 		return
 	}
@@ -606,7 +616,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Read(ctx context.Context, re
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "infraprotect_firewall_rule_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_firewall_rule_group", err),
 		)
 		return
 	}
@@ -788,6 +798,12 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Read(ctx context.Context, re
 }
 
 func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCInfraprotectFirewallRuleGroupModel
@@ -910,7 +926,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Update(ctx context.Context, 
 	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "infraprotect_firewall_rule_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "infraprotect_firewall_rule_group", err),
 		)
 		return
 	}
@@ -919,7 +935,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Update(ctx context.Context, 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "infraprotect_firewall_rule_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "infraprotect_firewall_rule_group", err),
 		)
 		return
 	}
@@ -1163,7 +1179,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Delete(ctx context.Context, 
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "infraprotect_firewall_rule_group", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "infraprotect_firewall_rule_group", err),
 		)
 		return
 	}

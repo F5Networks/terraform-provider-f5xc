@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -20,6 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -32,39 +36,39 @@ type DataSourceF5XCNetworkConnector struct {
 	client *client.APIClient
 }
 
-type NetworkConnectorCreateSpecTypeConnectorChoice struct {
+type NetConnectorConnectorChoice struct {
 	SliToGlobalDr types.Object `tfsdk:"sli_to_global_dr"`
 	SliToSloSnat  types.Object `tfsdk:"sli_to_slo_snat"`
 	SloToGlobalDr types.Object `tfsdk:"slo_to_global_dr"`
 }
 
-type NetworkConnectorCreateSpecTypeSliToGlobalDr struct {
+type NetConnectorSliToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type NetworkConnectorCreateSpecTypeSliToSloSnat struct {
+type NetConnectorSliToSloSnat struct {
 	PoolChoice    types.Object `tfsdk:"pool_choice"`
 	RoutingChoice types.Object `tfsdk:"routing_choice"`
 }
 
-type NetworkConnectorSnatConnectorTypePoolChoice struct {
+type NetConnectorPoolChoice struct {
 	InterfaceIp types.Bool `tfsdk:"interface_ip"`
 }
 
-type NetworkConnectorSnatConnectorTypeRoutingChoice struct {
+type NetConnectorRoutingChoice struct {
 	DefaultGwSnat types.Bool `tfsdk:"default_gw_snat"`
 }
 
-type NetworkConnectorCreateSpecTypeSloToGlobalDr struct {
+type NetConnectorSloToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type NetworkConnectorCreateSpecTypeForwardProxyChoice struct {
+type NetConnectorForwardProxyChoice struct {
 	DisableForwardProxy types.Bool   `tfsdk:"disable_forward_proxy"`
 	EnableForwardProxy  types.Object `tfsdk:"enable_forward_proxy"`
 }
 
-type NetworkConnectorCreateSpecTypeEnableForwardProxy struct {
+type NetConnectorEnableForwardProxy struct {
 	ConnectionTimeout   types.Int64 `tfsdk:"connection_timeout"`
 	MaxConnectAttempts  types.Int64 `tfsdk:"max_connect_attempts"`
 	WhiteListedPorts    types.List  `tfsdk:"white_listed_ports"`
@@ -194,8 +198,8 @@ func (d *DataSourceF5XCNetworkConnector) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_connector) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_connector) etc. can be fetched",
+		MarkdownDescription: "Network Connector is used to create connection between two virtual networks on a given site.<br><br>Outside Network is the unsecured network<br><br>Inside Network is secured network<br><br>Inside network can have connectivity to outside network in the following ways<br><br>Snat: There are 2 Snat modes<br><br>Default Gateway Snat:<br>A default route is added in inside network with CE as gateway. As outside network does not have any visibility<br>of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either<br>interface IP of out side virtual network interface Snat pool<br><br>Dynamic Gateway Snat:<br>Non default routes from out side network are pushed to inside network with CE as gateway. As outside network<br>does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside.<br>SNAT IP can be either interface IP of out side virtual network interface Snat pool<br>This mode is currently not supported<br><br>Dynamic Gateway:<br><br>Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has<br>reachability information of inside network, no SNAT is required<br>This mode is currently not supported<br><br>Proxy Configuration:<br>In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity.<br>There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would<br>take effect<br><br>Dynamic Reverse Proxy:<br>There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is<br>attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network<br>to select the destination. This dynamic resolution is done using a pre defined field in the received packet.<br>This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https,<br>DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS<br>resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the<br>outside network<br><br>Forward Proxy:<br>Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated<br>to actual IPs towards outside network<br><br>Constraint: There are no overlapping ip(s) between outside and inside network.",
+		Description:         "Network Connector is used to create connection between two virtual networks on a given site. Outside Network is the unsecured network Inside Network is secured network Inside network can have connectivity to outside network in the following ways Snat: There are 2 Snat modes Default Gateway Snat: A default route is added in inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool Dynamic Gateway Snat: Non default routes from out side network are pushed to inside network with CE as gateway. As outside network does not have any visibility of inside network, packets are SNATed to outside virtual network IP address moving from inside to outside. SNAT IP can be either interface IP of out side virtual network interface Snat pool This mode is currently not supported Dynamic Gateway: Using a dynamic routing protocol, routes from outside and inside are exchanged for connectivity. As outside network also has reachability information of inside network, no SNAT is required This mode is currently not supported Proxy Configuration: In addition to Snat configuration there can be L7 proxy configuration that influences the network connectivity. There are 2 proxy modes. These proxy modes are for TCP traffic. For non-tcp traffic, above described SNAT behavior would take effect Dynamic Reverse Proxy: There would by one or more Virtual hosts configured in the inside network. Traffic from inside network devices is attracted to Node IP(s). When the traffic is destined to Node IP(s), dynamic resolution is done in the outside network to select the destination. This dynamic resolution is done using a pre defined field in the received packet. This pre defined field depends on proxy type configured in Virtual Host. If the proxy in Virtual host is Http or Https, DNS resolution will be done on the HOST http header from the packet. If the proxy in Virtual host is TcpWithSNI, DNS resolution would be on the SNI of packet. This DNS resolved IP would be used as destination to forward the packet in the outside network Forward Proxy: Devices in the inside network resolve DNS to actual IPs. All sessions are terminated by Node and new sessions are initiated to actual IPs towards outside network Constraint: There are no overlapping ip(s) between outside and inside network.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -451,9 +455,15 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_network_connector.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "network_connector", err))
 		return
 	}
 
@@ -461,7 +471,41 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_network_connector.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -484,8 +528,14 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -494,6 +544,7 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -578,10 +629,15 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 	if oneofConnectorChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		connectorChoiceChoices := rawSpecMap["connector_choice"]
+		var connectorChoiceChoices interface{}
+		if v := rawSpecMap["connector_choice"]; v != nil {
+			connectorChoiceChoices = v
+		} else {
+			connectorChoiceChoices = specData.GetConnectorChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var connectorChoiceChoicesModel = &NetworkConnectorCreateSpecTypeConnectorChoice{}
+		var connectorChoiceChoicesModel = &NetConnectorConnectorChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -904,10 +960,15 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 	if oneofForwardProxyChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		forwardProxyChoiceChoices := rawSpecMap["forward_proxy_choice"]
+		var forwardProxyChoiceChoices interface{}
+		if v := rawSpecMap["forward_proxy_choice"]; v != nil {
+			forwardProxyChoiceChoices = v
+		} else {
+			forwardProxyChoiceChoices = specData.GetForwardProxyChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var forwardProxyChoiceChoicesModel = &NetworkConnectorCreateSpecTypeForwardProxyChoice{}
+		var forwardProxyChoiceChoicesModel = &NetConnectorForwardProxyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

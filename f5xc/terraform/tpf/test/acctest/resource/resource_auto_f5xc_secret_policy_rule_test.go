@@ -28,38 +28,42 @@ func TestAccResourceAutoF5XCSecretPolicyRule_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-sp-rule-" + testAccRunSuffix(t)
+	name := "example-sp-rule-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecretPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withDescription(name, namespace, "secret policy rule basic updated")},
+			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withDescription(name, namespace, "Updated basic secret policy rule example")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSecretPolicyRuleConfig_basic("example-sp-rule", "system"),
+		})
 }
 
 func TestAccResourceAutoF5XCSecretPolicyRule_actionTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-sp-rule-" + testAccRunSuffix(t)
+	name := "example-sp-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,18 +72,18 @@ func TestAccResourceAutoF5XCSecretPolicyRule_actionTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withAction(name, namespace, "ALLOW")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withAction(name, namespace, "DENY")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -90,27 +94,27 @@ func TestAccResourceAutoF5XCSecretPolicyRule_clientChoiceTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-sp-rule-" + testAccRunSuffix(t)
+	name := "example-sp-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecretPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientName(name, namespace, "client-a")},
+			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientName(name, namespace, "example-client")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientSelector(name, namespace, "env in (prod)")},
+			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientSelector(name, namespace, "env in (example)")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -121,27 +125,27 @@ func TestAccResourceAutoF5XCSecretPolicyRule_clientNameMatcherTransition(t *test
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-sp-rule-" + testAccRunSuffix(t)
+	name := "example-sp-rule-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecretPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientNameMatcherExact(name, namespace, "client-a")},
+			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientNameMatcherExact(name, namespace, "example-client")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientNameMatcherRegex(name, namespace, "^client-.*")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -152,31 +156,35 @@ func TestAccResourceAutoF5XCSecretPolicyRule_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-sp-rule-" + testAccRunSuffix(t)
+	name := "example-sp-rule-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecretPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_full(name, namespace, "test", "platform", "owner-a", "ALLOW", "client-a")},
+			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_full(name, namespace, "example", "platform", "example-owner", "ALLOW", "example-client")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_full(name, namespace, "prod", "security", "owner-b", "DENY", "client-b")},
+			{Config: testAccResourceAutoF5XCSecretPolicyRuleConfig_full(name, namespace, "example", "security", "example-owner-alt", "DENY", "example-client-alt")},
 			{
-				ResourceName:                         "f5xc_secret_policy_rule.test",
+				ResourceName:                         "f5xc_secret_policy_rule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_secret_policy_rule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSecretPolicyRuleConfig_full("example-sp-rule", "system", "example", "platform", "example-owner", "ALLOW", "example-client"),
+		})
 }
 
 func testAccCheckSecretPolicyRuleDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -185,14 +193,14 @@ func testAccCheckSecretPolicyRuleDestroyProducer(t *testing.T) func(*terraform.S
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name      = %q
   namespace = %q
 
   action = ["ALLOW"]
 
   client_choice = {
-    client_name = "client-a"
+    client_name = "example-client"
   }
 }
 `, name, namespace)
@@ -200,7 +208,7 @@ resource "f5xc_secret_policy_rule" "test" {
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -208,7 +216,7 @@ resource "f5xc_secret_policy_rule" "test" {
   action = ["ALLOW"]
 
   client_choice = {
-    client_name = "client-a"
+    client_name = "example-client"
   }
 }
 `, name, namespace, description)
@@ -216,14 +224,14 @@ resource "f5xc_secret_policy_rule" "test" {
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_withAction(name, namespace, action string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name      = %q
   namespace = %q
 
   action = [%q]
 
   client_choice = {
-    client_name = "client-a"
+    client_name = "example-client"
   }
 }
 `, name, namespace, action)
@@ -231,7 +239,7 @@ resource "f5xc_secret_policy_rule" "test" {
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientName(name, namespace, clientName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -246,7 +254,7 @@ resource "f5xc_secret_policy_rule" "test" {
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientSelector(name, namespace, expression string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -263,7 +271,7 @@ resource "f5xc_secret_policy_rule" "test" {
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientNameMatcherExact(name, namespace, exactValue string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -280,7 +288,7 @@ resource "f5xc_secret_policy_rule" "test" {
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_withClientNameMatcherRegex(name, namespace, regexValue string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name      = %q
   namespace = %q
 
@@ -297,10 +305,10 @@ resource "f5xc_secret_policy_rule" "test" {
 
 func testAccResourceAutoF5XCSecretPolicyRuleConfig_full(name, namespace, env, team, owner, action, exactValue string) string {
 	return fmt.Sprintf(`
-resource "f5xc_secret_policy_rule" "test" {
+resource "f5xc_secret_policy_rule" "example" {
   name        = %q
   namespace   = %q
-  description = "secret policy rule full"
+  description = "Full secret policy rule example"
 
   labels = {
     env  = %q

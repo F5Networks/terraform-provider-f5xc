@@ -29,8 +29,8 @@ func TestAccResourceAutoF5XCAlertPolicy_basic(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
 	suffix := acctest.RandString(t, 8)
-	name := "tf-acc-alert-policy-" + suffix
-	receiverName := "tf-acc-alert-receiver-" + suffix
+	name := "example-alert-policy-" + suffix
+	receiverName := "example-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -41,20 +41,20 @@ func TestAccResourceAutoF5XCAlertPolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_basic(name, receiverName, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_basicUpdated(name, receiverName, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -66,8 +66,8 @@ func TestAccResourceAutoF5XCAlertPolicy_withSeverityMatcher(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
 	suffix := acctest.RandString(t, 8)
-	name := "tf-acc-alert-policy-" + suffix
-	receiverName := "tf-acc-alert-receiver-" + suffix
+	name := "example-alert-policy-" + suffix
+	receiverName := "example-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -78,20 +78,20 @@ func TestAccResourceAutoF5XCAlertPolicy_withSeverityMatcher(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withSeverity(name, receiverName, namespace, "CRITICAL"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withSeverity(name, receiverName, namespace, "MAJOR"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -103,8 +103,8 @@ func TestAccResourceAutoF5XCAlertPolicy_withGroupMatcher(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
 	suffix := acctest.RandString(t, 8)
-	name := "tf-acc-alert-policy-" + suffix
-	receiverName := "tf-acc-alert-receiver-" + suffix
+	name := "example-alert-policy-" + suffix
+	receiverName := "example-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -115,20 +115,20 @@ func TestAccResourceAutoF5XCAlertPolicy_withGroupMatcher(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withGroup(name, receiverName, namespace, "SECURITY"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withGroup(name, receiverName, namespace, "INFRASTRUCTURE"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -140,8 +140,8 @@ func TestAccResourceAutoF5XCAlertPolicy_withAlertnameMatcher(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
 	suffix := acctest.RandString(t, 8)
-	name := "tf-acc-alert-policy-" + suffix
-	receiverName := "tf-acc-alert-receiver-" + suffix
+	name := "example-alert-policy-" + suffix
+	receiverName := "example-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -152,20 +152,20 @@ func TestAccResourceAutoF5XCAlertPolicy_withAlertnameMatcher(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withAlertname(name, receiverName, namespace, "ServiceHealthLow"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withAlertname(name, receiverName, namespace, "ServiceUnavailable"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -177,8 +177,8 @@ func TestAccResourceAutoF5XCAlertPolicy_withGroupByTransition(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
 	suffix := acctest.RandString(t, 8)
-	name := "tf-acc-alert-policy-" + suffix
-	receiverName := "tf-acc-alert-receiver-" + suffix
+	name := "example-alert-policy-" + suffix
+	receiverName := "example-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -189,20 +189,20 @@ func TestAccResourceAutoF5XCAlertPolicy_withGroupByTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withGroupBy(name, receiverName, namespace, "individual"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_withGroupBy(name, receiverName, namespace, "ves_io_group"),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -214,10 +214,10 @@ func TestAccResourceAutoF5XCAlertPolicy_full(t *testing.T) {
 
 	namespace := acctest.DefaultNamespace()
 	suffix := acctest.RandString(t, 8)
-	name := "tf-acc-alert-policy-" + suffix
-	receiverName := "tf-acc-alert-receiver-" + suffix
+	name := "example-alert-policy-" + suffix
+	receiverName := "example-alert-receiver-" + suffix
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
@@ -226,24 +226,28 @@ func TestAccResourceAutoF5XCAlertPolicy_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_full(name, receiverName, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_fullUpdated(name, receiverName, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAlertPolicyConfig_full("example-alert-policy", "example-alert-receiver", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCAlertPolicy_withCustomMatcherAnnotationsAndDefaultGroupBy(t *testing.T) {
@@ -251,8 +255,8 @@ func TestAccResourceAutoF5XCAlertPolicy_withCustomMatcherAnnotationsAndDefaultGr
 
 	namespace := acctest.DefaultNamespace()
 	suffix := acctest.RandString(t, 8)
-	name := "tf-acc-alert-policy-" + suffix
-	receiverName := "tf-acc-alert-receiver-" + suffix
+	name := "example-alert-policy-" + suffix
+	receiverName := "example-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -263,20 +267,20 @@ func TestAccResourceAutoF5XCAlertPolicy_withCustomMatcherAnnotationsAndDefaultGr
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_customMatcherAnnotationsAndDefaultGroupBy(name, receiverName, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAlertPolicyConfig_customMatcherAnnotationsAndDefaultGroupByUpdated(name, receiverName, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_alert_policy.test",
+				ResourceName:                         "f5xc_alert_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_alert_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -288,11 +292,11 @@ func testAccCheckAlertPolicyDestroyProducer(t *testing.T) func(*terraform.State)
 }
 
 func testAccResourceAutoF5XCAlertPolicyConfig_basic(name, receiverName, namespace string) string {
-	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy", "any", "send", "individual", "")
+	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy example", "any", "send", "individual", "")
 }
 
 func testAccResourceAutoF5XCAlertPolicyConfig_basicUpdated(name, receiverName, namespace string) string {
-	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy updated", "any", "send", "ves_io_group", "")
+	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy example updated", "any", "send", "ves_io_group", "")
 }
 
 func testAccResourceAutoF5XCAlertPolicyConfig_withSeverity(name, receiverName, namespace, severity string) string {
@@ -301,7 +305,7 @@ func testAccResourceAutoF5XCAlertPolicyConfig_withSeverity(name, receiverName, n
         severities = ["%s"]
       }
     }`, severity)
-	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Severity matcher", "", "send", "individual", matcher)
+	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy severity matcher example", "", "send", "individual", matcher)
 }
 
 func testAccResourceAutoF5XCAlertPolicyConfig_withGroup(name, receiverName, namespace, group string) string {
@@ -310,18 +314,18 @@ func testAccResourceAutoF5XCAlertPolicyConfig_withGroup(name, receiverName, name
         groups = ["%s"]
       }
     }`, group)
-	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Group matcher", "", "send", "individual", matcher)
+	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy group matcher example", "", "send", "individual", matcher)
 }
 
 func testAccResourceAutoF5XCAlertPolicyConfig_withAlertname(name, receiverName, namespace, alertname string) string {
 	matcher := fmt.Sprintf(`matcher_choice = {
       alertname = ["%s"]
     }`, alertname)
-	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alertname matcher", "", "send", "individual", matcher)
+	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy alertname matcher example", "", "send", "individual", matcher)
 }
 
 func testAccResourceAutoF5XCAlertPolicyConfig_withGroupBy(name, receiverName, namespace, groupBy string) string {
-	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "GroupBy", "any", "send", groupBy, "")
+	return testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, "Alert policy group-by example", "any", "send", groupBy, "")
 }
 
 func testAccResourceAutoF5XCAlertPolicyConfig_full(name, receiverName, namespace string) string {
@@ -330,19 +334,19 @@ func testAccResourceAutoF5XCAlertPolicyConfig_full(name, receiverName, namespace
     }`
 	return fmt.Sprintf(`
 %s
-resource "f5xc_alert_policy" "test" {
+resource "f5xc_alert_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "Alert policy full"
+	description = "Alert policy full example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   receivers = [
     {
-      name      = f5xc_alert_receiver.test.name
-      namespace = f5xc_alert_receiver.test.namespace
+      name      = f5xc_alert_receiver.example.name
+      namespace = f5xc_alert_receiver.example.namespace
     }
   ]
 
@@ -385,20 +389,20 @@ func testAccResourceAutoF5XCAlertPolicyConfig_fullUpdated(name, receiverName, na
     }`
 	return fmt.Sprintf(`
 %s
-resource "f5xc_alert_policy" "test" {
+resource "f5xc_alert_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "Alert policy full updated"
+	description = "Alert policy full example updated"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "shared"
   }
 
   receivers = [
     {
-      name      = f5xc_alert_receiver.test.name
-      namespace = f5xc_alert_receiver.test.namespace
+      name      = f5xc_alert_receiver.example.name
+      namespace = f5xc_alert_receiver.example.namespace
     }
   ]
 
@@ -452,7 +456,7 @@ func testAccResourceAutoF5XCAlertPolicyConfig_customMatcherAnnotationsAndDefault
 				alertlabel = {
 					env = {
 						matcher_type_choice = {
-							exact_match = "prod"
+							exact_match = "example"
 						}
 					}
 				}
@@ -461,23 +465,23 @@ func testAccResourceAutoF5XCAlertPolicyConfig_customMatcherAnnotationsAndDefault
 
 	return fmt.Sprintf(`
 %s
-resource "f5xc_alert_policy" "test" {
+resource "f5xc_alert_policy" "example" {
 	name        = %q
 	namespace   = %q
-	description = "Alert policy missing field coverage"
+	description = "Alert policy custom matcher example"
 
 	annotations = {
 		owner = "platform-team"
 	}
 
 	labels = {
-		env = "prod"
+		env = "example"
 	}
 
 	receivers = [
 		{
-			name      = f5xc_alert_receiver.test.name
-			namespace = f5xc_alert_receiver.test.namespace
+			name      = f5xc_alert_receiver.example.name
+			namespace = f5xc_alert_receiver.example.namespace
 		}
 	]
 
@@ -552,10 +556,10 @@ func testAccResourceAutoF5XCAlertPolicyConfig_customMatcherAnnotationsAndDefault
 
 	return fmt.Sprintf(`
 %s
-resource "f5xc_alert_policy" "test" {
+resource "f5xc_alert_policy" "example" {
 	name        = %q
 	namespace   = %q
-	description = "Alert policy missing field coverage updated"
+	description = "Alert policy custom matcher example updated"
 
 	annotations = {
 		owner = "platform-team"
@@ -563,14 +567,14 @@ resource "f5xc_alert_policy" "test" {
 	}
 
 	labels = {
-		env  = "staging"
+		env  = "example"
 		tier = "shared"
 	}
 
 	receivers = [
 		{
-			name      = f5xc_alert_receiver.test.name
-			namespace = f5xc_alert_receiver.test.namespace
+			name      = f5xc_alert_receiver.example.name
+			namespace = f5xc_alert_receiver.example.namespace
 		}
 	]
 
@@ -632,15 +636,15 @@ func testAccResourceAutoF5XCAlertPolicyConfig(name, receiverName, namespace, des
 
 	return fmt.Sprintf(`
 %s
-resource "f5xc_alert_policy" "test" {
+resource "f5xc_alert_policy" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
   receivers = [
     {
-      name      = f5xc_alert_receiver.test.name
-      namespace = f5xc_alert_receiver.test.namespace
+      name      = f5xc_alert_receiver.example.name
+      namespace = f5xc_alert_receiver.example.namespace
     }
   ]
 
@@ -667,7 +671,7 @@ resource "f5xc_alert_policy" "test" {
 
 func testAccResourceAutoF5XCAlertPolicyReceiverConfig(receiverName, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_alert_receiver" "test" {
+resource "f5xc_alert_receiver" "example" {
   name      = %q
   namespace = %q
 

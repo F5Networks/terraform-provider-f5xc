@@ -34,6 +34,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -44,6 +45,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_bgp_routing_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/bgp_routing_policy"
 )
@@ -242,8 +244,8 @@ func (r *ResourceF5XCBgpRoutingPolicy) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "BGP Route Filter BGP route filter is a collection of match condition and action to be taken on match. All the fields to evaluate match criteria will be extracted from BGP route being processed. IP prefix, BGP community and AS PATH, all fields which can be specified and all the fields must match with BGP route for action to be applied",
-		Description:         "BGP Route Filter BGP route filter is a collection of match condition and action to be taken on match. All the fields to evaluate match criteria will be extracted from BGP route being processed. IP prefix, BGP community and AS PATH, all fields which can be specified and all the fields must match with BGP route for action to be applied",
+		MarkdownDescription: "BGP Routing Policy is a list of rules, which contains match criteria and<br>action to be taken upon match. This helps in filtering routes which are<br>exported or imported by BGP peers",
+		Description:         "BGP Routing Policy is a list of rules, which contains match criteria and action to be taken upon match. This helps in filtering routes which are exported or imported by BGP peers",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -299,7 +301,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -496,7 +498,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 																Computed:            false,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
-																		regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																		regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																		"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																	),
 																},
@@ -621,9 +623,17 @@ func (r *ResourceF5XCBgpRoutingPolicy) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCBgpRoutingPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCBgpRoutingPolicyModel
 
 	// Read Terraform plan data into the model
@@ -956,7 +966,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Create(ctx context.Context, request resou
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "bgp_routing_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "bgp_routing_policy", err),
 		)
 		return
 	}
@@ -1497,7 +1507,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request resourc
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "bgp_routing_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "bgp_routing_policy", err),
 		)
 		return
 	}
@@ -1997,6 +2007,12 @@ func (r *ResourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCBgpRoutingPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCBgpRoutingPolicyModel
@@ -2342,7 +2358,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Update(ctx context.Context, request resou
 	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "bgp_routing_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bgp_routing_policy", err),
 		)
 		return
 	}
@@ -2351,7 +2367,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Update(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "bgp_routing_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bgp_routing_policy", err),
 		)
 		return
 	}
@@ -2913,7 +2929,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "bgp_routing_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "bgp_routing_policy", err),
 		)
 		return
 	}

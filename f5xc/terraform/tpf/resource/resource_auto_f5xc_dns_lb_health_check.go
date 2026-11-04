@@ -19,13 +19,13 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -45,6 +46,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_dns_lb_health_check "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dns_lb_health_check"
 )
@@ -236,8 +238,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_lb_health_check This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_health_check) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_lb_health_check This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_health_check) etc. can be fetched",
+		MarkdownDescription: "DNS Load Balancer Health Check object is used for configuring DNS Load Balancer Health Checks",
+		Description:         "DNS Load Balancer Health Check object is used for configuring DNS Load Balancer Health Checks",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -293,7 +295,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -310,26 +312,23 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 				Description:         "backref_objs a list of DNS Load balancer pools associated with this health check",
 				MarkdownDescription: "backref_objs a list of DNS Load balancer pools associated with this health check",
 				Required:            false,
-				Optional:            true,
+				Optional:            false,
 				Computed:            true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
@@ -337,9 +336,6 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 					},
 				},
@@ -380,10 +376,11 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							},
 							"health_check_secondary_port": schema.Int64Attribute{
 								Description:         "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
-								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 65535),
 								},
@@ -452,10 +449,6 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 										Computed:            false,
 										Validators: []validator.String{
 											stringvalidator.LengthAtMost(2048),
-											stringvalidator.RegexMatches(
-												regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$`),
-												"must be a valid hostname (RFC 1034)",
-											),
 										},
 									},
 								},
@@ -481,10 +474,11 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							},
 							"health_check_secondary_port": schema.Int64Attribute{
 								Description:         "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
-								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 65535),
 								},
@@ -553,10 +547,6 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 										Computed:            false,
 										Validators: []validator.String{
 											stringvalidator.LengthAtMost(2048),
-											stringvalidator.RegexMatches(
-												regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$`),
-												"must be a valid hostname (RFC 1034)",
-											),
 										},
 									},
 								},
@@ -592,30 +582,33 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							},
 							"health_check_secondary_port": schema.Int64Attribute{
 								Description:         "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
-								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 65535),
 								},
 							},
 							"receive": schema.StringAttribute{
 								Description:         "Receive String Regular expression used to match against the response to the monitor's request. Mark node up upon receipt of a successful regular expression match. Uses re2 regular expression syntax.",
-								MarkdownDescription: "Receive String Regular expression used to match against the response to the monitor's request. Mark node up upon receipt of a successful regular expression match. Uses re2 regular expression syntax.<br>**Validation:** `Length LengthAtMost(2048)`",
+								MarkdownDescription: "Receive String Regular expression used to match against the response to the monitor's request. Mark node up upon receipt of a successful regular expression match. Uses re2 regular expression syntax.<br>**Validation:** `Length LengthAtMost(2048)`<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 								Validators: []validator.String{
 									stringvalidator.LengthAtMost(2048),
 								},
 							},
 							"send": schema.StringAttribute{
 								Description:         "Send String Send this string to target (default empty. When send and receive are both empty, monitor just tests 3WHS)",
-								MarkdownDescription: "Send String Send this string to target (default empty. When send and receive are both empty, monitor just tests 3WHS)<br>**Validation:** `Length LengthAtMost(2048)`",
+								MarkdownDescription: "Send String Send this string to target (default empty. When send and receive are both empty, monitor just tests 3WHS)<br>**Validation:** `Length LengthAtMost(2048)`<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 								Validators: []validator.String{
 									stringvalidator.LengthAtMost(2048),
 								},
@@ -641,10 +634,11 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							},
 							"health_check_secondary_port": schema.Int64Attribute{
 								Description:         "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
-								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 65535),
 								},
@@ -698,10 +692,11 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							},
 							"health_check_secondary_port": schema.Int64Attribute{
 								Description:         "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
-								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass",
+								MarkdownDescription: "Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 65535),
 								},
@@ -792,9 +787,17 @@ func (r *ResourceF5XCDnsLbHealthCheck) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDnsLbHealthCheckModel
 
 	// Read Terraform plan data into the model
@@ -900,6 +903,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckHttpHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckHttpHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				httpHealthCheckOneOfSpec.HttpHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckHttpHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				httpHealthCheckOneOfSpec.HttpHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
@@ -966,6 +971,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckHttpsHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckHttpsHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				httpsHealthCheckOneOfSpec.HttpsHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckHttpsHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				httpsHealthCheckOneOfSpec.HttpsHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
@@ -1039,16 +1046,22 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckTcpHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckTcpHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				tcpHealthCheckOneOfSpec.TcpHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckTcpHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
 			if !dnsLbHealthCheckTcpHealthCheckModel.Receive.IsNull() && !dnsLbHealthCheckTcpHealthCheckModel.Receive.IsUnknown() {
 				tcpHealthCheckOneOfSpec.TcpHealthCheck.Receive = string(dnsLbHealthCheckTcpHealthCheckModel.Receive.ValueString())
+			} else {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.Receive = ""
 			}
 
 			// resource modelToSpecNested StringField --> Send
 			if !dnsLbHealthCheckTcpHealthCheckModel.Send.IsNull() && !dnsLbHealthCheckTcpHealthCheckModel.Send.IsUnknown() {
 				tcpHealthCheckOneOfSpec.TcpHealthCheck.Send = string(dnsLbHealthCheckTcpHealthCheckModel.Send.ValueString())
+			} else {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.Send = ""
 			}
 
 		}
@@ -1070,6 +1083,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckTcpHexHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckTcpHexHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				tcpHexHealthCheckOneOfSpec.TcpHexHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckTcpHexHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				tcpHexHealthCheckOneOfSpec.TcpHexHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
@@ -1101,6 +1116,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckUdpHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckUdpHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				udpHealthCheckOneOfSpec.UdpHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckUdpHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				udpHealthCheckOneOfSpec.UdpHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested RequiredStringField --> Receive
@@ -1119,7 +1136,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1142,7 +1159,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "dns_lb_health_check", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "dns_lb_health_check", err),
 		)
 		return
 	}
@@ -1312,14 +1329,12 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			AttrTypes: DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap,
 		}
 		nullDnsLbPoolsList := basetypes.NewListNull(dnsLbPoolsObjectType)
-		var priorValDnsLbPools types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_lb_pools"), &priorValDnsLbPools)
-		if !priorValDnsLbPools.IsNull() && !priorValDnsLbPools.IsUnknown() {
-			data.DnsLbPools = priorValDnsLbPools
+		if !data.DnsLbPools.IsNull() && !data.DnsLbPools.IsUnknown() && len(data.DnsLbPools.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLbPools = basetypes.NewListValueMust(dnsLbPoolsObjectType, nil)
 		} else {
 			data.DnsLbPools = nullDnsLbPoolsList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> HealthCheck
@@ -1563,20 +1578,12 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 				tcpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHealthCheckElement.GetHealthCheckSecondaryPort()))
 
 				// resource specToModelNested StringField --> Receive
-				if tcpHealthCheckElement.GetReceive() != "" {
-					tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["receive"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
 
 				// resource specToModelNested StringField --> Send
-				if tcpHealthCheckElement.GetSend() != "" {
-					tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
 
 				tcpHealthCheckObj, tcpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
 				response.Diagnostics.Append(tcpHealthCheckObjDiags...)
@@ -1747,7 +1754,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "dns_lb_health_check", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_lb_health_check", err),
 		)
 		return
 	}
@@ -1917,14 +1924,12 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 			AttrTypes: DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap,
 		}
 		nullDnsLbPoolsList := basetypes.NewListNull(dnsLbPoolsObjectType)
-		var priorValDnsLbPools types.List
-		_ = request.State.GetAttribute(ctx, path.Root("dns_lb_pools"), &priorValDnsLbPools)
-		if !priorValDnsLbPools.IsNull() && !priorValDnsLbPools.IsUnknown() {
-			data.DnsLbPools = priorValDnsLbPools
+		if !data.DnsLbPools.IsNull() && !data.DnsLbPools.IsUnknown() && len(data.DnsLbPools.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLbPools = basetypes.NewListValueMust(dnsLbPoolsObjectType, nil)
 		} else {
 			data.DnsLbPools = nullDnsLbPoolsList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> HealthCheck
@@ -2027,7 +2032,11 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 					httpHealthCheckAttributeMap["virtual_host_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpHealthCheckAttributeMap["virtual_host_choice"] = types.ObjectNull(DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap)
+					httpHealthCheckAttributeMap["virtual_host_choice"] = types.ObjectValueMust(DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_virtual_host":       types.BoolValue(true),
+						"inherit_load_balancer_fqdn": types.BoolNull(),
+						"virtual_host":               types.StringNull(),
+					})
 				}
 
 				httpHealthCheckObj, httpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckHttpHealthCheckModelAttributeMap, httpHealthCheckAttributeMap)
@@ -2128,7 +2137,11 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 					httpsHealthCheckAttributeMap["virtual_host_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpsHealthCheckAttributeMap["virtual_host_choice"] = types.ObjectNull(DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap)
+					httpsHealthCheckAttributeMap["virtual_host_choice"] = types.ObjectValueMust(DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_virtual_host":       types.BoolValue(true),
+						"inherit_load_balancer_fqdn": types.BoolNull(),
+						"virtual_host":               types.StringNull(),
+					})
 				}
 
 				httpsHealthCheckObj, httpsHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap, httpsHealthCheckAttributeMap)
@@ -2168,20 +2181,12 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 				tcpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHealthCheckElement.GetHealthCheckSecondaryPort()))
 
 				// resource specToModelNested StringField --> Receive
-				if tcpHealthCheckElement.GetReceive() != "" {
-					tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["receive"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
 
 				// resource specToModelNested StringField --> Send
-				if tcpHealthCheckElement.GetSend() != "" {
-					tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
 
 				tcpHealthCheckObj, tcpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
 				response.Diagnostics.Append(tcpHealthCheckObjDiags...)
@@ -2311,6 +2316,12 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDnsLbHealthCheckModel
@@ -2436,6 +2447,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckHttpHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckHttpHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				httpHealthCheckOneOfSpec.HttpHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckHttpHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				httpHealthCheckOneOfSpec.HttpHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
@@ -2502,6 +2515,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckHttpsHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckHttpsHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				httpsHealthCheckOneOfSpec.HttpsHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckHttpsHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				httpsHealthCheckOneOfSpec.HttpsHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
@@ -2575,16 +2590,22 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckTcpHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckTcpHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				tcpHealthCheckOneOfSpec.TcpHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckTcpHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
 			if !dnsLbHealthCheckTcpHealthCheckModel.Receive.IsNull() && !dnsLbHealthCheckTcpHealthCheckModel.Receive.IsUnknown() {
 				tcpHealthCheckOneOfSpec.TcpHealthCheck.Receive = string(dnsLbHealthCheckTcpHealthCheckModel.Receive.ValueString())
+			} else {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.Receive = ""
 			}
 
 			// resource modelToSpecNested StringField --> Send
 			if !dnsLbHealthCheckTcpHealthCheckModel.Send.IsNull() && !dnsLbHealthCheckTcpHealthCheckModel.Send.IsUnknown() {
 				tcpHealthCheckOneOfSpec.TcpHealthCheck.Send = string(dnsLbHealthCheckTcpHealthCheckModel.Send.ValueString())
+			} else {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.Send = ""
 			}
 
 		}
@@ -2606,6 +2627,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckTcpHexHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckTcpHexHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				tcpHexHealthCheckOneOfSpec.TcpHexHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckTcpHexHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				tcpHexHealthCheckOneOfSpec.TcpHexHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested StringField --> Receive
@@ -2637,6 +2660,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> HealthCheckSecondaryPort
 			if !dnsLbHealthCheckUdpHealthCheckModel.HealthCheckSecondaryPort.IsNull() && !dnsLbHealthCheckUdpHealthCheckModel.HealthCheckSecondaryPort.IsUnknown() {
 				udpHealthCheckOneOfSpec.UdpHealthCheck.HealthCheckSecondaryPort = uint32(uint32(dnsLbHealthCheckUdpHealthCheckModel.HealthCheckSecondaryPort.ValueInt64()))
+			} else {
+				udpHealthCheckOneOfSpec.UdpHealthCheck.HealthCheckSecondaryPort = uint32(0)
 			}
 
 			// resource modelToSpecNested RequiredStringField --> Receive
@@ -2655,7 +2680,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2671,7 +2696,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "dns_lb_health_check", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_lb_health_check", err),
 		)
 		return
 	}
@@ -2680,7 +2705,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "dns_lb_health_check", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_lb_health_check", err),
 		)
 		return
 	}
@@ -2849,14 +2874,12 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			AttrTypes: DnsLbHealthCheckDnsLbPoolsObjectRefModelAttributeMap,
 		}
 		nullDnsLbPoolsList := basetypes.NewListNull(dnsLbPoolsObjectType)
-		var priorValDnsLbPools types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_lb_pools"), &priorValDnsLbPools)
-		if !priorValDnsLbPools.IsNull() && !priorValDnsLbPools.IsUnknown() {
-			data.DnsLbPools = priorValDnsLbPools
+		if !data.DnsLbPools.IsNull() && !data.DnsLbPools.IsUnknown() && len(data.DnsLbPools.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsLbPools = basetypes.NewListValueMust(dnsLbPoolsObjectType, nil)
 		} else {
 			data.DnsLbPools = nullDnsLbPoolsList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> HealthCheck
@@ -3100,20 +3123,12 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 				tcpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHealthCheckElement.GetHealthCheckSecondaryPort()))
 
 				// resource specToModelNested StringField --> Receive
-				if tcpHealthCheckElement.GetReceive() != "" {
-					tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["receive"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
 
 				// resource specToModelNested StringField --> Send
-				if tcpHealthCheckElement.GetSend() != "" {
-					tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
 
 				tcpHealthCheckObj, tcpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
 				response.Diagnostics.Append(tcpHealthCheckObjDiags...)
@@ -3306,7 +3321,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "dns_lb_health_check", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "dns_lb_health_check", err),
 		)
 		return
 	}

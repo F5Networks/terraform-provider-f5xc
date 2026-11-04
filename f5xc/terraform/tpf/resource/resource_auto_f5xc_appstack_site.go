@@ -42,6 +42,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/oneofbranchplanmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
@@ -54,6 +55,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_fleet "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/fleet"
 	ves_io_schema_network_firewall "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_firewall"
@@ -759,6 +761,7 @@ type AppstackSiteSecretType struct {
 type AppstackSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type AppstackSiteBlindfoldSecretInfo struct {
@@ -1017,7 +1020,6 @@ type ResourceF5XCAppstackSiteModel struct {
 	GpuChoice                types.Object   `tfsdk:"gpu_choice"`
 	K8SClusterChoice         types.Object   `tfsdk:"k8s_cluster_choice"`
 	KubernetesUpgradeDrain   types.Object   `tfsdk:"kubernetes_upgrade_drain"`
-	LaunchIkeInNamespace     types.Bool     `tfsdk:"launch_ike_in_namespace"`
 	LogsReceiverChoice       types.Object   `tfsdk:"logs_receiver_choice"`
 	MasterNodeConfiguration  types.List     `tfsdk:"master_node_configuration"`
 	NetworkCfgChoice         types.Object   `tfsdk:"network_cfg_choice"`
@@ -2777,6 +2779,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStorageIscsiChapPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2811,6 +2814,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2960,6 +2964,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3008,6 +3013,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3222,6 +3228,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3256,6 +3263,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3290,6 +3298,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3338,6 +3347,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3616,6 +3626,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3704,6 +3715,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -4332,7 +4344,7 @@ var AppstackSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -4350,8 +4362,8 @@ func (r *ResourceF5XCAppstackSite) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a voltstack_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of voltstack_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a voltstack_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of voltstack_site) etc. can be fetched",
+		MarkdownDescription: "App Stack site defines a required parameters that can be used in CRUD, to create and manage an App Stack site.",
+		Description:         "App Stack site defines a required parameters that can be used in CRUD, to create and manage an App Stack site.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -4407,7 +4419,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -4422,10 +4434,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"address": schema.StringAttribute{
 				Description:         "address Site's geographical address that can be used to determine its latitude and longitude.",
-				MarkdownDescription: "address Site's geographical address that can be used to determine its latitude and longitude.<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "address Site's geographical address that can be used to determine its latitude and longitude.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
@@ -4882,7 +4895,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
@@ -4980,14 +4993,6 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 				},
 			},
-			"launch_ike_in_namespace": schema.BoolAttribute{
-				Description:         "launch_ike_in_namespace Identify that the CE needs to run IKE in namespace",
-				MarkdownDescription: "launch_ike_in_namespace Identify that the CE needs to run IKE in namespace<br>**Default:** `false`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(false),
-			},
 			"logs_receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Logs Streaming Select Logs receiver for logs streaming",
 				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming",
@@ -5029,7 +5034,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
@@ -5192,7 +5197,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -5301,7 +5306,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -5343,7 +5348,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -5524,14 +5529,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
@@ -5636,14 +5641,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
@@ -6054,7 +6059,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														Computed:            false,
 																														Validators: []validator.String{
 																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																																"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																															),
 																														},
@@ -6092,7 +6097,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Computed:            false,
 																											Validators: []validator.String{
 																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																													"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																												),
 																											},
@@ -6129,7 +6134,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				),
 																			},
 																			PlanModifiers: []planmodifier.Object{
-																				objectplanmodifier.UseStateForUnknown(),
+																				objectplanmodifier.UseNonNullStateForUnknown(),
 																				oneofbranchplanmodifier.PreserveSelectedBranch(),
 																			},
 																			Attributes: map[string]schema.Attribute{
@@ -6191,7 +6196,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Computed:            false,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
-																															regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																															regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																															"must be a valid IPv6 prefix (CIDR notation)",
 																														),
 																														stringvalidator.RegexMatches(
@@ -6239,7 +6244,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																				Computed:            false,
 																																				Validators: []validator.String{
 																																					stringvalidator.RegexMatches(
-																																						regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																																						regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																																						"must be a valid IPv6 prefix (CIDR notation)",
 																																					),
 																																				},
@@ -6573,7 +6578,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														Computed:            false,
 																														Validators: []validator.String{
 																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																																"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																															),
 																														},
@@ -6611,7 +6616,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Computed:            false,
 																											Validators: []validator.String{
 																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																													"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																												),
 																											},
@@ -6660,14 +6665,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            true,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
@@ -6718,7 +6723,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Optional:            false,
 																							Computed:            true,
 																							PlanModifiers: []planmodifier.String{
-																								stringplanmodifier.UseStateForUnknown(),
+																								stringplanmodifier.UseNonNullStateForUnknown(),
 																							},
 																						},
 																					},
@@ -6883,14 +6888,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
@@ -7026,7 +7031,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												Computed:            false,
 																												Validators: []validator.String{
 																													stringvalidator.RegexMatches(
-																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																														"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																													),
 																												},
@@ -7064,7 +7069,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Computed:            false,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																										),
 																									},
@@ -7103,7 +7108,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -7180,7 +7185,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -7227,7 +7232,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -7419,7 +7424,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -7488,14 +7493,15 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
+																				listvalidator.UniqueValues(),
 																			},
 																		},
 																		"ip_prefixes": schema.ListAttribute{
@@ -7601,7 +7607,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Optional:            false,
 																													Computed:            true,
 																													PlanModifiers: []planmodifier.String{
-																														stringplanmodifier.UseStateForUnknown(),
+																														stringplanmodifier.UseNonNullStateForUnknown(),
 																													},
 																												},
 																											},
@@ -7672,14 +7678,15 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
+																				listvalidator.UniqueValues(),
 																			},
 																		},
 																		"ip_prefixes": schema.ListAttribute{
@@ -7692,7 +7699,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Validators: []validator.List{
 																				listvalidator.SizeBetween(1, 256),
 																				listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																					regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																					regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																					"must be a valid IPv6 prefix",
 																				)),
 																				listvalidator.UniqueValues(),
@@ -7785,7 +7792,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Optional:            false,
 																													Computed:            true,
 																													PlanModifiers: []planmodifier.String{
-																														stringplanmodifier.UseStateForUnknown(),
+																														stringplanmodifier.UseNonNullStateForUnknown(),
 																													},
 																												},
 																											},
@@ -7818,10 +7825,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"tunnel_dead_timeout": schema.Int64Attribute{
 								Description:         "tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.",
-								MarkdownDescription: "tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.",
+								MarkdownDescription: "tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 180000),
 								},
@@ -7899,10 +7907,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"operating_system_version": schema.StringAttribute{
 				Description:         "Operating System Version Desired Operating System version that should be installed on the site",
-				MarkdownDescription: "Operating System Version Desired Operating System version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "Operating System Version Desired Operating System version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
@@ -7912,7 +7921,10 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				MarkdownDescription: "Operating System Operating System Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"operating_system_version_choice": schema.SingleNestedAttribute{
 						Description:         "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
@@ -8084,14 +8096,15 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 													Attributes: map[string]schema.Attribute{
 														"attrs": schema.ListAttribute{
 															Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-															MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+															MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+															Computed:            false,
 															Validators: []validator.List{
 																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																listvalidator.SizeAtMost(4),
+																listvalidator.UniqueValues(),
 															},
 														},
 														"ip_prefixes": schema.ListAttribute{
@@ -8197,7 +8210,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Optional:            false,
 																									Computed:            true,
 																									PlanModifiers: []planmodifier.String{
-																										stringplanmodifier.UseStateForUnknown(),
+																										stringplanmodifier.UseNonNullStateForUnknown(),
 																									},
 																								},
 																							},
@@ -8533,7 +8546,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"backend": schema.StringAttribute{
 																			Description:         "Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.",
-																			MarkdownDescription: "Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.<br>**Default:** `block`",
+																			MarkdownDescription: "Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.<br>**Default:** `block`<br>**Allowed Values (choose one):** `['block', 'file']`",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            true,
@@ -8725,6 +8738,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						exactlyoneofvalidator.RequiredExactlyOneOf(
 																							"blindfold_secret_info",
 																							"clear_secret_info",
+																							"none",
 																						),
 																					},
 																					Attributes: map[string]schema.Attribute{
@@ -8748,6 +8762,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
+																									WriteOnly:           true,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
 																											regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -8800,6 +8815,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										),
 																									},
 																								},
+																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            false,
+																							Validators: []validator.Bool{
+																								boolvalidator.Equals(true),
 																							},
 																						},
 																					},
@@ -8833,6 +8858,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						exactlyoneofvalidator.RequiredExactlyOneOf(
 																							"blindfold_secret_info",
 																							"clear_secret_info",
+																							"none",
 																						),
 																					},
 																					Attributes: map[string]schema.Attribute{
@@ -8856,6 +8882,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
+																									WriteOnly:           true,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
 																											regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -8908,6 +8935,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										),
 																									},
 																								},
+																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            false,
+																							Validators: []validator.Bool{
+																								boolvalidator.Equals(true),
 																							},
 																						},
 																					},
@@ -8996,7 +9033,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Validators: []validator.List{
 																										listvalidator.SizeAtMost(128),
 																										listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																											regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																											regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																											"must be a valid IPv6 prefix",
 																										)),
 																										listvalidator.UniqueValues(),
@@ -9065,6 +9102,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
@@ -9088,6 +9126,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9140,6 +9179,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -9282,6 +9331,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
@@ -9305,6 +9355,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9357,6 +9408,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -9495,7 +9556,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"space_reserve": schema.StringAttribute{
 																												Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            true,
@@ -9540,7 +9601,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"storage_driver_name": schema.StringAttribute{
 																							Description:         "Storage Backend Driver Configuration of Backend Name",
-																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`",
+																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`<br>**Allowed Values (choose one):** `['ontap-nas', 'ontap-nas-economy', 'ontap-nas-flexgroup']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -9685,7 +9746,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"space_reserve": schema.StringAttribute{
 																									Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            true,
@@ -9774,6 +9835,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														exactlyoneofvalidator.RequiredExactlyOneOf(
 																															"blindfold_secret_info",
 																															"clear_secret_info",
+																															"none",
 																														),
 																													},
 																													Attributes: map[string]schema.Attribute{
@@ -9797,6 +9859,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																	Required:            true,
 																																	Optional:            false,
 																																	Computed:            false,
+																																	WriteOnly:           true,
 																																	Validators: []validator.String{
 																																		stringvalidator.RegexMatches(
 																																			regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9849,6 +9912,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		),
 																																	},
 																																},
+																															},
+																														},
+																														"none": schema.BoolAttribute{
+																															Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															Required:            false,
+																															Optional:            true,
+																															Computed:            false,
+																															Validators: []validator.Bool{
+																																boolvalidator.Equals(true),
 																															},
 																														},
 																													},
@@ -9872,6 +9945,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														exactlyoneofvalidator.RequiredExactlyOneOf(
 																															"blindfold_secret_info",
 																															"clear_secret_info",
+																															"none",
 																														),
 																													},
 																													Attributes: map[string]schema.Attribute{
@@ -9895,6 +9969,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																	Required:            true,
 																																	Optional:            false,
 																																	Computed:            false,
+																																	WriteOnly:           true,
 																																	Validators: []validator.String{
 																																		stringvalidator.RegexMatches(
 																																			regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9947,6 +10022,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		),
 																																	},
 																																},
+																															},
+																														},
+																														"none": schema.BoolAttribute{
+																															Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															Required:            false,
+																															Optional:            true,
+																															Computed:            false,
+																															Validators: []validator.Bool{
+																																boolvalidator.Equals(true),
 																															},
 																														},
 																													},
@@ -10004,6 +10089,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
@@ -10027,6 +10113,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -10079,6 +10166,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -10227,6 +10324,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
@@ -10250,6 +10348,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -10302,6 +10401,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -10440,7 +10549,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"space_reserve": schema.StringAttribute{
 																												Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            true,
@@ -10485,7 +10594,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"storage_driver_name": schema.StringAttribute{
 																							Description:         "Storage Backend Driver Configuration of Backend Name",
-																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`",
+																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`<br>**Allowed Values (choose one):** `['ontap-san', 'ontap-san-economy', 'ontap-nas-flexgroup']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -10633,7 +10742,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"space_reserve": schema.StringAttribute{
 																									Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            true,
@@ -10705,7 +10814,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"default_fs_type": schema.StringAttribute{
 																							Description:         "Default Filesystem Type Block volume default filesystem type. Not recommended to change!",
-																							MarkdownDescription: "Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`",
+																							MarkdownDescription: "Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`<br>**Allowed Values (choose one):** `['xfs', 'ext4']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -10763,6 +10872,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													exactlyoneofvalidator.RequiredExactlyOneOf(
 																														"blindfold_secret_info",
 																														"clear_secret_info",
+																														"none",
 																													),
 																												},
 																												Attributes: map[string]schema.Attribute{
@@ -10786,6 +10896,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																Required:            true,
 																																Optional:            false,
 																																Computed:            false,
+																																WriteOnly:           true,
 																																Validators: []validator.String{
 																																	stringvalidator.RegexMatches(
 																																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -10838,6 +10949,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																	),
 																																},
 																															},
+																														},
+																													},
+																													"none": schema.BoolAttribute{
+																														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														Required:            false,
+																														Optional:            true,
+																														Computed:            false,
+																														Validators: []validator.Bool{
+																															boolvalidator.Equals(true),
 																														},
 																													},
 																												},
@@ -10913,7 +11034,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"san_type": schema.StringAttribute{
 																							Description:         "SAN Type Block volume access protocol, either ISCSI or FC",
-																							MarkdownDescription: "SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`",
+																							MarkdownDescription: "SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`<br>**Allowed Values (choose one):** `['ISCSI', 'FC']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -10978,6 +11099,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													exactlyoneofvalidator.RequiredExactlyOneOf(
 																														"blindfold_secret_info",
 																														"clear_secret_info",
+																														"none",
 																													),
 																												},
 																												Attributes: map[string]schema.Attribute{
@@ -11001,6 +11123,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																Required:            true,
 																																Optional:            false,
 																																Computed:            false,
+																																WriteOnly:           true,
 																																Validators: []validator.String{
 																																	stringvalidator.RegexMatches(
 																																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -11053,6 +11176,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																	),
 																																},
 																															},
+																														},
+																													},
+																													"none": schema.BoolAttribute{
+																														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														Required:            false,
+																														Optional:            true,
+																														Computed:            false,
+																														Validators: []validator.Bool{
+																															boolvalidator.Equals(true),
 																														},
 																													},
 																												},
@@ -11644,7 +11777,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												Computed:            false,
 																												Validators: []validator.String{
 																													stringvalidator.RegexMatches(
-																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																														"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																													),
 																												},
@@ -11682,7 +11815,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Computed:            false,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																										),
 																									},
@@ -11719,7 +11852,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		),
 																	},
 																	PlanModifiers: []planmodifier.Object{
-																		objectplanmodifier.UseStateForUnknown(),
+																		objectplanmodifier.UseNonNullStateForUnknown(),
 																		oneofbranchplanmodifier.PreserveSelectedBranch(),
 																	},
 																	Attributes: map[string]schema.Attribute{
@@ -11781,7 +11914,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Computed:            false,
 																											Validators: []validator.String{
 																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																													regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																													"must be a valid IPv6 prefix (CIDR notation)",
 																												),
 																												stringvalidator.RegexMatches(
@@ -11829,7 +11962,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		Computed:            false,
 																																		Validators: []validator.String{
 																																			stringvalidator.RegexMatches(
-																																				regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																																				regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																																				"must be a valid IPv6 prefix (CIDR notation)",
 																																			),
 																																		},
@@ -12163,7 +12296,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												Computed:            false,
 																												Validators: []validator.String{
 																													stringvalidator.RegexMatches(
-																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																														"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																													),
 																												},
@@ -12201,7 +12334,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Computed:            false,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																										),
 																									},
@@ -12250,14 +12383,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	},
 																},
 																"mtu": schema.Int64Attribute{
-																	Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																	MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																	Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																	MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
 																	Validators: []validator.Int64{
 																		int64validator.Any(
-																			int64validator.Between(512, 8000),
+																			int64validator.Between(512, 9000),
 																			int64validator.OneOf(0),
 																		),
 																	},
@@ -12308,7 +12441,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -12491,7 +12624,10 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				MarkdownDescription: "F5XC Software F5XC Software Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"volterra_sw_version_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
@@ -12592,7 +12728,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
@@ -12651,10 +12787,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"volterra_software_version": schema.StringAttribute{
 				Description:         "Software Version Desired volterra software version that should be installed on the site",
-				MarkdownDescription: "Software Version Desired volterra software version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "Software Version Desired volterra software version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
@@ -12669,11 +12806,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					"signatures_update_mode_choice": schema.SingleNestedAttribute{
 						Description:         "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
 						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						Required:            false,
-						Optional:            true,
+						Required:            true,
+						Optional:            false,
 						Computed:            false,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.ExactlyOneOf(
+							exactlyoneofvalidator.RequiredExactlyOneOf(
 								"automatic",
 								"manual",
 							),
@@ -12777,9 +12914,17 @@ func (r *ResourceF5XCAppstackSite) ModifyPlan(ctx context.Context, req resource.
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAppstackSiteModel
 
 	// Read Terraform plan data into the model
@@ -12787,6 +12932,17 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCAppstackSiteModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.StorageCfgChoice.IsNull() && !configData.StorageCfgChoice.IsUnknown() {
+		data.StorageCfgChoice = configData.StorageCfgChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -13300,6 +13456,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -13414,6 +13573,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			}
 			customNetworkConfigOneOfSpec := &ves_io_schema_views_voltstack_site.CreateSpecType_CustomNetworkConfig{}
 			customNetworkConfigOneOfSpec.CustomNetworkConfig = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration{}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SliChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultSliConfig{
+				DefaultSliConfig: &ves_io_schema.Empty{},
+			}
 			spec.NetworkCfgChoice = customNetworkConfigOneOfSpec
 
 			// resource modelToSpecNested StringField --> BgpPeerAddress
@@ -13537,6 +13699,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -15018,6 +15183,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								if response.Diagnostics.HasError() {
 									return
 								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
+								}
 
 								interfacesSpec[i].Labels = mapOfString
 							} else {
@@ -15264,6 +15436,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 						response.Diagnostics.Append(diags...)
 						if response.Diagnostics.HasError() {
 							return
+						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
 						}
 
 						sloConfigOneOfSpec.SloConfig.Labels = mapOfString
@@ -15652,6 +15831,8 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			// resource modelToSpecNested UintField --> TunnelDeadTimeout
 			if !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsNull() && !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsUnknown() {
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(uint32(appstackSiteCustomNetConfigModel.TunnelDeadTimeout.ValueInt64()))
+			} else {
+				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(0)
 			}
 
 			// resource modelToSpecNested EnumField --> VipVrrpMode
@@ -16500,6 +16681,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 											}
 
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !iscsiChapPasswordSecretInfoChoiceModel.None.IsNull() && !iscsiChapPasswordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												iscsiChapPasswordSpec.SecretInfoOneof = noneSpecBool
+											}
+
 										}
 
 									}
@@ -16577,6 +16765,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 													clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 												}
 
+											}
+
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												passwordSpec.SecretInfoOneof = noneSpecBool
 											}
 
 										}
@@ -16756,6 +16951,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -16791,6 +16993,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.Labels = mapOfString
@@ -16907,6 +17116,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -16943,6 +17159,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														storageSpec[ii].Labels = mapOfString
@@ -17296,6 +17519,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -17368,6 +17598,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																	clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 																}
 
+															}
+
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapTargetInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
 															}
 
 														}
@@ -17463,6 +17700,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -17503,6 +17747,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.Labels = mapOfString
@@ -17614,6 +17865,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -17650,6 +17908,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														storageSpec[ii].Labels = mapOfString
@@ -18053,6 +18318,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -18064,6 +18336,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														flashArraysSpec[ii].Labels = mapOfString
@@ -18219,6 +18498,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																	clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 																}
 
+															}
+
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
 															}
 
 														}
@@ -18387,6 +18673,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
 									return
+								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
 								}
 
 								storageInterfacesSpec[i].Labels = mapOfString
@@ -19497,7 +19790,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AppstackSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19537,7 +19830,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -19560,7 +19853,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "appstack_site", err),
 		)
 		return
 	}
@@ -19679,12 +19972,8 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
 	// false
@@ -20432,9 +20721,6 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	} else {
 		data.KubernetesUpgradeDrain = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
-
-	// resource SpecToModelRoot BoolField --> LaunchIkeInNamespace
-	data.LaunchIkeInNamespace = types.BoolValue(specData.GetLaunchIkeInNamespace())
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
 	// false
@@ -23346,15 +23632,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if interfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(interfacesElement.GetLabels()))
 										for k, v := range interfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -23807,15 +24094,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 							// resource specToModelNested MapOfStringField --> Labels
 							if sloConfigElement.GetLabels() != nil {
-								// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-								// They will be picked up during the next Read.
-								filteredMap := make(map[string]string)
+								// Filter out configured omitted map keys across all operations so backend-injected
+								// forbidden keys never enter or vanish from Terraform state.
+								filteredMap := make(map[string]string, len(sloConfigElement.GetLabels()))
 								for k, v := range sloConfigElement.GetLabels() {
-									if !strings.HasPrefix(k, "ves.io/") {
-										filteredMap[k] = v
-									}
+									filteredMap[k] = v
 								}
-
+								delete(filteredMap, "ves.io/config-propagation-destination")
+								delete(filteredMap, "ves.io/app_type")
+								delete(filteredMap, "ves.io/api-scope")
+								delete(filteredMap, "ves.io/provider")
 								if len(filteredMap) > 0 {
 									labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 									response.Diagnostics.Append(labelsDiags...)
@@ -24173,29 +24461,31 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: reconcile backend list order against client representation.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													} else {
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													}
 												}
 
@@ -24561,12 +24851,8 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// resource SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
@@ -25628,6 +25914,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															}
 														}
 
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -25772,6 +26067,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															} else {
 																passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -26051,6 +26355,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -26139,15 +26452,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapNasElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapNasElement.GetLabels()))
 																for k, v := range netappBackendOntapNasElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -26339,6 +26653,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -26394,15 +26717,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -26926,6 +27250,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																					}
 																				}
 
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																				}
+
 																				// --- End of Choices ---
 
 																				// Create the final ObjectValue for this OneOf field
@@ -27062,6 +27395,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																					} else {
 																						chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																					}
+																				}
+
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																				}
 
 																				// --- End of Choices ---
@@ -27256,6 +27598,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -27352,15 +27703,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapSanElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapSanElement.GetLabels()))
 																for k, v := range netappBackendOntapSanElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -27534,6 +27886,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -27589,15 +27950,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -28180,6 +28542,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																			}
 																		}
 
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -28219,15 +28590,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 																// resource specToModelNested MapOfStringField --> Labels
 																if flashArraysElement.GetLabels() != nil {
-																	// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																	// They will be picked up during the next Read.
-																	filteredMap := make(map[string]string)
+																	// Filter out configured omitted map keys across all operations so backend-injected
+																	// forbidden keys never enter or vanish from Terraform state.
+																	filteredMap := make(map[string]string, len(flashArraysElement.GetLabels()))
 																	for k, v := range flashArraysElement.GetLabels() {
-																		if !strings.HasPrefix(k, "ves.io/") {
-																			filteredMap[k] = v
-																		}
+																		filteredMap[k] = v
 																	}
-
+																	delete(filteredMap, "ves.io/config-propagation-destination")
+																	delete(filteredMap, "ves.io/app_type")
+																	delete(filteredMap, "ves.io/api-scope")
+																	delete(filteredMap, "ves.io/provider")
 																	if len(filteredMap) > 0 {
 																		labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																		response.Diagnostics.Append(labelsDiags...)
@@ -28469,6 +28841,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																			} else {
 																				apiTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 																			}
+																		}
+
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																		}
 
 																		// --- End of Choices ---
@@ -28830,15 +29211,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if storageInterfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(storageInterfacesElement.GetLabels()))
 										for k, v := range storageInterfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -30826,19 +31208,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// resource SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
 		var appstackSiteLiveSignaturesUpdateModel = &AppstackSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// GlobalSpecType
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30909,7 +31288,12 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			}
 			data.WorkerNodes = listValue
 		} else {
-			data.WorkerNodes = types.ListNull(types.StringType)
+			if !data.WorkerNodes.IsNull() && !data.WorkerNodes.IsUnknown() && len(data.WorkerNodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.WorkerNodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.WorkerNodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -30964,7 +31348,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "appstack_site", err),
 		)
 		return
 	}
@@ -31083,12 +31467,8 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
 	// false
@@ -31250,7 +31630,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.BlockedServicesChoice = types.ObjectNull(AppstackSiteBlockedServicesChoiceModelAttributeMap)
+
+		if data.BlockedServicesChoice.IsNull() || data.BlockedServicesChoice.IsUnknown() || ((data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsUnknown() || (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsUnknown())) && (data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsNull() || data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsUnknown())) {
+			data.BlockedServicesChoice = types.ObjectValueMust(AppstackSiteBlockedServicesChoiceModelAttributeMap, map[string]attr.Value{
+				"blocked_services":         types.ObjectNull(AppstackSiteBlockedServicesChoiceBlockedServicesModelAttributeMap),
+				"default_blocked_services": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> BondChoice
@@ -31358,7 +31744,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 							appstackSiteFleetBondDeviceTypeModel.LacpChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							appstackSiteFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
+							appstackSiteFleetBondDeviceTypeModel.LacpChoice = types.ObjectValueMust(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap, map[string]attr.Value{
+								"active_backup": types.BoolNull(),
+								"lacp": types.ObjectValueMust(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceLacpModelAttributeMap, map[string]attr.Value{
+									"rate": types.Int64Value(30),
+								}),
+							})
 						}
 
 						// resource specToModelNested RequiredUintField --> LinkPollingInterval
@@ -31432,7 +31823,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.BondChoice = types.ObjectNull(AppstackSiteBondChoiceModelAttributeMap)
+
+		if data.BondChoice.IsNull() || data.BondChoice.IsUnknown() || ((data.BondChoice.Attributes()["bond_device_list"].(types.Object).IsNull() || data.BondChoice.Attributes()["bond_device_list"].(types.Object).IsUnknown() || (data.BondChoice.Attributes()["bond_device_list"].(types.Object).Attributes()["bond_devices"].IsNull() || data.BondChoice.Attributes()["bond_device_list"].(types.Object).Attributes()["bond_devices"].IsUnknown())) && (data.BondChoice.Attributes()["no_bond_devices"].IsNull() || data.BondChoice.Attributes()["no_bond_devices"].IsUnknown())) {
+			data.BondChoice = types.ObjectValueMust(AppstackSiteBondChoiceModelAttributeMap, map[string]attr.Value{
+				"bond_device_list": types.ObjectNull(AppstackSiteBondChoiceBondDeviceListModelAttributeMap),
+				"no_bond_devices":  types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> Coordinates
@@ -31623,7 +32020,14 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.GpuChoice = types.ObjectNull(AppstackSiteGpuChoiceModelAttributeMap)
+
+		if data.GpuChoice.IsNull() || data.GpuChoice.IsUnknown() || ((data.GpuChoice.Attributes()["disable_gpu"].IsNull() || data.GpuChoice.Attributes()["disable_gpu"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_gpu"].IsNull() || data.GpuChoice.Attributes()["enable_gpu"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).IsUnknown() || ((data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["feature_type"].IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["feature_type"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_address"].IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_address"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_port"].IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_port"].IsUnknown())))) {
+			data.GpuChoice = types.ObjectValueMust(AppstackSiteGpuChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_gpu": types.BoolValue(true),
+				"enable_gpu":  types.BoolNull(),
+				"enable_vgpu": types.ObjectNull(AppstackSiteGpuChoiceEnableVgpuModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> K8SClusterChoice
@@ -31712,7 +32116,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.K8SClusterChoice = types.ObjectNull(AppstackSiteK8SClusterChoiceModelAttributeMap)
+
+		if data.K8SClusterChoice.IsNull() || data.K8SClusterChoice.IsUnknown() || ((data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).IsUnknown() || ((data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["name"].IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["name"].IsUnknown()) && (data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["namespace"].IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["tenant"].IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.K8SClusterChoice.Attributes()["no_k8s_cluster"].IsNull() || data.K8SClusterChoice.Attributes()["no_k8s_cluster"].IsUnknown())) {
+			data.K8SClusterChoice = types.ObjectValueMust(AppstackSiteK8SClusterChoiceModelAttributeMap, map[string]attr.Value{
+				"k8s_cluster":    types.ObjectNull(AppstackSiteK8SClusterChoiceK8SClusterModelAttributeMap),
+				"no_k8s_cluster": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
@@ -31787,7 +32197,9 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap)
+						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectValueMust(AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap, map[string]attr.Value{
+							"drain_max_unavailable_node_count": types.Int64Value(1),
+						})
 					}
 
 					// resource specToModelNested RequiredUintField --> DrainNodeTimeout
@@ -31836,9 +32248,6 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	} else {
 		data.KubernetesUpgradeDrain = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
-
-	// resource SpecToModelRoot BoolField --> LaunchIkeInNamespace
-	data.LaunchIkeInNamespace = types.BoolValue(specData.GetLaunchIkeInNamespace())
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
 	// false
@@ -31926,7 +32335,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LogsReceiverChoice = types.ObjectNull(AppstackSiteLogsReceiverChoiceModelAttributeMap)
+
+		if data.LogsReceiverChoice.IsNull() || data.LogsReceiverChoice.IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsNull() || data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsUnknown())) {
+			data.LogsReceiverChoice = types.ObjectValueMust(AppstackSiteLogsReceiverChoiceModelAttributeMap, map[string]attr.Value{
+				"log_receiver":            types.ObjectNull(AppstackSiteLogsReceiverChoiceLogReceiverModelAttributeMap),
+				"logs_streaming_disabled": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> MasterNodeConfiguration
@@ -32131,7 +32546,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["forward_proxy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["forward_proxy_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["forward_proxy_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_forward_proxy_policies": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceActiveForwardProxyPoliciesModelAttributeMap),
+						"forward_proxy_allow_all":       types.BoolNull(),
+						"no_forward_proxy":              types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
@@ -32389,7 +32808,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["global_network_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["global_network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["global_network_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"global_network_list": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceGlobalNetworkListModelAttributeMap),
+						"no_global_network":   types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> InterfaceChoice
@@ -32476,7 +32898,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap)
+										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+											"dc_cluster_group_connectivity_interface_disabled": types.BoolValue(true),
+											"dc_cluster_group_connectivity_interface_enabled":  types.BoolNull(),
+										})
 									}
 
 									// resource specToModelNested StringField --> Description
@@ -32612,7 +33037,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													dedicatedInterfaceAttributeMap["node_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap)
+													dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+														"cluster": types.BoolValue(true),
+														"node":    types.StringNull(),
+													})
 												}
 
 												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
@@ -32660,7 +33088,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													dedicatedInterfaceAttributeMap["primary_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap)
+													dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+														"is_primary":  types.BoolNull(),
+														"not_primary": types.BoolValue(true),
+													})
 												}
 
 												// resource specToModelNested UintField --> Priority
@@ -32744,7 +33175,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													dedicatedManagementInterfaceAttributeMap["node_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap)
+													dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+														"cluster": types.BoolValue(true),
+														"node":    types.StringNull(),
+													})
 												}
 
 												dedicatedManagementInterfaceObj, dedicatedManagementInterfaceObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedManagementInterfaceModelAttributeMap, dedicatedManagementInterfaceAttributeMap)
@@ -32852,7 +33286,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		appstackSiteDHCPNetTypeModel.DnsChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+																		appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap, map[string]attr.Value{
+																			"dns_address": types.StringNull(),
+																			"same_as_dgw": types.BoolValue(true),
+																		})
 																	}
 
 																	// resource specToModelNested RequiredOneOfField --> GatewayChoice
@@ -32910,7 +33347,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		appstackSiteDHCPNetTypeModel.GatewayChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+																		appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap, map[string]attr.Value{
+																			"dgw_address":   types.StringNull(),
+																			"first_address": types.BoolValue(true),
+																			"last_address":  types.BoolNull(),
+																		})
 																	}
 
 																	// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -33134,7 +33575,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																dhcpServerAttributeMap["interfaces_addressing_choice"] = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap)
+																dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+																	"automatic_from_end":   types.BoolNull(),
+																	"automatic_from_start": types.BoolValue(true),
+																	"interface_ip_map":     types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+																})
 															}
 
 															dhcpServerObj, dhcpServerObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerModelAttributeMap, dhcpServerAttributeMap)
@@ -33316,7 +33761,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["address_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["address_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["address_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap, map[string]attr.Value{
+														"dhcp_client": types.BoolValue(true),
+														"dhcp_server": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerModelAttributeMap),
+														"static_ip":   types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceStaticIpModelAttributeMap),
+													})
 												}
 
 												// resource specToModelNested RequiredStringField --> Device
@@ -33632,7 +34081,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																						statefulAttributeMap["interfaces_addressing_choice"] = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap)
+																						statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+																							"automatic_from_end":   types.BoolNull(),
+																							"automatic_from_start": types.BoolValue(true),
+																							"interface_ip_map":     types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+																						})
 																					}
 
 																					statefulObj, statefulObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulModelAttributeMap, statefulAttributeMap)
@@ -33784,7 +34237,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																							localDnsAttributeMap["local_dns_choice"] = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							localDnsAttributeMap["local_dns_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap)
+																							localDnsAttributeMap["local_dns_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																								"configured_address": types.StringNull(),
+																								"first_address":      types.BoolValue(true),
+																								"last_address":       types.BoolNull(),
+																							})
 																						}
 
 																						localDnsObj, localDnsObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, localDnsAttributeMap)
@@ -33814,7 +34271,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																				appstackSiteIPV6DnsConfigModel.DnsChoice = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+																				appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap, map[string]attr.Value{
+																					"configured_list": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceConfiguredListModelAttributeMap),
+																					"local_dns": types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, map[string]attr.Value{
+																						"local_dns_choice": types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																							"configured_address": types.StringNull(),
+																							"first_address":      types.BoolValue(true),
+																							"last_address":       types.BoolNull(),
+																						}),
+																					}),
+																				})
 																			}
 
 																			// This field needs to be converted to a types.ObjectValue before assignment.
@@ -33862,7 +34328,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																ipv6AutoConfigAttributeMap["autoconfig_choice"] = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap)
+																ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap, map[string]attr.Value{
+																	"host":   types.BoolValue(true),
+																	"router": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterModelAttributeMap),
+																})
 															}
 
 															ipv6AutoConfigObj, ipv6AutoConfigObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigModelAttributeMap, ipv6AutoConfigAttributeMap)
@@ -34244,7 +34713,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["network_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["network_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+														"segment_network":           types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceSegmentNetworkModelAttributeMap),
+														"site_local_inside_network": types.BoolNull(),
+														"site_local_network":        types.BoolValue(true),
+														"storage_network":           types.BoolNull(),
+													})
 												}
 
 												// resource specToModelNested RequiredOneOfField --> NodeChoice
@@ -34293,7 +34767,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["node_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+														"cluster": types.BoolValue(true),
+														"node":    types.StringNull(),
+													})
 												}
 
 												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
@@ -34341,7 +34818,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["primary_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+														"is_primary":  types.BoolNull(),
+														"not_primary": types.BoolValue(true),
+													})
 												}
 
 												// resource specToModelNested UintField --> Priority
@@ -34393,7 +34873,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["vlan_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap, map[string]attr.Value{
+														"untagged": types.BoolValue(true),
+														"vlan_id":  types.Int64Null(),
+													})
 												}
 
 												ethernetInterfaceObj, ethernetInterfaceObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceModelAttributeMap, ethernetInterfaceAttributeMap)
@@ -34465,7 +34948,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													tunnelInterfaceAttributeMap["network_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													tunnelInterfaceAttributeMap["network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap)
+													tunnelInterfaceAttributeMap["network_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+														"site_local_inside_network": types.BoolNull(),
+														"site_local_network":        types.BoolValue(true),
+													})
 												}
 
 												// resource specToModelNested RequiredOneOfField --> NodeChoice
@@ -34750,13 +35236,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if interfacesElement.GetLabels() != nil {
-										// READ operation: keep backend-injected keys so they enter the state.
-										labelsMap, labelsDiags := utils.StringMapToTerraformMap(interfacesElement.GetLabels())
-										response.Diagnostics.Append(labelsDiags...)
-										if response.Diagnostics.HasError() {
-											return
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(interfacesElement.GetLabels()))
+										for k, v := range interfacesElement.GetLabels() {
+											filteredMap[k] = v
 										}
-										appstackSiteIfaceModel.Labels = labelsMap
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
+										if len(filteredMap) > 0 {
+											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+											response.Diagnostics.Append(labelsDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											appstackSiteIfaceModel.Labels = labelsMap
+										} else {
+											appstackSiteIfaceModel.Labels = types.MapNull(types.StringType)
+										}
 									} else {
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -34809,7 +35308,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["interface_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["interface_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["interface_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+						"default_interface_config": types.BoolValue(true),
+						"interface_list":           types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
@@ -34990,7 +35492,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["network_policy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["network_policy_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["network_policy_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_enhanced_firewall_policies": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceActiveEnhancedFirewallPoliciesModelAttributeMap),
+						"active_network_policies":           types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceActiveNetworkPoliciesModelAttributeMap),
+						"no_network_policy":                 types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested StringField --> OutsideNameserver
@@ -35080,7 +35586,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["site_mesh_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["site_mesh_group_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"site_to_site_tunnel_ip":  types.StringNull(),
+						"sm_connection_public_ip": types.BoolNull(),
+						"sm_connection_pvt_ip":    types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> SloChoice
@@ -35194,18 +35704,34 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 								sloConfigAttributeMap["dc_cluster_group_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								sloConfigAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGroupChoiceModelAttributeMap)
+								sloConfigAttributeMap["dc_cluster_group_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGroupChoiceModelAttributeMap, map[string]attr.Value{
+									"dc_cluster_group":    types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGroupChoiceDcClusterGroupModelAttributeMap),
+									"no_dc_cluster_group": types.BoolValue(true),
+								})
 							}
 
 							// resource specToModelNested MapOfStringField --> Labels
 							if sloConfigElement.GetLabels() != nil {
-								// READ operation: keep backend-injected keys so they enter the state.
-								labelsMap, labelsDiags := utils.StringMapToTerraformMap(sloConfigElement.GetLabels())
-								response.Diagnostics.Append(labelsDiags...)
-								if response.Diagnostics.HasError() {
-									return
+								// Filter out configured omitted map keys across all operations so backend-injected
+								// forbidden keys never enter or vanish from Terraform state.
+								filteredMap := make(map[string]string, len(sloConfigElement.GetLabels()))
+								for k, v := range sloConfigElement.GetLabels() {
+									filteredMap[k] = v
 								}
-								sloConfigAttributeMap["labels"] = labelsMap
+								delete(filteredMap, "ves.io/config-propagation-destination")
+								delete(filteredMap, "ves.io/app_type")
+								delete(filteredMap, "ves.io/api-scope")
+								delete(filteredMap, "ves.io/provider")
+								if len(filteredMap) > 0 {
+									labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+									response.Diagnostics.Append(labelsDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									sloConfigAttributeMap["labels"] = labelsMap
+								} else {
+									sloConfigAttributeMap["labels"] = types.MapNull(types.StringType)
+								}
 							} else {
 								// API returned nil (Protobuf omits empty maps). Set to null.
 								// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -35483,7 +36009,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 								sloConfigAttributeMap["static_route_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								sloConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceModelAttributeMap)
+								sloConfigAttributeMap["static_route_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+									"no_static_routes": types.BoolValue(true),
+									"static_routes":    types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceStaticRoutesModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> StaticV6RouteChoice
@@ -35553,29 +36082,31 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														if response.Diagnostics.HasError() {
 															return
 														}
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: reconcile backend list order against client representation.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, listValue)
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													} else {
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													}
 												}
 
@@ -35779,7 +36310,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 								sloConfigAttributeMap["static_v6_route_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								sloConfigAttributeMap["static_v6_route_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceModelAttributeMap)
+								sloConfigAttributeMap["static_v6_route_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceModelAttributeMap, map[string]attr.Value{
+									"no_static_v6_routes": types.BoolValue(true),
+									"static_v6_routes":    types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceStaticV6RoutesModelAttributeMap),
+								})
 							}
 
 							sloConfigObj, sloConfigObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigModelAttributeMap, sloConfigAttributeMap)
@@ -35809,7 +36343,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["slo_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["slo_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["slo_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceModelAttributeMap, map[string]attr.Value{
+						"default_config": types.BoolValue(true),
+						"slo_config":     types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested UintField --> TunnelDeadTimeout
@@ -35870,7 +36407,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.NetworkCfgChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceModelAttributeMap)
+
+		if data.NetworkCfgChoice.IsNull() || data.NetworkCfgChoice.IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address_v6"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address_v6"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_router_id"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_router_id"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).Attributes()["forward_proxy_policies"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).Attributes()["forward_proxy_policies"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["forward_proxy_allow_all"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["forward_proxy_allow_all"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["no_forward_proxy"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["no_forward_proxy"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).Attributes()["global_network_connections"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).Attributes()["global_network_connections"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["no_global_network"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["no_global_network"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["default_interface_config"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["default_interface_config"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).Attributes()["interfaces"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).Attributes()["interfaces"].IsUnknown())))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).Attributes()["enhanced_firewall_policies"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).Attributes()["enhanced_firewall_policies"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).Attributes()["network_policies"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).Attributes()["network_policies"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["no_network_policy"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["no_network_policy"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver_v6"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver_v6"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip_v6"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip_v6"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["site_to_site_tunnel_ip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["site_to_site_tunnel_ip"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_public_ip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_public_ip"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_pvt_ip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_pvt_ip"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["default_config"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["default_config"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["name"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["name"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["namespace"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["tenant"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["no_dc_cluster_group"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["no_dc_cluster_group"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["labels"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["labels"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsUnknown())))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["no_static_v6_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["no_static_v6_routes"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).Attributes()["static_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).Attributes()["static_routes"].IsUnknown())))))))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["tunnel_dead_timeout"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["tunnel_dead_timeout"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["vip_vrrp_mode"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["vip_vrrp_mode"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["default_network_config"].IsNull() || data.NetworkCfgChoice.Attributes()["default_network_config"].IsUnknown())) {
+			data.NetworkCfgChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceModelAttributeMap, map[string]attr.Value{
+				"custom_network_config":  types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigModelAttributeMap),
+				"default_network_config": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> OfflineSurvivabilityMode
@@ -35923,7 +36466,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AppstackSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectValueMust(AppstackSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap, map[string]attr.Value{
+				"enable_offline_survivability_mode": types.BoolNull(),
+				"no_offline_survivability_mode":     types.BoolValue(true),
+			})
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
@@ -35941,12 +36487,8 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	}
 
 	// resource SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// resource SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
@@ -35999,7 +36541,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AppstackSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectValueMust(AppstackSiteOsOperatingSystemVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_os_version":       types.BoolValue(true),
+				"operating_system_version": types.StringNull(),
+			})
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
@@ -36118,7 +36663,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.SriovInterfaceChoice = types.ObjectNull(AppstackSiteSriovInterfaceChoiceModelAttributeMap)
+
+		if data.SriovInterfaceChoice.IsNull() || data.SriovInterfaceChoice.IsUnknown() || ((data.SriovInterfaceChoice.Attributes()["default_sriov_interface"].IsNull() || data.SriovInterfaceChoice.Attributes()["default_sriov_interface"].IsUnknown()) && (data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).IsNull() || data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).IsUnknown() || (data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).Attributes()["sriov_interface"].IsNull() || data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).Attributes()["sriov_interface"].IsUnknown()))) {
+			data.SriovInterfaceChoice = types.ObjectValueMust(AppstackSiteSriovInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+				"default_sriov_interface": types.BoolValue(true),
+				"sriov_interfaces":        types.ObjectNull(AppstackSiteSriovInterfaceChoiceSriovInterfacesModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> StorageCfgChoice
@@ -36415,7 +36966,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["static_route_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"no_static_routes": types.BoolValue(true),
+						"static_routes":    types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceStaticRoutesModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
@@ -36815,7 +37369,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["storage_class_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["storage_class_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["storage_class_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceModelAttributeMap, map[string]attr.Value{
+						"default_storage_class": types.BoolValue(true),
+						"storage_class_list":    types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceStorageClassListModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> StorageDeviceChoice
@@ -37008,6 +37565,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 															}
 														}
 
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -37164,6 +37730,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 															} else {
 																passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -37455,6 +38030,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -37555,13 +38139,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapNasElement.GetLabels() != nil {
-																// READ operation: keep backend-injected keys so they enter the state.
-																labelsMap, labelsDiags := utils.StringMapToTerraformMap(netappBackendOntapNasElement.GetLabels())
-																response.Diagnostics.Append(labelsDiags...)
-																if response.Diagnostics.HasError() {
-																	return
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapNasElement.GetLabels()))
+																for k, v := range netappBackendOntapNasElement.GetLabels() {
+																	filteredMap[k] = v
 																}
-																netappBackendOntapNasAttributeMap["labels"] = labelsMap
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
+																if len(filteredMap) > 0 {
+																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																	response.Diagnostics.Append(labelsDiags...)
+																	if response.Diagnostics.HasError() {
+																		return
+																	}
+																	netappBackendOntapNasAttributeMap["labels"] = labelsMap
+																} else {
+																	netappBackendOntapNasAttributeMap["labels"] = types.MapNull(types.StringType)
+																}
 															} else {
 																// API returned nil (Protobuf omits empty maps). Set to null.
 																// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -37743,6 +38340,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -37810,13 +38416,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// READ operation: keep backend-injected keys so they enter the state.
-																		labelsMap, labelsDiags := utils.StringMapToTerraformMap(storageElement.GetLabels())
-																		response.Diagnostics.Append(labelsDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
+																		for k, v := range storageElement.GetLabels() {
+																			filteredMap[k] = v
 																		}
-																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
+																		if len(filteredMap) > 0 {
+																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																			response.Diagnostics.Append(labelsDiags...)
+																			if response.Diagnostics.HasError() {
+																				return
+																			}
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		} else {
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+																		}
 																	} else {
 																		// API returned nil (Protobuf omits empty maps). Set to null.
 																		// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -37898,7 +38517,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																				"adaptive_qos_policy": types.StringNull(),
+																				"no_qos":              types.BoolValue(true),
+																				"qos_policy":          types.StringNull(),
+																			})
 																		}
 
 																		// resource specToModelNested StringField --> SecurityStyle
@@ -38109,7 +38732,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																		"adaptive_qos_policy": types.StringNull(),
+																		"no_qos":              types.BoolValue(true),
+																		"qos_policy":          types.StringNull(),
+																	})
 																}
 
 																// resource specToModelNested StringField --> SecurityStyle
@@ -38330,6 +38957,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																					}
 																				}
 
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																				}
+
 																				// --- End of Choices ---
 
 																				// Create the final ObjectValue for this OneOf field
@@ -38478,6 +39114,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																					} else {
 																						chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																					}
+																				}
+
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																				}
 
 																				// --- End of Choices ---
@@ -38684,6 +39329,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -38792,13 +39446,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapSanElement.GetLabels() != nil {
-																// READ operation: keep backend-injected keys so they enter the state.
-																labelsMap, labelsDiags := utils.StringMapToTerraformMap(netappBackendOntapSanElement.GetLabels())
-																response.Diagnostics.Append(labelsDiags...)
-																if response.Diagnostics.HasError() {
-																	return
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapSanElement.GetLabels()))
+																for k, v := range netappBackendOntapSanElement.GetLabels() {
+																	filteredMap[k] = v
 																}
-																netappBackendOntapSanAttributeMap["labels"] = labelsMap
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
+																if len(filteredMap) > 0 {
+																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																	response.Diagnostics.Append(labelsDiags...)
+																	if response.Diagnostics.HasError() {
+																		return
+																	}
+																	netappBackendOntapSanAttributeMap["labels"] = labelsMap
+																} else {
+																	netappBackendOntapSanAttributeMap["labels"] = types.MapNull(types.StringType)
+																}
 															} else {
 																// API returned nil (Protobuf omits empty maps). Set to null.
 																// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -38962,6 +39629,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -39029,13 +39705,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// READ operation: keep backend-injected keys so they enter the state.
-																		labelsMap, labelsDiags := utils.StringMapToTerraformMap(storageElement.GetLabels())
-																		response.Diagnostics.Append(labelsDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
+																		for k, v := range storageElement.GetLabels() {
+																			filteredMap[k] = v
 																		}
-																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
+																		if len(filteredMap) > 0 {
+																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																			response.Diagnostics.Append(labelsDiags...)
+																			if response.Diagnostics.HasError() {
+																				return
+																			}
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		} else {
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+																		}
 																	} else {
 																		// API returned nil (Protobuf omits empty maps). Set to null.
 																		// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -39117,7 +39806,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																				"adaptive_qos_policy": types.StringNull(),
+																				"no_qos":              types.BoolValue(true),
+																				"qos_policy":          types.StringNull(),
+																			})
 																		}
 
 																		// resource specToModelNested StringField --> SecurityStyle
@@ -39328,7 +40021,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																		"adaptive_qos_policy": types.StringNull(),
+																		"no_qos":              types.BoolValue(true),
+																		"qos_policy":          types.StringNull(),
+																	})
 																}
 
 																// resource specToModelNested StringField --> SecurityStyle
@@ -39608,6 +40305,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			}
 																		}
 
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -39659,13 +40365,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 																// resource specToModelNested MapOfStringField --> Labels
 																if flashArraysElement.GetLabels() != nil {
-																	// READ operation: keep backend-injected keys so they enter the state.
-																	labelsMap, labelsDiags := utils.StringMapToTerraformMap(flashArraysElement.GetLabels())
-																	response.Diagnostics.Append(labelsDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
+																	// Filter out configured omitted map keys across all operations so backend-injected
+																	// forbidden keys never enter or vanish from Terraform state.
+																	filteredMap := make(map[string]string, len(flashArraysElement.GetLabels()))
+																	for k, v := range flashArraysElement.GetLabels() {
+																		filteredMap[k] = v
 																	}
-																	appstackSiteFlashArrayEndpointModel.Labels = labelsMap
+																	delete(filteredMap, "ves.io/config-propagation-destination")
+																	delete(filteredMap, "ves.io/app_type")
+																	delete(filteredMap, "ves.io/api-scope")
+																	delete(filteredMap, "ves.io/provider")
+																	if len(filteredMap) > 0 {
+																		labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																		response.Diagnostics.Append(labelsDiags...)
+																		if response.Diagnostics.HasError() {
+																			return
+																		}
+																		appstackSiteFlashArrayEndpointModel.Labels = labelsMap
+																	} else {
+																		appstackSiteFlashArrayEndpointModel.Labels = types.MapNull(types.StringType)
+																	}
 																} else {
 																	// API returned nil (Protobuf omits empty maps). Set to null.
 																	// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -39897,6 +40616,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			} else {
 																				apiTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 																			}
+																		}
+
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																		}
 
 																		// --- End of Choices ---
@@ -40218,7 +40946,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["storage_device_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["storage_device_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["storage_device_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceModelAttributeMap, map[string]attr.Value{
+						"no_storage_device":   types.BoolValue(true),
+						"storage_device_list": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> StorageInterfaceChoice
@@ -40270,13 +41001,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if storageInterfacesElement.GetLabels() != nil {
-										// READ operation: keep backend-injected keys so they enter the state.
-										labelsMap, labelsDiags := utils.StringMapToTerraformMap(storageInterfacesElement.GetLabels())
-										response.Diagnostics.Append(labelsDiags...)
-										if response.Diagnostics.HasError() {
-											return
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(storageInterfacesElement.GetLabels()))
+										for k, v := range storageInterfacesElement.GetLabels() {
+											filteredMap[k] = v
 										}
-										appstackSiteStorageIfaceTypeModel.Labels = labelsMap
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
+										if len(filteredMap) > 0 {
+											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+											response.Diagnostics.Append(labelsDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											appstackSiteStorageIfaceTypeModel.Labels = labelsMap
+										} else {
+											appstackSiteStorageIfaceTypeModel.Labels = types.MapNull(types.StringType)
+										}
 									} else {
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -40375,7 +41119,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																appstackSiteDHCPNetTypeModel.DnsChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+																appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap, map[string]attr.Value{
+																	"dns_address": types.StringNull(),
+																	"same_as_dgw": types.BoolValue(true),
+																})
 															}
 
 															// resource specToModelNested RequiredOneOfField --> GatewayChoice
@@ -40433,7 +41180,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																appstackSiteDHCPNetTypeModel.GatewayChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+																appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap, map[string]attr.Value{
+																	"dgw_address":   types.StringNull(),
+																	"first_address": types.BoolValue(true),
+																	"last_address":  types.BoolNull(),
+																})
 															}
 
 															// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -40657,7 +41408,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														dhcpServerAttributeMap["interfaces_addressing_choice"] = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap)
+														dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+															"automatic_from_end":   types.BoolNull(),
+															"automatic_from_start": types.BoolValue(true),
+															"interface_ip_map":     types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+														})
 													}
 
 													dhcpServerObj, dhcpServerObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerModelAttributeMap, dhcpServerAttributeMap)
@@ -40839,7 +41594,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.AddressChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.AddressChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.AddressChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceModelAttributeMap, map[string]attr.Value{
+												"dhcp_client": types.BoolValue(true),
+												"dhcp_server": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerModelAttributeMap),
+												"static_ip":   types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceStaticIpModelAttributeMap),
+											})
 										}
 
 										// resource specToModelNested RequiredStringField --> Device
@@ -41155,7 +41914,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																				statefulAttributeMap["interfaces_addressing_choice"] = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap)
+																				statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+																					"automatic_from_end":   types.BoolNull(),
+																					"automatic_from_start": types.BoolValue(true),
+																					"interface_ip_map":     types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+																				})
 																			}
 
 																			statefulObj, statefulObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulModelAttributeMap, statefulAttributeMap)
@@ -41307,7 +42070,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																					localDnsAttributeMap["local_dns_choice"] = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					localDnsAttributeMap["local_dns_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap)
+																					localDnsAttributeMap["local_dns_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																						"configured_address": types.StringNull(),
+																						"first_address":      types.BoolValue(true),
+																						"last_address":       types.BoolNull(),
+																					})
 																				}
 
 																				localDnsObj, localDnsObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, localDnsAttributeMap)
@@ -41337,7 +42104,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		appstackSiteIPV6DnsConfigModel.DnsChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+																		appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap, map[string]attr.Value{
+																			"configured_list": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceConfiguredListModelAttributeMap),
+																			"local_dns": types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, map[string]attr.Value{
+																				"local_dns_choice": types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																					"configured_address": types.StringNull(),
+																					"first_address":      types.BoolValue(true),
+																					"last_address":       types.BoolNull(),
+																				}),
+																			}),
+																		})
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
@@ -41385,7 +42161,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														ipv6AutoConfigAttributeMap["autoconfig_choice"] = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap)
+														ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap, map[string]attr.Value{
+															"host":   types.BoolValue(true),
+															"router": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterModelAttributeMap),
+														})
 													}
 
 													ipv6AutoConfigObj, ipv6AutoConfigObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigModelAttributeMap, ipv6AutoConfigAttributeMap)
@@ -41767,7 +42546,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.NetworkChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.NetworkChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.NetworkChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+												"segment_network":           types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceSegmentNetworkModelAttributeMap),
+												"site_local_inside_network": types.BoolNull(),
+												"site_local_network":        types.BoolValue(true),
+												"storage_network":           types.BoolNull(),
+											})
 										}
 
 										// resource specToModelNested RequiredOneOfField --> NodeChoice
@@ -41816,7 +42600,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.NodeChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.NodeChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.NodeChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+												"cluster": types.BoolValue(true),
+												"node":    types.StringNull(),
+											})
 										}
 
 										// resource specToModelNested RequiredOneOfField --> PrimaryChoice
@@ -41864,7 +42651,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfacePrimaryChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+												"is_primary":  types.BoolNull(),
+												"not_primary": types.BoolValue(true),
+											})
 										}
 
 										// resource specToModelNested UintField --> Priority
@@ -41916,7 +42706,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.VlanChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.VlanChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceVlanChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.VlanChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceVlanChoiceModelAttributeMap, map[string]attr.Value{
+												"untagged": types.BoolValue(true),
+												"vlan_id":  types.Int64Null(),
+											})
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
@@ -41983,7 +42776,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["storage_interface_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["storage_interface_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["storage_interface_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+						"no_storage_interfaces":  types.BoolValue(true),
+						"storage_interface_list": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListModelAttributeMap),
+					})
 				}
 
 				customStorageConfigObj, customStorageConfigObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigModelAttributeMap, customStorageConfigAttributeMap)
@@ -42025,7 +42821,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.StorageCfgChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceModelAttributeMap)
+
+		if data.StorageCfgChoice.IsNull() || data.StorageCfgChoice.IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsUnknown())))) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["default_storage_class"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["default_storage_class"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).Attributes()["storage_classes"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).Attributes()["storage_classes"].IsUnknown())))) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["no_storage_device"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["no_storage_device"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).Attributes()["storage_devices"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).Attributes()["storage_devices"].IsUnknown())))) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["no_storage_interfaces"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["no_storage_interfaces"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).Attributes()["storage_interfaces"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).Attributes()["storage_interfaces"].IsUnknown())))))) && (data.StorageCfgChoice.Attributes()["default_storage_config"].IsNull() || data.StorageCfgChoice.Attributes()["default_storage_config"].IsUnknown())) {
+			data.StorageCfgChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceModelAttributeMap, map[string]attr.Value{
+				"custom_storage_config":  types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigModelAttributeMap),
+				"default_storage_config": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> Sw
@@ -42079,7 +42881,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AppstackSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectValueMust(AppstackSiteSwVolterraSwVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_sw_version":        types.BoolValue(true),
+				"volterra_software_version": types.StringNull(),
+			})
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
@@ -42191,7 +42996,14 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.UsbPolicyChoice = types.ObjectNull(AppstackSiteUsbPolicyChoiceModelAttributeMap)
+
+		if data.UsbPolicyChoice.IsNull() || data.UsbPolicyChoice.IsUnknown() || ((data.UsbPolicyChoice.Attributes()["allow_all_usb"].IsNull() || data.UsbPolicyChoice.Attributes()["allow_all_usb"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["deny_all_usb"].IsNull() || data.UsbPolicyChoice.Attributes()["deny_all_usb"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).IsUnknown() || ((data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["name"].IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["name"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["namespace"].IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["tenant"].IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["tenant"].IsUnknown())))) {
+			data.UsbPolicyChoice = types.ObjectValueMust(AppstackSiteUsbPolicyChoiceModelAttributeMap, map[string]attr.Value{
+				"allow_all_usb": types.BoolNull(),
+				"deny_all_usb":  types.BoolValue(true),
+				"usb_policy":    types.ObjectNull(AppstackSiteUsbPolicyChoiceUsbPolicyModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot OneOfField --> VmChoice
@@ -42254,19 +43066,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	}
 
 	// resource SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// resource SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
 		var appstackSiteLiveSignaturesUpdateModel = &AppstackSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42310,7 +43119,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectValueMust(AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap, map[string]attr.Value{
+				"automatic": types.BoolNull(),
+				"manual":    types.BoolValue(true),
+			})
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
@@ -42337,7 +43149,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			}
 			data.WorkerNodes = listValue
 		} else {
-			data.WorkerNodes = types.ListNull(types.StringType)
+			if !data.WorkerNodes.IsNull() && !data.WorkerNodes.IsUnknown() && len(data.WorkerNodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.WorkerNodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.WorkerNodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -42356,6 +43173,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 }
 
 func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAppstackSiteModel
@@ -42365,6 +43188,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planStorageCfgChoice := data.StorageCfgChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -42384,7 +43208,11 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planStorageCfgChoice := data.StorageCfgChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.StorageCfgChoice.IsNull() && !configData.StorageCfgChoice.IsUnknown() {
+		data.StorageCfgChoice = configData.StorageCfgChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -42897,6 +43725,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -43011,6 +43842,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			}
 			customNetworkConfigOneOfSpec := &ves_io_schema_views_voltstack_site.ReplaceSpecType_CustomNetworkConfig{}
 			customNetworkConfigOneOfSpec.CustomNetworkConfig = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration{}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SliChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultSliConfig{
+				DefaultSliConfig: &ves_io_schema.Empty{},
+			}
 			spec.NetworkCfgChoice = customNetworkConfigOneOfSpec
 
 			// resource modelToSpecNested StringField --> BgpPeerAddress
@@ -43134,6 +43968,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -44615,6 +45452,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								if response.Diagnostics.HasError() {
 									return
 								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
+								}
 
 								interfacesSpec[i].Labels = mapOfString
 							} else {
@@ -44861,6 +45705,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 						response.Diagnostics.Append(diags...)
 						if response.Diagnostics.HasError() {
 							return
+						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
 						}
 
 						sloConfigOneOfSpec.SloConfig.Labels = mapOfString
@@ -45249,6 +46100,8 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			// resource modelToSpecNested UintField --> TunnelDeadTimeout
 			if !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsNull() && !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsUnknown() {
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(uint32(appstackSiteCustomNetConfigModel.TunnelDeadTimeout.ValueInt64()))
+			} else {
+				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(0)
 			}
 
 			// resource modelToSpecNested EnumField --> VipVrrpMode
@@ -46097,6 +46950,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 											}
 
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !iscsiChapPasswordSecretInfoChoiceModel.None.IsNull() && !iscsiChapPasswordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												iscsiChapPasswordSpec.SecretInfoOneof = noneSpecBool
+											}
+
 										}
 
 									}
@@ -46174,6 +47034,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 													clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 												}
 
+											}
+
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												passwordSpec.SecretInfoOneof = noneSpecBool
 											}
 
 										}
@@ -46353,6 +47220,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -46388,6 +47262,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.Labels = mapOfString
@@ -46504,6 +47385,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -46540,6 +47428,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														storageSpec[ii].Labels = mapOfString
@@ -46893,6 +47788,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -46965,6 +47867,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																	clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 																}
 
+															}
+
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapTargetInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
 															}
 
 														}
@@ -47060,6 +47969,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -47100,6 +48016,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.Labels = mapOfString
@@ -47211,6 +48134,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -47247,6 +48177,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														storageSpec[ii].Labels = mapOfString
@@ -47650,6 +48587,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -47661,6 +48605,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														flashArraysSpec[ii].Labels = mapOfString
@@ -47816,6 +48767,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																	clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 																}
 
+															}
+
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
 															}
 
 														}
@@ -47984,6 +48942,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
 									return
+								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
 								}
 
 								storageInterfacesSpec[i].Labels = mapOfString
@@ -49094,7 +50059,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AppstackSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49134,7 +50099,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -49150,7 +50115,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "appstack_site", err),
 		)
 		return
 	}
@@ -49159,7 +50124,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "appstack_site", err),
 		)
 		return
 	}
@@ -49277,12 +50242,8 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
 	// false
@@ -50030,9 +50991,6 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	} else {
 		data.KubernetesUpgradeDrain = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
-
-	// resource SpecToModelRoot BoolField --> LaunchIkeInNamespace
-	data.LaunchIkeInNamespace = types.BoolValue(specData.GetLaunchIkeInNamespace())
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
 	// false
@@ -52944,15 +53902,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if interfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(interfacesElement.GetLabels()))
 										for k, v := range interfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -53405,15 +54364,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 							// resource specToModelNested MapOfStringField --> Labels
 							if sloConfigElement.GetLabels() != nil {
-								// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-								// They will be picked up during the next Read.
-								filteredMap := make(map[string]string)
+								// Filter out configured omitted map keys across all operations so backend-injected
+								// forbidden keys never enter or vanish from Terraform state.
+								filteredMap := make(map[string]string, len(sloConfigElement.GetLabels()))
 								for k, v := range sloConfigElement.GetLabels() {
-									if !strings.HasPrefix(k, "ves.io/") {
-										filteredMap[k] = v
-									}
+									filteredMap[k] = v
 								}
-
+								delete(filteredMap, "ves.io/config-propagation-destination")
+								delete(filteredMap, "ves.io/app_type")
+								delete(filteredMap, "ves.io/api-scope")
+								delete(filteredMap, "ves.io/provider")
 								if len(filteredMap) > 0 {
 									labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 									response.Diagnostics.Append(labelsDiags...)
@@ -53771,29 +54731,31 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: reconcile backend list order against client representation.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													} else {
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													}
 												}
 
@@ -54159,12 +55121,8 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// resource SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
@@ -55226,6 +56184,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															}
 														}
 
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -55370,6 +56337,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															} else {
 																passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -55649,6 +56625,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -55737,15 +56722,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapNasElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapNasElement.GetLabels()))
 																for k, v := range netappBackendOntapNasElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -55937,6 +56923,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -55992,15 +56987,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -56524,6 +57520,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																					}
 																				}
 
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																				}
+
 																				// --- End of Choices ---
 
 																				// Create the final ObjectValue for this OneOf field
@@ -56660,6 +57665,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																					} else {
 																						chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																					}
+																				}
+
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																				}
 
 																				// --- End of Choices ---
@@ -56854,6 +57868,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -56950,15 +57973,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapSanElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapSanElement.GetLabels()))
 																for k, v := range netappBackendOntapSanElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -57132,6 +58156,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -57187,15 +58220,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -57778,6 +58812,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																			}
 																		}
 
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -57817,15 +58860,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 																// resource specToModelNested MapOfStringField --> Labels
 																if flashArraysElement.GetLabels() != nil {
-																	// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																	// They will be picked up during the next Read.
-																	filteredMap := make(map[string]string)
+																	// Filter out configured omitted map keys across all operations so backend-injected
+																	// forbidden keys never enter or vanish from Terraform state.
+																	filteredMap := make(map[string]string, len(flashArraysElement.GetLabels()))
 																	for k, v := range flashArraysElement.GetLabels() {
-																		if !strings.HasPrefix(k, "ves.io/") {
-																			filteredMap[k] = v
-																		}
+																		filteredMap[k] = v
 																	}
-
+																	delete(filteredMap, "ves.io/config-propagation-destination")
+																	delete(filteredMap, "ves.io/app_type")
+																	delete(filteredMap, "ves.io/api-scope")
+																	delete(filteredMap, "ves.io/provider")
 																	if len(filteredMap) > 0 {
 																		labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																		response.Diagnostics.Append(labelsDiags...)
@@ -58067,6 +59111,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																			} else {
 																				apiTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 																			}
+																		}
+
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																		}
 
 																		// --- End of Choices ---
@@ -58428,15 +59481,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if storageInterfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(storageInterfacesElement.GetLabels()))
 										for k, v := range storageInterfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -60424,19 +61478,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// resource SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
 		var appstackSiteLiveSignaturesUpdateModel = &AppstackSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// GlobalSpecType
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60507,7 +61558,12 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			}
 			data.WorkerNodes = listValue
 		} else {
-			data.WorkerNodes = types.ListNull(types.StringType)
+			if !data.WorkerNodes.IsNull() && !data.WorkerNodes.IsUnknown() && len(data.WorkerNodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.WorkerNodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.WorkerNodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -60538,7 +61594,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	}
 	// Restore plan value for StorageCfgChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.StorageCfgChoice = planStorageCfgChoice
+	data.StorageCfgChoice = utils.ResolveUnknowns(planStorageCfgChoice, data.StorageCfgChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -60586,7 +61642,7 @@ func (r *ResourceF5XCAppstackSite) Delete(ctx context.Context, request resource.
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "appstack_site", err),
 		)
 		return
 	}

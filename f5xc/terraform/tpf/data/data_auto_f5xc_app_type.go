@@ -29,20 +29,21 @@ type DataSourceF5XCAppType struct {
 	client *client.APIClient
 }
 
-type AppTypeAppTypeBusinessLogicMarkupSetting struct {
+type AppTypeBusinessLogicMarkupSetting struct {
 	DiscoveredApiSettings          types.Object `tfsdk:"discovered_api_settings"`
 	LearnFromRedirectTrafficChoice types.Object `tfsdk:"learn_from_redirect_traffic_choice"`
 }
 
-type AppTypeAppTypeDiscoveredAPISettings struct {
+type AppTypeDiscoveredAPISettings struct {
 	PurgeDurationForInactiveDiscoveredApis types.Int64 `tfsdk:"purge_duration_for_inactive_discovered_apis"`
 }
 
-type AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+type AppTypeLearnFromRedirectTrafficChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
-type AppTypeAppTypeFeature struct {
+type AppTypeFeature struct {
 	Type types.List `tfsdk:"type"`
 }
 
@@ -80,7 +81,8 @@ var AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap = ma
 // Attribute map for OneOfField --> LearnFromRedirectTraffic
 var AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> Features
@@ -105,8 +107,8 @@ func (d *DataSourceF5XCAppType) Metadata(ctx context.Context, request datasource
 func (r *DataSourceF5XCAppType) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
-		Description:         "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
+		MarkdownDescription: "App Type object defines a application profile type from an advanced monitoring/security point of view.<br>An App type is a set of (micro) services that interact with one another and function as an application.<br>Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.<br>App type object is the profile for one such application label. One can define various advanced security features that can<br>be enabled for a given application in this object. All services in a given namespace that are labeled with<br>same ves.io/app_type label are assumed to be a single application. In a different namespace as two different<br>instances of same application.<br>app_type object is recommended per tenant and present only in shared namespace.<br>This way advanced security modeled developed for a given application can be shared across namespaces or deployments.<br>app_setting object can be used to enable a app_type monitoring profile in a given namespace.",
+		Description:         "App Type object defines a application profile type from an advanced monitoring/security point of view. An App type is a set of (micro) services that interact with one another and function as an application. Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services. App type object is the profile for one such application label. One can define various advanced security features that can be enabled for a given application in this object. All services in a given namespace that are labeled with same ves.io/app_type label are assumed to be a single application. In a different namespace as two different instances of same application. app_type object is recommended per tenant and present only in shared namespace. This way advanced security modeled developed for a given application can be shared across namespaces or deployments. app_setting object can be used to enable a app_type monitoring profile in a given namespace.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -173,6 +175,12 @@ func (r *DataSourceF5XCAppType) Schema(ctx context.Context, request datasource.S
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
+							"disable": schema.BoolAttribute{
+								Description: "Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
 							"enable": schema.BoolAttribute{
 								Description: "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
 								Required:    false,
@@ -257,7 +265,7 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "app_type", err))
 		return
 	}
 
@@ -320,27 +328,27 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 
 	// data SpecToModelRoot PointerField --> BusinessLogicMarkupSetting
 	if specData.GetBusinessLogicMarkupSetting() != nil {
-		var appTypeAppTypeBusinessLogicMarkupSettingModel = &AppTypeAppTypeBusinessLogicMarkupSetting{}
+		var appTypeBusinessLogicMarkupSettingModel = &AppTypeBusinessLogicMarkupSetting{}
 		businessLogicMarkupSettingElement := specData.GetBusinessLogicMarkupSetting()
 
 		// data specToModelNested PointerField --> DiscoveredApiSettings
 		if businessLogicMarkupSettingElement.GetDiscoveredApiSettings() != nil {
 			// Create the nested Go struct
-			appTypeAppTypeDiscoveredAPISettingsModel := &AppTypeAppTypeDiscoveredAPISettings{}
+			appTypeDiscoveredAPISettingsModel := &AppTypeDiscoveredAPISettings{}
 			discoveredApiSettingsElement := businessLogicMarkupSettingElement.GetDiscoveredApiSettings()
 
 			// Recursively populate the nested struct
 
 			// data specToModelNested UintField --> PurgeDurationForInactiveDiscoveredApis
-			appTypeAppTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
+			appTypeDiscoveredAPISettingsModel.PurgeDurationForInactiveDiscoveredApis = types.Int64Value(int64(discoveredApiSettingsElement.GetPurgeDurationForInactiveDiscoveredApis()))
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			appTypeAppTypeDiscoveredAPISettingsModelObj, objDiags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeAppTypeDiscoveredAPISettingsModel)
+			appTypeDiscoveredAPISettingsModelObj, objDiags := types.ObjectValueFrom(ctx, AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap, appTypeDiscoveredAPISettingsModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeAppTypeDiscoveredAPISettingsModelObj
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = appTypeDiscoveredAPISettingsModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -349,7 +357,7 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
+			appTypeBusinessLogicMarkupSettingModel.DiscoveredApiSettings = types.ObjectNull(AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap)
 		}
 
 		// data specToModelNested OneOfField --> LearnFromRedirectTraffic
@@ -362,6 +370,15 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 			businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices := businessLogicMarkupSettingElement.GetLearnFromRedirectTraffic()
 
 			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Disable)
+
+			if isDisable {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+			}
 
 			// data specToModelNested BoolOfOneOfPointerField --> Enable
 			_, isEnable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable)
@@ -385,16 +402,16 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appTypeAppTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
+			appTypeBusinessLogicMarkupSettingModel.LearnFromRedirectTrafficChoice = types.ObjectNull(AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap)
 		}
 
 		businessLogicMarkupSettingObj, businessLogicMarkupSettingDiags := utils.GoStructToObjectValue(
 			ctx,
 			AppTypeBusinessLogicMarkupSettingModelAttributeMap,
-			appTypeAppTypeBusinessLogicMarkupSettingModel,
+			appTypeBusinessLogicMarkupSettingModel,
 		)
 		response.Diagnostics.Append(businessLogicMarkupSettingDiags...)
 		data.BusinessLogicMarkupSetting = businessLogicMarkupSettingObj
@@ -404,10 +421,10 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 
 	// data SpecToModelRoot ArrayOfPointerField --> Features
 	if len(specData.GetFeatures()) > 0 {
-		featuresElements := make([]AppTypeAppTypeFeature, 0, len(specData.GetFeatures()))
+		featuresElements := make([]AppTypeFeature, 0, len(specData.GetFeatures()))
 
 		for _, featuresElement := range specData.GetFeatures() {
-			appTypeAppTypeFeatureModel := AppTypeAppTypeFeature{}
+			appTypeFeatureModel := AppTypeFeature{}
 
 			// data specToModelNested RequiredEnumField --> Type
 			if featuresElement.GetType().String() != "" {
@@ -418,12 +435,12 @@ func (d *DataSourceF5XCAppType) Read(ctx context.Context, request datasource.Rea
 				if response.Diagnostics.HasError() {
 					return
 				}
-				appTypeAppTypeFeatureModel.Type = listValue
+				appTypeFeatureModel.Type = listValue
 			} else {
-				appTypeAppTypeFeatureModel.Type = types.ListNull(types.StringType)
+				appTypeFeatureModel.Type = types.ListNull(types.StringType)
 			}
 
-			featuresElements = append(featuresElements, appTypeAppTypeFeatureModel)
+			featuresElements = append(featuresElements, appTypeFeatureModel)
 		}
 
 		{

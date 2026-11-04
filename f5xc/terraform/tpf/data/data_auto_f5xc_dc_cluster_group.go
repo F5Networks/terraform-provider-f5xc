@@ -28,11 +28,11 @@ type DataSourceF5XCDcClusterGroup struct {
 	client *client.APIClient
 }
 
-type DcClusterGroupDcClusterGroupDCClusterGroupMeshType struct {
+type DcClusterGroupDCClusterGroupMeshType struct {
 	DcClusterGroupMeshChoice types.Object `tfsdk:"dc_cluster_group_mesh_choice"`
 }
 
-type DcClusterGroupDCClusterGroupMeshTypeDcClusterGroupMeshChoice struct {
+type DcClusterGroupDcClusterGroupMeshChoice struct {
 	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
 	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 }
@@ -79,8 +79,8 @@ func (d *DataSourceF5XCDcClusterGroup) Metadata(ctx context.Context, request dat
 func (r *DataSourceF5XCDcClusterGroup) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dc_cluster_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dc_cluster_group) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dc_cluster_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dc_cluster_group) etc. can be fetched",
+		MarkdownDescription: "A DC Cluster Group represents a collection of sites that<br>can directly communicate with each other using the underlay network.",
+		Description:         "A DC Cluster Group represents a collection of sites that can directly communicate with each other using the underlay network.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -206,7 +206,7 @@ func (d *DataSourceF5XCDcClusterGroup) Read(ctx context.Context, request datasou
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dc_cluster_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dc_cluster_group", err))
 		return
 	}
 
@@ -269,7 +269,7 @@ func (d *DataSourceF5XCDcClusterGroup) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot PointerField --> Type
 	if specData.GetType() != nil {
-		var dcClusterGroupDcClusterGroupDCClusterGroupMeshTypeModel = &DcClusterGroupDcClusterGroupDCClusterGroupMeshType{}
+		var dcClusterGroupDCClusterGroupMeshTypeModel = &DcClusterGroupDCClusterGroupMeshType{}
 		typeElement := specData.GetType()
 
 		// data specToModelNested OneOfField --> DcClusterGroupMeshChoice
@@ -314,16 +314,16 @@ func (d *DataSourceF5XCDcClusterGroup) Read(ctx context.Context, request datasou
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dcClusterGroupDcClusterGroupDCClusterGroupMeshTypeModel.DcClusterGroupMeshChoice = finalObj
+			dcClusterGroupDCClusterGroupMeshTypeModel.DcClusterGroupMeshChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dcClusterGroupDcClusterGroupDCClusterGroupMeshTypeModel.DcClusterGroupMeshChoice = types.ObjectNull(DcClusterGroupTypeDcClusterGroupMeshChoiceModelAttributeMap)
+			dcClusterGroupDCClusterGroupMeshTypeModel.DcClusterGroupMeshChoice = types.ObjectNull(DcClusterGroupTypeDcClusterGroupMeshChoiceModelAttributeMap)
 		}
 
 		typeObj, typeDiags := utils.GoStructToObjectValue(
 			ctx,
 			DcClusterGroupTypeModelAttributeMap,
-			dcClusterGroupDcClusterGroupDCClusterGroupMeshTypeModel,
+			dcClusterGroupDCClusterGroupMeshTypeModel,
 		)
 		response.Diagnostics.Append(typeDiags...)
 		data.Type = typeObj

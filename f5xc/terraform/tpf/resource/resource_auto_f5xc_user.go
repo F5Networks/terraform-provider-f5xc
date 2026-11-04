@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -92,8 +93,8 @@ func (r *ResourceF5XCUser) Metadata(ctx context.Context, request resource.Metada
 func (r *ResourceF5XCUser) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Billing Feature Indicator Single instance of a billing indicator. It informs the customer of any problems with their billing, including failed payments, overdue invoices, or missing valid payment methods.",
-		Description:         "Billing Feature Indicator Single instance of a billing indicator. It informs the customer of any problems with their billing, including failed payments, overdue invoices, or missing valid payment methods.",
+		MarkdownDescription: "Represents user for a given tenant",
+		Description:         "Represents user for a given tenant",
 
 		Attributes: map[string]schema.Attribute{
 			"email": schema.StringAttribute{
@@ -115,7 +116,7 @@ func (r *ResourceF5XCUser) Schema(ctx context.Context, request resource.SchemaRe
 				MarkdownDescription: "Groups Group list must be associated to this user.",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				ElementType:         types.StringType,
 			},
 			"idm_type": schema.ListAttribute{
@@ -150,7 +151,7 @@ func (r *ResourceF5XCUser) Schema(ctx context.Context, request resource.SchemaRe
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace All users of a tenant must be created in tenant's system namespace.",
-				MarkdownDescription: "namespace All users of a tenant must be created in tenant's system namespace.<br>**Default:** `system`",
+				MarkdownDescription: "namespace All users of a tenant must be created in tenant's system namespace.<br>**Default:** `system`<br>**Allowed Values (choose one):** `['system']`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -269,9 +270,17 @@ func (r *ResourceF5XCUser) ModifyPlan(ctx context.Context, req resource.ModifyPl
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCUser) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCUserModel
 
 	// Read Terraform plan data into the model
@@ -427,7 +436,7 @@ func (r *ResourceF5XCUser) Create(ctx context.Context, request resource.CreateRe
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "user", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "user", err),
 		)
 		return
 	}
@@ -491,7 +500,7 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "user", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "user", err),
 		)
 		return
 	}
@@ -545,7 +554,12 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 			}
 			data.GroupNames = listValue
 		} else {
-			data.GroupNames = types.ListNull(types.StringType)
+			if !data.GroupNames.IsNull() && !data.GroupNames.IsUnknown() && len(data.GroupNames.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.GroupNames = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.GroupNames = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -635,7 +649,12 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 			AttrTypes: UserNamespaceRolesModelAttributeMap,
 		}
 		nullNamespaceRolesSet := basetypes.NewSetNull(namespaceRolesObjectType)
-		data.NamespaceRoles = nullNamespaceRolesSet
+		if !data.NamespaceRoles.IsNull() && !data.NamespaceRoles.IsUnknown() && len(data.NamespaceRoles.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty set.
+			data.NamespaceRoles = basetypes.NewSetValueMust(namespaceRolesObjectType, nil)
+		} else {
+			data.NamespaceRoles = nullNamespaceRolesSet
+		}
 	}
 
 	// resource SpecToModelRoot EnumField --> Type
@@ -664,6 +683,12 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 }
 
 func (r *ResourceF5XCUser) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCUserModel
@@ -821,7 +846,7 @@ func (r *ResourceF5XCUser) Update(ctx context.Context, request resource.UpdateRe
 	_, err = r.client.CustomAPI(ctx, "PUT", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "user", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "user", err),
 		)
 		return
 	}
@@ -895,7 +920,7 @@ func (r *ResourceF5XCUser) Delete(ctx context.Context, request resource.DeleteRe
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "user", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "user", err),
 			)
 			return
 		}
@@ -911,7 +936,7 @@ func (r *ResourceF5XCUser) Delete(ctx context.Context, request resource.DeleteRe
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "user", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "user", err),
 		)
 		return
 	}

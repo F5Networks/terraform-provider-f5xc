@@ -28,60 +28,60 @@ type DataSourceF5XCCdnCacheRule struct {
 	client *client.APIClient
 }
 
-type CdnCacheRuleCdnCacheRuleCDNCacheRule struct {
+type CdnCacheRuleCDNCacheRule struct {
 	CacheActionsChoice types.Object `tfsdk:"cache_actions_choice"`
 	RuleExpressionList types.List   `tfsdk:"rule_expression_list"`
 	RuleName           types.String `tfsdk:"rule_name"`
 }
 
-type CdnCacheRuleCDNCacheRuleCacheActionsChoice struct {
+type CdnCacheRuleCacheActionsChoice struct {
 	CacheBypass      types.Bool   `tfsdk:"cache_bypass"`
 	EligibleForCache types.Object `tfsdk:"eligible_for_cache"`
 }
 
-type CdnCacheRuleCDNCacheRuleEligibleForCache struct {
+type CdnCacheRuleEligibleForCache struct {
 	EligibleForCacheChoice types.Object `tfsdk:"eligible_for_cache_choice"`
 }
 
-type CdnCacheRuleCacheEligibleOptionsEligibleForCacheChoice struct {
+type CdnCacheRuleEligibleForCacheChoice struct {
 	SchemeProxyHostRequestUri types.Object `tfsdk:"scheme_proxy_host_request_uri"`
 	SchemeProxyHostUri        types.Object `tfsdk:"scheme_proxy_host_uri"`
 }
 
-type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUri struct {
+type CdnCacheRuleSchemeProxyHostReqUri struct {
 	CacheOverride        types.Bool   `tfsdk:"cache_override"`
 	CacheTtl             types.String `tfsdk:"cache_ttl"`
 	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
 }
 
-type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostUri struct {
+type CdnCacheRuleSchemeProxyHostUri struct {
 	CacheOverride        types.Bool   `tfsdk:"cache_override"`
 	CacheTtl             types.String `tfsdk:"cache_ttl"`
 	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
 }
 
-type CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList struct {
+type CdnCacheRuleCDNCacheRuleExpressionList struct {
 	CacheRuleExpression types.List   `tfsdk:"cache_rule_expression"`
 	ExpressionName      types.String `tfsdk:"expression_name"`
 }
 
-type CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression struct {
+type CdnCacheRuleCDNCacheRuleExpression struct {
 	CacheHeaders    types.List   `tfsdk:"cache_headers"`
 	CookieMatcher   types.List   `tfsdk:"cookie_matcher"`
 	PathMatch       types.Object `tfsdk:"path_match"`
 	QueryParameters types.List   `tfsdk:"query_parameters"`
 }
 
-type CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType struct {
+type CdnCacheRuleCacheHeaderMatcherType struct {
 	Name     types.List   `tfsdk:"name"`
 	Operator types.Object `tfsdk:"operator"`
 }
 
-type CdnCacheRuleCdnCacheRuleHeaderCacheOperator struct {
+type CdnCacheRuleHeaderCacheOperator struct {
 	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
 }
 
-type CdnCacheRuleHeaderCacheOperatorCacheOperatorChoice struct {
+type CdnCacheRuleCacheOperatorChoice struct {
 	Contains         types.String `tfsdk:"contains"`
 	DoesNotContain   types.String `tfsdk:"does_not_contain"`
 	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
@@ -93,12 +93,12 @@ type CdnCacheRuleHeaderCacheOperatorCacheOperatorChoice struct {
 	Startswith       types.String `tfsdk:"startswith"`
 }
 
-type CdnCacheRuleCdnCacheRuleCacheCookieMatcherType struct {
+type CdnCacheRuleCacheCookieMatcherType struct {
 	Name     types.String `tfsdk:"name"`
 	Operator types.Object `tfsdk:"operator"`
 }
 
-type CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator struct {
+type CdnCacheRuleCookieMatcherCacheOperator struct {
 	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
 }
 
@@ -114,11 +114,11 @@ type CdnCacheRuleCookieMatcherCacheOperatorCacheOperatorChoice struct {
 	Startswith       types.String `tfsdk:"startswith"`
 }
 
-type CdnCacheRuleCdnCacheRuleCDNPathMatcherType struct {
+type CdnCacheRuleCDNPathMatcherType struct {
 	Operator types.Object `tfsdk:"operator"`
 }
 
-type CdnCacheRuleCdnCacheRuleCacheOperator struct {
+type CdnCacheRuleCacheOperator struct {
 	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
 }
 
@@ -134,12 +134,12 @@ type CdnCacheRuleCacheOperatorCacheOperatorChoice struct {
 	Startswith       types.String `tfsdk:"startswith"`
 }
 
-type CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType struct {
+type CdnCacheRuleCacheQueryParamMatcherType struct {
 	Key      types.String `tfsdk:"key"`
 	Operator types.Object `tfsdk:"operator"`
 }
 
-type CdnCacheRuleCdnCacheRuleQueryParamCacheOperator struct {
+type CdnCacheRuleQueryParamCacheOperator struct {
 	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
 }
 
@@ -545,8 +545,8 @@ func (d *DataSourceF5XCCdnCacheRule) Metadata(ctx context.Context, request datas
 func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
-		Description:         "CacheCookieMatcherType A cookie matcher specifies the name of a single cookie and the criteria to match it. The input has a list of values for each cookie in the request. A cookie matcher can check for one of the following: * Presence or absence of the cookie * At least one of the values for the cookie in the request satisfies the MatcherType item",
+		MarkdownDescription: "CDN cache rule view defines a required parameters that can be used in CRUD, to create and manage CDN cache rule.<br>It can be used to create CDN cache rule.",
+		Description:         "CDN cache rule view defines a required parameters that can be used in CRUD, to create and manage CDN cache rule. It can be used to create CDN cache rule.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1103,7 +1103,7 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "cdn_cache_rule", err))
 		return
 	}
 
@@ -1166,7 +1166,7 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
-		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
+		var cdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
 
 		// data specToModelNested RequiredOneOfField --> CacheActions
@@ -1325,35 +1325,35 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
+			cdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredArrayOfPointerField --> RuleExpressionList
 		if len(cacheRulesElement.GetRuleExpressionList()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			ruleExpressionListElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
+			ruleExpressionListElements := make([]CdnCacheRuleCDNCacheRuleExpressionList, 0, len(cacheRulesElement.GetRuleExpressionList()))
 			for _, ruleExpressionListElement := range cacheRulesElement.GetRuleExpressionList() {
-				cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList{}
+				cdnCacheRuleCDNCacheRuleExpressionListModel := CdnCacheRuleCDNCacheRuleExpressionList{}
 
 				// data specToModelNested RequiredArrayOfPointerField --> CacheRuleExpression
 				if len(ruleExpressionListElement.GetCacheRuleExpression()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					cacheRuleExpressionElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
+					cacheRuleExpressionElements := make([]CdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
 					for _, cacheRuleExpressionElement := range ruleExpressionListElement.GetCacheRuleExpression() {
-						cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression{}
+						cdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCDNCacheRuleExpression{}
 
 						// data specToModelNested ArrayOfPointerField --> CacheHeaders
 						if len(cacheRuleExpressionElement.GetCacheHeaders()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cacheHeadersElements := make([]CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
+							cacheHeadersElements := make([]CdnCacheRuleCacheHeaderMatcherType, 0, len(cacheRuleExpressionElement.GetCacheHeaders()))
 							for _, cacheHeadersElement := range cacheRuleExpressionElement.GetCacheHeaders() {
-								cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType{}
+								cdnCacheRuleCacheHeaderMatcherTypeModel := CdnCacheRuleCacheHeaderMatcherType{}
 
 								// data specToModelNested RequiredEnumField --> Name
 								if cacheHeadersElement.GetName().String() != "" {
@@ -1364,15 +1364,15 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Name = listValue
 								} else {
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Name = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested PointerField --> Operator
 								if cacheHeadersElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleCdnCacheRuleHeaderCacheOperator{}
+									cdnCacheRuleHeaderCacheOperatorModel := &CdnCacheRuleHeaderCacheOperator{}
 									operatorElement := cacheHeadersElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -1492,19 +1492,19 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleHeaderCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModel)
+									cdnCacheRuleHeaderCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap, cdnCacheRuleHeaderCacheOperatorModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleHeaderCacheOperatorModelObj
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = cdnCacheRuleHeaderCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -1513,10 +1513,10 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
+									cdnCacheRuleCacheHeaderMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorModelAttributeMap)
 								}
 
-								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCdnCacheRuleCacheHeaderMatcherTypeModel)
+								cacheHeadersElements = append(cacheHeadersElements, cdnCacheRuleCacheHeaderMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1525,35 +1525,35 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = cacheHeadersListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
 						}
 
 						// data specToModelNested ArrayOfPointerField --> CookieMatcher
 						if len(cacheRuleExpressionElement.GetCookieMatcher()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							cookieMatcherElements := make([]CdnCacheRuleCdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
+							cookieMatcherElements := make([]CdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
 							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
-								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
+								cdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCacheCookieMatcherType{}
 
 								// data specToModelNested RequiredStringField --> Name
 								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
 								} else {
 									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
+									cdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
 								}
 
 								// data specToModelNested PointerField --> Operator
 								if cookieMatcherElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator{}
+									cdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCookieMatcherCacheOperator{}
 									operatorElement := cookieMatcherElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -1673,19 +1673,19 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel)
+									cdnCacheRuleCookieMatcherCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCookieMatcherCacheOperatorModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCookieMatcherCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -1694,10 +1694,10 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+									cdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
 								}
 
-								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
+								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCacheCookieMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1706,19 +1706,19 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
 						}
 
 						// data specToModelNested PointerField --> PathMatch
 						if cacheRuleExpressionElement.GetPathMatch() != nil {
 							// Create the nested Go struct
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCdnCacheRuleCDNPathMatcherType{}
+							cdnCacheRuleCDNPathMatcherTypeModel := &CdnCacheRuleCDNPathMatcherType{}
 							pathMatchElement := cacheRuleExpressionElement.GetPathMatch()
 
 							// Recursively populate the nested struct
@@ -1726,7 +1726,7 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 							// data specToModelNested PointerField --> Operator
 							if pathMatchElement.GetOperator() != nil {
 								// Create the nested Go struct
-								cdnCacheRuleCdnCacheRuleCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCacheOperator{}
+								cdnCacheRuleCacheOperatorModel := &CdnCacheRuleCacheOperator{}
 								operatorElement := pathMatchElement.GetOperator()
 
 								// Recursively populate the nested struct
@@ -1846,19 +1846,19 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									cdnCacheRuleCdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
+									cdnCacheRuleCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								cdnCacheRuleCdnCacheRuleCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCacheOperatorModel)
+								cdnCacheRuleCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap, cdnCacheRuleCacheOperatorModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCacheOperatorModelObj
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = cdnCacheRuleCacheOperatorModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -1867,16 +1867,16 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
+								cdnCacheRuleCDNPathMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModel)
+							cdnCacheRuleCDNPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap, cdnCacheRuleCDNPathMatcherTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCdnCacheRuleCDNPathMatcherTypeModelObj
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = cdnCacheRuleCDNPathMatcherTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1885,29 +1885,29 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
+							cdnCacheRuleCDNCacheRuleExpressionModel.PathMatch = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchModelAttributeMap)
 						}
 
 						// data specToModelNested ArrayOfPointerField --> QueryParameters
 						if len(cacheRuleExpressionElement.GetQueryParameters()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							queryParametersElements := make([]CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
+							queryParametersElements := make([]CdnCacheRuleCacheQueryParamMatcherType, 0, len(cacheRuleExpressionElement.GetQueryParameters()))
 							for _, queryParametersElement := range cacheRuleExpressionElement.GetQueryParameters() {
-								cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType{}
+								cdnCacheRuleCacheQueryParamMatcherTypeModel := CdnCacheRuleCacheQueryParamMatcherType{}
 
 								// data specToModelNested RequiredStringField --> Key
 								if queryParametersElement.GetKey() != "" {
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringValue(queryParametersElement.GetKey())
 								} else {
 									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Key = types.StringNull()
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Key = types.StringNull()
 								}
 
 								// data specToModelNested PointerField --> Operator
 								if queryParametersElement.GetOperator() != nil {
 									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleCdnCacheRuleQueryParamCacheOperator{}
+									cdnCacheRuleQueryParamCacheOperatorModel := &CdnCacheRuleQueryParamCacheOperator{}
 									operatorElement := queryParametersElement.GetOperator()
 
 									// Recursively populate the nested struct
@@ -2027,19 +2027,19 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
+										cdnCacheRuleQueryParamCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap)
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModel)
+									cdnCacheRuleQueryParamCacheOperatorModelObj, objDiags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap, cdnCacheRuleQueryParamCacheOperatorModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleQueryParamCacheOperatorModelObj
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = cdnCacheRuleQueryParamCacheOperatorModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -2048,10 +2048,10 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 									// because the API may always return a non-nil struct (with REDACTED values) for this field,
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
+									cdnCacheRuleCacheQueryParamMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorModelAttributeMap)
 								}
 
-								queryParametersElements = append(queryParametersElements, cdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherTypeModel)
+								queryParametersElements = append(queryParametersElements, cdnCacheRuleCacheQueryParamMatcherTypeModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2060,16 +2060,16 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 							if response.Diagnostics.HasError() {
 								return
 							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = queryParametersListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
+							cdnCacheRuleCDNCacheRuleExpressionModel.QueryParameters = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersModelAttributeMap})
 						}
 
-						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel)
+						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCDNCacheRuleExpressionModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2078,24 +2078,24 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 					if response.Diagnostics.HasError() {
 						return
 					}
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = cacheRuleExpressionListValue
 
 				} else {
 					// The source list is empty or nil.
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// Assign a null `types.ListValue`.
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
+					cdnCacheRuleCDNCacheRuleExpressionListModel.CacheRuleExpression = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap})
 				}
 
 				// data specToModelNested RequiredStringField --> ExpressionName
 				if ruleExpressionListElement.GetExpressionName() != "" {
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringValue(ruleExpressionListElement.GetExpressionName())
 				} else {
 					// Empty string, set to null
-					cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
+					cdnCacheRuleCDNCacheRuleExpressionListModel.ExpressionName = types.StringNull()
 				}
 
-				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionListModel)
+				ruleExpressionListElements = append(ruleExpressionListElements, cdnCacheRuleCDNCacheRuleExpressionListModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2104,27 +2104,27 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 			if response.Diagnostics.HasError() {
 				return
 			}
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = ruleExpressionListListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
+			cdnCacheRuleCDNCacheRuleModel.RuleExpressionList = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap})
 		}
 
 		// data specToModelNested RequiredStringField --> RuleName
 		if cacheRulesElement.GetRuleName() != "" {
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
 		} else {
 			// Empty string, set to null
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
+			cdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
 		}
 
 		cacheRulesObj, cacheRulesDiags := utils.GoStructToObjectValue(
 			ctx,
 			CdnCacheRuleCacheRulesModelAttributeMap,
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel,
+			cdnCacheRuleCDNCacheRuleModel,
 		)
 		response.Diagnostics.Append(cacheRulesDiags...)
 		data.CacheRules = cacheRulesObj

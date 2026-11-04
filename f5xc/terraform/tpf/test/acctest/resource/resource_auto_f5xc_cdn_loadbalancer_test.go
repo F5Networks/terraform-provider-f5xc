@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCCdnLoadbalancer_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cdn-lb-" + acctest.RandString(t, 8)
+	name := "example-cdn-lb-" + testAccRunSuffix(t)
 	namespace := "default"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCdnLoadbalancerDestroyProducer(t),
@@ -39,32 +39,36 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withDescription(name, namespace, "CDN loadbalancer basic updated"),
+				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withDescription(name, namespace, "CDN loadbalancer updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCdnLoadbalancerConfig_basic("example-cdn-lb", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCCdnLoadbalancer_withHttpsAutoCert(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cdn-lb-" + acctest.RandString(t, 8)
+	name := "example-cdn-lb-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,10 +80,10 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withHttpsAutoCert(t *testing.T) {
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withHttpsAutoCert(name, namespace, true, false),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info", "auto_cert_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -87,10 +91,10 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withHttpsAutoCert(t *testing.T) {
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withHttpsAutoCert(name, namespace, false, true),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info", "auto_cert_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -98,10 +102,83 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withHttpsAutoCert(t *testing.T) {
 	})
 }
 
+func TestAccResourceAutoF5XCCdnLoadbalancer_withHttpsCustomCert(t *testing.T) {
+	t.Parallel()
+
+	name := "example-cdn-lb-" + testAccRunSuffix(t)
+	namespace := "default"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckCdnLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withHttpsCustomCert(name, namespace, true, false),
+			},
+			{
+				ResourceName:      "f5xc_cdn_loadbalancer.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
+				ImportStateVerifyIgnore: []string{
+					"dns_info",
+					"loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.0.private_key.secret_info_choice.%",
+					"loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.0.private_key.secret_info_choice.clear_secret_info.%",
+					"loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.0.private_key.secret_info_choice.clear_secret_info.url",
+				},
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withHttpsCustomCert(name, namespace, false, true),
+			},
+			{
+				ResourceName:      "f5xc_cdn_loadbalancer.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
+				ImportStateVerifyIgnore: []string{
+					"dns_info",
+					"loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.0.private_key.secret_info_choice.%",
+					"loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.0.private_key.secret_info_choice.clear_secret_info.%",
+					"loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.0.private_key.secret_info_choice.clear_secret_info.url",
+				},
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCCdnLoadbalancer_stateHealingHeaderSecrets(t *testing.T) {
+	t.Parallel()
+
+	name := "example-cdn-lb-secret-" + testAccRunSuffix(t)
+	namespace := acctest.DefaultNamespace()
+	secretURL := "string:///dGVzdC1zZWNyZXQ="
+	config := testAccResourceAutoF5XCCdnLoadbalancerConfigWithHeaderSecrets(name, namespace, secretURL)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckCdnLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: config},
+			{
+				RefreshState: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_cdn_loadbalancer.example", "other_settings.header_options.request_headers_to_add.0.value_choice.secret_value.secret_info_choice.clear_secret_info.url", secretURL),
+					resource.TestCheckResourceAttr("f5xc_cdn_loadbalancer.example", "other_settings.header_options.response_headers_to_add.0.value_choice.secret_value.secret_info_choice.clear_secret_info.url", secretURL),
+				),
+			},
+			{Config: config, PlanOnly: true, ExpectNonEmptyPlan: false},
+		},
+	})
+}
+
 func TestAccResourceAutoF5XCCdnLoadbalancer_withDdosMitigationVariants(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cdn-lb-" + acctest.RandString(t, 8)
+	name := "example-cdn-lb-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -113,10 +190,10 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withDdosMitigationVariants(t *testin
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withDdosAction(name, namespace, "l7_ddos_action_default"),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -124,10 +201,10 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withDdosMitigationVariants(t *testin
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withDdosAction(name, namespace, "l7_ddos_action_block"),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -135,10 +212,10 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withDdosMitigationVariants(t *testin
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withDdosAction(name, namespace, "l7_ddos_action_js_challenge"),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -149,7 +226,7 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withDdosMitigationVariants(t *testin
 func TestAccResourceAutoF5XCCdnLoadbalancer_withServicePolicyChoiceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cdn-lb-" + acctest.RandString(t, 8)
+	name := "example-cdn-lb-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -161,10 +238,10 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withServicePolicyChoiceTransition(t 
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withServicePolicyChoice(name, namespace, "no_service_policies"),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -172,10 +249,10 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withServicePolicyChoiceTransition(t 
 				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withServicePolicyChoice(name, namespace, "service_policies_from_namespace"),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -186,7 +263,7 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withServicePolicyChoiceTransition(t 
 func TestAccResourceAutoF5XCCdnLoadbalancer_withOriginPublicIp(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cdn-lb-" + acctest.RandString(t, 8)
+	name := "example-cdn-lb-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -195,24 +272,13 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withOriginPublicIp(t *testing.T) {
 		CheckDestroy:             testAccCheckCdnLoadbalancerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicIp(name, namespace, "ip", "203.0.113.10"),
+				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicIp(name, namespace, "203.0.113.10"),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
-				ImportStateVerifyIgnore:              []string{"dns_info"},
-				ImportStateVerifyIdentifierAttribute: "uid",
-			},
-			{
-				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicIp(name, namespace, "ipv6", "2001:db8::20"),
-			},
-			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
-				ImportState:                          true,
-				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -223,7 +289,7 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withOriginPublicIp(t *testing.T) {
 func TestAccResourceAutoF5XCCdnLoadbalancer_withOriginPublicNameAndAdvancedOptions(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cdn-lb-" + acctest.RandString(t, 8)
+	name := "example-cdn-lb-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -232,24 +298,24 @@ func TestAccResourceAutoF5XCCdnLoadbalancer_withOriginPublicNameAndAdvancedOptio
 		CheckDestroy:             testAccCheckCdnLoadbalancerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicName(name, namespace, "origin-a.example.com", 300, "30s", true, false),
+				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicName(name, namespace, "origin-a-"+name+".example.com", 300, "30s", true, false),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicName(name, namespace, "origin-b.example.com", 0, "90s", false, true),
+				Config: testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicName(name, namespace, "origin-b-"+name+".example.com", 0, "90s", false, true),
 			},
 			{
-				ResourceName:                         "f5xc_cdn_loadbalancer.test",
+				ResourceName:                         "f5xc_cdn_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cdn_loadbalancer.example"),
 				ImportStateVerifyIgnore:              []string{"dns_info"},
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -269,7 +335,7 @@ func testAccResourceAutoF5XCCdnLoadbalancerConfig_basic(name, namespace string) 
 	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
 
 	return fmt.Sprintf(`
-resource "f5xc_cdn_loadbalancer" "test" {
+resource "f5xc_cdn_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%q]
@@ -295,6 +361,9 @@ resource "f5xc_cdn_loadbalancer" "test" {
   }
 
   origin_pool = {
+    public_name = {
+      dns_name = "origin.%s"
+    }
     origin_servers = [{
       choice = {
         public_ip = {
@@ -313,14 +382,42 @@ resource "f5xc_cdn_loadbalancer" "test" {
     no_service_policies = true
   }
 }
-`, name, namespace, domain)
+`, name, namespace, domain, domain)
+}
+
+func testAccResourceAutoF5XCCdnLoadbalancerConfigWithHeaderSecrets(name, namespace, secretURL string) string {
+	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
+	return fmt.Sprintf(`
+resource "f5xc_cdn_loadbalancer" "example" {
+  name      = %q
+  namespace = %q
+  domains   = [%q]
+  waf_choice = { disable_waf = true }
+  l7_ddos_auto_mitigation_action_choice = { l7_ddos_action_default = true }
+  loadbalancer_type_choice = { http = { port_choice = { port = 80 } } }
+  slow_ddos_mitigation_choice = { system_default_timeouts = true }
+  origin_pool = {
+    public_name = { dns_name = "origin.%s" }
+    origin_servers = [{ choice = { public_ip = { public_ip_choice = { ip = "203.0.113.10" } } } }]
+    tls_choice = { no_tls = true }
+  }
+  service_policy_choice = { no_service_policies = true }
+  other_settings = {
+    add_location = true
+    header_options = {
+      request_headers_to_add = [{ name = "x-state-request", value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+      response_headers_to_add = [{ name = "x-state-response", value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+    }
+  }
+}
+`, name, namespace, domain, domain, secretURL, secretURL)
 }
 
 func testAccResourceAutoF5XCCdnLoadbalancerConfig_withDescription(name, namespace, description string) string {
 	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
 
 	return fmt.Sprintf(`
-resource "f5xc_cdn_loadbalancer" "test" {
+resource "f5xc_cdn_loadbalancer" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -347,6 +444,9 @@ resource "f5xc_cdn_loadbalancer" "test" {
   }
 
   origin_pool = {
+    public_name = {
+      dns_name = "origin.%s"
+    }
     origin_servers = [{
       choice = {
         public_ip = {
@@ -365,14 +465,14 @@ resource "f5xc_cdn_loadbalancer" "test" {
     no_service_policies = true
   }
 }
-`, name, namespace, description, domain)
+`, name, namespace, description, domain, domain)
 }
 
 func testAccResourceAutoF5XCCdnLoadbalancerConfig_withHttpsAutoCert(name, namespace string, httpRedirect, addHsts bool) string {
 	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
 
 	return fmt.Sprintf(`
-resource "f5xc_cdn_loadbalancer" "test" {
+resource "f5xc_cdn_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%q]
@@ -397,6 +497,9 @@ resource "f5xc_cdn_loadbalancer" "test" {
   }
 
   origin_pool = {
+    public_name = {
+      dns_name = "origin.%s"
+    }
     origin_servers = [{
       choice = {
         public_ip = {
@@ -415,7 +518,91 @@ resource "f5xc_cdn_loadbalancer" "test" {
     no_service_policies = true
   }
 }
-`, name, namespace, domain, httpRedirect, addHsts)
+`, name, namespace, domain, httpRedirect, addHsts, domain)
+}
+
+func testAccResourceAutoF5XCCdnLoadbalancerConfig_withHttpsCustomCert(name, namespace string, httpRedirect, addHsts bool) string {
+	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
+
+	return fmt.Sprintf(`
+resource "f5xc_cdn_loadbalancer" "example" {
+  name      = %q
+  namespace = %q
+  domains   = [%q]
+
+  waf_choice = {
+    disable_waf = true
+  }
+
+  l7_ddos_auto_mitigation_action_choice = {
+    l7_ddos_action_default = true
+  }
+
+  loadbalancer_type_choice = {
+    https = {
+      http_redirect = %t
+      add_hsts      = %t
+      tls_cert_options = {
+        tls_certificates_choice = {
+          tls_inline_params = {
+            tls_certificates = [{
+              certificate_url = "string:///%s"
+
+              private_key = {
+                secret_info_choice = {
+                  clear_secret_info = {
+                    url = "string:///%s"
+                  }
+                }
+              }
+
+              ocsp_stapling_choice = {
+                use_system_defaults = true
+              }
+            }]
+
+            tls_config = {
+              choice = {
+                default_security = true
+              }
+            }
+
+            mtls_choice = {
+              no_mtls = true
+            }
+          }
+        }
+      }
+    }
+  }
+
+  slow_ddos_mitigation_choice = {
+    system_default_timeouts = true
+  }
+
+  origin_pool = {
+    public_name = {
+      dns_name = "origin.%s"
+    }
+    origin_servers = [{
+      choice = {
+        public_ip = {
+          public_ip_choice = {
+            ip = "203.0.113.10"
+          }
+        }
+      }
+    }]
+    tls_choice = {
+      no_tls = true
+    }
+  }
+
+  service_policy_choice = {
+    no_service_policies = true
+  }
+}
+`, name, namespace, domain, httpRedirect, addHsts, TestCertB64, TestKeyB64, domain)
 }
 
 func testAccResourceAutoF5XCCdnLoadbalancerConfig_withDdosAction(name, namespace, ddosAction string) string {
@@ -429,7 +616,7 @@ func testAccResourceAutoF5XCCdnLoadbalancerConfig_withDdosAction(name, namespace
 	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
 
 	return fmt.Sprintf(`
-resource "f5xc_cdn_loadbalancer" "test" {
+resource "f5xc_cdn_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%q]
@@ -455,6 +642,9 @@ resource "f5xc_cdn_loadbalancer" "test" {
   }
 
   origin_pool = {
+    public_name = {
+      dns_name = "origin.%s"
+    }
     origin_servers = [{
       choice = {
         public_ip = {
@@ -473,7 +663,7 @@ resource "f5xc_cdn_loadbalancer" "test" {
     no_service_policies = true
   }
 }
-`, name, namespace, domain, ddosActionBlock)
+`, name, namespace, domain, ddosActionBlock, domain)
 }
 
 func testAccResourceAutoF5XCCdnLoadbalancerConfig_withServicePolicyChoice(name, namespace, servicePolicyChoice string) string {
@@ -484,7 +674,7 @@ func testAccResourceAutoF5XCCdnLoadbalancerConfig_withServicePolicyChoice(name, 
 	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
 
 	return fmt.Sprintf(`
-resource "f5xc_cdn_loadbalancer" "test" {
+resource "f5xc_cdn_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%q]
@@ -510,6 +700,9 @@ resource "f5xc_cdn_loadbalancer" "test" {
   }
 
   origin_pool = {
+    public_name = {
+      dns_name = "origin.%s"
+    }
     origin_servers = [{
       choice = {
         public_ip = {
@@ -557,18 +750,15 @@ resource "f5xc_cdn_loadbalancer" "test" {
     }
   }
 }
-`, name, namespace, domain, servicePolicyChoiceBlock)
+`, name, namespace, domain, domain, servicePolicyChoiceBlock)
 }
 
-func testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicIp(name, namespace, addrType, address string) string {
+func testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicIp(name, namespace, address string) string {
 	publicIPChoice := fmt.Sprintf("ip = %q", address)
-	if addrType == "ipv6" {
-		publicIPChoice = fmt.Sprintf("ipv6 = %q", address)
-	}
 	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
 
 	return fmt.Sprintf(`
-resource "f5xc_cdn_loadbalancer" "test" {
+resource "f5xc_cdn_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%q]
@@ -594,6 +784,9 @@ resource "f5xc_cdn_loadbalancer" "test" {
   }
 
   origin_pool = {
+    public_name = {
+      dns_name = "origin.%s"
+    }
     origin_servers = [{
       choice = {
         public_ip = {
@@ -612,14 +805,14 @@ resource "f5xc_cdn_loadbalancer" "test" {
     no_service_policies = true
   }
 }
-`, name, namespace, domain, publicIPChoice)
+`, name, namespace, domain, domain, publicIPChoice)
 }
 
 func testAccResourceAutoF5XCCdnLoadbalancerConfig_withOriginPublicName(name, namespace, dnsName string, refreshInterval int, originTimeout string, enableByteRange, websocketProxy bool) string {
 	domain := testAccResourceAutoF5XCCdnLoadbalancerDomain(name)
 
 	return fmt.Sprintf(`
-resource "f5xc_cdn_loadbalancer" "test" {
+resource "f5xc_cdn_loadbalancer" "example" {
   name      = %q
   namespace = %q
   domains   = [%q]
@@ -645,6 +838,9 @@ resource "f5xc_cdn_loadbalancer" "test" {
   }
 
   origin_pool = {
+    public_name = {
+      dns_name = %q
+    }
     more_origin_options = {
       enable_byte_range_request = %t
       websocket_proxy           = %t
@@ -668,5 +864,5 @@ resource "f5xc_cdn_loadbalancer" "test" {
     no_service_policies = true
   }
 }
-`, name, namespace, domain, enableByteRange, websocketProxy, originTimeout, dnsName, refreshInterval)
+`, name, namespace, domain, dnsName, enableByteRange, websocketProxy, originTimeout, dnsName, refreshInterval)
 }

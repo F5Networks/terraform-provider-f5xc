@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCCertificateChain_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-cc-" + acctest.RandString(t, 8)
+	name := "example-certificate-chain-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCertificateChainDestroyProducer(t),
@@ -39,24 +39,28 @@ func TestAccResourceAutoF5XCCertificateChain_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCCertificateChainConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_certificate_chain.test",
+				ResourceName:                         "f5xc_certificate_chain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate_chain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate_chain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCCertificateChainConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_certificate_chain.test",
+				ResourceName:                         "f5xc_certificate_chain.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate_chain.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_certificate_chain.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCertificateChainConfig_basic("example-certificate-chain", "default"),
+		})
 }
 
 func testAccCheckCertificateChainDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -65,24 +69,24 @@ func testAccCheckCertificateChainDestroyProducer(t *testing.T) func(*terraform.S
 
 func testAccResourceAutoF5XCCertificateChainConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_certificate_chain" "test" {
+resource "f5xc_certificate_chain" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test certificate chain"
+  description = "Certificate chain example"
 
   certificate_url = "string:///%s"
 }
-`, name, namespace, testCertB64)
+`, name, namespace, TestCertB64)
 }
 
 func testAccResourceAutoF5XCCertificateChainConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_certificate_chain" "test" {
+resource "f5xc_certificate_chain" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test certificate chain updated"
+  description = "Certificate chain example updated"
 
   certificate_url = "string:///%s"
 }
-`, name, namespace, testCertB64)
+`, name, namespace, TestCertB64)
 }

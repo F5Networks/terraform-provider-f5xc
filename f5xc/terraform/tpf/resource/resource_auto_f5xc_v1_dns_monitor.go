@@ -39,6 +39,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -312,8 +313,8 @@ func (r *ResourceF5XCV1DnsMonitor) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a v1_dns_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_dns_monitor) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a v1_dns_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_dns_monitor) etc. can be fetched",
+		MarkdownDescription: "DNS Monitor defines a DNS synthetic monitor.",
+		Description:         "DNS Monitor defines a DNS synthetic monitor.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -428,13 +429,13 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 									Attributes: map[string]schema.Attribute{
 										"regions": schema.ListAttribute{
 											Description:         "AWS Regions A specific source location within AWS",
-											MarkdownDescription: "AWS Regions A specific source location within AWS",
+											MarkdownDescription: "AWS Regions A specific source location within AWS<br>**Valid Options:** `['ca-central-1', 'ap-northeast-1', 'us-east-2', 'us-west-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'sa-east-1', 'ap-east-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-south-1', 'us-east-1']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.List{
-												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"eu-north-1", "us-west-1", "us-east-2", "ap-northeast-1", "ca-central-1"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ca-central-1", "ap-northeast-1", "us-east-2", "us-west-1", "eu-north-1", "eu-west-2", "me-south-1", "sa-east-1", "ap-east-1", "ap-southeast-1", "ap-southeast-2", "ap-south-1", "us-east-1"}...)),
 												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
 												listvalidator.UniqueValues(),
 											},
@@ -450,13 +451,13 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 									Attributes: map[string]schema.Attribute{
 										"regions": schema.ListAttribute{
 											Description:         "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
-											MarkdownDescription: "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
+											MarkdownDescription: "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud<br>**Valid Options:** `['ves-io-newyork', 'ves-io-sanjose', 'ves-io-paris', 'ves-io-ashburn', 'ves-io-dallas', 'ves-io-seattle', 'ves-io-toronto', 'ves-io-montreal', 'ves-io-saopaulo', 'ves-io-london', 'ves-io-frankfurt', 'ves-io-amsterdam', 'ves-io-stockholm', 'ves-io-lisbon', 'ves-io-madrid', 'ves-io-dubai', 'ves-io-telaviv', 'ves-io-tokyo', 'ves-io-osaka', 'ves-io-singapore', 'ves-io-hongkong', 'ves-io-sydney', 'ves-io-melbourne', 'ves-io-mumbai', 'ves-io-chennai', 'ves-io-jakarta']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.List{
-												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ves-io-newyork", "ves-io-paris", "ves-io-sanjose"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ves-io-newyork", "ves-io-sanjose", "ves-io-paris", "ves-io-ashburn", "ves-io-dallas", "ves-io-seattle", "ves-io-toronto", "ves-io-montreal", "ves-io-saopaulo", "ves-io-london", "ves-io-frankfurt", "ves-io-amsterdam", "ves-io-stockholm", "ves-io-lisbon", "ves-io-madrid", "ves-io-dubai", "ves-io-telaviv", "ves-io-tokyo", "ves-io-osaka", "ves-io-singapore", "ves-io-hongkong", "ves-io-sydney", "ves-io-melbourne", "ves-io-mumbai", "ves-io-chennai", "ves-io-jakarta"}...)),
 												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
 												listvalidator.UniqueValues(),
 											},
@@ -855,7 +856,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 			},
 			"protocol": schema.StringAttribute{
 				Description:         "protocol",
-				MarkdownDescription: "protocol<br>**Default:** `UDP`",
+				MarkdownDescription: "protocol<br>**Default:** `UDP`<br>**Allowed Values (choose one):** `['UDP', 'TCP']`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -866,17 +867,18 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 			},
 			"receive": schema.StringAttribute{
 				Description:         "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy.",
-				MarkdownDescription: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy.<br>**Validation:** `Length LengthAtMost(2048)`",
+				MarkdownDescription: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy.<br>**Validation:** `Length LengthAtMost(2048)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(2048),
 				},
 			},
 			"record_type": schema.StringAttribute{
 				Description:         "record_type",
-				MarkdownDescription: "record_type<br>**Default:** `A`",
+				MarkdownDescription: "record_type<br>**Default:** `A`<br>**Allowed Values (choose one):** `['A', 'AAAA', 'CNAME', 'MX', 'NS', 'PTR', 'TXT', 'SOA', 'SRV']`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -958,9 +960,17 @@ func (r *ResourceF5XCV1DnsMonitor) ModifyPlan(ctx context.Context, req resource.
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCV1DnsMonitorModel
 
 	// Read Terraform plan data into the model
@@ -1482,7 +1492,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1505,7 +1515,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -1807,6 +1817,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1DnsMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1DnsMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -1935,6 +1946,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
@@ -2028,6 +2040,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
@@ -2121,6 +2134,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
@@ -2475,14 +2489,12 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			AttrTypes: V1DnsMonitorNameServersModelAttributeMap,
 		}
 		nullNameServersList := basetypes.NewListNull(nameServersObjectType)
-		var priorValNameServers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("name_servers"), &priorValNameServers)
-		if !priorValNameServers.IsNull() && !priorValNameServers.IsUnknown() {
-			data.NameServers = priorValNameServers
+		if !data.NameServers.IsNull() && !data.NameServers.IsUnknown() && len(data.NameServers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NameServers = basetypes.NewListValueMust(nameServersObjectType, nil)
 		} else {
 			data.NameServers = nullNameServersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -2610,12 +2622,8 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot RequiredStringField --> RecordType
 	if specData.GetRecordType() != "" {
@@ -2687,7 +2695,7 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -2983,6 +2991,7 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1DnsMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1DnsMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -3111,7 +3120,11 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectValueMust(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"dynamic_threshold":          types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap),
+				"dynamic_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
@@ -3204,7 +3217,11 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectValueMust(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"static_max_threshold":          types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap),
+				"static_max_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
@@ -3297,7 +3314,11 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectValueMust(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"static_min_threshold":          types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap),
+				"static_min_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
 		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
@@ -3603,7 +3624,20 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.IntervalChoice = types.ObjectNull(V1DnsMonitorIntervalChoiceModelAttributeMap)
+
+		if data.IntervalChoice.IsNull() || data.IntervalChoice.IsUnknown() || ((data.IntervalChoice.Attributes()["interval_12_hours"].IsNull() || data.IntervalChoice.Attributes()["interval_12_hours"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_15_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_15_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_day"].IsNull() || data.IntervalChoice.Attributes()["interval_1_day"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_hour"].IsNull() || data.IntervalChoice.Attributes()["interval_1_hour"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_min"].IsNull() || data.IntervalChoice.Attributes()["interval_1_min"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_30_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_30_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_30_secs"].IsNull() || data.IntervalChoice.Attributes()["interval_30_secs"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_5_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_5_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_6_hours"].IsNull() || data.IntervalChoice.Attributes()["interval_6_hours"].IsUnknown())) {
+			data.IntervalChoice = types.ObjectValueMust(V1DnsMonitorIntervalChoiceModelAttributeMap, map[string]attr.Value{
+				"interval_12_hours": types.BoolNull(),
+				"interval_15_mins":  types.BoolNull(),
+				"interval_1_day":    types.BoolNull(),
+				"interval_1_hour":   types.BoolNull(),
+				"interval_1_min":    types.BoolValue(true),
+				"interval_30_mins":  types.BoolNull(),
+				"interval_30_secs":  types.BoolNull(),
+				"interval_5_mins":   types.BoolNull(),
+				"interval_6_hours":  types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
@@ -3651,14 +3685,12 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			AttrTypes: V1DnsMonitorNameServersModelAttributeMap,
 		}
 		nullNameServersList := basetypes.NewListNull(nameServersObjectType)
-		var priorValNameServers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("name_servers"), &priorValNameServers)
-		if !priorValNameServers.IsNull() && !priorValNameServers.IsUnknown() {
-			data.NameServers = priorValNameServers
+		if !data.NameServers.IsNull() && !data.NameServers.IsUnknown() && len(data.NameServers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NameServers = basetypes.NewListValueMust(nameServersObjectType, nil)
 		} else {
 			data.NameServers = nullNameServersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -3774,7 +3806,13 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
+
+		if data.OnFailureToChoice.IsNull() || data.OnFailureToChoice.IsUnknown() || ((data.OnFailureToChoice.Attributes()["on_failure_to_all"].IsNull() || data.OnFailureToChoice.Attributes()["on_failure_to_all"].IsUnknown()) && (data.OnFailureToChoice.Attributes()["on_failure_to_any"].IsNull() || data.OnFailureToChoice.Attributes()["on_failure_to_any"].IsUnknown())) {
+			data.OnFailureToChoice = types.ObjectValueMust(V1DnsMonitorOnFailureToChoiceModelAttributeMap, map[string]attr.Value{
+				"on_failure_to_all": types.BoolNull(),
+				"on_failure_to_any": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredStringField --> Protocol
@@ -3786,12 +3824,8 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot RequiredStringField --> RecordType
 	if specData.GetRecordType() != "" {
@@ -3816,6 +3850,12 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 }
 
 func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCV1DnsMonitorModel
@@ -4357,7 +4397,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4373,7 +4413,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	err = r.client.ReplaceObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -4388,7 +4428,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -4494,34 +4534,27 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -4550,17 +4583,23 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -4684,6 +4723,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1DnsMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1DnsMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -4812,6 +4852,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
@@ -4905,6 +4946,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
@@ -4998,6 +5040,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
@@ -5352,14 +5395,12 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			AttrTypes: V1DnsMonitorNameServersModelAttributeMap,
 		}
 		nullNameServersList := basetypes.NewListNull(nameServersObjectType)
-		var priorValNameServers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("name_servers"), &priorValNameServers)
-		if !priorValNameServers.IsNull() && !priorValNameServers.IsUnknown() {
-			data.NameServers = priorValNameServers
+		if !data.NameServers.IsNull() && !data.NameServers.IsUnknown() && len(data.NameServers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NameServers = basetypes.NewListValueMust(nameServersObjectType, nil)
 		} else {
 			data.NameServers = nullNameServersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -5487,12 +5528,8 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot RequiredStringField --> RecordType
 	if specData.GetRecordType() != "" {
@@ -5580,7 +5617,7 @@ func (r *ResourceF5XCV1DnsMonitor) Delete(ctx context.Context, request resource.
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "v1_dns_monitor", err),
 		)
 		return
 	}

@@ -14,18 +14,53 @@
 page_title: "f5xc_app_api_group Resource - F5 XC Distributed Cloud"
 subcategory: "API Security & Management"
 description: |-
-  app_api_group object The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for internal use by data path and other services. An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it matches at least one element in the api group. The App API Group may be created using API Group Builder which defines path filter and label selectors to match API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members. The view creates the following child objects: * api_group
+  The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order<br>to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for<br>internal use by data path and other services.<br><br>An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all<br>elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it<br>matches at least one element in the api group.<br><br>The App API Group may be created using API Group Builder which defines path filter and label selectors to match<br>API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled<br>then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members.<br><br>The view creates the following child objects:<br>* api_group
 ---
 
 # f5xc_app_api_group (Resource)
 
-app_api_group object The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for internal use by data path and other services. An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it matches at least one element in the api group. The App API Group may be created using API Group Builder which defines path filter and label selectors to match API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members. The view creates the following child objects: * api_group
+The app_api_group construct provides a mechanism to classify the universal set of request APIs into a much smaller number of logical groups in order<br>to make it easier to author and maintain API level access control policies. The app_api_group holds api_group child object with the same content for<br>internal use by data path and other services.<br><br>An app_api_group object consists of an unordered list of api group elements. The method and path from the input request API are matched against all<br>elements in an app_api_group to determine if the request API belongs to the api group in question. The request API belongs to an api group if it<br>matches at least one element in the api group.<br><br>The App API Group may be created using API Group Builder which defines path filter and label selectors to match<br>API Endpoints from a referenced object, like HTTP Loadbalancer. For example, if there is a HTTP LB with API Discovery enabled<br>then all discovered API Endpoints serve as a base set and filters define which API Endpoints would be the group members.<br><br>The view creates the following child objects:<br>* api_group
 
 To get more information about f5xc_app_api_group, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/views-app-api-group)
 
+## Example Usage
 
+```terraform
+# Example: App API Group - Full
+
+resource "f5xc_app_api_group" "example" {
+  name        = "example-app-api-group"
+  namespace   = "shared"
+  description = "App API group example"
+
+  labels = {
+    env  = "example"
+    tier = "api"
+  }
+
+  elements = [
+    {
+      methods    = ["GET", "POST"]
+      path_regex = "^/api/v1/orders$"
+    },
+    {
+      methods    = ["PUT", "DELETE"]
+      path_regex = "^/api/v1/orders/.+$"
+    }
+  ]
+
+  scope_choice = {
+    http_loadbalancer = {
+      http_loadbalancer = {
+        name      = "app-http-lb"
+        namespace = "shared"
+      }
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -146,7 +181,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -154,7 +189,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_app_api_group.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

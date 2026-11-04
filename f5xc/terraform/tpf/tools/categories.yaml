@@ -25,7 +25,11 @@ prefix_mappings:
 resources:
   # App Security & Load Balancing
   http_loadbalancer: "App Security & Load Balancing"
+  http_loadbalancer_service_policy_attachments: "App Security & Load Balancing"
   tcp_loadbalancer: "App Security & Load Balancing"
+  tcp_loadbalancer_service_policy_attachments: "App Security & Load Balancing"
+  securemesh_site_v2_enhanced_firewall_policy_attachments: "App Security & Load Balancing"
+  securemesh_site_v2_forward_proxy_policy_attachments: "App Security & Load Balancing"
   udp_loadbalancer: "App Security & Load Balancing"
   cdn_loadbalancer: "App Security & Load Balancing"
   origin_pool: "App Security & Load Balancing"
@@ -76,6 +80,7 @@ resources:
   dc_cluster_group: "Cloud & Infrastructure Sites"
   fleet: "Cloud & Infrastructure Sites"
   site_mesh_group: "Cloud & Infrastructure Sites"
+  site_state: "Cloud & Infrastructure Sites"
   virtual_site: "Cloud & Infrastructure Sites"
   cloud_credentials: "Cloud & Infrastructure Sites"
   cloud_elastic_ip: "Cloud & Infrastructure Sites"

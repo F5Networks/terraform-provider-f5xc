@@ -31,13 +31,13 @@ type DataSourceF5XCAdvertisePolicy struct {
 	client *client.APIClient
 }
 
-type AdvertisePolicyGlobalSpecTypeAddressTypeChoice struct {
+type AdvertisePolicyAddrTypeChoice struct {
 	Dualstack types.Bool `tfsdk:"dualstack"`
 	Ipv4      types.Bool `tfsdk:"ipv4"`
 	Ipv6      types.Bool `tfsdk:"ipv6"`
 }
 
-type AdvertisePolicyGlobalSpecTypePortChoice struct {
+type AdvertisePolicyPortChoice struct {
 	Port       types.Int64  `tfsdk:"port"`
 	PortRanges types.String `tfsdk:"port_ranges"`
 }
@@ -51,10 +51,9 @@ type ObjectRefTypeModel struct {
 type AdvertisePolicyDownstreamTlsParamsType struct {
 	ClientCertificateVerifyChoice types.Object `tfsdk:"client_certificate_verify_choice"`
 	CommonParams                  types.Object `tfsdk:"common_params"`
-	XfccHeaderElements            types.List   `tfsdk:"xfcc_header_elements"`
 }
 
-type AdvertisePolicyDownstreamTlsParamsTypeClientCertificateVerifyChoice struct {
+type AdvertisePolicyClientCertVerifyChoice struct {
 	ClientCertificateOptional types.Bool `tfsdk:"client_certificate_optional"`
 	ClientCertificateRequired types.Bool `tfsdk:"client_certificate_required"`
 	NoClientCertificate       types.Bool `tfsdk:"no_client_certificate"`
@@ -68,20 +67,20 @@ type AdvertisePolicyTlsParamsType struct {
 	ValidationParams       types.Object `tfsdk:"validation_params"`
 }
 
-type AdvertisePolicyTlsCertificateType struct {
+type AdvertisePolicyTlsCertType struct {
 	CertificateUrl     types.String `tfsdk:"certificate_url"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
 	PrivateKey         types.Object `tfsdk:"private_key"`
 }
 
-type AdvertisePolicyTlsCertificateTypeOcspStaplingChoice struct {
+type AdvertisePolicyOcspStaplingChoice struct {
 	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
 	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
 	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
 }
 
-type AdvertisePolicyTlsCertificateTypeCustomHashAlgorithms struct {
+type AdvertisePolicyCustomHashAlgorithms struct {
 	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
@@ -89,63 +88,64 @@ type AdvertisePolicySecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type AdvertisePolicySecretTypeSecretInfoChoice struct {
+type AdvertisePolicySecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type AdvertisePolicySecretTypeBlindfoldSecretInfo struct {
+type AdvertisePolicyBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type AdvertisePolicySecretTypeClearSecretInfo struct {
+type AdvertisePolicyClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type AdvertisePolicyTlsValidationParamsType struct {
+type AdvertisePolicyTlsValParamsType struct {
 	SkipHostnameVerification types.Bool   `tfsdk:"skip_hostname_verification"`
 	TrustedCaChoice          types.Object `tfsdk:"trusted_ca_choice"`
 	VerifySubjectAltNames    types.List   `tfsdk:"verify_subject_alt_names"`
 }
 
-type AdvertisePolicyTlsValidationParamsTypeTrustedCaChoice struct {
+type AdvertisePolicyTrustedCaChoice struct {
 	TrustedCa    types.Object `tfsdk:"trusted_ca"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 }
 
-type AdvertisePolicyTlsValidationParamsTypeTrustedCa struct {
+type AdvertisePolicyTrustedCa struct {
 	TrustedCaList types.List `tfsdk:"trusted_ca_list"`
 }
 
-type AdvertisePolicyNetworkSiteRefSelector struct {
+type AdvertisePolicyNetSiteRefSelector struct {
 	RefOrSelectorChoice types.Object `tfsdk:"ref_or_selector_choice"`
 }
 
-type AdvertisePolicyNetworkSiteRefSelectorRefOrSelectorChoice struct {
+type AdvertisePolicyRefOrSelectorChoice struct {
 	Site           types.Object `tfsdk:"site"`
 	VirtualNetwork types.Object `tfsdk:"virtual_network"`
 	VirtualSite    types.Object `tfsdk:"virtual_site"`
 }
 
-type AdvertisePolicyNetworkSiteRefSelectorSite struct {
+type AdvertisePolicySite struct {
 	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
 	NetworkType       types.List   `tfsdk:"network_type"`
 	Ref               types.List   `tfsdk:"ref"`
 }
 
-type AdvertisePolicySiteRefTypeInternetVipChoice struct {
+type AdvertisePolicyInternetVipChoice struct {
 	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
 	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
 }
 
-type AdvertisePolicyNetworkSiteRefSelectorVirtualNetwork struct {
+type AdvertisePolicyVirtualNet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type AdvertisePolicyNetworkSiteRefSelectorVirtualSite struct {
+type AdvertisePolicyVirtualSite struct {
 	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
 	NetworkType       types.List   `tfsdk:"network_type"`
 	Ref               types.List   `tfsdk:"ref"`
@@ -241,9 +241,6 @@ var AdvertisePolicyTlsParametersModelAttributeMap = map[string]attr.Type{
 						ElemType: types.StringType,
 					}},
 			}},
-	},
-	"xfcc_header_elements": types.ListType{
-		ElemType: types.StringType,
 	},
 }
 
@@ -345,6 +342,7 @@ var AdvertisePolicyTlsParametersCommonParamsTlsCertificatesPrivateKeySecretInfoO
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AdvertisePolicyTlsParametersCommonParamsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -521,8 +519,8 @@ func (d *DataSourceF5XCAdvertisePolicy) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCAdvertisePolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a advertise_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of advertise_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a advertise_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of advertise_policy) etc. can be fetched",
+		MarkdownDescription: "advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.<br>Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE).<br><br>A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port.<br>So the problem of configuring VIP and Service port is made possible by advertise policy.<br>There three things to be decided<br><br>* Network<br>* VIP<br>* Protocol and Port<br><br>Network is decided by a concrete network reference<br>Network can be inferred automatically based on site and network type<br>Network can be inferred automatically based on all site selected by virtual site and network type<br><br>VIP can be automatically allocated by the system  or configured.<br>Most of the time VIP is the interface IP of the Application gateway in the given network.<br><br>Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system.<br>A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.",
+		Description:         "advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers. Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE). A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port. So the problem of configuring VIP and Service port is made possible by advertise policy. There three things to be decided Network VIP Protocol and Port Network is decided by a concrete network reference Network can be inferred automatically based on site and network type Network can be inferred automatically based on all site selected by virtual site and network type VIP can be automatically allocated by the system  or configured. Most of the time VIP is the interface IP of the Application gateway in the given network. Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system. A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -823,8 +821,15 @@ func (r *DataSourceF5XCAdvertisePolicy) Schema(ctx context.Context, request data
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
+																	Sensitive:   true,
 																},
 															},
+														},
+														"none": schema.BoolAttribute{
+															Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
 														},
 													},
 												},
@@ -905,13 +910,6 @@ func (r *DataSourceF5XCAdvertisePolicy) Schema(ctx context.Context, request data
 								},
 							},
 						},
-					},
-					"xfcc_header_elements": schema.ListAttribute{
-						Description: "XFCC Header X-Forwarded-Client-Cert header elements to be set in an mTLS enabled connections. If none are defined, the header will not be added.",
-						ElementType: types.StringType,
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
 					},
 				},
 			},
@@ -1150,7 +1148,7 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_advertise_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "advertise_policy", err))
 		return
 	}
 
@@ -1212,12 +1210,8 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// data SpecToModelRoot OneOfField --> AddressType
 	// false
@@ -1229,7 +1223,7 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 		addressTypeChoiceChoices := specData.GetAddressType()
 
 		// The model struct that will be populated by the nested template.
-		var addressTypeChoiceChoicesModel = &AdvertisePolicyGlobalSpecTypeAddressTypeChoice{}
+		var addressTypeChoiceChoicesModel = &AdvertisePolicyAddrTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1290,7 +1284,7 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 		portChoiceChoices := specData.GetPortChoice()
 
 		// The model struct that will be populated by the nested template.
-		var portChoiceChoicesModel = &AdvertisePolicyGlobalSpecTypePortChoice{}
+		var portChoiceChoicesModel = &AdvertisePolicyPortChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1516,24 +1510,24 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 			if len(commonParamsElement.GetTlsCertificates()) > 0 {
 				// Step 1: Always create a slice of model structs from the spec data.
 				// This slice serves as an intermediate representation.
-				tlsCertificatesElements := make([]AdvertisePolicyTlsCertificateType, 0, len(commonParamsElement.GetTlsCertificates()))
+				tlsCertificatesElements := make([]AdvertisePolicyTlsCertType, 0, len(commonParamsElement.GetTlsCertificates()))
 				for _, tlsCertificatesElement := range commonParamsElement.GetTlsCertificates() {
-					advertisePolicyTlsCertificateTypeModel := AdvertisePolicyTlsCertificateType{}
+					advertisePolicyTlsCertTypeModel := AdvertisePolicyTlsCertType{}
 
 					// data specToModelNested RequiredStringField --> CertificateUrl
 					if tlsCertificatesElement.GetCertificateUrl() != "" {
-						advertisePolicyTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+						advertisePolicyTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 					} else {
 						// Empty string, set to null
-						advertisePolicyTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+						advertisePolicyTlsCertTypeModel.CertificateUrl = types.StringNull()
 					}
 
 					// data specToModelNested StringField --> Description
 					if tlsCertificatesElement.GetDescription() != "" {
-						advertisePolicyTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+						advertisePolicyTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 					} else {
 						// Empty string, set to null
-						advertisePolicyTlsCertificateTypeModel.Description = types.StringNull()
+						advertisePolicyTlsCertTypeModel.Description = types.StringNull()
 					}
 
 					// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -1617,10 +1611,10 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						advertisePolicyTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+						advertisePolicyTlsCertTypeModel.OcspStaplingChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						advertisePolicyTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(AdvertisePolicyTlsParametersCommonParamsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+						advertisePolicyTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(AdvertisePolicyTlsParametersCommonParamsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredPointerField --> PrivateKey
@@ -1725,6 +1719,15 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 								}
 							}
 
+							// data specToModelNested BoolOfOneOfPointerField --> None
+							_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+							if isNone {
+								privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+							} else {
+								privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -1762,7 +1765,7 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						advertisePolicyTlsCertificateTypeModel.PrivateKey = advertisePolicySecretTypeModelObj
+						advertisePolicyTlsCertTypeModel.PrivateKey = advertisePolicySecretTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1771,10 +1774,10 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 						// here because the API may always return a non-nil struct (with REDACTED values) for this
 						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						advertisePolicyTlsCertificateTypeModel.PrivateKey = types.ObjectNull(AdvertisePolicyTlsParametersCommonParamsTlsCertificatesPrivateKeyModelAttributeMap)
+						advertisePolicyTlsCertTypeModel.PrivateKey = types.ObjectNull(AdvertisePolicyTlsParametersCommonParamsTlsCertificatesPrivateKeyModelAttributeMap)
 					}
 
-					tlsCertificatesElements = append(tlsCertificatesElements, advertisePolicyTlsCertificateTypeModel)
+					tlsCertificatesElements = append(tlsCertificatesElements, advertisePolicyTlsCertTypeModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1795,13 +1798,13 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 			// data specToModelNested PointerField --> ValidationParams
 			if commonParamsElement.GetValidationParams() != nil {
 				// Create the nested Go struct
-				advertisePolicyTlsValidationParamsTypeModel := &AdvertisePolicyTlsValidationParamsType{}
+				advertisePolicyTlsValParamsTypeModel := &AdvertisePolicyTlsValParamsType{}
 				validationParamsElement := commonParamsElement.GetValidationParams()
 
 				// Recursively populate the nested struct
 
 				// data specToModelNested BoolField --> SkipHostnameVerification
-				advertisePolicyTlsValidationParamsTypeModel.SkipHostnameVerification = types.BoolValue(bool(validationParamsElement.GetSkipHostnameVerification()))
+				advertisePolicyTlsValParamsTypeModel.SkipHostnameVerification = types.BoolValue(bool(validationParamsElement.GetSkipHostnameVerification()))
 
 				// data specToModelNested RequiredOneOfField --> TrustedCaChoice
 				// <no value>
@@ -1909,10 +1912,10 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					advertisePolicyTlsValidationParamsTypeModel.TrustedCaChoice = finalObj
+					advertisePolicyTlsValParamsTypeModel.TrustedCaChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					advertisePolicyTlsValidationParamsTypeModel.TrustedCaChoice = types.ObjectNull(AdvertisePolicyTlsParametersCommonParamsValidationParamsTrustedCaChoiceModelAttributeMap)
+					advertisePolicyTlsValParamsTypeModel.TrustedCaChoice = types.ObjectNull(AdvertisePolicyTlsParametersCommonParamsValidationParamsTrustedCaChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested ArrayOfStringField --> VerifySubjectAltNames
@@ -1922,18 +1925,18 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 					if response.Diagnostics.HasError() {
 						return
 					}
-					advertisePolicyTlsValidationParamsTypeModel.VerifySubjectAltNames = listValue
+					advertisePolicyTlsValParamsTypeModel.VerifySubjectAltNames = listValue
 				} else {
-					advertisePolicyTlsValidationParamsTypeModel.VerifySubjectAltNames = types.ListNull(types.StringType)
+					advertisePolicyTlsValParamsTypeModel.VerifySubjectAltNames = types.ListNull(types.StringType)
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				advertisePolicyTlsValidationParamsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AdvertisePolicyTlsParametersCommonParamsValidationParamsModelAttributeMap, advertisePolicyTlsValidationParamsTypeModel)
+				advertisePolicyTlsValParamsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AdvertisePolicyTlsParametersCommonParamsValidationParamsModelAttributeMap, advertisePolicyTlsValParamsTypeModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				advertisePolicyTlsParamsTypeModel.ValidationParams = advertisePolicyTlsValidationParamsTypeModelObj
+				advertisePolicyTlsParamsTypeModel.ValidationParams = advertisePolicyTlsValParamsTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -1963,24 +1966,6 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 			advertisePolicyDownstreamTlsParamsTypeModel.CommonParams = types.ObjectNull(AdvertisePolicyTlsParametersCommonParamsModelAttributeMap)
 		}
 
-		// data SpecToModelNested ArrayOfEnumField --> XfccHeaderElements
-		if len(tlsParametersElement.GetXfccHeaderElements()) > 0 {
-			xfccHeaderElementsStrings := make([]string, 0, len(tlsParametersElement.GetXfccHeaderElements()))
-			for _, v := range tlsParametersElement.GetXfccHeaderElements() {
-				if strVal, exists := ves_io_schema.XfccElement_name[int32(v)]; exists {
-					xfccHeaderElementsStrings = append(xfccHeaderElementsStrings, strVal)
-				}
-			}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, xfccHeaderElementsStrings)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			advertisePolicyDownstreamTlsParamsTypeModel.XfccHeaderElements = listValue
-		} else {
-			advertisePolicyDownstreamTlsParamsTypeModel.XfccHeaderElements = types.ListNull(types.StringType)
-		}
-
 		tlsParametersObj, tlsParametersDiags := utils.GoStructToObjectValue(
 			ctx,
 			AdvertisePolicyTlsParametersModelAttributeMap,
@@ -1994,7 +1979,7 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot PointerField --> Where
 	if specData.GetWhere() != nil {
-		var advertisePolicyNetworkSiteRefSelectorModel = &AdvertisePolicyNetworkSiteRefSelector{}
+		var advertisePolicyNetSiteRefSelectorModel = &AdvertisePolicyNetSiteRefSelector{}
 		whereElement := specData.GetWhere()
 
 		// data specToModelNested RequiredOneOfField --> RefOrSelector
@@ -2361,16 +2346,16 @@ func (d *DataSourceF5XCAdvertisePolicy) Read(ctx context.Context, request dataso
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			advertisePolicyNetworkSiteRefSelectorModel.RefOrSelectorChoice = finalObj
+			advertisePolicyNetSiteRefSelectorModel.RefOrSelectorChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			advertisePolicyNetworkSiteRefSelectorModel.RefOrSelectorChoice = types.ObjectNull(AdvertisePolicyWhereRefOrSelectorModelAttributeMap)
+			advertisePolicyNetSiteRefSelectorModel.RefOrSelectorChoice = types.ObjectNull(AdvertisePolicyWhereRefOrSelectorModelAttributeMap)
 		}
 
 		whereObj, whereDiags := utils.GoStructToObjectValue(
 			ctx,
 			AdvertisePolicyWhereModelAttributeMap,
-			advertisePolicyNetworkSiteRefSelectorModel,
+			advertisePolicyNetSiteRefSelectorModel,
 		)
 		response.Diagnostics.Append(whereDiags...)
 		data.Where = whereObj

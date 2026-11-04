@@ -14,12 +14,12 @@
 page_title: "f5xc_origin_pool Resource - F5 XC Distributed Cloud"
 subcategory: "App Security & Load Balancing"
 description: |-
-  Origin Pool Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer It will create following child objects * cluster * endpoints * healthcheck
+  Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer<br><br>It will create following child objects<br><br>* cluster<br>* endpoints<br>* healthcheck
 ---
 
 # f5xc_origin_pool (Resource)
 
-Origin Pool Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer It will create following child objects * cluster * endpoints * healthcheck
+Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer<br><br>It will create following child objects<br><br>* cluster<br>* endpoints<br>* healthcheck
 
 To get more information about f5xc_origin_pool, refer:
 
@@ -36,9 +36,9 @@ resource "f5xc_origin_pool" "example" {
   description            = "Origin pool example"
   loadbalancer_algorithm = ["ROUND_ROBIN"]
   endpoint_selection     = ["LOCAL_PREFERRED"]
-  
+
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v1"
   }
 
@@ -79,7 +79,7 @@ resource "f5xc_origin_pool" "example" {
   endpoint_selection     = ["LOCAL_PREFERRED"]
 
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v2"
   }
 
@@ -726,7 +726,6 @@ Required:
 Optional:
 
 - `ip` (String) IP Public IPV4 address
-- `ipv6` (String) IPV6 Public IPV6 address
 
 
 
@@ -879,13 +878,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice.use_mtls.tls_certificates.private_key.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -1013,7 +1013,7 @@ Optional:
 
 Required:
 
-- `cipher_suites` (List of String) cipher_suites The TLS listener will only support the specified cipher list.
+- `cipher_suites` (List of String) cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)
 
 Optional:
 
@@ -1150,11 +1150,11 @@ Optional:
 
 Optional:
 
-- `base_ejection_time` (Number) base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.
-- `consecutive_5xx` (Number) consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.
-- `consecutive_gateway_failure` (Number) consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.
-- `interval` (Number) interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.
-- `max_ejection_percent` (Number) max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.
+- `base_ejection_time` (Number) base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.<br>**Default:** `0`
+- `consecutive_5xx` (Number) consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.<br>**Default:** `0`
+- `consecutive_gateway_failure` (Number) consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.<br>**Default:** `0`
+- `interval` (Number) interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.<br>**Default:** `0`
+- `max_ejection_percent` (Number) max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.<br>**Default:** `0`
 
 
 
@@ -1268,7 +1268,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -1276,7 +1276,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_origin_pool.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

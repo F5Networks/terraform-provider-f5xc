@@ -64,8 +64,8 @@ func (d *DataSourceF5XCServicePolicySet) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCServicePolicySet) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a service_policy_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of service_policy_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a service_policy_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of service_policy_set) etc. can be fetched",
+		MarkdownDescription: "A service_policy_set object consists of an ordered list of references to service_policy objects. The policies are evaluated in the specified order against<br>a set of input fields that are extracted from or derived from an L7 request API. The evaluation of the policy set terminates when the request API matches a<br>policy which results in an 'allow' or 'deny' action. If the request API does not match a policy, the next policy in the list is evaluated. If the request API<br>does not match any of the policies in the set, the result is a 'default_deny' action.<br><br>There can be no more than one service policy set configured under a namespace. That policy set is applied to requests destined to all virtual_hosts in that<br>namespace.",
+		Description:         "A service_policy_set object consists of an ordered list of references to service_policy objects. The policies are evaluated in the specified order against a set of input fields that are extracted from or derived from an L7 request API. The evaluation of the policy set terminates when the request API matches a policy which results in an 'allow' or 'deny' action. If the request API does not match a policy, the next policy in the list is evaluated. If the request API does not match any of the policies in the set, the result is a 'default_deny' action. There can be no more than one service policy set configured under a namespace. That policy set is applied to requests destined to all virtual_hosts in that namespace.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -191,7 +191,7 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_service_policy_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "service_policy_set", err))
 		return
 	}
 

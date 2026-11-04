@@ -30,23 +30,23 @@ type DataSourceF5XCDiscovery struct {
 	client *client.APIClient
 }
 
-type DiscoveryGlobalSpecTypeClusterIdentifierChoice struct {
+type DiscoveryClusterIdentifierChoice struct {
 	ClusterId   types.String `tfsdk:"cluster_id"`
 	NoClusterId types.Bool   `tfsdk:"no_cluster_id"`
 }
 
-type DiscoveryGlobalSpecTypeDiscoveryChoice struct {
+type DiscoveryDiscoveryChoice struct {
 	DiscoveryCbip       types.Object `tfsdk:"discovery_cbip"`
 	DiscoveryConsul     types.Object `tfsdk:"discovery_consul"`
 	DiscoveryK8S        types.Object `tfsdk:"discovery_k8s"`
 	DiscoveryThirdParty types.Object `tfsdk:"discovery_third_party"`
 }
 
-type DiscoveryGlobalSpecTypeDiscoveryCbip struct {
+type DiscoveryDiscoveryCbip struct {
 	CbipClusters types.List `tfsdk:"cbip_clusters"`
 }
 
-type DiscoveryDiscoveryCbipCluster struct {
+type DiscoveryCbipCluster struct {
 	AdminCredentials         types.Object `tfsdk:"admin_credentials"`
 	CbipCertificateAuthority types.Object `tfsdk:"cbip_certificate_authority"`
 	CbipMgmtIps              types.List   `tfsdk:"cbip_mgmt_ips"`
@@ -57,7 +57,7 @@ type DiscoveryDiscoveryCbipCluster struct {
 	VirtualServerFilter      types.Object `tfsdk:"virtual_server_filter"`
 }
 
-type DiscoveryDiscoveryCbipAdminCredentials struct {
+type DiscoveryCbipAdminCredentials struct {
 	Password types.Object `tfsdk:"password"`
 	Username types.String `tfsdk:"username"`
 }
@@ -66,36 +66,37 @@ type DiscoverySecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type DiscoverySecretTypeSecretInfoChoice struct {
+type DiscoverySecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type DiscoverySecretTypeBlindfoldSecretInfo struct {
+type DiscoveryBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type DiscoverySecretTypeClearSecretInfo struct {
+type DiscoveryClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type DiscoveryDiscoveryCbipCertificateAuthority struct {
+type DiscoveryCbipCertAuthority struct {
 	ServerValidationChoice types.Object `tfsdk:"server_validation_choice"`
 }
 
-type DiscoveryCbipCertificateAuthorityServerValidationChoice struct {
+type DiscoveryServerValChoice struct {
 	SkipServerVerification types.Bool   `tfsdk:"skip_server_verification"`
 	TrustedCa              types.Object `tfsdk:"trusted_ca"`
 }
 
-type DiscoveryDiscoveryHASync struct {
+type DiscoveryHASync struct {
 	SyncTypeChoice types.Object `tfsdk:"sync_type_choice"`
 }
 
-type DiscoveryHASyncSyncTypeChoice struct {
+type DiscoverySyncTypeChoice struct {
 	ManualSync    types.Bool `tfsdk:"manual_sync"`
 	NotApplicable types.Bool `tfsdk:"not_applicable"`
 	XcManagedSync types.Bool `tfsdk:"xc_managed_sync"`
@@ -106,168 +107,158 @@ type DiscoveryMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type DiscoveryDiscoveryManagementPort struct {
+type DiscoveryMgmtPort struct {
 	Port types.Int64 `tfsdk:"port"`
 }
 
-type DiscoveryCbipClusterNamespaceMappingChoice struct {
+type DiscoveryNsMappingChoice struct {
 	DefaultAll       types.Bool   `tfsdk:"default_all"`
 	NamespaceMapping types.Object `tfsdk:"namespace_mapping"`
 }
 
-type DiscoveryCbipClusterNamespaceMapping struct {
+type DiscoveryNsMapping struct {
 	Items types.List `tfsdk:"items"`
 }
 
-type DiscoveryDiscoveryNamespaceMappingItem struct {
+type DiscoveryNsMappingItem struct {
 	Namespace      types.String `tfsdk:"namespace"`
 	PartitionRegex types.String `tfsdk:"partition_regex"`
 }
 
-type DiscoveryDiscoveryVirtualServerFilter struct {
+type DiscoveryVirtualServerFilter struct {
 	DescriptionRegex               types.String `tfsdk:"description_regex"`
 	DiscoverDisabledVirtualServers types.Bool   `tfsdk:"discover_disabled_virtual_servers"`
 	NameRegex                      types.String `tfsdk:"name_regex"`
 	PortRanges                     types.String `tfsdk:"port_ranges"`
 }
 
-type DiscoveryGlobalSpecTypeDiscoveryConsul struct {
+type DiscoveryDiscoveryConsul struct {
 	AccessInfo  types.Object `tfsdk:"access_info"`
 	PublishInfo types.Object `tfsdk:"publish_info"`
 }
 
-type DiscoveryDiscoveryConsulAccessInfo struct {
+type DiscoveryConsulAccessInfo struct {
 	ConnectionInfo    types.Object `tfsdk:"connection_info"`
 	HttpBasicAuthInfo types.Object `tfsdk:"http_basic_auth_info"`
 }
 
-type DiscoveryDiscoveryRestConfigType struct {
+type DiscoveryRestConfigType struct {
 	ApiServer types.String `tfsdk:"api_server"`
 	TlsInfo   types.Object `tfsdk:"tls_info"`
 }
 
-type DiscoveryDiscoveryTLSClientConfigType struct {
+type DiscoveryTLSClientConfigType struct {
 	Certificate  types.String `tfsdk:"certificate"`
 	KeyUrl       types.Object `tfsdk:"key_url"`
 	ServerName   types.String `tfsdk:"server_name"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 }
 
-type DiscoveryDiscoveryConsulHttpBasicAuthInfoType struct {
+type DiscoveryConsulHttpBasicAuthInfoType struct {
 	PasswdUrl types.Object `tfsdk:"passwd_url"`
 	UserName  types.String `tfsdk:"user_name"`
 }
 
-type DiscoveryDiscoveryConsulVipDiscoveryInfoType struct {
+type DiscoveryConsulVipDiscoveryInfoType struct {
 	PublishChoice types.Object `tfsdk:"publish_choice"`
 }
 
-type DiscoveryConsulVipDiscoveryInfoTypePublishChoice struct {
+type DiscoveryPublishChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
 	Publish types.Bool `tfsdk:"publish"`
 }
 
-type DiscoveryGlobalSpecTypeDiscoveryK8S struct {
+type DiscoveryDiscoveryK8S struct {
 	AccessInfo             types.Object `tfsdk:"access_info"`
 	NamespaceMappingChoice types.Object `tfsdk:"namespace_mapping_choice"`
 	PublishInfo            types.Object `tfsdk:"publish_info"`
 }
 
-type DiscoveryDiscoveryK8SAccessInfo struct {
+type DiscoveryK8SAccessInfo struct {
 	ConfigTypeChoice    types.Object `tfsdk:"config_type_choice"`
 	K8SPodNetworkChoice types.Object `tfsdk:"k8s_pod_network_choice"`
 }
 
-type DiscoveryK8SAccessInfoConfigTypeChoice struct {
+type DiscoveryConfigTypeChoice struct {
 	ConnectionInfo types.Object `tfsdk:"connection_info"`
 	KubeconfigUrl  types.Object `tfsdk:"kubeconfig_url"`
 }
 
-type DiscoveryK8SAccessInfoConnectionInfo struct {
+type DiscoveryConnInfo struct {
 	ApiServer types.String `tfsdk:"api_server"`
 	TlsInfo   types.Object `tfsdk:"tls_info"`
 }
 
-type DiscoveryK8SAccessInfoKubeconfigUrl struct {
+type DiscoveryKubeconfigUrl struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type DiscoveryK8SAccessInfoK8SPodNetworkChoice struct {
+type DiscoveryK8SPodNetChoice struct {
 	Isolated  types.Bool `tfsdk:"isolated"`
 	Reachable types.Bool `tfsdk:"reachable"`
 }
 
-type DiscoveryK8SDiscoveryTypeNamespaceMappingChoice struct {
+type DiscoveryK8SDiscoveryTypeNsMappingChoice struct {
 	DefaultAll       types.Bool   `tfsdk:"default_all"`
 	NamespaceMapping types.Object `tfsdk:"namespace_mapping"`
 }
 
-type DiscoveryK8SDiscoveryTypeNamespaceMapping struct {
+type DiscoveryK8SDiscoveryTypeNsMapping struct {
 	Items types.List `tfsdk:"items"`
 }
 
-type DiscoveryDiscoveryK8SNamespaceMappingItem struct {
+type DiscoveryK8SNsMappingItem struct {
 	Namespace      types.String `tfsdk:"namespace"`
 	NamespaceRegex types.String `tfsdk:"namespace_regex"`
 }
 
-type DiscoveryDiscoveryK8SVipDiscoveryInfoType struct {
+type DiscoveryK8SVipDiscoveryInfoType struct {
 	PublishChoice types.Object `tfsdk:"publish_choice"`
 }
 
 type DiscoveryK8SVipDiscoveryInfoTypePublishChoice struct {
+	Disable       types.Bool   `tfsdk:"disable"`
 	DnsDelegation types.Object `tfsdk:"dns_delegation"`
 	Publish       types.Object `tfsdk:"publish"`
 	PublishFqdns  types.Bool   `tfsdk:"publish_fqdns"`
 }
 
-type DiscoveryK8SVipDiscoveryInfoTypeDnsDelegation struct {
+type DiscoveryDnsDelegation struct {
 	DnsMode   types.List   `tfsdk:"dns_mode"`
 	Subdomain types.String `tfsdk:"subdomain"`
 }
 
-type DiscoveryK8SVipDiscoveryInfoTypePublish struct {
+type DiscoveryPublish struct {
 	Namespace types.String `tfsdk:"namespace"`
 }
 
-type DiscoveryGlobalSpecTypeDiscoveryThirdParty struct {
+type DiscoveryDiscoveryThirdParty struct {
 	Applications types.List `tfsdk:"applications"`
 	SourceCidr   types.List `tfsdk:"source_cidr"`
 }
 
-type DiscoveryNetworkSiteRefSelector struct {
+type DiscoveryNetSiteRefSelector struct {
 	RefOrSelectorChoice types.Object `tfsdk:"ref_or_selector_choice"`
 }
 
-type DiscoveryNetworkSiteRefSelectorRefOrSelectorChoice struct {
+type DiscoveryRefOrSelectorChoice struct {
 	Site           types.Object `tfsdk:"site"`
 	VirtualNetwork types.Object `tfsdk:"virtual_network"`
 	VirtualSite    types.Object `tfsdk:"virtual_site"`
 }
 
-type DiscoveryNetworkSiteRefSelectorSite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
+type DiscoverySite struct {
+	NetworkType types.List `tfsdk:"network_type"`
+	Ref         types.List `tfsdk:"ref"`
 }
 
-type DiscoverySiteRefTypeInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
-}
-
-type DiscoveryNetworkSiteRefSelectorVirtualNetwork struct {
+type DiscoveryVirtualNet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type DiscoveryNetworkSiteRefSelectorVirtualSite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
-}
-
-type DiscoveryVSiteRefTypeInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
+type DiscoveryVirtualSite struct {
+	NetworkType types.List `tfsdk:"network_type"`
+	Ref         types.List `tfsdk:"ref"`
 }
 
 // DataSourceF5XCDiscoveryModel describes the resource data model.
@@ -428,6 +419,7 @@ var DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsPasswordSec
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -643,6 +635,7 @@ var DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoKeyUrl
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -688,6 +681,7 @@ var DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoPasswdUrlS
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoPasswdUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -716,6 +710,7 @@ var DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoModelAttributeMap = map[st
 // Attribute map for RequiredOneOfField --> PublishChoice
 var DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoPublishChoiceModelAttributeMap = map[string]attr.Type{
 
+	"disable": types.BoolType,
 	"publish": types.BoolType,
 }
 
@@ -808,6 +803,7 @@ var DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInf
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInfoKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -842,6 +838,7 @@ var DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlSecretI
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -907,6 +904,7 @@ var DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoModelAttributeMap = map[strin
 // Attribute map for RequiredOneOfField --> PublishChoice
 var DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceModelAttributeMap = map[string]attr.Type{
 
+	"disable": types.BoolType,
 	"dns_delegation": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceDnsDelegationModelAttributeMap,
 	},
@@ -967,9 +965,6 @@ var DiscoveryWhereRefOrSelectorModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> Site
 var DiscoveryWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap,
-	},
 	"network_type": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -983,13 +978,6 @@ var DiscoveryWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Ref
@@ -1018,9 +1006,6 @@ var DiscoveryWhereRefOrSelectorVirtualNetworkModelAttributeMap = map[string]attr
 // Attribute map for PointerOfOneOfField --> VirtualSite
 var DiscoveryWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap,
-	},
 	"network_type": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -1034,13 +1019,6 @@ var DiscoveryWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Ty
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -1057,8 +1035,8 @@ func (d *DataSourceF5XCDiscovery) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of discovery) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of discovery) etc. can be fetched",
+		MarkdownDescription: "Service discovery in F5XC performs following<br><br>Dynamic service discovery: Resolving the load balancer endpoints for a ADC cluster<br>Dynamic VIP discovery: Publishing virtual IP to attract traffic from clients",
+		Description:         "Service discovery in F5XC performs following Dynamic service discovery: Resolving the load balancer endpoints for a ADC cluster Dynamic VIP discovery: Publishing virtual IP to attract traffic from clients",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1199,8 +1177,15 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
+																			Sensitive:   true,
 																		},
 																	},
+																},
+																"none": schema.BoolAttribute{
+																	Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
 																},
 															},
 														},
@@ -1509,8 +1494,15 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
+																				Sensitive:   true,
 																			},
 																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
 																	},
 																},
 															},
@@ -1593,8 +1585,15 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -1622,6 +1621,12 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "disable Disable VIP Publishing",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"publish": schema.BoolAttribute{
 												Description: "publish Publish domain to VIP mapping.",
 												Required:    false,
@@ -1731,8 +1736,15 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
+																						Sensitive:   true,
 																					},
 																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
 																			},
 																		},
 																	},
@@ -1809,8 +1821,15 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -1896,6 +1915,12 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description: "disable Disable VIP Publishing and DNS Delegation",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
 											"dns_delegation": schema.SingleNestedAttribute{
 												Description: "dns delegation Program DNS delegation for a sub-domain in external cluster",
 												Required:    false,
@@ -1985,26 +2010,6 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description: "Internet VIP Choice Internet VIP Choice",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
 									"network_type": schema.ListAttribute{
 										Description: "network_type The type of network on the referred site",
 										ElementType: types.StringType,
@@ -2084,26 +2089,6 @@ func (r *DataSourceF5XCDiscovery) Schema(ctx context.Context, request datasource
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description: "Internet VIP Choice Internet VIP Choice",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
 									"network_type": schema.ListAttribute{
 										Description: "network_type The type of network on the referred virtual_site",
 										ElementType: types.StringType,
@@ -2202,7 +2187,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "discovery", err))
 		return
 	}
 
@@ -2273,7 +2258,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 		clusterIdentifierChoiceChoices := specData.GetClusterIdentifierChoice()
 
 		// The model struct that will be populated by the nested template.
-		var clusterIdentifierChoiceChoicesModel = &DiscoveryGlobalSpecTypeClusterIdentifierChoice{}
+		var clusterIdentifierChoiceChoicesModel = &DiscoveryClusterIdentifierChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2326,7 +2311,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 		discoveryChoiceChoices := specData.GetDiscoveryChoice()
 
 		// The model struct that will be populated by the nested template.
-		var discoveryChoiceChoicesModel = &DiscoveryGlobalSpecTypeDiscoveryChoice{}
+		var discoveryChoiceChoicesModel = &DiscoveryDiscoveryChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2344,14 +2329,14 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 				if len(discoveryCbipElement.GetCbipClusters()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					cbipClustersElements := make([]DiscoveryDiscoveryCbipCluster, 0, len(discoveryCbipElement.GetCbipClusters()))
+					cbipClustersElements := make([]DiscoveryCbipCluster, 0, len(discoveryCbipElement.GetCbipClusters()))
 					for _, cbipClustersElement := range discoveryCbipElement.GetCbipClusters() {
-						discoveryDiscoveryCbipClusterModel := DiscoveryDiscoveryCbipCluster{}
+						discoveryCbipClusterModel := DiscoveryCbipCluster{}
 
 						// data specToModelNested RequiredPointerField --> AdminCredentials
 						if cbipClustersElement.GetAdminCredentials() != nil {
 							// Create the nested Go struct
-							discoveryDiscoveryCbipAdminCredentialsModel := &DiscoveryDiscoveryCbipAdminCredentials{}
+							discoveryCbipAdminCredentialsModel := &DiscoveryCbipAdminCredentials{}
 							adminCredentialsElement := cbipClustersElement.GetAdminCredentials()
 
 							// Recursively populate the nested struct
@@ -2458,6 +2443,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -2495,7 +2489,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 								if response.Diagnostics.HasError() {
 									return
 								}
-								discoveryDiscoveryCbipAdminCredentialsModel.Password = discoverySecretTypeModelObj
+								discoveryCbipAdminCredentialsModel.Password = discoverySecretTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -2504,24 +2498,24 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								discoveryDiscoveryCbipAdminCredentialsModel.Password = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsPasswordModelAttributeMap)
+								discoveryCbipAdminCredentialsModel.Password = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsPasswordModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredStringField --> Username
 							if adminCredentialsElement.GetUsername() != "" {
-								discoveryDiscoveryCbipAdminCredentialsModel.Username = types.StringValue(adminCredentialsElement.GetUsername())
+								discoveryCbipAdminCredentialsModel.Username = types.StringValue(adminCredentialsElement.GetUsername())
 							} else {
 								// Empty string, set to null
-								discoveryDiscoveryCbipAdminCredentialsModel.Username = types.StringNull()
+								discoveryCbipAdminCredentialsModel.Username = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							discoveryDiscoveryCbipAdminCredentialsModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsModelAttributeMap, discoveryDiscoveryCbipAdminCredentialsModel)
+							discoveryCbipAdminCredentialsModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsModelAttributeMap, discoveryCbipAdminCredentialsModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryCbipClusterModel.AdminCredentials = discoveryDiscoveryCbipAdminCredentialsModelObj
+							discoveryCbipClusterModel.AdminCredentials = discoveryCbipAdminCredentialsModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2530,13 +2524,13 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryCbipClusterModel.AdminCredentials = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsModelAttributeMap)
+							discoveryCbipClusterModel.AdminCredentials = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> CbipCertificateAuthority
 						if cbipClustersElement.GetCbipCertificateAuthority() != nil {
 							// Create the nested Go struct
-							discoveryDiscoveryCbipCertificateAuthorityModel := &DiscoveryDiscoveryCbipCertificateAuthority{}
+							discoveryCbipCertAuthorityModel := &DiscoveryCbipCertAuthority{}
 							cbipCertificateAuthorityElement := cbipClustersElement.GetCbipCertificateAuthority()
 
 							// Recursively populate the nested struct
@@ -2620,19 +2614,19 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								discoveryDiscoveryCbipCertificateAuthorityModel.ServerValidationChoice = finalObj
+								discoveryCbipCertAuthorityModel.ServerValidationChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								discoveryDiscoveryCbipCertificateAuthorityModel.ServerValidationChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceModelAttributeMap)
+								discoveryCbipCertAuthorityModel.ServerValidationChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							discoveryDiscoveryCbipCertificateAuthorityModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityModelAttributeMap, discoveryDiscoveryCbipCertificateAuthorityModel)
+							discoveryCbipCertAuthorityModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityModelAttributeMap, discoveryCbipCertAuthorityModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryCbipClusterModel.CbipCertificateAuthority = discoveryDiscoveryCbipCertificateAuthorityModelObj
+							discoveryCbipClusterModel.CbipCertificateAuthority = discoveryCbipCertAuthorityModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2641,7 +2635,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryCbipClusterModel.CbipCertificateAuthority = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityModelAttributeMap)
+							discoveryCbipClusterModel.CbipCertificateAuthority = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredArrayOfStringField --> CbipMgmtIps
@@ -2651,15 +2645,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryCbipClusterModel.CbipMgmtIps = listValue
+							discoveryCbipClusterModel.CbipMgmtIps = listValue
 						} else {
-							discoveryDiscoveryCbipClusterModel.CbipMgmtIps = types.ListNull(types.StringType)
+							discoveryCbipClusterModel.CbipMgmtIps = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested PointerField --> HaSync
 						if cbipClustersElement.GetHaSync() != nil {
 							// Create the nested Go struct
-							discoveryDiscoveryHASyncModel := &DiscoveryDiscoveryHASync{}
+							discoveryHASyncModel := &DiscoveryHASync{}
 							haSyncElement := cbipClustersElement.GetHaSync()
 
 							// Recursively populate the nested struct
@@ -2715,19 +2709,19 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								discoveryDiscoveryHASyncModel.SyncTypeChoice = finalObj
+								discoveryHASyncModel.SyncTypeChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								discoveryDiscoveryHASyncModel.SyncTypeChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersHaSyncSyncTypeModelAttributeMap)
+								discoveryHASyncModel.SyncTypeChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersHaSyncSyncTypeModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							discoveryDiscoveryHASyncModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersHaSyncModelAttributeMap, discoveryDiscoveryHASyncModel)
+							discoveryHASyncModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersHaSyncModelAttributeMap, discoveryHASyncModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryCbipClusterModel.HaSync = discoveryDiscoveryHASyncModelObj
+							discoveryCbipClusterModel.HaSync = discoveryHASyncModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2736,7 +2730,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryCbipClusterModel.HaSync = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersHaSyncModelAttributeMap)
+							discoveryCbipClusterModel.HaSync = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersHaSyncModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
@@ -2769,7 +2763,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryCbipClusterModel.Metadata = discoveryMessageMetaTypeModelObj
+							discoveryCbipClusterModel.Metadata = discoveryMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2778,27 +2772,27 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryCbipClusterModel.Metadata = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMetadataModelAttributeMap)
+							discoveryCbipClusterModel.Metadata = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> MgmtPort
 						if cbipClustersElement.GetMgmtPort() != nil {
 							// Create the nested Go struct
-							discoveryDiscoveryManagementPortModel := &DiscoveryDiscoveryManagementPort{}
+							discoveryMgmtPortModel := &DiscoveryMgmtPort{}
 							mgmtPortElement := cbipClustersElement.GetMgmtPort()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested RequiredUintField --> Port
-							discoveryDiscoveryManagementPortModel.Port = types.Int64Value(int64(mgmtPortElement.GetPort()))
+							discoveryMgmtPortModel.Port = types.Int64Value(int64(mgmtPortElement.GetPort()))
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							discoveryDiscoveryManagementPortModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMgmtPortModelAttributeMap, discoveryDiscoveryManagementPortModel)
+							discoveryMgmtPortModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMgmtPortModelAttributeMap, discoveryMgmtPortModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryCbipClusterModel.MgmtPort = discoveryDiscoveryManagementPortModelObj
+							discoveryCbipClusterModel.MgmtPort = discoveryMgmtPortModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2807,7 +2801,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryCbipClusterModel.MgmtPort = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMgmtPortModelAttributeMap)
+							discoveryCbipClusterModel.MgmtPort = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMgmtPortModelAttributeMap)
 						}
 
 						// data specToModelNested OneOfField --> NamespaceMappingChoice
@@ -2844,27 +2838,27 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 									if len(namespaceMappingElement.GetItems()) > 0 {
 										// Step 1: Always create a slice of model structs from the spec data.
 										// This slice serves as an intermediate representation.
-										itemsElements := make([]DiscoveryDiscoveryNamespaceMappingItem, 0, len(namespaceMappingElement.GetItems()))
+										itemsElements := make([]DiscoveryNsMappingItem, 0, len(namespaceMappingElement.GetItems()))
 										for _, itemsElement := range namespaceMappingElement.GetItems() {
-											discoveryDiscoveryNamespaceMappingItemModel := DiscoveryDiscoveryNamespaceMappingItem{}
+											discoveryNsMappingItemModel := DiscoveryNsMappingItem{}
 
 											// data specToModelNested StringField --> Namespace
 											if itemsElement.GetNamespace() != "" {
-												discoveryDiscoveryNamespaceMappingItemModel.Namespace = types.StringValue(itemsElement.GetNamespace())
+												discoveryNsMappingItemModel.Namespace = types.StringValue(itemsElement.GetNamespace())
 											} else {
 												// Empty string, set to null
-												discoveryDiscoveryNamespaceMappingItemModel.Namespace = types.StringNull()
+												discoveryNsMappingItemModel.Namespace = types.StringNull()
 											}
 
 											// data specToModelNested RequiredStringField --> PartitionRegex
 											if itemsElement.GetPartitionRegex() != "" {
-												discoveryDiscoveryNamespaceMappingItemModel.PartitionRegex = types.StringValue(itemsElement.GetPartitionRegex())
+												discoveryNsMappingItemModel.PartitionRegex = types.StringValue(itemsElement.GetPartitionRegex())
 											} else {
 												// Empty string, set to null
-												discoveryDiscoveryNamespaceMappingItemModel.PartitionRegex = types.StringNull()
+												discoveryNsMappingItemModel.PartitionRegex = types.StringNull()
 											}
 
-											itemsElements = append(itemsElements, discoveryDiscoveryNamespaceMappingItemModel)
+											itemsElements = append(itemsElements, discoveryNsMappingItemModel)
 										}
 										// CASE 1: The target field is a `types.List` or an attribute map.
 										// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2906,54 +2900,54 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							discoveryDiscoveryCbipClusterModel.NamespaceMappingChoice = finalObj
+							discoveryCbipClusterModel.NamespaceMappingChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							discoveryDiscoveryCbipClusterModel.NamespaceMappingChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersNamespaceMappingChoiceModelAttributeMap)
+							discoveryCbipClusterModel.NamespaceMappingChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersNamespaceMappingChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> VirtualServerFilter
 						if cbipClustersElement.GetVirtualServerFilter() != nil {
 							// Create the nested Go struct
-							discoveryDiscoveryVirtualServerFilterModel := &DiscoveryDiscoveryVirtualServerFilter{}
+							discoveryVirtualServerFilterModel := &DiscoveryVirtualServerFilter{}
 							virtualServerFilterElement := cbipClustersElement.GetVirtualServerFilter()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> DescriptionRegex
 							if virtualServerFilterElement.GetDescriptionRegex() != "" {
-								discoveryDiscoveryVirtualServerFilterModel.DescriptionRegex = types.StringValue(virtualServerFilterElement.GetDescriptionRegex())
+								discoveryVirtualServerFilterModel.DescriptionRegex = types.StringValue(virtualServerFilterElement.GetDescriptionRegex())
 							} else {
 								// Empty string, set to null
-								discoveryDiscoveryVirtualServerFilterModel.DescriptionRegex = types.StringNull()
+								discoveryVirtualServerFilterModel.DescriptionRegex = types.StringNull()
 							}
 
 							// data specToModelNested BoolField --> DiscoverDisabledVirtualServers
-							discoveryDiscoveryVirtualServerFilterModel.DiscoverDisabledVirtualServers = types.BoolValue(bool(virtualServerFilterElement.GetDiscoverDisabledVirtualServers()))
+							discoveryVirtualServerFilterModel.DiscoverDisabledVirtualServers = types.BoolValue(bool(virtualServerFilterElement.GetDiscoverDisabledVirtualServers()))
 
 							// data specToModelNested StringField --> NameRegex
 							if virtualServerFilterElement.GetNameRegex() != "" {
-								discoveryDiscoveryVirtualServerFilterModel.NameRegex = types.StringValue(virtualServerFilterElement.GetNameRegex())
+								discoveryVirtualServerFilterModel.NameRegex = types.StringValue(virtualServerFilterElement.GetNameRegex())
 							} else {
 								// Empty string, set to null
-								discoveryDiscoveryVirtualServerFilterModel.NameRegex = types.StringNull()
+								discoveryVirtualServerFilterModel.NameRegex = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> PortRanges
 							if virtualServerFilterElement.GetPortRanges() != "" {
-								discoveryDiscoveryVirtualServerFilterModel.PortRanges = types.StringValue(virtualServerFilterElement.GetPortRanges())
+								discoveryVirtualServerFilterModel.PortRanges = types.StringValue(virtualServerFilterElement.GetPortRanges())
 							} else {
 								// Empty string, set to null
-								discoveryDiscoveryVirtualServerFilterModel.PortRanges = types.StringNull()
+								discoveryVirtualServerFilterModel.PortRanges = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							discoveryDiscoveryVirtualServerFilterModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersVirtualServerFilterModelAttributeMap, discoveryDiscoveryVirtualServerFilterModel)
+							discoveryVirtualServerFilterModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersVirtualServerFilterModelAttributeMap, discoveryVirtualServerFilterModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryCbipClusterModel.VirtualServerFilter = discoveryDiscoveryVirtualServerFilterModelObj
+							discoveryCbipClusterModel.VirtualServerFilter = discoveryVirtualServerFilterModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2962,10 +2956,10 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryCbipClusterModel.VirtualServerFilter = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersVirtualServerFilterModelAttributeMap)
+							discoveryCbipClusterModel.VirtualServerFilter = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersVirtualServerFilterModelAttributeMap)
 						}
 
-						cbipClustersElements = append(cbipClustersElements, discoveryDiscoveryCbipClusterModel)
+						cbipClustersElements = append(cbipClustersElements, discoveryCbipClusterModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3007,7 +3001,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 				// data specToModelNested RequiredPointerField --> AccessInfo
 				if discoveryConsulElement.GetAccessInfo() != nil {
 					// Create the nested Go struct
-					discoveryDiscoveryConsulAccessInfoModel := &DiscoveryDiscoveryConsulAccessInfo{}
+					discoveryConsulAccessInfoModel := &DiscoveryConsulAccessInfo{}
 					accessInfoElement := discoveryConsulElement.GetAccessInfo()
 
 					// Recursively populate the nested struct
@@ -3015,33 +3009,33 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 					// data specToModelNested PointerField --> ConnectionInfo
 					if accessInfoElement.GetConnectionInfo() != nil {
 						// Create the nested Go struct
-						discoveryDiscoveryRestConfigTypeModel := &DiscoveryDiscoveryRestConfigType{}
+						discoveryRestConfigTypeModel := &DiscoveryRestConfigType{}
 						connectionInfoElement := accessInfoElement.GetConnectionInfo()
 
 						// Recursively populate the nested struct
 
 						// data specToModelNested RequiredStringField --> ApiServer
 						if connectionInfoElement.GetApiServer() != "" {
-							discoveryDiscoveryRestConfigTypeModel.ApiServer = types.StringValue(connectionInfoElement.GetApiServer())
+							discoveryRestConfigTypeModel.ApiServer = types.StringValue(connectionInfoElement.GetApiServer())
 						} else {
 							// Empty string, set to null
-							discoveryDiscoveryRestConfigTypeModel.ApiServer = types.StringNull()
+							discoveryRestConfigTypeModel.ApiServer = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> TlsInfo
 						if connectionInfoElement.GetTlsInfo() != nil {
 							// Create the nested Go struct
-							discoveryDiscoveryTLSClientConfigTypeModel := &DiscoveryDiscoveryTLSClientConfigType{}
+							discoveryTLSClientConfigTypeModel := &DiscoveryTLSClientConfigType{}
 							tlsInfoElement := connectionInfoElement.GetTlsInfo()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Certificate
 							if tlsInfoElement.GetCertificate() != "" {
-								discoveryDiscoveryTLSClientConfigTypeModel.Certificate = types.StringValue(tlsInfoElement.GetCertificate())
+								discoveryTLSClientConfigTypeModel.Certificate = types.StringValue(tlsInfoElement.GetCertificate())
 							} else {
 								// Empty string, set to null
-								discoveryDiscoveryTLSClientConfigTypeModel.Certificate = types.StringNull()
+								discoveryTLSClientConfigTypeModel.Certificate = types.StringNull()
 							}
 
 							// data specToModelNested PointerField --> KeyUrl
@@ -3146,6 +3140,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -3183,7 +3186,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 								if response.Diagnostics.HasError() {
 									return
 								}
-								discoveryDiscoveryTLSClientConfigTypeModel.KeyUrl = discoverySecretTypeModelObj
+								discoveryTLSClientConfigTypeModel.KeyUrl = discoverySecretTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -3192,32 +3195,32 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								discoveryDiscoveryTLSClientConfigTypeModel.KeyUrl = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoKeyUrlModelAttributeMap)
+								discoveryTLSClientConfigTypeModel.KeyUrl = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoKeyUrlModelAttributeMap)
 							}
 
 							// data specToModelNested StringField --> ServerName
 							if tlsInfoElement.GetServerName() != "" {
-								discoveryDiscoveryTLSClientConfigTypeModel.ServerName = types.StringValue(tlsInfoElement.GetServerName())
+								discoveryTLSClientConfigTypeModel.ServerName = types.StringValue(tlsInfoElement.GetServerName())
 							} else {
 								// Empty string, set to null
-								discoveryDiscoveryTLSClientConfigTypeModel.ServerName = types.StringNull()
+								discoveryTLSClientConfigTypeModel.ServerName = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> TrustedCaUrl
 							if tlsInfoElement.GetTrustedCaUrl() != "" {
-								discoveryDiscoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringValue(tlsInfoElement.GetTrustedCaUrl())
+								discoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringValue(tlsInfoElement.GetTrustedCaUrl())
 							} else {
 								// Empty string, set to null
-								discoveryDiscoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringNull()
+								discoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							discoveryDiscoveryTLSClientConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoModelAttributeMap, discoveryDiscoveryTLSClientConfigTypeModel)
+							discoveryTLSClientConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoModelAttributeMap, discoveryTLSClientConfigTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryRestConfigTypeModel.TlsInfo = discoveryDiscoveryTLSClientConfigTypeModelObj
+							discoveryRestConfigTypeModel.TlsInfo = discoveryTLSClientConfigTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -3226,16 +3229,16 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryRestConfigTypeModel.TlsInfo = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoModelAttributeMap)
+							discoveryRestConfigTypeModel.TlsInfo = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						discoveryDiscoveryRestConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoModelAttributeMap, discoveryDiscoveryRestConfigTypeModel)
+						discoveryRestConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoModelAttributeMap, discoveryRestConfigTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						discoveryDiscoveryConsulAccessInfoModel.ConnectionInfo = discoveryDiscoveryRestConfigTypeModelObj
+						discoveryConsulAccessInfoModel.ConnectionInfo = discoveryRestConfigTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -3244,13 +3247,13 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						discoveryDiscoveryConsulAccessInfoModel.ConnectionInfo = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoModelAttributeMap)
+						discoveryConsulAccessInfoModel.ConnectionInfo = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoModelAttributeMap)
 					}
 
 					// data specToModelNested PointerField --> HttpBasicAuthInfo
 					if accessInfoElement.GetHttpBasicAuthInfo() != nil {
 						// Create the nested Go struct
-						discoveryDiscoveryConsulHttpBasicAuthInfoTypeModel := &DiscoveryDiscoveryConsulHttpBasicAuthInfoType{}
+						discoveryConsulHttpBasicAuthInfoTypeModel := &DiscoveryConsulHttpBasicAuthInfoType{}
 						httpBasicAuthInfoElement := accessInfoElement.GetHttpBasicAuthInfo()
 
 						// Recursively populate the nested struct
@@ -3357,6 +3360,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 									}
 								}
 
+								// data specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := passwdUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -3394,7 +3406,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							if response.Diagnostics.HasError() {
 								return
 							}
-							discoveryDiscoveryConsulHttpBasicAuthInfoTypeModel.PasswdUrl = discoverySecretTypeModelObj
+							discoveryConsulHttpBasicAuthInfoTypeModel.PasswdUrl = discoverySecretTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -3403,24 +3415,20 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryDiscoveryConsulHttpBasicAuthInfoTypeModel.PasswdUrl = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoPasswdUrlModelAttributeMap)
+							discoveryConsulHttpBasicAuthInfoTypeModel.PasswdUrl = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoPasswdUrlModelAttributeMap)
 						}
 
 						// data specToModelNested StringField --> UserName
-						if httpBasicAuthInfoElement.GetUserName() != "" {
-							discoveryDiscoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
-						} else {
-							// Empty string, set to null
-							discoveryDiscoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringNull()
-						}
+						// The resource defaults this field to "", so API "" must stay "" to match it.
+						discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						discoveryDiscoveryConsulHttpBasicAuthInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoModelAttributeMap, discoveryDiscoveryConsulHttpBasicAuthInfoTypeModel)
+						discoveryConsulHttpBasicAuthInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoModelAttributeMap, discoveryConsulHttpBasicAuthInfoTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						discoveryDiscoveryConsulAccessInfoModel.HttpBasicAuthInfo = discoveryDiscoveryConsulHttpBasicAuthInfoTypeModelObj
+						discoveryConsulAccessInfoModel.HttpBasicAuthInfo = discoveryConsulHttpBasicAuthInfoTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -3429,16 +3437,16 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						// because the API may always return a non-nil struct (with REDACTED values) for this field,
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
-						discoveryDiscoveryConsulAccessInfoModel.HttpBasicAuthInfo = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoModelAttributeMap)
+						discoveryConsulAccessInfoModel.HttpBasicAuthInfo = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					discoveryDiscoveryConsulAccessInfoModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoModelAttributeMap, discoveryDiscoveryConsulAccessInfoModel)
+					discoveryConsulAccessInfoModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoModelAttributeMap, discoveryConsulAccessInfoModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					discoveryConsulAttributeMap["access_info"] = discoveryDiscoveryConsulAccessInfoModelObj
+					discoveryConsulAttributeMap["access_info"] = discoveryConsulAccessInfoModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -3453,7 +3461,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 				// data specToModelNested RequiredPointerField --> PublishInfo
 				if discoveryConsulElement.GetPublishInfo() != nil {
 					// Create the nested Go struct
-					discoveryDiscoveryConsulVipDiscoveryInfoTypeModel := &DiscoveryDiscoveryConsulVipDiscoveryInfoType{}
+					discoveryConsulVipDiscoveryInfoTypeModel := &DiscoveryConsulVipDiscoveryInfoType{}
 					publishInfoElement := discoveryConsulElement.GetPublishInfo()
 
 					// Recursively populate the nested struct
@@ -3469,6 +3477,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> Publish
 						_, isPublish := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Publish)
@@ -3492,19 +3509,19 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						discoveryDiscoveryConsulVipDiscoveryInfoTypeModel.PublishChoice = finalObj
+						discoveryConsulVipDiscoveryInfoTypeModel.PublishChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						discoveryDiscoveryConsulVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoPublishChoiceModelAttributeMap)
+						discoveryConsulVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoPublishChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					discoveryDiscoveryConsulVipDiscoveryInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoModelAttributeMap, discoveryDiscoveryConsulVipDiscoveryInfoTypeModel)
+					discoveryConsulVipDiscoveryInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoModelAttributeMap, discoveryConsulVipDiscoveryInfoTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					discoveryConsulAttributeMap["publish_info"] = discoveryDiscoveryConsulVipDiscoveryInfoTypeModelObj
+					discoveryConsulAttributeMap["publish_info"] = discoveryConsulVipDiscoveryInfoTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -3540,7 +3557,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 				// data specToModelNested RequiredPointerField --> AccessInfo
 				if discoveryK8sElement.GetAccessInfo() != nil {
 					// Create the nested Go struct
-					discoveryDiscoveryK8SAccessInfoModel := &DiscoveryDiscoveryK8SAccessInfo{}
+					discoveryK8SAccessInfoModel := &DiscoveryK8SAccessInfo{}
 					accessInfoElement := discoveryK8sElement.GetAccessInfo()
 
 					// Recursively populate the nested struct
@@ -3578,17 +3595,17 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 								// data specToModelNested PointerField --> TlsInfo
 								if connectionInfoElement.GetTlsInfo() != nil {
 									// Create the nested Go struct
-									discoveryDiscoveryTLSClientConfigTypeModel := &DiscoveryDiscoveryTLSClientConfigType{}
+									discoveryTLSClientConfigTypeModel := &DiscoveryTLSClientConfigType{}
 									tlsInfoElement := connectionInfoElement.GetTlsInfo()
 
 									// Recursively populate the nested struct
 
 									// data specToModelNested StringField --> Certificate
 									if tlsInfoElement.GetCertificate() != "" {
-										discoveryDiscoveryTLSClientConfigTypeModel.Certificate = types.StringValue(tlsInfoElement.GetCertificate())
+										discoveryTLSClientConfigTypeModel.Certificate = types.StringValue(tlsInfoElement.GetCertificate())
 									} else {
 										// Empty string, set to null
-										discoveryDiscoveryTLSClientConfigTypeModel.Certificate = types.StringNull()
+										discoveryTLSClientConfigTypeModel.Certificate = types.StringNull()
 									}
 
 									// data specToModelNested PointerField --> KeyUrl
@@ -3693,6 +3710,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 												}
 											}
 
+											// data specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -3730,7 +3756,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 										if response.Diagnostics.HasError() {
 											return
 										}
-										discoveryDiscoveryTLSClientConfigTypeModel.KeyUrl = discoverySecretTypeModelObj
+										discoveryTLSClientConfigTypeModel.KeyUrl = discoverySecretTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -3739,32 +3765,32 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 										// because the API may always return a non-nil struct (with REDACTED values) for this field,
 										// making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										discoveryDiscoveryTLSClientConfigTypeModel.KeyUrl = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInfoKeyUrlModelAttributeMap)
+										discoveryTLSClientConfigTypeModel.KeyUrl = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInfoKeyUrlModelAttributeMap)
 									}
 
 									// data specToModelNested StringField --> ServerName
 									if tlsInfoElement.GetServerName() != "" {
-										discoveryDiscoveryTLSClientConfigTypeModel.ServerName = types.StringValue(tlsInfoElement.GetServerName())
+										discoveryTLSClientConfigTypeModel.ServerName = types.StringValue(tlsInfoElement.GetServerName())
 									} else {
 										// Empty string, set to null
-										discoveryDiscoveryTLSClientConfigTypeModel.ServerName = types.StringNull()
+										discoveryTLSClientConfigTypeModel.ServerName = types.StringNull()
 									}
 
 									// data specToModelNested StringField --> TrustedCaUrl
 									if tlsInfoElement.GetTrustedCaUrl() != "" {
-										discoveryDiscoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringValue(tlsInfoElement.GetTrustedCaUrl())
+										discoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringValue(tlsInfoElement.GetTrustedCaUrl())
 									} else {
 										// Empty string, set to null
-										discoveryDiscoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringNull()
+										discoveryTLSClientConfigTypeModel.TrustedCaUrl = types.StringNull()
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									discoveryDiscoveryTLSClientConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInfoModelAttributeMap, discoveryDiscoveryTLSClientConfigTypeModel)
+									discoveryTLSClientConfigTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInfoModelAttributeMap, discoveryTLSClientConfigTypeModel)
 									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
-									connectionInfoAttributeMap["tls_info"] = discoveryDiscoveryTLSClientConfigTypeModelObj
+									connectionInfoAttributeMap["tls_info"] = discoveryTLSClientConfigTypeModelObj
 
 								} else {
 									// The source field is nil (e.g. redacted by the API).
@@ -3891,6 +3917,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := kubeconfigUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -3934,10 +3969,10 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						discoveryDiscoveryK8SAccessInfoModel.ConfigTypeChoice = finalObj
+						discoveryK8SAccessInfoModel.ConfigTypeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						discoveryDiscoveryK8SAccessInfoModel.ConfigTypeChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeModelAttributeMap)
+						discoveryK8SAccessInfoModel.ConfigTypeChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredOneOfField --> K8SPodNetworkChoice
@@ -3983,19 +4018,19 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						discoveryDiscoveryK8SAccessInfoModel.K8SPodNetworkChoice = finalObj
+						discoveryK8SAccessInfoModel.K8SPodNetworkChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						discoveryDiscoveryK8SAccessInfoModel.K8SPodNetworkChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoK8SPodNetworkChoiceModelAttributeMap)
+						discoveryK8SAccessInfoModel.K8SPodNetworkChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoK8SPodNetworkChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					discoveryDiscoveryK8SAccessInfoModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoModelAttributeMap, discoveryDiscoveryK8SAccessInfoModel)
+					discoveryK8SAccessInfoModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoModelAttributeMap, discoveryK8SAccessInfoModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					discoveryK8sAttributeMap["access_info"] = discoveryDiscoveryK8SAccessInfoModelObj
+					discoveryK8sAttributeMap["access_info"] = discoveryK8SAccessInfoModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -4041,27 +4076,27 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 							if len(namespaceMappingElement.GetItems()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								itemsElements := make([]DiscoveryDiscoveryK8SNamespaceMappingItem, 0, len(namespaceMappingElement.GetItems()))
+								itemsElements := make([]DiscoveryK8SNsMappingItem, 0, len(namespaceMappingElement.GetItems()))
 								for _, itemsElement := range namespaceMappingElement.GetItems() {
-									discoveryDiscoveryK8SNamespaceMappingItemModel := DiscoveryDiscoveryK8SNamespaceMappingItem{}
+									discoveryK8SNsMappingItemModel := DiscoveryK8SNsMappingItem{}
 
 									// data specToModelNested StringField --> Namespace
 									if itemsElement.GetNamespace() != "" {
-										discoveryDiscoveryK8SNamespaceMappingItemModel.Namespace = types.StringValue(itemsElement.GetNamespace())
+										discoveryK8SNsMappingItemModel.Namespace = types.StringValue(itemsElement.GetNamespace())
 									} else {
 										// Empty string, set to null
-										discoveryDiscoveryK8SNamespaceMappingItemModel.Namespace = types.StringNull()
+										discoveryK8SNsMappingItemModel.Namespace = types.StringNull()
 									}
 
 									// data specToModelNested StringField --> NamespaceRegex
 									if itemsElement.GetNamespaceRegex() != "" {
-										discoveryDiscoveryK8SNamespaceMappingItemModel.NamespaceRegex = types.StringValue(itemsElement.GetNamespaceRegex())
+										discoveryK8SNsMappingItemModel.NamespaceRegex = types.StringValue(itemsElement.GetNamespaceRegex())
 									} else {
 										// Empty string, set to null
-										discoveryDiscoveryK8SNamespaceMappingItemModel.NamespaceRegex = types.StringNull()
+										discoveryK8SNsMappingItemModel.NamespaceRegex = types.StringNull()
 									}
 
-									itemsElements = append(itemsElements, discoveryDiscoveryK8SNamespaceMappingItemModel)
+									itemsElements = append(itemsElements, discoveryK8SNsMappingItemModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4112,7 +4147,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 				// data specToModelNested RequiredPointerField --> PublishInfo
 				if discoveryK8sElement.GetPublishInfo() != nil {
 					// Create the nested Go struct
-					discoveryDiscoveryK8SVipDiscoveryInfoTypeModel := &DiscoveryDiscoveryK8SVipDiscoveryInfoType{}
+					discoveryK8SVipDiscoveryInfoTypeModel := &DiscoveryK8SVipDiscoveryInfoType{}
 					publishInfoElement := discoveryK8sElement.GetPublishInfo()
 
 					// Recursively populate the nested struct
@@ -4128,6 +4163,15 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// data specToModelNested PointerOfOneOfField --> DnsDelegation
 						// <no value>
@@ -4223,19 +4267,19 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						discoveryDiscoveryK8SVipDiscoveryInfoTypeModel.PublishChoice = finalObj
+						discoveryK8SVipDiscoveryInfoTypeModel.PublishChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						discoveryDiscoveryK8SVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceModelAttributeMap)
+						discoveryK8SVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					discoveryDiscoveryK8SVipDiscoveryInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoModelAttributeMap, discoveryDiscoveryK8SVipDiscoveryInfoTypeModel)
+					discoveryK8SVipDiscoveryInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoModelAttributeMap, discoveryK8SVipDiscoveryInfoTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					discoveryK8sAttributeMap["publish_info"] = discoveryDiscoveryK8SVipDiscoveryInfoTypeModelObj
+					discoveryK8sAttributeMap["publish_info"] = discoveryK8SVipDiscoveryInfoTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -4325,7 +4369,7 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 
 	// data SpecToModelRoot RequiredPointerField --> Where
 	if specData.GetWhere() != nil {
-		var discoveryNetworkSiteRefSelectorModel = &DiscoveryNetworkSiteRefSelector{}
+		var discoveryNetSiteRefSelectorModel = &DiscoveryNetSiteRefSelector{}
 		whereElement := specData.GetWhere()
 
 		// data specToModelNested RequiredOneOfField --> RefOrSelector
@@ -4349,55 +4393,6 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
-
-					// data specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
 
 					// data specToModelNested EnumField --> NetworkType
 					if siteElement.GetNetworkType().String() != "" {
@@ -4555,55 +4550,6 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// data specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
 					// data specToModelNested EnumField --> NetworkType
 					if virtualSiteElement.GetNetworkType().String() != "" {
 						stringValue := types.StringValue(virtualSiteElement.GetNetworkType().String())
@@ -4692,16 +4638,16 @@ func (d *DataSourceF5XCDiscovery) Read(ctx context.Context, request datasource.R
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			discoveryNetworkSiteRefSelectorModel.RefOrSelectorChoice = finalObj
+			discoveryNetSiteRefSelectorModel.RefOrSelectorChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			discoveryNetworkSiteRefSelectorModel.RefOrSelectorChoice = types.ObjectNull(DiscoveryWhereRefOrSelectorModelAttributeMap)
+			discoveryNetSiteRefSelectorModel.RefOrSelectorChoice = types.ObjectNull(DiscoveryWhereRefOrSelectorModelAttributeMap)
 		}
 
 		whereObj, whereDiags := utils.GoStructToObjectValue(
 			ctx,
 			DiscoveryWhereModelAttributeMap,
-			discoveryNetworkSiteRefSelectorModel,
+			discoveryNetSiteRefSelectorModel,
 		)
 		response.Diagnostics.Append(whereDiags...)
 		if response.Diagnostics.HasError() {

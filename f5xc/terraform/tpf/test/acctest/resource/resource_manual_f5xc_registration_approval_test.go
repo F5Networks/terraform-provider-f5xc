@@ -314,7 +314,7 @@ func testAccSeedRegistration(t *testing.T, apiClient *client.APIClient, fixture 
 					},
 				},
 				Interfaces: map[string]*ves_io_schema_registration.Interface{
-					"eth0": {
+					"fabric": {
 						Addr: "192.168.1.10",
 						Plen: 24,
 						Name: "eth0",
@@ -626,20 +626,20 @@ func TestAccResourceF5XCRegistrationApproval_basic(t *testing.T) {
 
 	namespace := "system"
 	runID := testAccRegistrationRunID(t)
-	clusterName := "tf-acc-reg-" + runID
-	hostname := "tf-acc-host-" + runID
-	tokenName := "tf-acc-token-reg-" + acctest.RandString(t, 8)
+	clusterName := "example-reg-" + runID
+	hostname := "example-host-" + runID
+	tokenName := "example-token-reg-" + acctest.RandString(t, 8)
 
 	apiClient := testAccBuildRegAPIClient(t)
 	fixture := &testRegistrationFixture{
 		namespace: namespace, clusterName: clusterName,
 		hostname: hostname, tokenName: tokenName,
-		instanceID: "tf-acc-inst-" + runID,
-		machineID:  "tf-acc-mach-" + runID,
+		instanceID: "example-inst-" + runID,
+		machineID:  "example-mach-" + runID,
 		zone:       "us-west-2a",
 	}
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -647,16 +647,20 @@ func TestAccResourceF5XCRegistrationApproval_basic(t *testing.T) {
 				PreConfig: func() { testAccSeedRegistration(t, apiClient, fixture) },
 				Config:    testAccResourceF5XCRegistrationApprovalConfig_basic(clusterName, hostname),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_registration_approval.test", "cluster_name", clusterName),
-					resource.TestCheckResourceAttr("f5xc_registration_approval.test", "hostname", hostname),
-					resource.TestCheckResourceAttr("f5xc_registration_approval.test", "cluster_size", "1"),
-					resource.TestCheckResourceAttr("f5xc_registration_approval.test", "namespace", "system"),
-					resource.TestCheckResourceAttrSet("f5xc_registration_approval.test", "registration_name"),
-					testAccRegistrationStateCheck("f5xc_registration_approval.test", apiClient, ves_io_schema_registration.APPROVED),
+					resource.TestCheckResourceAttr("f5xc_registration_approval.example", "cluster_name", clusterName),
+					resource.TestCheckResourceAttr("f5xc_registration_approval.example", "hostname", hostname),
+					resource.TestCheckResourceAttr("f5xc_registration_approval.example", "cluster_size", "1"),
+					resource.TestCheckResourceAttr("f5xc_registration_approval.example", "namespace", "system"),
+					resource.TestCheckResourceAttrSet("f5xc_registration_approval.example", "registration_name"),
+					testAccRegistrationStateCheck("f5xc_registration_approval.example", apiClient, ves_io_schema_registration.APPROVED),
 				),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceF5XCRegistrationApprovalConfig_basic("example-cluster", "example-host"),
+		})
 
 	testAccCleanupRegistration(t, apiClient, fixture)
 }
@@ -669,16 +673,16 @@ func TestAccResourceF5XCRegistrationApproval_withImport(t *testing.T) {
 
 	namespace := "system"
 	runID := testAccRegistrationRunID(t)
-	clusterName := "tf-acc-reg-" + runID
-	hostname := "tf-acc-host-" + runID
-	tokenName := "tf-acc-token-reg-" + acctest.RandString(t, 8)
+	clusterName := "example-reg-" + runID
+	hostname := "example-host-" + runID
+	tokenName := "example-token-reg-" + acctest.RandString(t, 8)
 
 	apiClient := testAccBuildRegAPIClient(t)
 	fixture := &testRegistrationFixture{
 		namespace: namespace, clusterName: clusterName,
 		hostname: hostname, tokenName: tokenName,
-		instanceID: "tf-acc-inst-" + runID,
-		machineID:  "tf-acc-mach-" + runID,
+		instanceID: "example-inst-" + runID,
+		machineID:  "example-mach-" + runID,
 		zone:       "us-west-2a",
 	}
 
@@ -690,16 +694,16 @@ func TestAccResourceF5XCRegistrationApproval_withImport(t *testing.T) {
 				PreConfig: func() { testAccSeedRegistration(t, apiClient, fixture) },
 				Config:    testAccResourceF5XCRegistrationApprovalConfig_basic(clusterName, hostname),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("f5xc_registration_approval.test", "registration_name"),
-					testAccRegistrationStateCheck("f5xc_registration_approval.test", apiClient, ves_io_schema_registration.APPROVED),
+					resource.TestCheckResourceAttrSet("f5xc_registration_approval.example", "registration_name"),
+					testAccRegistrationStateCheck("f5xc_registration_approval.example", apiClient, ves_io_schema_registration.APPROVED),
 				),
 			},
 			{
-				ResourceName:                         "f5xc_registration_approval.test",
+				ResourceName:                         "f5xc_registration_approval.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "registration_name",
-				ImportStateIdFunc:                    testAccRegistrationApprovalImportStateID("f5xc_registration_approval.test"),
+				ImportStateIdFunc:                    testAccRegistrationApprovalImportStateID("f5xc_registration_approval.example"),
 				ImportStateVerifyIgnore: []string{
 					"cluster_name", "cluster_size", "hostname",
 					"retry", "wait_time",
@@ -720,16 +724,16 @@ func TestAccResourceF5XCRegistrationApproval_withTunnelType(t *testing.T) {
 
 	namespace := "system"
 	runID := testAccRegistrationRunID(t)
-	clusterName := "tf-acc-reg-" + runID
-	hostname := "tf-acc-host-" + runID
-	tokenName := "tf-acc-token-reg-" + acctest.RandString(t, 8)
+	clusterName := "example-reg-" + runID
+	hostname := "example-host-" + runID
+	tokenName := "example-token-reg-" + acctest.RandString(t, 8)
 
 	apiClient := testAccBuildRegAPIClient(t)
 	fixture := &testRegistrationFixture{
 		namespace: namespace, clusterName: clusterName,
 		hostname: hostname, tokenName: tokenName,
-		instanceID: "tf-acc-inst-" + runID,
-		machineID:  "tf-acc-mach-" + runID,
+		instanceID: "example-inst-" + runID,
+		machineID:  "example-mach-" + runID,
 		zone:       "us-west-2a",
 	}
 
@@ -743,8 +747,8 @@ func TestAccResourceF5XCRegistrationApproval_withTunnelType(t *testing.T) {
 					clusterName, hostname, "SITE_TO_SITE_TUNNEL_IPSEC",
 				),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_registration_approval.test", "tunnel_type.0", "SITE_TO_SITE_TUNNEL_IPSEC"),
-					testAccRegistrationStateCheck("f5xc_registration_approval.test", apiClient, ves_io_schema_registration.APPROVED),
+					resource.TestCheckResourceAttr("f5xc_registration_approval.example", "tunnel_type.0", "SITE_TO_SITE_TUNNEL_IPSEC"),
+					testAccRegistrationStateCheck("f5xc_registration_approval.example", apiClient, ves_io_schema_registration.APPROVED),
 				),
 			},
 		},
@@ -761,16 +765,16 @@ func TestAccResourceF5XCRegistrationApproval_withOptionalFields(t *testing.T) {
 
 	namespace := "system"
 	runID := testAccRegistrationRunID(t)
-	clusterName := "tf-acc-reg-" + runID
-	hostname := "tf-acc-host-" + runID
-	tokenName := "tf-acc-token-reg-" + acctest.RandString(t, 8)
+	clusterName := "example-reg-" + runID
+	hostname := "example-host-" + runID
+	tokenName := "example-token-reg-" + acctest.RandString(t, 8)
 
 	apiClient := testAccBuildRegAPIClient(t)
 	fixture := &testRegistrationFixture{
 		namespace: namespace, clusterName: clusterName,
 		hostname: hostname, tokenName: tokenName,
-		instanceID: "tf-acc-inst-" + runID,
-		machineID:  "tf-acc-mach-" + runID,
+		instanceID: "example-inst-" + runID,
+		machineID:  "example-mach-" + runID,
 		zone:       "us-west-2a",
 	}
 
@@ -784,9 +788,9 @@ func TestAccResourceF5XCRegistrationApproval_withOptionalFields(t *testing.T) {
 					clusterName, hostname, "us-west-2", 37.7749, -122.4194,
 				),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_registration_approval.test", "cluster_name", clusterName),
-					resource.TestCheckResourceAttr("f5xc_registration_approval.test", "connected_region", "us-west-2"),
-					testAccRegistrationStateCheck("f5xc_registration_approval.test", apiClient, ves_io_schema_registration.APPROVED),
+					resource.TestCheckResourceAttr("f5xc_registration_approval.example", "cluster_name", clusterName),
+					resource.TestCheckResourceAttr("f5xc_registration_approval.example", "connected_region", "us-west-2"),
+					testAccRegistrationStateCheck("f5xc_registration_approval.example", apiClient, ves_io_schema_registration.APPROVED),
 				),
 			},
 		},
@@ -799,20 +803,20 @@ func TestAccResourceF5XCRegistrationApproval_withOptionalFields(t *testing.T) {
 
 func testAccResourceF5XCRegistrationApprovalConfig_basic(clusterName, hostname string) string {
 	return fmt.Sprintf(`
-resource "f5xc_registration_approval" "test" {
+resource "f5xc_registration_approval" "example" {
   cluster_name = %q
   hostname     = %q
   cluster_size = 1
   retry        = 5
   wait_time    = 30
-	tunnel_type  = ["SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL"]
+  tunnel_type  = ["SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL"]
 }
 `, clusterName, hostname)
 }
 
 func testAccResourceF5XCRegistrationApprovalConfig_withTunnelType(clusterName, hostname, tunnelType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_registration_approval" "test" {
+resource "f5xc_registration_approval" "example" {
   cluster_name = %q
   hostname     = %q
   cluster_size = 1
@@ -827,13 +831,13 @@ func testAccResourceF5XCRegistrationApprovalConfig_withOptionalFields(
 	clusterName, hostname, connectedRegion string, latitude, longitude float64,
 ) string {
 	return fmt.Sprintf(`
-resource "f5xc_registration_approval" "test" {
+resource "f5xc_registration_approval" "example" {
   cluster_name     = %q
   hostname         = %q
   cluster_size     = 1
   retry            = 5
   wait_time        = 30
-	tunnel_type      = ["SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL"]
+  tunnel_type      = ["SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL"]
   connected_region = %q
   latitude         = %f
   longitude        = %f

@@ -16,6 +16,7 @@ package resource
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -27,10 +28,10 @@ import (
 func TestAccResourceAutoF5XCProxy_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-proxy-" + testAccRunSuffix(t)
+	name := "example-proxy-" + testAccRunSuffix(t)
 	namespace := "default"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProxyDestroyProducer(t),
@@ -39,30 +40,88 @@ func TestAccResourceAutoF5XCProxy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCProxyConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCProxyConfig_withDescription(name, namespace, "proxy basic updated"),
+				Config: testAccResourceAutoF5XCProxyConfig_withDescription(name, namespace, "Updated basic proxy example"),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProxyConfig_basic("example-proxy", namespace),
+		})
+}
+
+func TestAccResourceAutoF5XCProxy_stateHealingHeaderCookieSecrets(t *testing.T) {
+	t.Parallel()
+
+	for _, testCase := range []struct {
+		name       string
+		mode       string
+		pathPrefix string
+	}{
+		{
+			name:       "dynamic-http",
+			mode:       "dynamic_http",
+			pathPrefix: "proxy_choice.dynamic_proxy.proxy_choice.http_proxy.more_option.",
+		},
+		{
+			name:       "dynamic-https",
+			mode:       "dynamic_https",
+			pathPrefix: "proxy_choice.dynamic_proxy.proxy_choice.https_proxy.more_option.",
+		},
+		{
+			name:       "http-connect",
+			mode:       "http_connect",
+			pathPrefix: "proxy_choice.http_proxy.more_option.",
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			name := "example-proxy-secret-" + testAccRunSuffix(t)
+			namespace := acctest.DefaultNamespace()
+			secretURL := "string:///dGVzdC1zZWNyZXQ="
+			config := testAccResourceAutoF5XCProxyConfigWithHeaderCookieSecrets(name, namespace, testCase.mode, secretURL)
+			checks := make([]resource.TestCheckFunc, 0, 4)
+			for _, field := range []string{"request_cookies_to_add", "request_headers_to_add", "response_cookies_to_add", "response_headers_to_add"} {
+				checks = append(checks, resource.TestCheckResourceAttr(
+					"f5xc_proxy.example",
+					testCase.pathPrefix+field+".0.value_choice.secret_value.secret_info_choice.clear_secret_info.url",
+					secretURL,
+				))
+			}
+
+			acctest.VcrTest(t, resource.TestCase{
+				PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+				CheckDestroy:             testAccCheckProxyDestroyProducer(t),
+				Steps: []resource.TestStep{
+					{Config: config},
+					{RefreshState: true, Check: resource.ComposeTestCheckFunc(checks...)},
+					{Config: config, PlanOnly: true, ExpectNonEmptyPlan: false},
+				},
+			})
+		})
+	}
 }
 
 func TestAccResourceAutoF5XCProxy_withNetworkChoiceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-proxy-" + testAccRunSuffix(t)
+	name := "example-proxy-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +133,20 @@ func TestAccResourceAutoF5XCProxy_withNetworkChoiceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCProxyConfig_withNetworkChoice(name, namespace, "site_local_network"),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProxyConfig_withNetworkChoice(name, namespace, "site_local_inside_network"),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +156,7 @@ func TestAccResourceAutoF5XCProxy_withNetworkChoiceTransition(t *testing.T) {
 func TestAccResourceAutoF5XCProxy_withDynamicProxyDnsChoiceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-proxy-" + testAccRunSuffix(t)
+	name := "example-proxy-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +168,20 @@ func TestAccResourceAutoF5XCProxy_withDynamicProxyDnsChoiceTransition(t *testing
 				Config: testAccResourceAutoF5XCProxyConfig_withDynamicProxy(name, namespace, "sni_proxy", "disable_dns_masquerade"),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProxyConfig_withDynamicProxy(name, namespace, "sni_proxy", "enable_dns_masquerade"),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +191,7 @@ func TestAccResourceAutoF5XCProxy_withDynamicProxyDnsChoiceTransition(t *testing
 func TestAccResourceAutoF5XCProxy_withDynamicProxyDestinationTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-proxy-" + testAccRunSuffix(t)
+	name := "example-proxy-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +203,20 @@ func TestAccResourceAutoF5XCProxy_withDynamicProxyDestinationTransition(t *testi
 				Config: testAccResourceAutoF5XCProxyConfig_withDynamicProxy(name, namespace, "sni_proxy", "disable_dns_masquerade"),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProxyConfig_withDynamicProxy(name, namespace, "http_proxy", "disable_dns_masquerade"),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,7 +226,7 @@ func TestAccResourceAutoF5XCProxy_withDynamicProxyDestinationTransition(t *testi
 func TestAccResourceAutoF5XCProxy_withConnectionTimeoutTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-proxy-" + testAccRunSuffix(t)
+	name := "example-proxy-" + testAccRunSuffix(t)
 	namespace := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -179,20 +238,20 @@ func TestAccResourceAutoF5XCProxy_withConnectionTimeoutTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCProxyConfig_withConnectionTimeout(name, namespace, 2000),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProxyConfig_withConnectionTimeout(name, namespace, 5000),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -202,11 +261,11 @@ func TestAccResourceAutoF5XCProxy_withConnectionTimeoutTransition(t *testing.T) 
 func TestAccResourceAutoF5XCProxy_withProxyPolicyTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-proxy-" + testAccRunSuffix(t)
-	policyName := "tf-acc-fpp-" + testAccRunSuffix(t)
+	name := "example-proxy-" + testAccRunSuffix(t)
+	policyName := "example-fpp-" + testAccRunSuffix(t)
 	namespace := "default"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckProxyDestroyProducer(t),
@@ -215,24 +274,28 @@ func TestAccResourceAutoF5XCProxy_withProxyPolicyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCProxyConfig_withProxyPolicy(name, policyName, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCProxyConfig_withProxyPolicy(name, policyName, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_proxy.test",
+				ResourceName:                         "f5xc_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCProxyConfig_withProxyPolicy("example-proxy", "example-fpp", namespace, true),
+		})
 }
 
 func testAccCheckProxyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -241,7 +304,7 @@ func testAccCheckProxyDestroyProducer(t *testing.T) func(*terraform.State) error
 
 func testAccResourceAutoF5XCProxyConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_proxy" "test" {
+resource "f5xc_proxy" "example" {
   name      = %q
   namespace = %q
 
@@ -272,15 +335,55 @@ resource "f5xc_proxy" "test" {
 `, name, namespace)
 }
 
+func testAccResourceAutoF5XCProxyConfigWithHeaderCookieSecrets(name, namespace, mode, secretURL string) string {
+	moreOptions := fmt.Sprintf(`
+http10_choice = { enable_http10 = true }
+max_requests_per_connection_choice = { no_request_limit_per_connection = true }
+request_cookies_to_add = [{ name = "state_req_cookie", value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+request_headers_to_add = [{ name = "x-state-request", append = false, value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+response_cookies_to_add = [{ name = "state_resp_cookie", value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+response_headers_to_add = [{ name = "x-state-response", append = false, value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+`, secretURL, secretURL, secretURL, secretURL)
+	var proxyChoice string
+	switch mode {
+	case "dynamic_http", "dynamic_https":
+		destination := strings.TrimPrefix(mode, "dynamic_") + "_proxy"
+		proxyChoice = fmt.Sprintf(`dynamic_proxy = {
+  domains = ["proxy-example.com"]
+  proxy_choice = { %s = { more_option = { %s } } }
+  dns_choice = { disable_dns_masquerade = true }
+}`, destination, moreOptions)
+	case "http_connect":
+		proxyChoice = fmt.Sprintf(`http_proxy = {
+  http_https_choice = { enable_http = true }
+  more_option = { %s }
+}`, moreOptions)
+	default:
+		panic(fmt.Sprintf("unsupported proxy mode %q", mode))
+	}
+
+	return fmt.Sprintf(`
+resource "f5xc_proxy" "example" {
+  name      = %q
+  namespace = %q
+  proxy_choice = { %s }
+  site_choice = { do_not_advertise = true }
+  network_choice = { site_local_network = true }
+  proxy_policy_choice = { no_forward_proxy_policy = true }
+  tls_interception_choice = { no_interception = true }
+}
+`, name, namespace, proxyChoice)
+}
+
 func testAccResourceAutoF5XCProxyConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_proxy" "test" {
+resource "f5xc_proxy" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
   labels = {
-    env = "acceptance"
+    env = "example"
   }
 
   annotations = {
@@ -316,7 +419,7 @@ resource "f5xc_proxy" "test" {
 
 func testAccResourceAutoF5XCProxyConfig_withNetworkChoice(name, namespace, networkChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_proxy" "test" {
+resource "f5xc_proxy" "example" {
   name      = %q
   namespace = %q
 
@@ -354,13 +457,13 @@ func testAccResourceAutoF5XCProxyConfig_withDynamicProxy(name, namespace, dynami
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_proxy" "test" {
+resource "f5xc_proxy" "example" {
   name      = %q
   namespace = %q
 
   proxy_choice = {
     dynamic_proxy = {
-      domains = ["proxy.example.com"]
+      domains = ["proxy-example.com"]
 
       proxy_choice = {
         %s
@@ -393,7 +496,7 @@ resource "f5xc_proxy" "test" {
 
 func testAccResourceAutoF5XCProxyConfig_withConnectionTimeout(name, namespace string, timeout int) string {
 	return fmt.Sprintf(`
-resource "f5xc_proxy" "test" {
+resource "f5xc_proxy" "example" {
   name               = %q
   namespace          = %q
   connection_timeout = %d
@@ -441,7 +544,7 @@ func testAccResourceAutoF5XCProxyConfig_withProxyPolicy(name, policyName, namesp
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_forward_proxy_policy" "policy" {
+resource "f5xc_forward_proxy_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -454,7 +557,7 @@ resource "f5xc_forward_proxy_policy" "policy" {
   }
 }
 
-resource "f5xc_proxy" "test" {
+resource "f5xc_proxy" "example" {
   name      = %q
   namespace = %q
 
@@ -482,7 +585,7 @@ resource "f5xc_proxy" "test" {
     no_interception = true
   }
 
-  depends_on = [f5xc_forward_proxy_policy.policy]
+  depends_on = [f5xc_forward_proxy_policy.example]
 }
 `, policyName, policyNamespace, name, proxyNamespace, proxyPolicyChoice)
 }

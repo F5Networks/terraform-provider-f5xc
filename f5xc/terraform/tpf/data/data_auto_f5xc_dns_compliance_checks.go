@@ -67,8 +67,8 @@ func (d *DataSourceF5XCDnsComplianceChecks) Metadata(ctx context.Context, reques
 func (r *DataSourceF5XCDnsComplianceChecks) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_compliance_checks This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_compliance_checks) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_compliance_checks This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_compliance_checks) etc. can be fetched",
+		MarkdownDescription: "DNS Compliance Checks view defines the required parameters that can be used in CRUD, to create and manage DNS Compliance Checks.<br>It can be used to create DNS Compliance Checks.",
+		Description:         "DNS Compliance Checks view defines the required parameters that can be used in CRUD, to create and manage DNS Compliance Checks. It can be used to create DNS Compliance Checks.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -215,7 +215,7 @@ func (d *DataSourceF5XCDnsComplianceChecks) Read(ctx context.Context, request da
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dns_compliance_checks", err))
 		return
 	}
 

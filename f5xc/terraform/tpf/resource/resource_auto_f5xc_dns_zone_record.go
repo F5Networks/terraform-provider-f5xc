@@ -31,6 +31,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
@@ -1219,7 +1220,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 												},
 												"tag": schema.StringAttribute{
 													Description:         "Certification authority authorization tag",
-													MarkdownDescription: "Certification authority authorization tag",
+													MarkdownDescription: "Certification authority authorization tag<br>**Allowed Values (choose one):** `['issue', 'issuewild', 'iodef']`",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1737,7 +1738,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -1778,9 +1779,9 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 												"altitude": schema.Float32Attribute{
 													Description:         "Altitude Altitude in meters",
 													MarkdownDescription: "Altitude Altitude in meters",
-													Required:            false,
+													Required:            true,
 													Optional:            false,
-													Computed:            true,
+													Computed:            false,
 												},
 												"horizontal_precision": schema.Float32Attribute{
 													Description:         "Horizontal Precision Horizontal Precision in meters",
@@ -2507,9 +2508,17 @@ func (r *ResourceF5XCDnsZoneRecord) ModifyPlan(ctx context.Context, req resource
 			return
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDnsZoneRecord) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDnsZoneRecordModel
 
 	// Read Terraform plan data into the model
@@ -3293,6 +3302,9 @@ func (r *ResourceF5XCDnsZoneRecord) Create(ctx context.Context, request resource
 
 							// Recursively process nested elements
 
+							// resource modelToSpecNested RequiredFloatField --> Altitude
+							locRecordOneOfSpec.LocRecord.Values[i].Altitude = float32(valuesElement.Altitude.ValueFloat32())
+
 							// resource modelToSpecNested FloatField --> HorizontalPrecision
 							if !valuesElement.HorizontalPrecision.IsNull() && !valuesElement.HorizontalPrecision.IsUnknown() {
 								locRecordOneOfSpec.LocRecord.Values[i].HorizontalPrecision = float32(valuesElement.HorizontalPrecision.ValueFloat32())
@@ -3921,7 +3933,7 @@ func (r *ResourceF5XCDnsZoneRecord) Create(ctx context.Context, request resource
 	})
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "dns_zone_record", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "dns_zone_record", err),
 		)
 		return
 	}
@@ -4000,7 +4012,7 @@ func (r *ResourceF5XCDnsZoneRecord) Read(ctx context.Context, request resource.R
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "dns_zone_record", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_zone_record", err),
 		)
 		return
 	}
@@ -5259,28 +5271,16 @@ func (r *ResourceF5XCDnsZoneRecord) Read(ctx context.Context, request resource.R
 							dnsZoneRecordNAPTRValueModel.Preference = types.Int64Value(int64(valuesElement.GetPreference()))
 
 							// resource specToModelNested StringField --> Regexp
-							if valuesElement.GetRegexp() != "" {
-								dnsZoneRecordNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
-							} else {
-								// Empty string, set to null
-								dnsZoneRecordNAPTRValueModel.Regexp = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							dnsZoneRecordNAPTRValueModel.Regexp = types.StringValue(valuesElement.GetRegexp())
 
 							// resource specToModelNested StringField --> Replacement
-							if valuesElement.GetReplacement() != "" {
-								dnsZoneRecordNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
-							} else {
-								// Empty string, set to null
-								dnsZoneRecordNAPTRValueModel.Replacement = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							dnsZoneRecordNAPTRValueModel.Replacement = types.StringValue(valuesElement.GetReplacement())
 
 							// resource specToModelNested StringField --> Service
-							if valuesElement.GetService() != "" {
-								dnsZoneRecordNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
-							} else {
-								// Empty string, set to null
-								dnsZoneRecordNAPTRValueModel.Service = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							dnsZoneRecordNAPTRValueModel.Service = types.StringValue(valuesElement.GetService())
 
 							valuesElements = append(valuesElements, dnsZoneRecordNAPTRValueModel)
 						}
@@ -5823,6 +5823,12 @@ func (r *ResourceF5XCDnsZoneRecord) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCDnsZoneRecord) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDnsZoneRecordModel
@@ -6621,6 +6627,9 @@ func (r *ResourceF5XCDnsZoneRecord) Update(ctx context.Context, request resource
 
 							// Recursively process nested elements
 
+							// resource modelToSpecNested RequiredFloatField --> Altitude
+							locRecordOneOfSpec.LocRecord.Values[i].Altitude = float32(valuesElement.Altitude.ValueFloat32())
+
 							// resource modelToSpecNested FloatField --> HorizontalPrecision
 							if !valuesElement.HorizontalPrecision.IsNull() && !valuesElement.HorizontalPrecision.IsUnknown() {
 								locRecordOneOfSpec.LocRecord.Values[i].HorizontalPrecision = float32(valuesElement.HorizontalPrecision.ValueFloat32())
@@ -7248,7 +7257,7 @@ func (r *ResourceF5XCDnsZoneRecord) Update(ctx context.Context, request resource
 	_, err = r.client.CustomAPI(ctx, "PUT", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "dns_zone_record", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "dns_zone_record", err),
 		)
 		return
 	}
@@ -7311,7 +7320,7 @@ func (r *ResourceF5XCDnsZoneRecord) Delete(ctx context.Context, request resource
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "dns_zone_record", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "dns_zone_record", err),
 			)
 			return
 		}
@@ -7327,7 +7336,7 @@ func (r *ResourceF5XCDnsZoneRecord) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "dns_zone_record", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "dns_zone_record", err),
 		)
 		return
 	}

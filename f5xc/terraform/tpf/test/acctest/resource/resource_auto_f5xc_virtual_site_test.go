@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCVirtualSite_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-virtual-site-" + acctest.RandString(t, 8)
+	name := "example-virtual-site-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCVirtualSite_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCVirtualSiteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_site.test",
+				ResourceName:                         "f5xc_virtual_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCVirtualSiteConfig_withDescription(name, namespace, "virtual site basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_site.test",
+				ResourceName:                         "f5xc_virtual_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,35 +63,39 @@ func TestAccResourceAutoF5XCVirtualSite_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-virtual-site-" + acctest.RandString(t, 8)
+	name := "example-virtual-site-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckVirtualSiteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCVirtualSiteConfig_full(name, namespace, "REGIONAL_EDGE", "team-a"),
+				Config: testAccResourceAutoF5XCVirtualSiteConfig_full(name, namespace, "REGIONAL_EDGE", "example-team"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_site.test",
+				ResourceName:                         "f5xc_virtual_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCVirtualSiteConfig_full(name, namespace, "REGIONAL_EDGE", "team-b"),
+				Config: testAccResourceAutoF5XCVirtualSiteConfig_full(name, namespace, "REGIONAL_EDGE", "example-team-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_virtual_site.test",
+				ResourceName:                         "f5xc_virtual_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_virtual_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCVirtualSiteConfig_full("example-virtual-site", "default", "REGIONAL_EDGE", "example-team"),
+		})
 }
 
 func testAccCheckVirtualSiteDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -100,12 +104,12 @@ func testAccCheckVirtualSiteDestroyProducer(t *testing.T) func(*terraform.State)
 
 func testAccResourceAutoF5XCVirtualSiteConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_site" "test" {
+resource "f5xc_virtual_site" "example" {
   name      = %q
   namespace = %q
 
   site_selector = {
-    expressions = ["environment in (prod)"]
+    expressions = ["environment in (example)"]
   }
 
   site_type = ["REGIONAL_EDGE"]
@@ -115,13 +119,13 @@ resource "f5xc_virtual_site" "test" {
 
 func testAccResourceAutoF5XCVirtualSiteConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_site" "test" {
+resource "f5xc_virtual_site" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
   site_selector = {
-    expressions = ["environment in (prod)"]
+    expressions = ["environment in (example)"]
   }
 
   site_type = ["REGIONAL_EDGE"]
@@ -131,12 +135,12 @@ resource "f5xc_virtual_site" "test" {
 
 func testAccResourceAutoF5XCVirtualSiteConfig_withSelectorProd(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_site" "test" {
+resource "f5xc_virtual_site" "example" {
   name      = %q
   namespace = %q
 
   site_selector = {
-		expressions = ["environment in (prod)"]
+    expressions = ["environment in (example)"]
   }
 
   site_type = ["REGIONAL_EDGE"]
@@ -146,28 +150,28 @@ resource "f5xc_virtual_site" "test" {
 
 func testAccResourceAutoF5XCVirtualSiteConfig_withSelectorDevRegion(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_site" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_virtual_site" "example" {
+  name      = %q
+  namespace = %q
 
-	site_selector = {
-		expressions = ["environment in (dev)"]
-	}
+  site_selector = {
+    expressions = ["environment in (dev)"]
+  }
 
-	site_type = ["REGIONAL_EDGE"]
+  site_type = ["REGIONAL_EDGE"]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCVirtualSiteConfig_full(name, namespace, siteType, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_virtual_site" "test" {
+resource "f5xc_virtual_site" "example" {
   name        = %q
   namespace   = %q
-  description = "virtual site full"
+  description = "Virtual site full example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -175,7 +179,7 @@ resource "f5xc_virtual_site" "test" {
   }
 
   site_selector = {
-		expressions = ["environment in (prod)"]
+    expressions = ["environment in (example)"]
   }
 
   site_type = [%q]

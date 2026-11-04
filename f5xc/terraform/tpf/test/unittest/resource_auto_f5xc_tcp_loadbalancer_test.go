@@ -145,8 +145,11 @@ func TestTcpLoadbalancerResourceSchema(t *testing.T) {
 			kind: "present",
 		},
 		{
-			key:  "service_policy_choice",
-			kind: "present",
+			key:           "service_policy_choice",
+			kind:          "present",
+			optional:      true,
+			computed:      true,
+			hasValidators: true,
 		},
 		{
 			key:  "sni_default_lb_choice",

@@ -27,6 +27,7 @@ import (
 
 	client "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	dataSources "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/data"
+	dataSourcesManual "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/data/manual"
 	resources "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource"
 	resourcesManual "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/manual"
 	utils "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -112,22 +113,27 @@ func (p *F5XCProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			},
 			"api_key": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "The F5XC API key for api operations.",
 			},
 			"api_cert": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "The F5XC API cert for api operations.",
 			},
 			"api_token": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "The F5XC API token for api operations.",
 			},
 			"api_ca_cert": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "The F5XC API CA Cert for api operations.",
 			},
 			"api_p12_file": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "Absolute path to p12 file.",
 			},
 			"throttling": schema.SingleNestedAttribute{
@@ -358,13 +364,14 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	ctx = tflog.SetField(ctx, "tenant", tenant)
 	ctx = tflog.SetField(ctx, "besenv", vesenv)
 	ctx = tflog.SetField(ctx, "timeout", timeout)
-	ctx = tflog.SetField(ctx, "apiKey", api_key)
-	ctx = tflog.SetField(ctx, "apiCert", api_cert)
-	ctx = tflog.SetField(ctx, "apiToken", api_token)
-	ctx = tflog.SetField(ctx, "apiCaCert", api_ca_cert)
-	ctx = tflog.SetField(ctx, "apiP12File", api_p12_file)
+	ctx = tflog.SetField(ctx, "hasApiKey", api_key != "")
+	ctx = tflog.SetField(ctx, "hasApiCert", api_cert != "")
+	ctx = tflog.SetField(ctx, "hasApiToken", api_token != "")
+	ctx = tflog.SetField(ctx, "hasApiCaCert", api_ca_cert != "")
+	ctx = tflog.SetField(ctx, "hasApiP12File", api_p12_file != "")
 	ctx = tflog.SetField(ctx, "throttlingEnabled", throttlingEnabled)
 	ctx = tflog.SetField(ctx, "throttlingMaxRetries", throttlingMaxRetries)
+	ctx = tflog.SetField(ctx, "terraformVersion", req.TerraformVersion)
 	tflog.Info(ctx, "Global Variables")
 
 	ctx = tflog.SetField(ctx, "Url", config.Url.ValueString())
@@ -372,28 +379,29 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	ctx = tflog.SetField(ctx, "Tenant", config.Tenant.ValueString())
 	ctx = tflog.SetField(ctx, "Vesenv", config.Vesenv.ValueBool())
 	ctx = tflog.SetField(ctx, "Timeout", config.Timeout.ValueString())
-	ctx = tflog.SetField(ctx, "ApiKey", config.ApiKey.ValueString())
-	ctx = tflog.SetField(ctx, "ApiCert", config.ApiCert.ValueString())
-	ctx = tflog.SetField(ctx, "ApiToken", config.ApiToken.ValueString())
-	ctx = tflog.SetField(ctx, "ApiCaCert", config.ApiCaCert.ValueString())
-	ctx = tflog.SetField(ctx, "ApiP12File", config.ApiP12File.ValueString())
+	ctx = tflog.SetField(ctx, "hasConfigApiKey", !config.ApiKey.IsNull() && config.ApiKey.ValueString() != "")
+	ctx = tflog.SetField(ctx, "hasConfigApiCert", !config.ApiCert.IsNull() && config.ApiCert.ValueString() != "")
+	ctx = tflog.SetField(ctx, "hasConfigApiToken", !config.ApiToken.IsNull() && config.ApiToken.ValueString() != "")
+	ctx = tflog.SetField(ctx, "hasConfigApiCaCert", !config.ApiCaCert.IsNull() && config.ApiCaCert.ValueString() != "")
+	ctx = tflog.SetField(ctx, "hasConfigApiP12File", !config.ApiP12File.IsNull() && config.ApiP12File.ValueString() != "")
 	ctx = tflog.SetField(ctx, "ThrottlingEnabled", throttlingEnabled)
 	ctx = tflog.SetField(ctx, "ThrottlingMaxRetries", throttlingMaxRetries)
 	tflog.Info(ctx, "Model Fields")
 
 	// Create a new F5XCProvider client using the configuration values
 	client, err := client.NewVesAPIClient(&client.ProviderConfig{
-		Url:            url,
-		Test:           test,
-		Vesenv:         vesenv,
-		Timeout:        timeout,
-		ApiKey:         api_key,
-		ApiCert:        api_cert,
-		ApiToken:       api_token,
-		ApiCACert:      api_ca_cert,
-		ApiP12File:     api_p12_file,
-		ApiP12Password: api_p12_password,
-		Throttling:     throttlingCfg,
+		Url:              url,
+		Test:             test,
+		TerraformVersion: req.TerraformVersion,
+		Vesenv:           vesenv,
+		Timeout:          timeout,
+		ApiKey:           api_key,
+		ApiCert:          api_cert,
+		ApiToken:         api_token,
+		ApiCACert:        api_ca_cert,
+		ApiP12File:       api_p12_file,
+		ApiP12Password:   api_p12_password,
+		Throttling:       throttlingCfg,
 	})
 
 	if err != nil {
@@ -410,6 +418,7 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	// type Configure methods.
 	resp.DataSourceData = client
 	resp.ResourceData = client
+	resp.EphemeralResourceData = client
 
 	tflog.Info(ctx, "Configured F5XCProvider client", map[string]any{"success": true})
 }
@@ -418,6 +427,7 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *F5XCProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		// Manual Data Sources
+		dataSourcesManual.NewDataSourceF5XCSiteState,
 
 		// Auto Generated Data Sources
 		dataSources.NewDataSourceF5XCAdvertisePolicy,
@@ -698,12 +708,17 @@ func (p *F5XCProvider) Resources(_ context.Context) []func() resource.Resource {
 		resources.NewResourceF5XCWorkload,
 		resources.NewResourceF5XCWorkloadFlavor,
 		resources.NewResourceF5xcHttpLoadbalancerServicePolicyAttachments,
+		resources.NewResourceF5xcSecuremeshSiteV2EnhancedFirewallPolicyAttachments,
+		resources.NewResourceF5xcSecuremeshSiteV2ForwardProxyPolicyAttachments,
+		resources.NewResourceF5xcTcpLoadbalancerServicePolicyAttachments,
 	}
 }
 
 // EphemeralResources defines the ephemeral resources implemented in the provider.
 func (p *F5XCProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
-	return []func() ephemeral.EphemeralResource{}
+	return []func() ephemeral.EphemeralResource{
+		resourcesManual.NewEphemeralF5XCBlindfoldSecret,
+	}
 }
 
 // Functions defines the functions implemented in the provider.

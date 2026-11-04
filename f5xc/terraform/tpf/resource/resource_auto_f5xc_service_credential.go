@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -26,6 +25,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
@@ -36,6 +37,7 @@ import (
 
 	"gopkg.volterra.us/stdlib/codec"
 	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_api_credential "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_credential"
 )
@@ -76,12 +78,8 @@ type ResourceF5XCServiceCredentialModel struct {
 	Name                    types.String   `tfsdk:"name"`
 	Namespace               types.String   `tfsdk:"namespace"`
 	NamespaceRoles          types.List     `tfsdk:"namespace_roles"`
-	Password                types.String   `tfsdk:"password"`
 	ServiceCredentialChoice types.Object   `tfsdk:"service_credential_choice"`
-	Type                    types.List     `tfsdk:"type"`
 	UserGroupNames          types.List     `tfsdk:"user_group_names"`
-	VirtualK8SName          types.String   `tfsdk:"virtual_k8s_name"`
-	VirtualK8SNamespace     types.String   `tfsdk:"virtual_k8s_namespace"`
 	CredentialName          types.String   `tfsdk:"credential_name"`
 	RenewTrigger            types.Bool     `tfsdk:"renew_trigger"`
 	Timeouts                timeouts.Value `tfsdk:"timeouts"`
@@ -149,8 +147,8 @@ func (r *ResourceF5XCServiceCredential) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Replace Service credentials request to replace user_groups and roles in service credentials. Note - for updating expiry use RenewServiceCredentials and to active/inactive service credential use ActivateServiceCredentials API",
-		Description:         "Replace Service credentials request to replace user_groups and roles in service credentials. Note - for updating expiry use RenewServiceCredentials and to active/inactive service credential use ActivateServiceCredentials API",
+		MarkdownDescription: "Object keeps track of various object credentials downloaded by users.",
+		Description:         "Object keeps track of various object credentials downloaded by users.",
 
 		Attributes: map[string]schema.Attribute{
 			"expiration_days": schema.Int64Attribute{
@@ -177,7 +175,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 				Optional:            true,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -198,7 +196,6 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 							Optional:            false,
 							Computed:            false,
 							Validators: []validator.String{
-								stringvalidator.OneOf([]string{"system"}...),
 								stringvalidator.LengthAtMost(256),
 							},
 						},
@@ -218,13 +215,6 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 						},
 					},
 				},
-			},
-			"password": schema.StringAttribute{
-				Description:         "Password for API certificate Password is used for generating an API certificate P12 bundle user can use to protect access to it. this password will not be saved/persisted anywhere in the system. Applicable for credential type API_CERTIFICATE Users have to use this password when they use the certificate, e.g. in curl or while adding to key chain.",
-				MarkdownDescription: "Password for API certificate Password is used for generating an API certificate P12 bundle user can use to protect access to it. this password will not be saved/persisted anywhere in the system. Applicable for credential type API_CERTIFICATE Users have to use this password when they use the certificate, e.g. in curl or while adding to key chain.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
 			},
 			"service_credential_choice": schema.SingleNestedAttribute{
 				Description:         "Service Credential Spec Credential specification can be one of the following types - * service api token * service api certificate * service kube config * site global kube config",
@@ -254,6 +244,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
+								Sensitive:           true,
 								Validators: []validator.String{
 									bytesvalidator.BytesBetween(6, 50),
 								},
@@ -276,6 +267,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
+						DeprecationMessage:  "This field is deprecated and will be removed in future release.",
 						Attributes: map[string]schema.Attribute{
 							"site": schema.StringAttribute{
 								Description:         "Site Name of the site for which kubeconfig is being requested.",
@@ -295,6 +287,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
+						DeprecationMessage:  "This field is deprecated and will be removed in future release.",
 						Attributes: map[string]schema.Attribute{
 							"vk8s_cluster_name": schema.StringAttribute{
 								Description:         "virtual k8s cluster name Name of virtual k8s cluster.",
@@ -326,19 +319,6 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 					},
 				},
 			},
-			"type": schema.ListAttribute{
-				Description:         "Type Type of API credential, API credentials, kubeconfig or token. Please move to the oneof 'service_credential_choice' field for providing the details.",
-				MarkdownDescription: "Type Type of API credential, API credentials, kubeconfig or token. Please move to the oneof 'service_credential_choice' field for providing the details.<br>**Allowed Values (choose one):** `['SCIM_API_TOKEN', 'SERVICE_API_CERTIFICATE', 'SERVICE_API_TOKEN', 'SERVICE_KUBE_CONFIG', 'SERVICE_SITE_GLOBAL_KUBE_CONFIG', 'SITE_GLOBAL_KUBE_CONFIG']`",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				ElementType:         types.StringType,
-				DeprecationMessage:  "This field is deprecated and will be removed in future release.",
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SCIM_API_TOKEN", "SERVICE_API_CERTIFICATE", "SERVICE_API_TOKEN", "SERVICE_KUBE_CONFIG", "SERVICE_SITE_GLOBAL_KUBE_CONFIG", "SITE_GLOBAL_KUBE_CONFIG"}...)),
-					listvalidator.SizeAtMost(1),
-				},
-			},
 			"user_group_names": schema.ListAttribute{
 				Description:         "User Groups Names list of user_groups assigned to this service credential",
 				MarkdownDescription: "User Groups Names list of user_groups assigned to this service credential",
@@ -346,20 +326,6 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 				Optional:            true,
 				Computed:            false,
 				ElementType:         types.StringType,
-			},
-			"virtual_k8s_name": schema.StringAttribute{
-				Description:         "virtual k8s cluster name Name of virtual_k8s cluster. Applicable for KUBE_CONFIG.",
-				MarkdownDescription: "virtual k8s cluster name Name of virtual_k8s cluster. Applicable for KUBE_CONFIG.",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-			},
-			"virtual_k8s_namespace": schema.StringAttribute{
-				Description:         "Virtual k8s namespace Namespace of virtual_k8s cluster. Applicable for KUBE_CONFIG.",
-				MarkdownDescription: "Virtual k8s namespace Namespace of virtual_k8s cluster. Applicable for KUBE_CONFIG.",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
 			},
 			"credential_name": schema.StringAttribute{
 				Description:         "Actual credential name assigned by backend.",
@@ -437,9 +403,17 @@ func (r *ResourceF5XCServiceCredential) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCServiceCredential) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCServiceCredentialModel
 
 	// Read Terraform plan data into the model
@@ -518,9 +492,6 @@ func (r *ResourceF5XCServiceCredential) Create(ctx context.Context, request reso
 		}
 	}
 
-	// resource modelToSpecRoot RequiredStringField --> Password
-	req.Password = string(data.Password.ValueString())
-
 	// resource modelToSpecRoot OneOfField --> ServiceCredentialChoice
 	if !data.ServiceCredentialChoice.IsNull() && !data.ServiceCredentialChoice.IsUnknown() {
 		serviceCredentialChoiceModel := SvcCredentialSvcCredentialChoice{}
@@ -597,31 +568,6 @@ func (r *ResourceF5XCServiceCredential) Create(ctx context.Context, request reso
 
 	}
 
-	// resource modelToSpecRoot RequiredEnumField --> Type
-	{
-		var typeElements []types.String
-		diags = data.Type.ElementsAs(ctx, &typeElements, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		if len(typeElements) > 0 {
-			typeStrVal := typeElements[0].ValueString()
-
-			if v, ok := ves_io_schema_api_credential.APICredentialType_value[typeStrVal]; ok {
-				// Dynamic path assignment (Global vs CreateSpec)
-				req.Type = ves_io_schema_api_credential.APICredentialType(v)
-			} else {
-				response.Diagnostics.AddError(
-					"Invalid Enum Value",
-					fmt.Sprintf("Value '%s' is not a valid member for ves_io_schema_api_credential.APICredentialType", typeStrVal),
-				)
-				return
-			}
-		}
-	}
-
 	{
 		// resource modelToSpecRoot ArrayOfStringField--> UserGroupNames
 		if !data.UserGroupNames.IsNull() && !data.UserGroupNames.IsUnknown() {
@@ -630,16 +576,6 @@ func (r *ResourceF5XCServiceCredential) Create(ctx context.Context, request reso
 			response.Diagnostics.Append(userGroupNamesElementsDiags...)
 			req.UserGroupNames = elements
 		}
-	}
-
-	// resource modelToSpecRoot StringField --> VirtualK8SName
-	if !data.VirtualK8SName.IsNull() && !data.VirtualK8SName.IsUnknown() {
-		req.VirtualK8SName = string(data.VirtualK8SName.ValueString())
-	}
-
-	// resource modelToSpecRoot StringField --> VirtualK8SNamespace
-	if !data.VirtualK8SNamespace.IsNull() && !data.VirtualK8SNamespace.IsUnknown() {
-		req.VirtualK8SNamespace = string(data.VirtualK8SNamespace.ValueString())
 	}
 
 	if response.Diagnostics.HasError() {
@@ -660,7 +596,7 @@ func (r *ResourceF5XCServiceCredential) Create(ctx context.Context, request reso
 	createRespMsg, err := r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "service_credential", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "service_credential", err),
 		)
 		return
 	}
@@ -726,6 +662,7 @@ func (r *ResourceF5XCServiceCredential) Read(ctx context.Context, request resour
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
+	priorServiceCredentialChoice := data.ServiceCredentialChoice
 
 	// CustomAPI Read (IsCustomAPIOnly): ListServiceCredentials
 	customReadRPCFQN := "ves.io.schema.api_credential.CustomAPI.ListServiceCredentials"
@@ -734,7 +671,7 @@ func (r *ResourceF5XCServiceCredential) Read(ctx context.Context, request resour
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "service_credential", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "service_credential", err),
 		)
 		return
 	}
@@ -770,23 +707,6 @@ func (r *ResourceF5XCServiceCredential) Read(ctx context.Context, request resour
 		data.Namespace = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredEnumField --> Type
-	{
-		if specData.GetType().String() != "" {
-			stringValue := types.StringValue(specData.GetType().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.Type = listValue
-		} else {
-			// Empty string, set to null
-			data.Type = types.ListNull(types.StringType)
-		}
-	}
-
 	// resource specToModelRootOld ArrayOfStringField --> UserGroupNames
 	{
 		if len(specData.GetUserGroupNames()) > 0 {
@@ -797,8 +717,19 @@ func (r *ResourceF5XCServiceCredential) Read(ctx context.Context, request resour
 			}
 			data.UserGroupNames = listValue
 		} else {
-			data.UserGroupNames = types.ListNull(types.StringType)
+			if !data.UserGroupNames.IsNull() && !data.UserGroupNames.IsUnknown() && len(data.UserGroupNames.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.UserGroupNames = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.UserGroupNames = types.ListNull(types.StringType)
+			}
 		}
+	}
+
+	// Restore prior state for ServiceCredentialChoice. The API redacts sensitive fields
+	// in GET responses. Preserve prior state to keep state consistent.
+	if !priorServiceCredentialChoice.IsNull() && !priorServiceCredentialChoice.IsUnknown() {
+		data.ServiceCredentialChoice = priorServiceCredentialChoice
 	}
 
 	if response.Diagnostics.HasError() {
@@ -810,6 +741,12 @@ func (r *ResourceF5XCServiceCredential) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCServiceCredential) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCServiceCredentialModel
@@ -901,7 +838,7 @@ func (r *ResourceF5XCServiceCredential) Update(ctx context.Context, request reso
 	_, err = r.client.CustomAPI(ctx, "PUT", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "service_credential", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "service_credential", err),
 		)
 		return
 	}
@@ -975,7 +912,7 @@ func (r *ResourceF5XCServiceCredential) Delete(ctx context.Context, request reso
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "service_credential", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "service_credential", err),
 			)
 			return
 		}
@@ -991,7 +928,7 @@ func (r *ResourceF5XCServiceCredential) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "service_credential", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "service_credential", err),
 		)
 		return
 	}

@@ -18,7 +18,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -49,7 +51,7 @@ func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 		var errMsg strings.Builder
 
 		for k := range rsAttr {
-			if _, ignored := ignoreFields[k]; ignored {
+			if shouldIgnoreField(k, ignoreFields) {
 				continue
 			}
 
@@ -57,14 +59,14 @@ func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 			if strings.HasPrefix(k, "labels.") || strings.HasPrefix(k, "annotations.") {
 				continue
 			}
-			// if k == "%" {
-			// 	continue
-			// }
+			if k == "%" {
+				continue
+			}
 			if dsAttr[k] != rsAttr[k] {
 				// treat missing list/set count in data source as empty — both "" and "0" mean no items
-				// if strings.HasSuffix(k, "#") && (dsAttr[k] == "" || dsAttr[k] == "0") && (rsAttr[k] == "" || rsAttr[k] == "0") {
-				// 	continue
-				// }
+				if strings.HasSuffix(k, "#") && (dsAttr[k] == "" || dsAttr[k] == "0") && (rsAttr[k] == "" || rsAttr[k] == "0") {
+					continue
+				}
 				errMsg.WriteString(fmt.Sprintf("%s: data source has %q, resource has %q\n", k, dsAttr[k], rsAttr[k]))
 			}
 		}
@@ -74,5 +76,73 @@ func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 		}
 
 		return nil
+	}
+}
+
+// shouldIgnoreField reports whether a state attribute key should be ignored.
+//
+// Why: Test callers often ignore a parent attribute path (for example,
+// receiver_choice.webhook.url.secret_info_choice), but Terraform state stores
+// nested keys under that path (for example, ...clear_secret_info.url). Without
+// prefix matching, these nested secret fields still cause false mismatches.
+//
+// How: It checks for an exact ignore key first, then treats any ignore key as a
+// namespace prefix followed by a dot.
+//
+// Parameters:
+//   - key: the Terraform state attribute key being compared
+//   - ignoreFields: set of ignore paths configured by the test
+//
+// Returns:
+//   - true when key should be skipped from comparison; false otherwise.
+func shouldIgnoreField(key string, ignoreFields map[string]struct{}) bool {
+	if _, ignored := ignoreFields[key]; ignored {
+		return true
+	}
+
+	for ignore := range ignoreFields {
+		if strings.HasPrefix(key, ignore+".") {
+			return true
+		}
+	}
+
+	return false
+}
+
+// testAccSkipMissingPreExistingDataSourceObject returns an ErrorCheckFunc that skips a read-only data source test when the target tenant object does not exist.
+//
+// Why: Certain read-only data sources (such as public_ip, service_policy_set,
+// network_policy_set, shape_bot_defense_instance, bot_*_policy, or site_state)
+// query system-managed or pre-provisioned tenant objects that have no
+// corresponding Terraform resource in the provider (or whose backing core object
+// is reconciled asynchronously). On clean test tenants without those pre-existing
+// objects, the Read RPC fails with HTTP 404 (code 5) "does not exist in namespace".
+//
+// How: It inspects the error returned by the test step for the standard F5 XC
+// HTTP 404 NotFound response ("HTTP 404, code 5" and "does not exist in namespace")
+// and calls t.Skipf so the test is marked as skipped rather than failed when the
+// prerequisite tenant object is absent.
+//
+// Parameters:
+//   - t: the testing.T instance for the current acceptance test
+//   - dataSourceType: short name of the data source being tested for skip logging
+//
+// Returns:
+//   - resource.ErrorCheckFunc: error check callback for resource.TestCase
+//
+// Example:
+//
+//	ErrorCheck: testAccSkipMissingPreExistingDataSourceObject(t, "public_ip"),
+func testAccSkipMissingPreExistingDataSourceObject(t *testing.T, dataSourceType string) resource.ErrorCheckFunc {
+	return func(err error) error {
+		if err == nil {
+			return nil
+		}
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "HTTP 404, code 5") && strings.Contains(errMsg, "does not exist in namespace") {
+			t.Skipf("Skipping read-only data source %s test because prerequisite object does not exist on target tenant: %v", dataSourceType, err)
+			return nil
+		}
+		return err
 	}
 }

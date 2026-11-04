@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -27,6 +28,7 @@ import (
 
 	"gopkg.volterra.us/stdlib/codec"
 	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema_views_terraform_parameters "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/terraform_parameters"
 )
 
@@ -67,8 +69,8 @@ func (r *ResourceF5XCTfParamsAction) Metadata(ctx context.Context, request resou
 func (r *ResourceF5XCTfParamsAction) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Azure Spoke Vnet Information Azure Spoke Vnet related information, these vnets info will be use to establish vnet peering between volterra site vnet and spoke vnets",
-		Description:         "Azure Spoke Vnet Information Azure Spoke Vnet related information, these vnets info will be use to establish vnet peering between volterra site vnet and spoke vnets",
+		MarkdownDescription: "View terraform parameters object defines parameters to create external configs using terraform.",
+		Description:         "View terraform parameters object defines parameters to create external configs using terraform.",
 
 		Attributes: map[string]schema.Attribute{
 			"action": schema.ListAttribute{
@@ -87,11 +89,11 @@ func (r *ResourceF5XCTfParamsAction) Schema(ctx context.Context, request resourc
 			"namespace": schema.StringAttribute{
 				Description:         "Namespace Namespace for the label to be retrieved",
 				MarkdownDescription: "Namespace Namespace for the label to be retrieved",
-				Required:            false,
-				Optional:            true,
+				Required:            true,
+				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"view_kind": schema.StringAttribute{
@@ -178,9 +180,17 @@ func (r *ResourceF5XCTfParamsAction) ModifyPlan(ctx context.Context, req resourc
 			return
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCTfParamsAction) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCTfParamsActionModel
 
 	// Read Terraform plan data into the model
@@ -271,7 +281,7 @@ func (r *ResourceF5XCTfParamsAction) Create(ctx context.Context, request resourc
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "tf_params_action", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "tf_params_action", err),
 		)
 		return
 	}
@@ -338,6 +348,12 @@ func (r *ResourceF5XCTfParamsAction) Read(ctx context.Context, request resource.
 }
 
 func (r *ResourceF5XCTfParamsAction) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCTfParamsActionModel

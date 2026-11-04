@@ -25,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -35,6 +36,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -124,7 +126,7 @@ type ResourceF5XCApiDiscoveryModel struct {
 	Name                          types.String   `tfsdk:"name"`
 	Namespace                     types.String   `tfsdk:"namespace"`
 	Uid                           types.String   `tfsdk:"uid"`
-	CustomAuthTypes               types.List     `tfsdk:"custom_auth_types"`
+	CustomAuthTypes               types.Set      `tfsdk:"custom_auth_types"`
 	UserDefinedApiDiscoveryPolicy types.Object   `tfsdk:"user_defined_api_discovery_policy"`
 	Timeouts                      timeouts.Value `tfsdk:"timeouts"`
 }
@@ -139,7 +141,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> CustomAuthTypes
+// Attribute map for SetOfPointerField --> CustomAuthTypes
 var ApiDiscoveryCustomAuthTypesModelAttributeMap = map[string]attr.Type{
 
 	"parameter_name": types.StringType,
@@ -297,8 +299,8 @@ func (r *ResourceF5XCApiDiscovery) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a api_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_discovery) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a api_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_discovery) etc. can be fetched",
+		MarkdownDescription: "The api_discovery contains settings for API discovery",
+		Description:         "The api_discovery contains settings for API discovery",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -364,14 +366,14 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"custom_auth_types": schema.ListNestedAttribute{
+			"custom_auth_types": schema.SetNestedAttribute{
 				Description:         "custom_auth_types Select your custom authentication types to be detected in the API discovery",
 				MarkdownDescription: "custom_auth_types Select your custom authentication types to be detected in the API discovery",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(10),
+				Validators: []validator.Set{
+					setvalidator.SizeAtMost(10),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -765,9 +767,17 @@ func (r *ResourceF5XCApiDiscovery) ModifyPlan(ctx context.Context, req resource.
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCApiDiscoveryModel
 
 	// Read Terraform plan data into the model
@@ -849,7 +859,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 	}
 
 	{
-		// resource modelToSpecRoot ArrayOfPointerField --> CustomAuthTypes
+		// resource modelToSpecRoot SetOfPointerField --> CustomAuthTypes
 		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() {
 			var customAuthTypesElements []ApiDiscoveryCustomAuthType
 			response.Diagnostics.Append(data.CustomAuthTypes.ElementsAs(ctx, &customAuthTypesElements, false)...)
@@ -993,6 +1003,13 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 						response.Diagnostics.Append(diags...)
 						if response.Diagnostics.HasError() {
 							return
+						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
 						}
 
 						discoveryRulesSpec[i].Labels = mapOfString
@@ -1187,7 +1204,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1210,7 +1227,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "api_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "api_discovery", err),
 		)
 		return
 	}
@@ -1328,9 +1345,10 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
+	// resource SpecToModelRoot SetOfPointerField --> CustomAuthTypes
 	if len(specData.GetCustomAuthTypes()) > 0 {
 		customAuthTypesElements := make([]ApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
+
 		for _, customAuthTypesElement := range specData.GetCustomAuthTypes() {
 			apiDiscoveryCustomAuthTypeModel := ApiDiscoveryCustomAuthType{}
 
@@ -1362,32 +1380,30 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 		}
 
 		{
-			customAuthTypesList, listDiags := utils.GoStructSliceToListValue(
+			customAuthTypesSet, setDiags := utils.GoStructSliceToSetValue(
 				ctx,
 				ApiDiscoveryCustomAuthTypesModelAttributeMap,
 				customAuthTypesElements,
 			)
 
-			response.Diagnostics.Append(listDiags...)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
 
-			data.CustomAuthTypes = customAuthTypesList
+			data.CustomAuthTypes = customAuthTypesSet
 		}
 	} else {
 		var customAuthTypesObjectType = basetypes.ObjectType{
 			AttrTypes: ApiDiscoveryCustomAuthTypesModelAttributeMap,
 		}
-		nullCustomAuthTypesList := basetypes.NewListNull(customAuthTypesObjectType)
-		var priorValCustomAuthTypes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("custom_auth_types"), &priorValCustomAuthTypes)
-		if !priorValCustomAuthTypes.IsNull() && !priorValCustomAuthTypes.IsUnknown() {
-			data.CustomAuthTypes = priorValCustomAuthTypes
+		nullCustomAuthTypesSet := basetypes.NewSetNull(customAuthTypesObjectType)
+		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() && len(data.CustomAuthTypes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty set.
+			data.CustomAuthTypes = basetypes.NewSetValueMust(customAuthTypesObjectType, nil)
 		} else {
-			data.CustomAuthTypes = nullCustomAuthTypesList
+			data.CustomAuthTypes = nullCustomAuthTypesSet
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> UserDefinedApiDiscoveryPolicy
@@ -1513,15 +1529,16 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 				// resource specToModelNested MapOfStringField --> Labels
 				if discoveryRulesElement.GetLabels() != nil {
-					// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-					// They will be picked up during the next Read.
-					filteredMap := make(map[string]string)
+					// Filter out configured omitted map keys across all operations so backend-injected
+					// forbidden keys never enter or vanish from Terraform state.
+					filteredMap := make(map[string]string, len(discoveryRulesElement.GetLabels()))
 					for k, v := range discoveryRulesElement.GetLabels() {
-						if !strings.HasPrefix(k, "ves.io/") {
-							filteredMap[k] = v
-						}
+						filteredMap[k] = v
 					}
-
+					delete(filteredMap, "ves.io/config-propagation-destination")
+					delete(filteredMap, "ves.io/app_type")
+					delete(filteredMap, "ves.io/api-scope")
+					delete(filteredMap, "ves.io/provider")
 					if len(filteredMap) > 0 {
 						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 						response.Diagnostics.Append(labelsDiags...)
@@ -1905,7 +1922,7 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "api_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "api_discovery", err),
 		)
 		return
 	}
@@ -2023,9 +2040,10 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
+	// resource SpecToModelRoot SetOfPointerField --> CustomAuthTypes
 	if len(specData.GetCustomAuthTypes()) > 0 {
 		customAuthTypesElements := make([]ApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
+
 		for _, customAuthTypesElement := range specData.GetCustomAuthTypes() {
 			apiDiscoveryCustomAuthTypeModel := ApiDiscoveryCustomAuthType{}
 
@@ -2057,32 +2075,30 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 		}
 
 		{
-			customAuthTypesList, listDiags := utils.GoStructSliceToListValue(
+			customAuthTypesSet, setDiags := utils.GoStructSliceToSetValue(
 				ctx,
 				ApiDiscoveryCustomAuthTypesModelAttributeMap,
 				customAuthTypesElements,
 			)
 
-			response.Diagnostics.Append(listDiags...)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
 
-			data.CustomAuthTypes = customAuthTypesList
+			data.CustomAuthTypes = customAuthTypesSet
 		}
 	} else {
 		var customAuthTypesObjectType = basetypes.ObjectType{
 			AttrTypes: ApiDiscoveryCustomAuthTypesModelAttributeMap,
 		}
-		nullCustomAuthTypesList := basetypes.NewListNull(customAuthTypesObjectType)
-		var priorValCustomAuthTypes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("custom_auth_types"), &priorValCustomAuthTypes)
-		if !priorValCustomAuthTypes.IsNull() && !priorValCustomAuthTypes.IsUnknown() {
-			data.CustomAuthTypes = priorValCustomAuthTypes
+		nullCustomAuthTypesSet := basetypes.NewSetNull(customAuthTypesObjectType)
+		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() && len(data.CustomAuthTypes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty set.
+			data.CustomAuthTypes = basetypes.NewSetValueMust(customAuthTypesObjectType, nil)
 		} else {
-			data.CustomAuthTypes = nullCustomAuthTypesList
+			data.CustomAuthTypes = nullCustomAuthTypesSet
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> UserDefinedApiDiscoveryPolicy
@@ -2156,7 +2172,10 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 						exclusiveAttributeMap["action_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						exclusiveAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap)
+						exclusiveAttributeMap["action_choice"] = types.ObjectValueMust(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap, map[string]attr.Value{
+							"archive": types.BoolNull(),
+							"ignore":  types.BoolValue(true),
+						})
 					}
 
 					exclusiveObj, exclusiveObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap, exclusiveAttributeMap)
@@ -2195,7 +2214,10 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectValueMust(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap, map[string]attr.Value{
+				"exclusive": types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap),
+				"inclusive": types.BoolValue(true),
+			})
 		}
 
 		// resource specToModelNested ArrayOfPointerField --> DiscoveryRules
@@ -2208,13 +2230,26 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 
 				// resource specToModelNested MapOfStringField --> Labels
 				if discoveryRulesElement.GetLabels() != nil {
-					// READ operation: keep backend-injected keys so they enter the state.
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
+					// Filter out configured omitted map keys across all operations so backend-injected
+					// forbidden keys never enter or vanish from Terraform state.
+					filteredMap := make(map[string]string, len(discoveryRulesElement.GetLabels()))
+					for k, v := range discoveryRulesElement.GetLabels() {
+						filteredMap[k] = v
 					}
-					apiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+					delete(filteredMap, "ves.io/config-propagation-destination")
+					delete(filteredMap, "ves.io/app_type")
+					delete(filteredMap, "ves.io/api-scope")
+					delete(filteredMap, "ves.io/provider")
+					if len(filteredMap) > 0 {
+						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+						response.Diagnostics.Append(labelsDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						apiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+					} else {
+						apiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
+					}
 				} else {
 					// API returned nil (Protobuf omits empty maps). Set to null.
 					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -2446,7 +2481,10 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 									exclusionAttributeMap["action_choice"] = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									exclusionAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap)
+									exclusionAttributeMap["action_choice"] = types.ObjectValueMust(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, map[string]attr.Value{
+										"archive": types.BoolNull(),
+										"ignore":  types.BoolValue(true),
+									})
 								}
 
 								exclusionObj, exclusionObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, exclusionAttributeMap)
@@ -2485,7 +2523,15 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 						apiDiscoveryRulePropsModel.RuleTypeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryRulePropsModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
+						apiDiscoveryRulePropsModel.RuleTypeChoice = types.ObjectValueMust(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap, map[string]attr.Value{
+							"exclusion": types.ObjectValueMust(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, map[string]attr.Value{
+								"action_choice": types.ObjectValueMust(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, map[string]attr.Value{
+									"archive": types.BoolNull(),
+									"ignore":  types.BoolValue(true),
+								}),
+							}),
+							"inclusion": types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -2547,6 +2593,12 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 }
 
 func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCApiDiscoveryModel
@@ -2648,7 +2700,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	}
 
 	{
-		// resource modelToSpecRoot ArrayOfPointerField --> CustomAuthTypes
+		// resource modelToSpecRoot SetOfPointerField --> CustomAuthTypes
 		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() {
 			var customAuthTypesElements []ApiDiscoveryCustomAuthType
 			response.Diagnostics.Append(data.CustomAuthTypes.ElementsAs(ctx, &customAuthTypesElements, false)...)
@@ -2792,6 +2844,13 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 						response.Diagnostics.Append(diags...)
 						if response.Diagnostics.HasError() {
 							return
+						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
 						}
 
 						discoveryRulesSpec[i].Labels = mapOfString
@@ -2986,7 +3045,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3002,7 +3061,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "api_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "api_discovery", err),
 		)
 		return
 	}
@@ -3011,7 +3070,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "api_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "api_discovery", err),
 		)
 		return
 	}
@@ -3128,9 +3187,10 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
+	// resource SpecToModelRoot SetOfPointerField --> CustomAuthTypes
 	if len(specData.GetCustomAuthTypes()) > 0 {
 		customAuthTypesElements := make([]ApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
+
 		for _, customAuthTypesElement := range specData.GetCustomAuthTypes() {
 			apiDiscoveryCustomAuthTypeModel := ApiDiscoveryCustomAuthType{}
 
@@ -3162,32 +3222,30 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		}
 
 		{
-			customAuthTypesList, listDiags := utils.GoStructSliceToListValue(
+			customAuthTypesSet, setDiags := utils.GoStructSliceToSetValue(
 				ctx,
 				ApiDiscoveryCustomAuthTypesModelAttributeMap,
 				customAuthTypesElements,
 			)
 
-			response.Diagnostics.Append(listDiags...)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
 
-			data.CustomAuthTypes = customAuthTypesList
+			data.CustomAuthTypes = customAuthTypesSet
 		}
 	} else {
 		var customAuthTypesObjectType = basetypes.ObjectType{
 			AttrTypes: ApiDiscoveryCustomAuthTypesModelAttributeMap,
 		}
-		nullCustomAuthTypesList := basetypes.NewListNull(customAuthTypesObjectType)
-		var priorValCustomAuthTypes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("custom_auth_types"), &priorValCustomAuthTypes)
-		if !priorValCustomAuthTypes.IsNull() && !priorValCustomAuthTypes.IsUnknown() {
-			data.CustomAuthTypes = priorValCustomAuthTypes
+		nullCustomAuthTypesSet := basetypes.NewSetNull(customAuthTypesObjectType)
+		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() && len(data.CustomAuthTypes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty set.
+			data.CustomAuthTypes = basetypes.NewSetValueMust(customAuthTypesObjectType, nil)
 		} else {
-			data.CustomAuthTypes = nullCustomAuthTypesList
+			data.CustomAuthTypes = nullCustomAuthTypesSet
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> UserDefinedApiDiscoveryPolicy
@@ -3313,15 +3371,16 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 				// resource specToModelNested MapOfStringField --> Labels
 				if discoveryRulesElement.GetLabels() != nil {
-					// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-					// They will be picked up during the next Read.
-					filteredMap := make(map[string]string)
+					// Filter out configured omitted map keys across all operations so backend-injected
+					// forbidden keys never enter or vanish from Terraform state.
+					filteredMap := make(map[string]string, len(discoveryRulesElement.GetLabels()))
 					for k, v := range discoveryRulesElement.GetLabels() {
-						if !strings.HasPrefix(k, "ves.io/") {
-							filteredMap[k] = v
-						}
+						filteredMap[k] = v
 					}
-
+					delete(filteredMap, "ves.io/config-propagation-destination")
+					delete(filteredMap, "ves.io/app_type")
+					delete(filteredMap, "ves.io/api-scope")
+					delete(filteredMap, "ves.io/provider")
 					if len(filteredMap) > 0 {
 						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 						response.Diagnostics.Append(labelsDiags...)
@@ -3727,7 +3786,7 @@ func (r *ResourceF5XCApiDiscovery) Delete(ctx context.Context, request resource.
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "api_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "api_discovery", err),
 		)
 		return
 	}

@@ -28,12 +28,12 @@ type DataSourceF5XCInfraprotectAsn struct {
 	client *client.APIClient
 }
 
-type InfraprotectAsnGlobalSpecTypeBgpSessionChoice struct {
+type InfraprotectAsnBgpSessionChoice struct {
 	BgpSessionDisabled types.Bool `tfsdk:"bgp_session_disabled"`
 	BgpSessionEnabled  types.Bool `tfsdk:"bgp_session_enabled"`
 }
 
-type InfraprotectAsnGlobalSpecTypeReviewTypeChoice struct {
+type InfraprotectAsnReviewTypeChoice struct {
 	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
 	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
 	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
@@ -83,8 +83,8 @@ func (d *DataSourceF5XCInfraprotectAsn) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCInfraprotectAsn) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_asn This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a infraprotect_asn This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn) etc. can be fetched",
+		MarkdownDescription: "DDoS transit ASN information",
+		Description:         "DDoS transit ASN information",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -234,7 +234,7 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_asn", err))
 		return
 	}
 
@@ -311,7 +311,7 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 		bgpSessionChoiceChoices := specData.GetBgpSession()
 
 		// The model struct that will be populated by the nested template.
-		var bgpSessionChoiceChoicesModel = &InfraprotectAsnGlobalSpecTypeBgpSessionChoice{}
+		var bgpSessionChoiceChoicesModel = &InfraprotectAsnBgpSessionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -363,7 +363,7 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 		reviewTypeChoiceChoices := specData.GetReviewType()
 
 		// The model struct that will be populated by the nested template.
-		var reviewTypeChoiceChoicesModel = &InfraprotectAsnGlobalSpecTypeReviewTypeChoice{}
+		var reviewTypeChoiceChoicesModel = &InfraprotectAsnReviewTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

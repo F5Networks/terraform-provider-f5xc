@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -35,6 +34,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -621,8 +621,8 @@ func (r *ResourceF5XCPolicyBasedRouting) Metadata(ctx context.Context, request r
 func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a policy_based_routing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policy_based_routing) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a policy_based_routing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policy_based_routing) etc. can be fetched",
+		MarkdownDescription: "Policy based routing is used to control how different classes of traffic is forwarded and QOS is<br>applied over WAN interfaces in SDWAN scenarios.",
+		Description:         "Policy based routing is used to control how different classes of traffic is forwarded and QOS is applied over WAN interfaces in SDWAN scenarios.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -720,7 +720,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -1036,7 +1036,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 														Optional:            false,
 														Computed:            true,
 														PlanModifiers: []planmodifier.String{
-															stringplanmodifier.UseStateForUnknown(),
+															stringplanmodifier.UseNonNullStateForUnknown(),
 														},
 													},
 												},
@@ -1128,7 +1128,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -1171,7 +1171,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1297,7 +1297,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1322,7 +1322,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1380,7 +1380,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 														Optional:            false,
 														Computed:            true,
 														PlanModifiers: []planmodifier.String{
-															stringplanmodifier.UseStateForUnknown(),
+															stringplanmodifier.UseNonNullStateForUnknown(),
 														},
 													},
 												},
@@ -1474,12 +1474,11 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 													Attributes: map[string]schema.Attribute{
 														"applications": schema.ListAttribute{
 															Description:         "Applications Application protocols like HTTP, SNMP",
-															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`",
+															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("APPLICATION_HTTP")),
+															Computed:            false,
 															Validators: []validator.List{
 																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPLICATION_DNS", "APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP"}...)),
 															},
@@ -1510,7 +1509,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 														},
 														"protocol": schema.StringAttribute{
 															Description:         "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`",
+															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`",
 															Required:            false,
 															Optional:            true,
 															Computed:            true,
@@ -1588,7 +1587,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												Validators: []validator.List{
 													listvalidator.SizeAtMost(128),
 													listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-														regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+														regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 														"must be a valid IPv6 prefix",
 													)),
 													listvalidator.UniqueValues(),
@@ -1680,9 +1679,17 @@ func (r *ResourceF5XCPolicyBasedRouting) ModifyPlan(ctx context.Context, req res
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCPolicyBasedRoutingModel
 
 	// Read Terraform plan data into the model
@@ -2570,7 +2577,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2593,7 +2600,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "policy_based_routing", err),
 		)
 		return
 	}
@@ -4040,7 +4047,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "policy_based_routing", err),
 		)
 		return
 	}
@@ -4400,7 +4407,12 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 												policyBasedRoutingURLTypeModel.PathChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												policyBasedRoutingURLTypeModel.PathChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap)
+												policyBasedRoutingURLTypeModel.PathChoice = types.ObjectValueMust(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap, map[string]attr.Value{
+													"any_path":          types.BoolValue(true),
+													"path_exact_value":  types.StringNull(),
+													"path_prefix_value": types.StringNull(),
+													"path_regex_value":  types.StringNull(),
+												})
 											}
 
 											httpListElements = append(httpListElements, policyBasedRoutingURLTypeModel)
@@ -4555,7 +4567,11 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceModelAttributeMap)
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = types.ObjectValueMust(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceModelAttributeMap, map[string]attr.Value{
+								"all_destinations": types.BoolValue(true),
+								"http_list":        types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListModelAttributeMap),
+								"tls_list":         types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceTlsListModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested RequiredArrayOfPointerField --> ForwardingClassList
@@ -5446,6 +5462,12 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 }
 
 func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCPolicyBasedRoutingModel
@@ -6353,7 +6375,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6369,7 +6391,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 	err = r.client.ReplaceObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "policy_based_routing", err),
 		)
 		return
 	}
@@ -6378,7 +6400,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "policy_based_routing", err),
 		)
 		return
 	}
@@ -7846,7 +7868,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Delete(ctx context.Context, request res
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "policy_based_routing", err),
 		)
 		return
 	}

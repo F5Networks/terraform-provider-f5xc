@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -23,24 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 )
-
-var httpLoadbalancerServicePolicyAttachmentsLocks sync.Map
-
-// lockHttpLoadbalancerServicePolicyAttachments serializes Read-Modify-Write operations per target parent resource.
-func lockHttpLoadbalancerServicePolicyAttachments(namespace, name string) func() {
-	ns := strings.TrimSpace(namespace)
-	if ns == "" {
-		ns = "default"
-	}
-	key := fmt.Sprintf("%s/%s", ns, strings.TrimSpace(name))
-
-	muAny, _ := httpLoadbalancerServicePolicyAttachmentsLocks.LoadOrStore(key, &sync.Mutex{})
-	mu := muAny.(*sync.Mutex)
-	mu.Lock()
-
-	return mu.Unlock
-}
 
 type httpLoadbalancerServicePolicyAttachmentsModel struct {
 	ID                   types.String   `tfsdk:"id"`
@@ -134,7 +117,7 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) Configure(_ conte
 }
 
 func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) fetchTargetResource(ctx context.Context, namespace, targetName string) ([]byte, string, error) {
-	urls := getHttpLoadbalancerURLs(r.client.RestClient.URL, namespace, targetName)
+	urls := r.getTargetURLs(r.client.RestClient.URL, namespace, targetName)
 	var lastErr error
 	for _, url := range urls {
 		respBytes, err := r.client.RestClient.Execute(ctx, http.MethodGet, url, nil)
@@ -160,13 +143,13 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) Create(ctx contex
 	}
 	targetName := data.HttpLoadbalancerName.ValueString()
 
-	policyNames, err := extractStringList(ctx, data.ServicePolicies)
+	policyNames, err := r.extractStringList(ctx, data.ServicePolicies)
 	if err != nil {
 		response.Diagnostics.AddError("Extract Attachment List Error", err.Error())
 		return
 	}
 
-	unlock := lockHttpLoadbalancerServicePolicyAttachments(namespace, targetName)
+	unlock := lockAttachmentTarget("http_loadbalancer", namespace, targetName)
 	defer unlock()
 
 	tflog.Info(ctx, fmt.Sprintf("Setting attachments for http_loadbalancer %s in namespace %s: %v", targetName, namespace, policyNames))
@@ -192,7 +175,7 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) Create(ctx contex
 		parentObj["spec"] = spec
 	}
 
-	// Guardrail: Check if active service policies are already configured on the target parent resource.
+	// Guardrail: Check if active policies are already configured on the target parent resource.
 	// This prevents multiple attachment resources or an inline configuration from silently overwriting each other.
 	if activeMap, ok := spec["active_service_policies"].(map[string]any); ok && activeMap != nil {
 		if policies, ok := activeMap["policies"].([]any); ok && len(policies) > 0 {
@@ -257,8 +240,15 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) Read(ctx context.
 
 	respBytes, _, err := r.fetchTargetResource(ctx, namespace, targetName)
 	if err != nil {
-		tflog.Warn(ctx, fmt.Sprintf("Target resource http_loadbalancer %s not found in namespace %s: %s. Removing association from state.", targetName, namespace, err.Error()))
-		response.State.RemoveResource(ctx)
+		if utils.IsNotFoundError(err) {
+			tflog.Warn(ctx, fmt.Sprintf("Target resource http_loadbalancer %s not found in namespace %s: %s. Removing association from state.", targetName, namespace, err.Error()))
+			response.State.RemoveResource(ctx)
+			return
+		}
+		response.Diagnostics.AddError(
+			"Fetch Target Resource Error",
+			fmt.Sprintf("Failed to fetch http_loadbalancer '%s' in namespace '%s': %s", targetName, namespace, err.Error()),
+		)
 		return
 	}
 
@@ -272,7 +262,7 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) Read(ctx context.
 	activeChoice, _ := spec["active_service_policies"].(map[string]any)
 	policiesRaw, _ := activeChoice["policies"].([]any)
 
-	var retrievedPolicies []string
+	retrievedPolicies := make([]string, 0)
 	for _, p := range policiesRaw {
 		if pMap, ok := p.(map[string]any); ok {
 			if spName, ok := pMap["name"].(string); ok && spName != "" {
@@ -306,13 +296,13 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) Update(ctx contex
 	}
 	targetName := data.HttpLoadbalancerName.ValueString()
 
-	policyNames, err := extractStringList(ctx, data.ServicePolicies)
+	policyNames, err := r.extractStringList(ctx, data.ServicePolicies)
 	if err != nil {
 		response.Diagnostics.AddError("Extract Attachment List Error", err.Error())
 		return
 	}
 
-	unlock := lockHttpLoadbalancerServicePolicyAttachments(namespace, targetName)
+	unlock := lockAttachmentTarget("http_loadbalancer", namespace, targetName)
 	defer unlock()
 
 	tflog.Info(ctx, fmt.Sprintf("Updating attachments for http_loadbalancer %s in namespace %s: %v", targetName, namespace, policyNames))
@@ -386,7 +376,7 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) Delete(ctx contex
 	}
 	targetName := data.HttpLoadbalancerName.ValueString()
 
-	unlock := lockHttpLoadbalancerServicePolicyAttachments(namespace, targetName)
+	unlock := lockAttachmentTarget("http_loadbalancer", namespace, targetName)
 	defer unlock()
 
 	tflog.Info(ctx, fmt.Sprintf("Clearing attachments for http_loadbalancer %s in namespace %s", targetName, namespace))
@@ -439,7 +429,7 @@ func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) ImportState(ctx c
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("http_loadbalancer_name"), parts[1])...)
 }
 
-func getHttpLoadbalancerURLs(baseURL, namespace, targetName string) []string {
+func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) getTargetURLs(baseURL, namespace, targetName string) []string {
 	cleanBase := strings.TrimRight(baseURL, "/")
 	return []string{
 		fmt.Sprintf("%s/config/namespaces/%s/http_loadbalancers/%s", cleanBase, namespace, targetName),
@@ -447,7 +437,7 @@ func getHttpLoadbalancerURLs(baseURL, namespace, targetName string) []string {
 	}
 }
 
-func extractStringList(ctx context.Context, listVal types.List) ([]string, error) {
+func (r *ResourceF5xcHttpLoadbalancerServicePolicyAttachments) extractStringList(ctx context.Context, listVal types.List) ([]string, error) {
 	if listVal.IsNull() || listVal.IsUnknown() {
 		return nil, nil
 	}

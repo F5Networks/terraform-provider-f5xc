@@ -31,7 +31,7 @@ type DataSourceF5XCShapeBotDefenseInstance struct {
 	client *client.APIClient
 }
 
-type ShapeBotDefenseInstanceShapeBotDefenseInstanceInstance struct {
+type ShapeBotDefenseInstanceInstance struct {
 	ApiKey          types.Object `tfsdk:"api_key"`
 	Cluster         types.List   `tfsdk:"cluster"`
 	TelemetryPrefix types.String `tfsdk:"telemetry_prefix"`
@@ -42,18 +42,19 @@ type ShapeBotDefenseInstanceSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type ShapeBotDefenseInstanceSecretTypeSecretInfoChoice struct {
+type ShapeBotDefenseInstanceSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type ShapeBotDefenseInstanceSecretTypeBlindfoldSecretInfo struct {
+type ShapeBotDefenseInstanceBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type ShapeBotDefenseInstanceSecretTypeClearSecretInfo struct {
+type ShapeBotDefenseInstanceClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
@@ -120,6 +121,7 @@ var ShapeBotDefenseInstanceMobileApiKeySecretInfoOneofModelAttributeMap = map[st
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ShapeBotDefenseInstanceMobileApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -184,6 +186,7 @@ var ShapeBotDefenseInstanceWebApiKeySecretInfoOneofModelAttributeMap = map[strin
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ShapeBotDefenseInstanceWebApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -215,8 +218,8 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Metadata(ctx context.Context, re
 func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a shape_bot_defense_instance This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of shape_bot_defense_instance) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a shape_bot_defense_instance This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of shape_bot_defense_instance) etc. can be fetched",
+		MarkdownDescription: "Shape Bot Defense Instance is the main configuration for a Shape Integration.<br>It defines various configuration parameters needed to use Shape SSEs.",
+		Description:         "Shape Bot Defense Instance is the main configuration for a Shape Integration. It defines various configuration parameters needed to use Shape SSEs.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -346,8 +349,15 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
+												Sensitive:   true,
 											},
 										},
+									},
+									"none": schema.BoolAttribute{
+										Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
 									},
 								},
 							},
@@ -456,8 +466,15 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
+												Sensitive:   true,
 											},
 										},
+									},
+									"none": schema.BoolAttribute{
+										Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
 									},
 								},
 							},
@@ -562,7 +579,7 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_bot_defense_instance.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "shape_bot_defense_instance", err))
 		return
 	}
 
@@ -681,7 +698,7 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 
 	// data SpecToModelRoot PointerField --> Mobile
 	if specData.GetMobile() != nil {
-		var shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel = &ShapeBotDefenseInstanceShapeBotDefenseInstanceInstance{}
+		var shapeBotDefenseInstanceInstanceModel = &ShapeBotDefenseInstanceInstance{}
 		mobileElement := specData.GetMobile()
 
 		// data specToModelNested PointerField --> ApiKey
@@ -786,6 +803,15 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 					}
 				}
 
+				// data specToModelNested BoolOfOneOfPointerField --> None
+				_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+				if isNone {
+					apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+				} else {
+					apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -823,7 +849,7 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			if response.Diagnostics.HasError() {
 				return
 			}
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.ApiKey = shapeBotDefenseInstanceSecretTypeModelObj
+			shapeBotDefenseInstanceInstanceModel.ApiKey = shapeBotDefenseInstanceSecretTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -832,7 +858,7 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.ApiKey = types.ObjectNull(ShapeBotDefenseInstanceMobileApiKeyModelAttributeMap)
+			shapeBotDefenseInstanceInstanceModel.ApiKey = types.ObjectNull(ShapeBotDefenseInstanceMobileApiKeyModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredArrayOfPointerField --> Cluster
@@ -876,35 +902,35 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			if response.Diagnostics.HasError() {
 				return
 			}
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = clusterListValue
+			shapeBotDefenseInstanceInstanceModel.Cluster = clusterListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap})
+			shapeBotDefenseInstanceInstanceModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap})
 		}
 
 		// data specToModelNested StringField --> TelemetryPrefix
 		if mobileElement.GetTelemetryPrefix() != "" {
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringValue(mobileElement.GetTelemetryPrefix())
+			shapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringValue(mobileElement.GetTelemetryPrefix())
 		} else {
 			// Empty string, set to null
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringNull()
+			shapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringNull()
 		}
 
 		// data specToModelNested RequiredStringField --> Url
 		if mobileElement.GetUrl() != "" {
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringValue(mobileElement.GetUrl())
+			shapeBotDefenseInstanceInstanceModel.Url = types.StringValue(mobileElement.GetUrl())
 		} else {
 			// Empty string, set to null
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringNull()
+			shapeBotDefenseInstanceInstanceModel.Url = types.StringNull()
 		}
 
 		mobileObj, mobileDiags := utils.GoStructToObjectValue(
 			ctx,
 			ShapeBotDefenseInstanceMobileModelAttributeMap,
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel,
+			shapeBotDefenseInstanceInstanceModel,
 		)
 		response.Diagnostics.Append(mobileDiags...)
 		data.Mobile = mobileObj
@@ -914,7 +940,7 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 
 	// data SpecToModelRoot PointerField --> Web
 	if specData.GetWeb() != nil {
-		var shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel = &ShapeBotDefenseInstanceShapeBotDefenseInstanceInstance{}
+		var shapeBotDefenseInstanceInstanceModel = &ShapeBotDefenseInstanceInstance{}
 		webElement := specData.GetWeb()
 
 		// data specToModelNested PointerField --> ApiKey
@@ -1019,6 +1045,15 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 					}
 				}
 
+				// data specToModelNested BoolOfOneOfPointerField --> None
+				_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+				if isNone {
+					apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+				} else {
+					apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -1056,7 +1091,7 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			if response.Diagnostics.HasError() {
 				return
 			}
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.ApiKey = shapeBotDefenseInstanceSecretTypeModelObj
+			shapeBotDefenseInstanceInstanceModel.ApiKey = shapeBotDefenseInstanceSecretTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -1065,7 +1100,7 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.ApiKey = types.ObjectNull(ShapeBotDefenseInstanceWebApiKeyModelAttributeMap)
+			shapeBotDefenseInstanceInstanceModel.ApiKey = types.ObjectNull(ShapeBotDefenseInstanceWebApiKeyModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredArrayOfPointerField --> Cluster
@@ -1109,35 +1144,35 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			if response.Diagnostics.HasError() {
 				return
 			}
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = clusterListValue
+			shapeBotDefenseInstanceInstanceModel.Cluster = clusterListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap})
+			shapeBotDefenseInstanceInstanceModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap})
 		}
 
 		// data specToModelNested StringField --> TelemetryPrefix
 		if webElement.GetTelemetryPrefix() != "" {
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringValue(webElement.GetTelemetryPrefix())
+			shapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringValue(webElement.GetTelemetryPrefix())
 		} else {
 			// Empty string, set to null
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringNull()
+			shapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringNull()
 		}
 
 		// data specToModelNested RequiredStringField --> Url
 		if webElement.GetUrl() != "" {
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringValue(webElement.GetUrl())
+			shapeBotDefenseInstanceInstanceModel.Url = types.StringValue(webElement.GetUrl())
 		} else {
 			// Empty string, set to null
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringNull()
+			shapeBotDefenseInstanceInstanceModel.Url = types.StringNull()
 		}
 
 		webObj, webDiags := utils.GoStructToObjectValue(
 			ctx,
 			ShapeBotDefenseInstanceWebModelAttributeMap,
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel,
+			shapeBotDefenseInstanceInstanceModel,
 		)
 		response.Diagnostics.Append(webDiags...)
 		data.Web = webObj

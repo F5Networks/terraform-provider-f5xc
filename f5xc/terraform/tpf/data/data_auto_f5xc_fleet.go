@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -21,6 +23,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -35,27 +39,27 @@ type DataSourceF5XCFleet struct {
 	client *client.APIClient
 }
 
-type FleetFleetBlockedServices struct {
+type FleetBlockedServices struct {
 	BlockedServicesValueTypeChoice types.Object `tfsdk:"blocked_services_value_type_choice"`
 	NetworkType                    types.List   `tfsdk:"network_type"`
 }
 
-type FleetBlockedServicesBlockedServicesValueTypeChoice struct {
+type FleetBlockedServicesValueTypeChoice struct {
 	Dns              types.Bool `tfsdk:"dns"`
 	Ssh              types.Bool `tfsdk:"ssh"`
 	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
 }
 
-type FleetCreateSpecTypeBondChoice struct {
+type FleetBondChoice struct {
 	BondDeviceList types.Object `tfsdk:"bond_device_list"`
 	NoBondDevices  types.Bool   `tfsdk:"no_bond_devices"`
 }
 
-type FleetCreateSpecTypeBondDeviceList struct {
+type FleetBondDeviceList struct {
 	BondDevices types.List `tfsdk:"bond_devices"`
 }
 
-type FleetFleetFleetBondDeviceType struct {
+type FleetFleetBondDeviceType struct {
 	Devices             types.List   `tfsdk:"devices"`
 	LacpChoice          types.Object `tfsdk:"lacp_choice"`
 	LinkPollingInterval types.Int64  `tfsdk:"link_polling_interval"`
@@ -63,95 +67,95 @@ type FleetFleetFleetBondDeviceType struct {
 	Name                types.String `tfsdk:"name"`
 }
 
-type FleetFleetBondDeviceTypeLacpChoice struct {
+type FleetLacpChoice struct {
 	ActiveBackup types.Bool   `tfsdk:"active_backup"`
 	Lacp         types.Object `tfsdk:"lacp"`
 }
 
-type FleetFleetBondDeviceTypeLacp struct {
+type FleetLacp struct {
 	Rate types.Int64 `tfsdk:"rate"`
 }
 
-type FleetCreateSpecTypeDcClusterGroupChoice struct {
+type FleetDcClusterGroupChoice struct {
 	DcClusterGroup       types.Object `tfsdk:"dc_cluster_group"`
 	DcClusterGroupInside types.Object `tfsdk:"dc_cluster_group_inside"`
 	NoDcClusterGroup     types.Bool   `tfsdk:"no_dc_cluster_group"`
 }
 
-type FleetCreateSpecTypeGpuChoice struct {
+type FleetGpuChoice struct {
 	DisableGpu types.Bool   `tfsdk:"disable_gpu"`
 	EnableGpu  types.Bool   `tfsdk:"enable_gpu"`
 	EnableVgpu types.Object `tfsdk:"enable_vgpu"`
 }
 
-type FleetCreateSpecTypeEnableVgpu struct {
+type FleetEnableVgpu struct {
 	FeatureType   types.List   `tfsdk:"feature_type"`
 	ServerAddress types.String `tfsdk:"server_address"`
 	ServerPort    types.Int64  `tfsdk:"server_port"`
 }
 
-type FleetCreateSpecTypeInterfaceChoice struct {
+type FleetIfaceChoice struct {
 	DefaultConfig types.Bool   `tfsdk:"default_config"`
 	DeviceList    types.Object `tfsdk:"device_list"`
 	InterfaceList types.Object `tfsdk:"interface_list"`
 }
 
-type FleetCreateSpecTypeDeviceList struct {
+type FleetDeviceList struct {
 	Devices types.List `tfsdk:"devices"`
 }
 
-type FleetFleetDeviceInstanceType struct {
+type FleetDeviceInstanceType struct {
 	DeviceInstanceChoice types.Object `tfsdk:"device_instance_choice"`
 	Name                 types.String `tfsdk:"name"`
 	Owner                types.List   `tfsdk:"owner"`
 }
 
-type FleetDeviceInstanceTypeDeviceInstanceChoice struct {
+type FleetDeviceInstanceChoice struct {
 	NetworkDevice types.Object `tfsdk:"network_device"`
 }
 
-type FleetDeviceInstanceTypeNetworkDevice struct {
+type FleetNetDevice struct {
 	Interface types.List `tfsdk:"interface"`
 	Use       types.List `tfsdk:"use"`
 }
 
-type FleetCreateSpecTypeInterfaceList struct {
+type FleetIfaceList struct {
 	Interfaces types.List `tfsdk:"interfaces"`
 }
 
-type FleetViewsKubernetesUpgradeDrain struct {
+type FleetK8sUpgradeDrain struct {
 	KubernetesUpgradeDrainEnableChoice types.Object `tfsdk:"kubernetes_upgrade_drain_enable_choice"`
 }
 
-type FleetKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoice struct {
+type FleetK8sUpgradeDrainEnableChoice struct {
 	DisableUpgradeDrain types.Bool   `tfsdk:"disable_upgrade_drain"`
 	EnableUpgradeDrain  types.Object `tfsdk:"enable_upgrade_drain"`
 }
 
-type FleetKubernetesUpgradeDrainEnableUpgradeDrain struct {
+type FleetEnableUpgradeDrain struct {
 	DrainMaxUnavailableChoice types.Object `tfsdk:"drain_max_unavailable_choice"`
 	DrainNodeTimeout          types.Int64  `tfsdk:"drain_node_timeout"`
 }
 
-type FleetKubernetesUpgradeDrainConfigDrainMaxUnavailableChoice struct {
+type FleetDrainMaxUnavailableChoice struct {
 	DrainMaxUnavailableNodeCount types.Int64 `tfsdk:"drain_max_unavailable_node_count"`
 }
 
-type FleetCreateSpecTypeLogsReceiverChoice struct {
+type FleetLogsReceiverChoice struct {
 	LogReceiver           types.Object `tfsdk:"log_receiver"`
 	LogsStreamingDisabled types.Bool   `tfsdk:"logs_streaming_disabled"`
 }
 
-type FleetViewsPerformanceEnhancementModeType struct {
+type FleetPerformanceEnhancementModeType struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
-type FleetPerformanceEnhancementModeTypePerfModeChoice struct {
+type FleetPerfModeChoice struct {
 	PerfModeL3Enhanced types.Object `tfsdk:"perf_mode_l3_enhanced"`
 	PerfModeL7Enhanced types.Object `tfsdk:"perf_mode_l7_enhanced"`
 }
 
-type FleetPerformanceEnhancementModeTypePerfModeL3Enhanced struct {
+type FleetPerfModeL3Enhanced struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
@@ -160,7 +164,7 @@ type FleetL3PerformanceEnhancementTypePerfModeChoice struct {
 	NoJumbo types.Bool `tfsdk:"no_jumbo"`
 }
 
-type FleetPerformanceEnhancementModeTypePerfModeL7Enhanced struct {
+type FleetPerfModeL7Enhanced struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
@@ -169,31 +173,31 @@ type FleetL7PerformanceEnhancementTypePerfModeChoice struct {
 	JumboEnabled  types.Bool `tfsdk:"jumbo_enabled"`
 }
 
-type FleetCreateSpecTypeSriovInterfaceChoice struct {
+type FleetSriovIfaceChoice struct {
 	DefaultSriovInterface types.Bool   `tfsdk:"default_sriov_interface"`
 	SriovInterfaces       types.Object `tfsdk:"sriov_interfaces"`
 }
 
-type FleetCreateSpecTypeSriovInterfaces struct {
+type FleetSriovInterfaces struct {
 	SriovInterface types.List `tfsdk:"sriov_interface"`
 }
 
-type FleetFleetSriovInterface struct {
+type FleetSriovIface struct {
 	InterfaceName   types.String `tfsdk:"interface_name"`
 	NumberOfVfioVfs types.Int64  `tfsdk:"number_of_vfio_vfs"`
 	NumberOfVfs     types.Int64  `tfsdk:"number_of_vfs"`
 }
 
-type FleetCreateSpecTypeStorageClassChoice struct {
+type FleetStorageClassChoice struct {
 	DefaultStorageClass types.Bool   `tfsdk:"default_storage_class"`
 	StorageClassList    types.Object `tfsdk:"storage_class_list"`
 }
 
-type FleetCreateSpecTypeStorageClassList struct {
+type FleetStorageClassList struct {
 	StorageClasses types.List `tfsdk:"storage_classes"`
 }
 
-type FleetFleetFleetStorageClassType struct {
+type FleetFleetStorageClassType struct {
 	AdvancedStorageParameters types.Map    `tfsdk:"advanced_storage_parameters"`
 	AllowVolumeExpansion      types.Bool   `tfsdk:"allow_volume_expansion"`
 	DefaultStorageClass       types.Bool   `tfsdk:"default_storage_class"`
@@ -204,18 +208,18 @@ type FleetFleetFleetStorageClassType struct {
 	StorageDevice             types.String `tfsdk:"storage_device"`
 }
 
-type FleetFleetStorageClassTypeDeviceChoice struct {
+type FleetDeviceChoice struct {
 	CustomStorage           types.Object `tfsdk:"custom_storage"`
 	HpeStorage              types.Object `tfsdk:"hpe_storage"`
 	NetappTrident           types.Object `tfsdk:"netapp_trident"`
 	PureServiceOrchestrator types.Object `tfsdk:"pure_service_orchestrator"`
 }
 
-type FleetFleetStorageClassTypeCustomStorage struct {
+type FleetCustomStorage struct {
 	Yaml types.String `tfsdk:"yaml"`
 }
 
-type FleetFleetStorageClassTypeHpeStorage struct {
+type FleetHpeStorage struct {
 	AllowMutations     types.String `tfsdk:"allow_mutations"`
 	AllowOverrides     types.String `tfsdk:"allow_overrides"`
 	DedupeEnabled      types.Bool   `tfsdk:"dedupe_enabled"`
@@ -234,27 +238,27 @@ type FleetFleetStorageClassTypeHpeStorage struct {
 	Thick              types.Bool   `tfsdk:"thick"`
 }
 
-type FleetFleetStorageClassTypeNetappTrident struct {
+type FleetNetappTrident struct {
 	Selector     types.Map    `tfsdk:"selector"`
 	StoragePools types.String `tfsdk:"storage_pools"`
 }
 
-type FleetFleetStorageClassTypePureServiceOrchestrator struct {
+type FleetPureSvcOrchestrator struct {
 	Backend        types.String `tfsdk:"backend"`
 	BandwidthLimit types.String `tfsdk:"bandwidth_limit"`
 	IopsLimit      types.Int64  `tfsdk:"iops_limit"`
 }
 
-type FleetCreateSpecTypeStorageDeviceChoice struct {
+type FleetStorageDeviceChoice struct {
 	NoStorageDevice   types.Bool   `tfsdk:"no_storage_device"`
 	StorageDeviceList types.Object `tfsdk:"storage_device_list"`
 }
 
-type FleetCreateSpecTypeStorageDeviceList struct {
+type FleetStorageDeviceList struct {
 	StorageDevices types.List `tfsdk:"storage_devices"`
 }
 
-type FleetFleetFleetStorageDeviceType struct {
+type FleetFleetStorageDeviceType struct {
 	AdvancedAdvancedParameters types.Map    `tfsdk:"advanced_advanced_parameters"`
 	DeviceChoice               types.Object `tfsdk:"device_choice"`
 	StorageDevice              types.String `tfsdk:"storage_device"`
@@ -281,18 +285,19 @@ type FleetSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type FleetSecretTypeSecretInfoChoice struct {
+type FleetSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type FleetSecretTypeBlindfoldSecretInfo struct {
+type FleetBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type FleetSecretTypeClearSecretInfo struct {
+type FleetClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
@@ -301,12 +306,12 @@ type FleetFleetStorageDeviceTypeNetappTrident struct {
 	BackendChoice types.Object `tfsdk:"backend_choice"`
 }
 
-type FleetStorageDeviceNetappTridentTypeBackendChoice struct {
+type FleetBackendChoice struct {
 	NetappBackendOntapNas types.Object `tfsdk:"netapp_backend_ontap_nas"`
 	NetappBackendOntapSan types.Object `tfsdk:"netapp_backend_ontap_san"`
 }
 
-type FleetStorageDeviceNetappTridentTypeNetappBackendOntapNas struct {
+type FleetNetappBackendOntapNas struct {
 	AutoExportCidrs      types.Object `tfsdk:"auto_export_cidrs"`
 	AutoExportPolicy     types.Bool   `tfsdk:"auto_export_policy"`
 	BackendName          types.String `tfsdk:"backend_name"`
@@ -329,28 +334,28 @@ type FleetStorageDeviceNetappTridentTypeNetappBackendOntapNas struct {
 	VolumeDefaults       types.Object `tfsdk:"volume_defaults"`
 }
 
-type FleetViewsPrefixStringListType struct {
+type FleetPrefixStringListType struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type FleetStorageDeviceNetappBackendOntapNasTypeDataLifChoice struct {
+type FleetDataLifChoice struct {
 	DataLifDnsName types.String `tfsdk:"data_lif_dns_name"`
 	DataLifIp      types.String `tfsdk:"data_lif_ip"`
 }
 
-type FleetStorageDeviceNetappBackendOntapNasTypeManagementLifChoice struct {
+type FleetMgmtLifChoice struct {
 	ManagementLifDnsName types.String `tfsdk:"management_lif_dns_name"`
 	ManagementLifIp      types.String `tfsdk:"management_lif_ip"`
 }
 
-type FleetFleetOntapVirtualStoragePoolType struct {
+type FleetOntapVirtualStoragePoolType struct {
 	Labels         types.Map    `tfsdk:"labels"`
 	VolumeDefaults types.Object `tfsdk:"volume_defaults"`
 	Zone           types.String `tfsdk:"zone"`
 }
 
-type FleetFleetOntapVolumeDefaults struct {
+type FleetOntapVolumeDefaults struct {
 	Encryption      types.Bool   `tfsdk:"encryption"`
 	ExportPolicy    types.String `tfsdk:"export_policy"`
 	QosPolicyChoice types.Object `tfsdk:"qos_policy_choice"`
@@ -364,13 +369,13 @@ type FleetFleetOntapVolumeDefaults struct {
 	UnixPermissions types.Int32  `tfsdk:"unix_permissions"`
 }
 
-type FleetOntapVolumeDefaultsQosPolicyChoice struct {
+type FleetQosPolicyChoice struct {
 	AdaptiveQosPolicy types.String `tfsdk:"adaptive_qos_policy"`
 	NoQos             types.Bool   `tfsdk:"no_qos"`
 	QosPolicy         types.String `tfsdk:"qos_policy"`
 }
 
-type FleetStorageDeviceNetappTridentTypeNetappBackendOntapSan struct {
+type FleetNetappBackendOntapSan struct {
 	ChapChoice           types.Object `tfsdk:"chap_choice"`
 	ClientCertificate    types.String `tfsdk:"client_certificate"`
 	ClientPrivateKey     types.Object `tfsdk:"client_private_key"`
@@ -391,12 +396,12 @@ type FleetStorageDeviceNetappTridentTypeNetappBackendOntapSan struct {
 	VolumeDefaults       types.Object `tfsdk:"volume_defaults"`
 }
 
-type FleetStorageDeviceNetappBackendOntapSanTypeChapChoice struct {
+type FleetChapChoice struct {
 	NoChap  types.Bool   `tfsdk:"no_chap"`
 	UseChap types.Object `tfsdk:"use_chap"`
 }
 
-type FleetStorageDeviceNetappBackendOntapSanTypeUseChap struct {
+type FleetUseChap struct {
 	ChapInitiatorSecret       types.Object `tfsdk:"chap_initiator_secret"`
 	ChapTargetInitiatorSecret types.Object `tfsdk:"chap_target_initiator_secret"`
 	ChapTargetUsername        types.String `tfsdk:"chap_target_username"`
@@ -408,24 +413,24 @@ type FleetStorageDeviceNetappBackendOntapSanTypeDataLifChoice struct {
 	DataLifIp      types.String `tfsdk:"data_lif_ip"`
 }
 
-type FleetStorageDeviceNetappBackendOntapSanTypeManagementLifChoice struct {
+type FleetStorageDeviceNetappBackendOntapSanTypeMgmtLifChoice struct {
 	ManagementLifDnsName types.String `tfsdk:"management_lif_dns_name"`
 	ManagementLifIp      types.String `tfsdk:"management_lif_ip"`
 }
 
-type FleetFleetStorageDeviceTypePureServiceOrchestrator struct {
+type FleetFleetStorageDeviceTypePureSvcOrchestrator struct {
 	Arrays                types.Object `tfsdk:"arrays"`
 	ClusterId             types.String `tfsdk:"cluster_id"`
 	EnableStorageTopology types.Bool   `tfsdk:"enable_storage_topology"`
 	EnableStrictTopology  types.Bool   `tfsdk:"enable_strict_topology"`
 }
 
-type FleetFleetPsoArrayConfiguration struct {
+type FleetPsoArrayCfg struct {
 	FlashArray types.Object `tfsdk:"flash_array"`
 	FlashBlade types.Object `tfsdk:"flash_blade"`
 }
 
-type FleetFleetFlashArrayType struct {
+type FleetFlashArrayType struct {
 	DefaultFsOpt              types.String `tfsdk:"default_fs_opt"`
 	DefaultFsType             types.String `tfsdk:"default_fs_type"`
 	DefaultMountOpts          types.List   `tfsdk:"default_mount_opts"`
@@ -435,24 +440,24 @@ type FleetFleetFlashArrayType struct {
 	SanType                   types.String `tfsdk:"san_type"`
 }
 
-type FleetFleetFlashArrayEndpoint struct {
+type FleetFlashArrayEndpoint struct {
 	ApiToken           types.Object `tfsdk:"api_token"`
 	Labels             types.Map    `tfsdk:"labels"`
 	MgmtEndpointChoice types.Object `tfsdk:"mgmt_endpoint_choice"`
 }
 
-type FleetFlashArrayEndpointMgmtEndpointChoice struct {
+type FleetMgmtEndpointChoice struct {
 	MgmtDnsName types.String `tfsdk:"mgmt_dns_name"`
 	MgmtIp      types.String `tfsdk:"mgmt_ip"`
 }
 
-type FleetFleetFlashBladeType struct {
+type FleetFlashBladeType struct {
 	EnableSnapshotDirectory types.Bool   `tfsdk:"enable_snapshot_directory"`
 	ExportRules             types.String `tfsdk:"export_rules"`
 	FlashBlades             types.List   `tfsdk:"flash_blades"`
 }
 
-type FleetFleetFlashBladeEndpoint struct {
+type FleetFlashBladeEndpoint struct {
 	ApiToken           types.Object `tfsdk:"api_token"`
 	Lables             types.Map    `tfsdk:"lables"`
 	MgmtEndpointChoice types.Object `tfsdk:"mgmt_endpoint_choice"`
@@ -464,26 +469,26 @@ type FleetFlashBladeEndpointMgmtEndpointChoice struct {
 	MgmtIp      types.String `tfsdk:"mgmt_ip"`
 }
 
-type FleetFlashBladeEndpointNfsEndpointChoice struct {
+type FleetNfsEndpointChoice struct {
 	NfsEndpointDnsName types.String `tfsdk:"nfs_endpoint_dns_name"`
 	NfsEndpointIp      types.String `tfsdk:"nfs_endpoint_ip"`
 }
 
-type FleetCreateSpecTypeStorageInterfaceChoice struct {
+type FleetStorageIfaceChoice struct {
 	NoStorageInterfaces  types.Bool   `tfsdk:"no_storage_interfaces"`
 	StorageInterfaceList types.Object `tfsdk:"storage_interface_list"`
 }
 
-type FleetCreateSpecTypeStorageInterfaceList struct {
+type FleetStorageIfaceList struct {
 	Interfaces types.List `tfsdk:"interfaces"`
 }
 
-type FleetCreateSpecTypeStorageStaticRoutesChoice struct {
+type FleetStorageStaticRoutesChoice struct {
 	NoStorageStaticRoutes types.Bool   `tfsdk:"no_storage_static_routes"`
 	StorageStaticRoutes   types.Object `tfsdk:"storage_static_routes"`
 }
 
-type FleetCreateSpecTypeStorageStaticRoutes struct {
+type FleetStorageStaticRoutes struct {
 	StorageRoutes types.List `tfsdk:"storage_routes"`
 }
 
@@ -500,34 +505,34 @@ type FleetNextHopType struct {
 	Type           types.List   `tfsdk:"type"`
 }
 
-type FleetIpAddressType struct {
+type FleetIpAddrType struct {
 	VerChoice types.Object `tfsdk:"ver_choice"`
 }
 
-type FleetIpAddressTypeVerChoice struct {
+type FleetVerChoice struct {
 	DualStack types.Object `tfsdk:"dual_stack"`
 	Ipv4      types.Object `tfsdk:"ipv4"`
 	Ipv6      types.Object `tfsdk:"ipv6"`
 }
 
-type FleetIpAddressTypeDualStack struct {
+type FleetDualStack struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
 	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
-type FleetIpv4AddressType struct {
+type FleetIpv4AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type FleetIpv6AddressType struct {
+type FleetIpv6AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type FleetIpAddressTypeIpv4 struct {
+type FleetIpv4 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type FleetIpAddressTypeIpv6 struct {
+type FleetIpv6 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
@@ -550,13 +555,13 @@ type FleetIpSubnetTypeIpv6 struct {
 	Prefix types.String `tfsdk:"prefix"`
 }
 
-type FleetCreateSpecTypeUsbPolicyChoice struct {
+type FleetUsbPolicyChoice struct {
 	AllowAllUsb types.Bool   `tfsdk:"allow_all_usb"`
 	DenyAllUsb  types.Bool   `tfsdk:"deny_all_usb"`
 	UsbPolicy   types.Object `tfsdk:"usb_policy"`
 }
 
-type FleetCreateSpecTypeVmChoice struct {
+type FleetVmChoice struct {
 	DisableVm types.Bool `tfsdk:"disable_vm"`
 	EnableVm  types.Bool `tfsdk:"enable_vm"`
 }
@@ -1187,6 +1192,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStorag
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStorageIscsiChapPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1221,6 +1227,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStorag
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1370,6 +1377,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1418,6 +1426,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1632,6 +1641,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1666,6 +1676,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1700,6 +1711,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1748,6 +1760,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2026,6 +2039,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServi
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2114,6 +2128,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServi
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2419,8 +2434,8 @@ func (d *DataSourceF5XCFleet) Metadata(ctx context.Context, request datasource.M
 func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Network Device Type Represents physical network interface. The 'interface' reference points to a Network Interface object. Attributes such as Labels, MTU from Network Interface must be applied to the device. Device mapping to nodes A fleet can have many devices and nodes in VER customer edge site can have many interfaces. An interface in node inherits configuration from a device by matching, - device_name in Network Interface for the device - device name for physical-interface in the node",
-		Description:         "Network Device Type Represents physical network interface. The 'interface' reference points to a Network Interface object. Attributes such as Labels, MTU from Network Interface must be applied to the device. Device mapping to nodes A fleet can have many devices and nodes in VER customer edge site can have many interfaces. An interface in node inherits configuration from a device by matching, - device_name in Network Interface for the device - device name for physical-interface in the node",
+		MarkdownDescription: "Fleet is used to configure infrastructure components (like nodes) in one or<br>more F5XC customer edge sites homogeneously. Fleet configuration has<br>following information,<br>* Software image release to be deployed on the fleet<br>* List of devices to be configured on every node<br>* Connections between the virtual networks in the site<br>* Security policies applied in the site<br><br>Fleet object must be created in the 'system' namespace for the tenant<br><br>Associating Fleet with Site<br><br>Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label<br>'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant.<br>A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label<br>of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time.<br><br>When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration<br>is applied on all nodes that are member of the fleet.<br><br>Fleet and Virtual Site<br><br>Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between<br>virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset<br>of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site.<br><br>However to enable other features like monitoring, deploying application or jobs on sites represented by fleet,<br>system will automatically create a virtual_site in shared namespace representing all sites in a fleet.",
+		Description:         "Fleet is used to configure infrastructure components (like nodes) in one or more F5XC customer edge sites homogeneously. Fleet configuration has following information, Software image release to be deployed on the fleet List of devices to be configured on every node Connections between the virtual networks in the site Security policies applied in the site Fleet object must be created in the 'system' namespace for the tenant Associating Fleet with Site Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label 'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant. A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time. When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration is applied on all nodes that are member of the fleet. Fleet and Virtual Site Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site. However to enable other features like monitoring, deploying application or jobs on sites represented by fleet, system will automatically create a virtual_site in shared namespace representing all sites in a fleet.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -3535,8 +3550,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																					Required:    false,
 																					Optional:    false,
 																					Computed:    true,
+																					Sensitive:   true,
 																				},
 																			},
+																		},
+																		"none": schema.BoolAttribute{
+																			Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
 																		},
 																	},
 																},
@@ -3603,8 +3625,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																					Required:    false,
 																					Optional:    false,
 																					Computed:    true,
+																					Sensitive:   true,
 																				},
 																			},
+																		},
+																		"none": schema.BoolAttribute{
+																			Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
 																		},
 																	},
 																},
@@ -3743,8 +3772,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																									Required:    false,
 																									Optional:    false,
 																									Computed:    true,
+																									Sensitive:   true,
 																								},
 																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
 																						},
 																					},
 																				},
@@ -3870,8 +3906,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																									Required:    false,
 																									Optional:    false,
 																									Computed:    true,
+																									Sensitive:   true,
 																								},
 																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
 																						},
 																					},
 																				},
@@ -4205,8 +4248,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -4267,8 +4317,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																													Required:    false,
 																													Optional:    false,
 																													Computed:    true,
+																													Sensitive:   true,
 																												},
 																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											Required:    false,
+																											Optional:    false,
+																											Computed:    true,
 																										},
 																									},
 																								},
@@ -4351,8 +4408,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																									Required:    false,
 																									Optional:    false,
 																									Computed:    true,
+																									Sensitive:   true,
 																								},
 																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
 																						},
 																					},
 																				},
@@ -4478,8 +4542,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																									Required:    false,
 																									Optional:    false,
 																									Computed:    true,
+																									Sensitive:   true,
 																								},
 																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
 																						},
 																					},
 																				},
@@ -4843,8 +4914,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
+																												Sensitive:   true,
 																											},
 																										},
+																									},
+																									"none": schema.BoolAttribute{
+																										Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																										Required:    false,
+																										Optional:    false,
+																										Computed:    true,
 																									},
 																								},
 																							},
@@ -4974,8 +5052,15 @@ func (r *DataSourceF5XCFleet) Schema(ctx context.Context, request datasource.Sch
 																												Required:    false,
 																												Optional:    false,
 																												Computed:    true,
+																												Sensitive:   true,
 																											},
 																										},
+																									},
+																									"none": schema.BoolAttribute{
+																										Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																										Required:    false,
+																										Optional:    false,
+																										Computed:    true,
 																									},
 																								},
 																							},
@@ -5474,9 +5559,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_fleet.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_fleet.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_fleet.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "fleet", err))
 		return
 	}
 
@@ -5484,7 +5575,41 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_fleet.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -5507,8 +5632,14 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -5517,6 +5648,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -5569,10 +5701,10 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 
 	// data SpecToModelRoot ArrayOfPointerField --> BlockedServices
 	if len(specData.GetBlockedServices()) > 0 {
-		blockedServicesElements := make([]FleetFleetBlockedServices, 0, len(specData.GetBlockedServices()))
+		blockedServicesElements := make([]FleetBlockedServices, 0, len(specData.GetBlockedServices()))
 
 		for _, blockedServicesElement := range specData.GetBlockedServices() {
-			fleetFleetBlockedServicesModel := FleetFleetBlockedServices{}
+			fleetBlockedServicesModel := FleetBlockedServices{}
 
 			// data specToModelNested OneOfField --> BlockedServicesValueTypeChoice
 			// CreateSpecType: GetBlockedServicesValueTypeChoice() returns the oneof interface value.
@@ -5665,9 +5797,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				fleetFleetBlockedServicesModel.BlockedServicesValueTypeChoice = finalObj
+				fleetBlockedServicesModel.BlockedServicesValueTypeChoice = finalObj
 			} else {
-				fleetFleetBlockedServicesModel.BlockedServicesValueTypeChoice = types.ObjectNull(FleetBlockedServicesBlockedServicesValueTypeChoiceModelAttributeMap)
+				fleetBlockedServicesModel.BlockedServicesValueTypeChoice = types.ObjectNull(FleetBlockedServicesBlockedServicesValueTypeChoiceModelAttributeMap)
 			}
 
 			// data specToModelNested EnumField --> NetworkType
@@ -5679,12 +5811,12 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 				if response.Diagnostics.HasError() {
 					return
 				}
-				fleetFleetBlockedServicesModel.NetworkType = listValue
+				fleetBlockedServicesModel.NetworkType = listValue
 			} else {
-				fleetFleetBlockedServicesModel.NetworkType = types.ListNull(types.StringType)
+				fleetBlockedServicesModel.NetworkType = types.ListNull(types.StringType)
 			}
 
-			blockedServicesElements = append(blockedServicesElements, fleetFleetBlockedServicesModel)
+			blockedServicesElements = append(blockedServicesElements, fleetBlockedServicesModel)
 		}
 
 		{
@@ -5739,10 +5871,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofBondChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		bondChoiceChoices := rawSpecMap["bond_choice"]
+		var bondChoiceChoices interface{}
+		if v := rawSpecMap["bond_choice"]; v != nil {
+			bondChoiceChoices = v
+		} else {
+			bondChoiceChoices = specData.GetBondChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var bondChoiceChoicesModel = &FleetCreateSpecTypeBondChoice{}
+		var bondChoiceChoicesModel = &FleetBondChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5760,9 +5897,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 				if len(bondDeviceListElement.GetBondDevices()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					bondDevicesElements := make([]FleetFleetFleetBondDeviceType, 0, len(bondDeviceListElement.GetBondDevices()))
+					bondDevicesElements := make([]FleetFleetBondDeviceType, 0, len(bondDeviceListElement.GetBondDevices()))
 					for _, bondDevicesElement := range bondDeviceListElement.GetBondDevices() {
-						fleetFleetFleetBondDeviceTypeModel := FleetFleetFleetBondDeviceType{}
+						fleetFleetBondDeviceTypeModel := FleetFleetBondDeviceType{}
 
 						// data specToModelNested RequiredArrayOfStringField --> Devices
 						if len(bondDevicesElement.GetDevices()) > 0 {
@@ -5771,9 +5908,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fleetFleetFleetBondDeviceTypeModel.Devices = listValue
+							fleetFleetBondDeviceTypeModel.Devices = listValue
 						} else {
-							fleetFleetFleetBondDeviceTypeModel.Devices = types.ListNull(types.StringType)
+							fleetFleetBondDeviceTypeModel.Devices = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> LacpChoice
@@ -5848,26 +5985,26 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							fleetFleetFleetBondDeviceTypeModel.LacpChoice = finalObj
+							fleetFleetBondDeviceTypeModel.LacpChoice = finalObj
 						} else {
-							fleetFleetFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(FleetBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
+							fleetFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(FleetBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredUintField --> LinkPollingInterval
-						fleetFleetFleetBondDeviceTypeModel.LinkPollingInterval = types.Int64Value(int64(bondDevicesElement.GetLinkPollingInterval()))
+						fleetFleetBondDeviceTypeModel.LinkPollingInterval = types.Int64Value(int64(bondDevicesElement.GetLinkPollingInterval()))
 
 						// data specToModelNested RequiredUintField --> LinkUpDelay
-						fleetFleetFleetBondDeviceTypeModel.LinkUpDelay = types.Int64Value(int64(bondDevicesElement.GetLinkUpDelay()))
+						fleetFleetBondDeviceTypeModel.LinkUpDelay = types.Int64Value(int64(bondDevicesElement.GetLinkUpDelay()))
 
 						// data specToModelNested RequiredStringField --> Name
 						if bondDevicesElement.GetName() != "" {
-							fleetFleetFleetBondDeviceTypeModel.Name = types.StringValue(bondDevicesElement.GetName())
+							fleetFleetBondDeviceTypeModel.Name = types.StringValue(bondDevicesElement.GetName())
 						} else {
 							// Empty string, set to null
-							fleetFleetFleetBondDeviceTypeModel.Name = types.StringNull()
+							fleetFleetBondDeviceTypeModel.Name = types.StringNull()
 						}
 
-						bondDevicesElements = append(bondDevicesElements, fleetFleetFleetBondDeviceTypeModel)
+						bondDevicesElements = append(bondDevicesElements, fleetFleetBondDeviceTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5972,10 +6109,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofDcClusterGroupChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		dcClusterGroupChoiceChoices := rawSpecMap["dc_cluster_group_choice"]
+		var dcClusterGroupChoiceChoices interface{}
+		if v := rawSpecMap["dc_cluster_group_choice"]; v != nil {
+			dcClusterGroupChoiceChoices = v
+		} else {
+			dcClusterGroupChoiceChoices = specData.GetDcClusterGroupChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var dcClusterGroupChoiceChoicesModel = &FleetCreateSpecTypeDcClusterGroupChoice{}
+		var dcClusterGroupChoiceChoicesModel = &FleetDcClusterGroupChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6156,10 +6298,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofGpuChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		gpuChoiceChoices := rawSpecMap["gpu_choice"]
+		var gpuChoiceChoices interface{}
+		if v := rawSpecMap["gpu_choice"]; v != nil {
+			gpuChoiceChoices = v
+		} else {
+			gpuChoiceChoices = specData.GetGpuChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var gpuChoiceChoicesModel = &FleetCreateSpecTypeGpuChoice{}
+		var gpuChoiceChoicesModel = &FleetGpuChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6363,10 +6510,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofInterfaceChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		interfaceChoiceChoices := rawSpecMap["interface_choice"]
+		var interfaceChoiceChoices interface{}
+		if v := rawSpecMap["interface_choice"]; v != nil {
+			interfaceChoiceChoices = v
+		} else {
+			interfaceChoiceChoices = specData.GetInterfaceChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var interfaceChoiceChoicesModel = &FleetCreateSpecTypeInterfaceChoice{}
+		var interfaceChoiceChoicesModel = &FleetIfaceChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6406,9 +6558,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 				if len(deviceListElement.GetDevices()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					devicesElements := make([]FleetFleetDeviceInstanceType, 0, len(deviceListElement.GetDevices()))
+					devicesElements := make([]FleetDeviceInstanceType, 0, len(deviceListElement.GetDevices()))
 					for _, devicesElement := range deviceListElement.GetDevices() {
-						fleetFleetDeviceInstanceTypeModel := FleetFleetDeviceInstanceType{}
+						fleetDeviceInstanceTypeModel := FleetDeviceInstanceType{}
 
 						// data specToModelNested RequiredOneOfField --> DeviceInstance
 						// CreateSpecType
@@ -6521,17 +6673,17 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							fleetFleetDeviceInstanceTypeModel.DeviceInstanceChoice = finalObj
+							fleetDeviceInstanceTypeModel.DeviceInstanceChoice = finalObj
 						} else {
-							fleetFleetDeviceInstanceTypeModel.DeviceInstanceChoice = types.ObjectNull(FleetInterfaceChoiceDeviceListDevicesDeviceInstanceModelAttributeMap)
+							fleetDeviceInstanceTypeModel.DeviceInstanceChoice = types.ObjectNull(FleetInterfaceChoiceDeviceListDevicesDeviceInstanceModelAttributeMap)
 						}
 
 						// data specToModelNested StringField --> Name
 						if devicesElement.GetName() != "" {
-							fleetFleetDeviceInstanceTypeModel.Name = types.StringValue(devicesElement.GetName())
+							fleetDeviceInstanceTypeModel.Name = types.StringValue(devicesElement.GetName())
 						} else {
 							// Empty string, set to null
-							fleetFleetDeviceInstanceTypeModel.Name = types.StringNull()
+							fleetDeviceInstanceTypeModel.Name = types.StringNull()
 						}
 
 						// data specToModelNested RequiredEnumField --> Owner
@@ -6543,12 +6695,12 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fleetFleetDeviceInstanceTypeModel.Owner = listValue
+							fleetDeviceInstanceTypeModel.Owner = listValue
 						} else {
-							fleetFleetDeviceInstanceTypeModel.Owner = types.ListNull(types.StringType)
+							fleetDeviceInstanceTypeModel.Owner = types.ListNull(types.StringType)
 						}
 
-						devicesElements = append(devicesElements, fleetFleetDeviceInstanceTypeModel)
+						devicesElements = append(devicesElements, fleetDeviceInstanceTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6670,7 +6822,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 
 	// data SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
-		var fleetViewsKubernetesUpgradeDrainModel = &FleetViewsKubernetesUpgradeDrain{}
+		var fleetK8sUpgradeDrainModel = &FleetK8sUpgradeDrain{}
 		kubernetesUpgradeDrainElement := specData.GetKubernetesUpgradeDrain()
 
 		// data specToModelNested RequiredOneOfField --> KubernetesUpgradeDrainEnableChoice
@@ -6786,15 +6938,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			fleetViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
+			fleetK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
 		} else {
-			fleetViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(FleetKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
+			fleetK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(FleetKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
 		}
 
 		kubernetesUpgradeDrainObj, kubernetesUpgradeDrainDiags := utils.GoStructToObjectValue(
 			ctx,
 			FleetKubernetesUpgradeDrainModelAttributeMap,
-			fleetViewsKubernetesUpgradeDrainModel,
+			fleetK8sUpgradeDrainModel,
 		)
 		response.Diagnostics.Append(kubernetesUpgradeDrainDiags...)
 		data.KubernetesUpgradeDrain = kubernetesUpgradeDrainObj
@@ -6832,10 +6984,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofLogsReceiverChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		logsReceiverChoiceChoices := rawSpecMap["logs_receiver_choice"]
+		var logsReceiverChoiceChoices interface{}
+		if v := rawSpecMap["logs_receiver_choice"]; v != nil {
+			logsReceiverChoiceChoices = v
+		} else {
+			logsReceiverChoiceChoices = specData.GetLogsReceiverChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var logsReceiverChoiceChoicesModel = &FleetCreateSpecTypeLogsReceiverChoice{}
+		var logsReceiverChoiceChoicesModel = &FleetLogsReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -7039,12 +7196,8 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	}
 
 	// data SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// data SpecToModelRoot ArrayOfPointerField --> OutsideVirtualNetwork
 	if len(specData.GetOutsideVirtualNetwork()) > 0 {
@@ -7104,7 +7257,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 
 	// data SpecToModelRoot PointerField --> PerformanceEnhancementMode
 	if specData.GetPerformanceEnhancementMode() != nil {
-		var fleetViewsPerformanceEnhancementModeTypeModel = &FleetViewsPerformanceEnhancementModeType{}
+		var fleetPerformanceEnhancementModeTypeModel = &FleetPerformanceEnhancementModeType{}
 		performanceEnhancementModeElement := specData.GetPerformanceEnhancementMode()
 
 		// data specToModelNested RequiredOneOfField --> PerfModeChoice
@@ -7325,15 +7478,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			fleetViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+			fleetPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 		} else {
-			fleetViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(FleetPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+			fleetPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(FleetPerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 		}
 
 		performanceEnhancementModeObj, performanceEnhancementModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			FleetPerformanceEnhancementModeModelAttributeMap,
-			fleetViewsPerformanceEnhancementModeTypeModel,
+			fleetPerformanceEnhancementModeTypeModel,
 		)
 		response.Diagnostics.Append(performanceEnhancementModeDiags...)
 		data.PerformanceEnhancementMode = performanceEnhancementModeObj
@@ -7371,10 +7524,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofSriovInterfaceChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		sriovInterfaceChoiceChoices := rawSpecMap["sriov_interface_choice"]
+		var sriovInterfaceChoiceChoices interface{}
+		if v := rawSpecMap["sriov_interface_choice"]; v != nil {
+			sriovInterfaceChoiceChoices = v
+		} else {
+			sriovInterfaceChoiceChoices = specData.GetSriovInterfaceChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var sriovInterfaceChoiceChoicesModel = &FleetCreateSpecTypeSriovInterfaceChoice{}
+		var sriovInterfaceChoiceChoicesModel = &FleetSriovIfaceChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -7414,25 +7572,25 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 				if len(sriovInterfacesElement.GetSriovInterface()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					sriovInterfaceElements := make([]FleetFleetSriovInterface, 0, len(sriovInterfacesElement.GetSriovInterface()))
+					sriovInterfaceElements := make([]FleetSriovIface, 0, len(sriovInterfacesElement.GetSriovInterface()))
 					for _, sriovInterfaceElement := range sriovInterfacesElement.GetSriovInterface() {
-						fleetFleetSriovInterfaceModel := FleetFleetSriovInterface{}
+						fleetSriovIfaceModel := FleetSriovIface{}
 
 						// data specToModelNested RequiredStringField --> InterfaceName
 						if sriovInterfaceElement.GetInterfaceName() != "" {
-							fleetFleetSriovInterfaceModel.InterfaceName = types.StringValue(sriovInterfaceElement.GetInterfaceName())
+							fleetSriovIfaceModel.InterfaceName = types.StringValue(sriovInterfaceElement.GetInterfaceName())
 						} else {
 							// Empty string, set to null
-							fleetFleetSriovInterfaceModel.InterfaceName = types.StringNull()
+							fleetSriovIfaceModel.InterfaceName = types.StringNull()
 						}
 
 						// data specToModelNested UintField --> NumberOfVfioVfs
-						fleetFleetSriovInterfaceModel.NumberOfVfioVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfioVfs()))
+						fleetSriovIfaceModel.NumberOfVfioVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfioVfs()))
 
 						// data specToModelNested RequiredUintField --> NumberOfVfs
-						fleetFleetSriovInterfaceModel.NumberOfVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfs()))
+						fleetSriovIfaceModel.NumberOfVfs = types.Int64Value(int64(sriovInterfaceElement.GetNumberOfVfs()))
 
-						sriovInterfaceElements = append(sriovInterfaceElements, fleetFleetSriovInterfaceModel)
+						sriovInterfaceElements = append(sriovInterfaceElements, fleetSriovIfaceModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7511,10 +7669,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofStorageClassChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		storageClassChoiceChoices := rawSpecMap["storage_class_choice"]
+		var storageClassChoiceChoices interface{}
+		if v := rawSpecMap["storage_class_choice"]; v != nil {
+			storageClassChoiceChoices = v
+		} else {
+			storageClassChoiceChoices = specData.GetStorageClassChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var storageClassChoiceChoicesModel = &FleetCreateSpecTypeStorageClassChoice{}
+		var storageClassChoiceChoicesModel = &FleetStorageClassChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -7554,9 +7717,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 				if len(storageClassListElement.GetStorageClasses()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					storageClassesElements := make([]FleetFleetFleetStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
+					storageClassesElements := make([]FleetFleetStorageClassType, 0, len(storageClassListElement.GetStorageClasses()))
 					for _, storageClassesElement := range storageClassListElement.GetStorageClasses() {
-						fleetFleetFleetStorageClassTypeModel := FleetFleetFleetStorageClassType{}
+						fleetFleetStorageClassTypeModel := FleetFleetStorageClassType{}
 
 						// data specToModelNested MapOfStringField --> AdvancedStorageParameters
 						if storageClassesElement.GetAdvancedStorageParameters() != nil {
@@ -7567,27 +7730,27 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 								return
 							}
 							// Assign the typed map to the model
-							fleetFleetFleetStorageClassTypeModel.AdvancedStorageParameters = advancedStorageParametersMap
+							fleetFleetStorageClassTypeModel.AdvancedStorageParameters = advancedStorageParametersMap
 						} else {
 							// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 							// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 							// API returned nil (Protobuf omits empty maps). Set to null.
 							// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-							fleetFleetFleetStorageClassTypeModel.AdvancedStorageParameters = types.MapNull(types.StringType)
+							fleetFleetStorageClassTypeModel.AdvancedStorageParameters = types.MapNull(types.StringType)
 						}
 
 						// data specToModelNested BoolField --> AllowVolumeExpansion
-						fleetFleetFleetStorageClassTypeModel.AllowVolumeExpansion = types.BoolValue(bool(storageClassesElement.GetAllowVolumeExpansion()))
+						fleetFleetStorageClassTypeModel.AllowVolumeExpansion = types.BoolValue(bool(storageClassesElement.GetAllowVolumeExpansion()))
 
 						// data specToModelNested BoolField --> DefaultStorageClass
-						fleetFleetFleetStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
+						fleetFleetStorageClassTypeModel.DefaultStorageClass = types.BoolValue(bool(storageClassesElement.GetDefaultStorageClass()))
 
 						// data specToModelNested StringField --> Description
 						if storageClassesElement.GetDescription() != "" {
-							fleetFleetFleetStorageClassTypeModel.Description = types.StringValue(storageClassesElement.GetDescription())
+							fleetFleetStorageClassTypeModel.Description = types.StringValue(storageClassesElement.GetDescription())
 						} else {
 							// Empty string, set to null
-							fleetFleetFleetStorageClassTypeModel.Description = types.StringNull()
+							fleetFleetStorageClassTypeModel.Description = types.StringNull()
 						}
 
 						// data specToModelNested RequiredOneOfField --> DeviceChoice
@@ -7846,36 +8009,36 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							fleetFleetFleetStorageClassTypeModel.DeviceChoice = finalObj
+							fleetFleetStorageClassTypeModel.DeviceChoice = finalObj
 						} else {
-							fleetFleetFleetStorageClassTypeModel.DeviceChoice = types.ObjectNull(FleetStorageClassChoiceStorageClassListStorageClassesDeviceChoiceModelAttributeMap)
+							fleetFleetStorageClassTypeModel.DeviceChoice = types.ObjectNull(FleetStorageClassChoiceStorageClassListStorageClassesDeviceChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested StringField --> ReclaimPolicy
 						if storageClassesElement.GetReclaimPolicy() != "" {
-							fleetFleetFleetStorageClassTypeModel.ReclaimPolicy = types.StringValue(storageClassesElement.GetReclaimPolicy())
+							fleetFleetStorageClassTypeModel.ReclaimPolicy = types.StringValue(storageClassesElement.GetReclaimPolicy())
 						} else {
 							// Empty string, set to null
-							fleetFleetFleetStorageClassTypeModel.ReclaimPolicy = types.StringNull()
+							fleetFleetStorageClassTypeModel.ReclaimPolicy = types.StringNull()
 						}
 
 						// data specToModelNested RequiredStringField --> StorageClassName
 						if storageClassesElement.GetStorageClassName() != "" {
-							fleetFleetFleetStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
+							fleetFleetStorageClassTypeModel.StorageClassName = types.StringValue(storageClassesElement.GetStorageClassName())
 						} else {
 							// Empty string, set to null
-							fleetFleetFleetStorageClassTypeModel.StorageClassName = types.StringNull()
+							fleetFleetStorageClassTypeModel.StorageClassName = types.StringNull()
 						}
 
 						// data specToModelNested RequiredStringField --> StorageDevice
 						if storageClassesElement.GetStorageDevice() != "" {
-							fleetFleetFleetStorageClassTypeModel.StorageDevice = types.StringValue(storageClassesElement.GetStorageDevice())
+							fleetFleetStorageClassTypeModel.StorageDevice = types.StringValue(storageClassesElement.GetStorageDevice())
 						} else {
 							// Empty string, set to null
-							fleetFleetFleetStorageClassTypeModel.StorageDevice = types.StringNull()
+							fleetFleetStorageClassTypeModel.StorageDevice = types.StringNull()
 						}
 
-						storageClassesElements = append(storageClassesElements, fleetFleetFleetStorageClassTypeModel)
+						storageClassesElements = append(storageClassesElements, fleetFleetStorageClassTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7954,10 +8117,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofStorageDeviceChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		storageDeviceChoiceChoices := rawSpecMap["storage_device_choice"]
+		var storageDeviceChoiceChoices interface{}
+		if v := rawSpecMap["storage_device_choice"]; v != nil {
+			storageDeviceChoiceChoices = v
+		} else {
+			storageDeviceChoiceChoices = specData.GetStorageDeviceChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var storageDeviceChoiceChoicesModel = &FleetCreateSpecTypeStorageDeviceChoice{}
+		var storageDeviceChoiceChoicesModel = &FleetStorageDeviceChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -7997,9 +8165,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 				if len(storageDeviceListElement.GetStorageDevices()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					storageDevicesElements := make([]FleetFleetFleetStorageDeviceType, 0, len(storageDeviceListElement.GetStorageDevices()))
+					storageDevicesElements := make([]FleetFleetStorageDeviceType, 0, len(storageDeviceListElement.GetStorageDevices()))
 					for _, storageDevicesElement := range storageDeviceListElement.GetStorageDevices() {
-						fleetFleetFleetStorageDeviceTypeModel := FleetFleetFleetStorageDeviceType{}
+						fleetFleetStorageDeviceTypeModel := FleetFleetStorageDeviceType{}
 
 						// data specToModelNested MapOfStringField --> AdvancedAdvancedParameters
 						if storageDevicesElement.GetAdvancedAdvancedParameters() != nil {
@@ -8010,13 +8178,13 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 								return
 							}
 							// Assign the typed map to the model
-							fleetFleetFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = advancedAdvancedParametersMap
+							fleetFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = advancedAdvancedParametersMap
 						} else {
 							// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 							// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 							// API returned nil (Protobuf omits empty maps). Set to null.
 							// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-							fleetFleetFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = types.MapNull(types.StringType)
+							fleetFleetStorageDeviceTypeModel.AdvancedAdvancedParameters = types.MapNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> DeviceChoice
@@ -8170,6 +8338,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												}
 											}
 
+											// data specToModelNested BoolOfOneOfPointerField --> None
+											var noneInMap bool
+
+											if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+												if _, found := gcSpec["none"]; found {
+													noneInMap = true
+												}
+											}
+
+											if !noneInMap {
+												if _, found := rawSpecMap["none"]; found {
+													noneInMap = true
+												}
+											}
+
+											_, isNoneForBool := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+											if noneInMap || isNoneForBool {
+												iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -8317,6 +8507,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												}
 											}
 
+											// data specToModelNested BoolOfOneOfPointerField --> None
+											var noneInMap bool
+
+											if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+												if _, found := gcSpec["none"]; found {
+													noneInMap = true
+												}
+											}
+
+											if !noneInMap {
+												if _, found := rawSpecMap["none"]; found {
+													noneInMap = true
+												}
+											}
+
+											_, isNoneForBool := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+											if noneInMap || isNoneForBool {
+												passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -8424,7 +8636,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												// data specToModelNested PointerField --> AutoExportCidrs
 												if netappBackendOntapNasElement.GetAutoExportCidrs() != nil {
 													// Create the nested Go struct
-													fleetViewsPrefixStringListTypeModel := &FleetViewsPrefixStringListType{}
+													fleetPrefixStringListTypeModel := &FleetPrefixStringListType{}
 													autoExportCidrsElement := netappBackendOntapNasElement.GetAutoExportCidrs()
 
 													// Recursively populate the nested struct
@@ -8436,9 +8648,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														if response.Diagnostics.HasError() {
 															return
 														}
-														fleetViewsPrefixStringListTypeModel.Ipv6Prefixes = listValue
+														fleetPrefixStringListTypeModel.Ipv6Prefixes = listValue
 													} else {
-														fleetViewsPrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
+														fleetPrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested ArrayOfStringField --> Prefixes
@@ -8448,18 +8660,18 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														if response.Diagnostics.HasError() {
 															return
 														}
-														fleetViewsPrefixStringListTypeModel.Prefixes = listValue
+														fleetPrefixStringListTypeModel.Prefixes = listValue
 													} else {
-														fleetViewsPrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
+														fleetPrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
 													}
 
 													// This field needs to be converted to a types.ObjectValue before assignment.
-													fleetViewsPrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasAutoExportCidrsModelAttributeMap, fleetViewsPrefixStringListTypeModel)
+													fleetPrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasAutoExportCidrsModelAttributeMap, fleetPrefixStringListTypeModel)
 													response.Diagnostics.Append(objDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
-													netappBackendOntapNasAttributeMap["auto_export_cidrs"] = fleetViewsPrefixStringListTypeModelObj
+													netappBackendOntapNasAttributeMap["auto_export_cidrs"] = fleetPrefixStringListTypeModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -8591,6 +8803,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															} else {
 																clientPrivateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// data specToModelNested BoolOfOneOfPointerField --> None
+														var noneInMap bool
+
+														if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+															if _, found := gcSpec["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														if !noneInMap {
+															if _, found := rawSpecMap["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														_, isNoneForBool := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+														if noneInMap || isNoneForBool {
+															clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -8875,6 +9109,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															}
 														}
 
+														// data specToModelNested BoolOfOneOfPointerField --> None
+														var noneInMap bool
+
+														if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+															if _, found := gcSpec["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														if !noneInMap {
+															if _, found := rawSpecMap["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														_, isNoneForBool := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+														if noneInMap || isNoneForBool {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -8923,9 +9179,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												if len(netappBackendOntapNasElement.GetStorage()) > 0 {
 													// Step 1: Always create a slice of model structs from the spec data.
 													// This slice serves as an intermediate representation.
-													storageElements := make([]FleetFleetOntapVirtualStoragePoolType, 0, len(netappBackendOntapNasElement.GetStorage()))
+													storageElements := make([]FleetOntapVirtualStoragePoolType, 0, len(netappBackendOntapNasElement.GetStorage()))
 													for _, storageElement := range netappBackendOntapNasElement.GetStorage() {
-														fleetFleetOntapVirtualStoragePoolTypeModel := FleetFleetOntapVirtualStoragePoolType{}
+														fleetOntapVirtualStoragePoolTypeModel := FleetOntapVirtualStoragePoolType{}
 
 														// data specToModelNested MapOfStringField --> Labels
 														if storageElement.GetLabels() != nil {
@@ -8936,32 +9192,32 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																return
 															}
 															// Assign the typed map to the model
-															fleetFleetOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+															fleetOntapVirtualStoragePoolTypeModel.Labels = labelsMap
 														} else {
 															// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 															// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 															// API returned nil (Protobuf omits empty maps). Set to null.
 															// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-															fleetFleetOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+															fleetOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
 														}
 
 														// data specToModelNested PointerField --> VolumeDefaults
 														if storageElement.GetVolumeDefaults() != nil {
 															// Create the nested Go struct
-															fleetFleetOntapVolumeDefaultsModel := &FleetFleetOntapVolumeDefaults{}
+															fleetOntapVolumeDefaultsModel := &FleetOntapVolumeDefaults{}
 															volumeDefaultsElement := storageElement.GetVolumeDefaults()
 
 															// Recursively populate the nested struct
 
 															// data specToModelNested BoolField --> Encryption
-															fleetFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+															fleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 															// data specToModelNested StringField --> ExportPolicy
 															if volumeDefaultsElement.GetExportPolicy() != "" {
-																fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
 															// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -9032,67 +9288,67 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+																fleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 															} else {
-																fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																fleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 															}
 
 															// data specToModelNested StringField --> SecurityStyle
 															if volumeDefaultsElement.GetSecurityStyle() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+																fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 															}
 
 															// data specToModelNested BoolField --> SnapshotDir
-															fleetFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+															fleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 															// data specToModelNested StringField --> SnapshotPolicy
 															if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+																fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 															}
 
 															// data specToModelNested StringField --> SnapshotReserve
 															if volumeDefaultsElement.GetSnapshotReserve() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+																fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 															}
 
 															// data specToModelNested StringField --> SpaceReserve
 															if volumeDefaultsElement.GetSpaceReserve() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+																fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 															}
 
 															// data specToModelNested BoolField --> SplitOnClone
-															fleetFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+															fleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 															// data specToModelNested StringField --> TieringPolicy
 															if volumeDefaultsElement.GetTieringPolicy() != "" {
-																fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+																fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+																fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 															}
 
 															// data specToModelNested IntField --> UnixPermissions
-															fleetFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+															fleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 															// This field needs to be converted to a types.ObjectValue before assignment.
-															fleetFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap, fleetFleetOntapVolumeDefaultsModel)
+															fleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap, fleetOntapVolumeDefaultsModel)
 															response.Diagnostics.Append(objDiags...)
 															if response.Diagnostics.HasError() {
 																return
 															}
-															fleetFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = fleetFleetOntapVolumeDefaultsModelObj
+															fleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = fleetOntapVolumeDefaultsModelObj
 
 														} else {
 															// The source field is nil (e.g. redacted by the API).
@@ -9101,18 +9357,18 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															// because the API may always return a non-nil struct (with REDACTED values) for this field,
 															// making this else-branch unreachable. The child OneOf handles the actual healing.
 															// The target is a types.Object, so we use types.ObjectNull.
-															fleetFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap)
+															fleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsModelAttributeMap)
 														}
 
 														// data specToModelNested StringField --> Zone
 														if storageElement.GetZone() != "" {
-															fleetFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
+															fleetOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
 														} else {
 															// Empty string, set to null
-															fleetFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
+															fleetOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
 														}
 
-														storageElements = append(storageElements, fleetFleetOntapVirtualStoragePoolTypeModel)
+														storageElements = append(storageElements, fleetOntapVirtualStoragePoolTypeModel)
 													}
 													// CASE 1: The target field is a `types.List` or an attribute map.
 													// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -9173,20 +9429,20 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												// data specToModelNested PointerField --> VolumeDefaults
 												if netappBackendOntapNasElement.GetVolumeDefaults() != nil {
 													// Create the nested Go struct
-													fleetFleetOntapVolumeDefaultsModel := &FleetFleetOntapVolumeDefaults{}
+													fleetOntapVolumeDefaultsModel := &FleetOntapVolumeDefaults{}
 													volumeDefaultsElement := netappBackendOntapNasElement.GetVolumeDefaults()
 
 													// Recursively populate the nested struct
 
 													// data specToModelNested BoolField --> Encryption
-													fleetFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+													fleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 													// data specToModelNested StringField --> ExportPolicy
 													if volumeDefaultsElement.GetExportPolicy() != "" {
-														fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
 													// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -9257,67 +9513,67 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+														fleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 													} else {
-														fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+														fleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 													}
 
 													// data specToModelNested StringField --> SecurityStyle
 													if volumeDefaultsElement.GetSecurityStyle() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+														fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 													}
 
 													// data specToModelNested BoolField --> SnapshotDir
-													fleetFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+													fleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 													// data specToModelNested StringField --> SnapshotPolicy
 													if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+														fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 													}
 
 													// data specToModelNested StringField --> SnapshotReserve
 													if volumeDefaultsElement.GetSnapshotReserve() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+														fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 													}
 
 													// data specToModelNested StringField --> SpaceReserve
 													if volumeDefaultsElement.GetSpaceReserve() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+														fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 													}
 
 													// data specToModelNested BoolField --> SplitOnClone
-													fleetFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+													fleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 													// data specToModelNested StringField --> TieringPolicy
 													if volumeDefaultsElement.GetTieringPolicy() != "" {
-														fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+														fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+														fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 													}
 
 													// data specToModelNested IntField --> UnixPermissions
-													fleetFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+													fleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 													// This field needs to be converted to a types.ObjectValue before assignment.
-													fleetFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsModelAttributeMap, fleetFleetOntapVolumeDefaultsModel)
+													fleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsModelAttributeMap, fleetOntapVolumeDefaultsModel)
 													response.Diagnostics.Append(objDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
-													netappBackendOntapNasAttributeMap["volume_defaults"] = fleetFleetOntapVolumeDefaultsModelObj
+													netappBackendOntapNasAttributeMap["volume_defaults"] = fleetOntapVolumeDefaultsModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -9497,6 +9753,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																		}
 																	}
 
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	var noneInMap bool
+
+																	if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+																		if _, found := gcSpec["none"]; found {
+																			noneInMap = true
+																		}
+																	}
+
+																	if !noneInMap {
+																		if _, found := rawSpecMap["none"]; found {
+																			noneInMap = true
+																		}
+																	}
+
+																	_, isNoneForBool := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+																	if noneInMap || isNoneForBool {
+																		chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -9634,6 +9912,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																		} else {
 																			chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																		}
+																	}
+
+																	// data specToModelNested BoolOfOneOfPointerField --> None
+																	var noneInMap bool
+
+																	if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+																		if _, found := gcSpec["none"]; found {
+																			noneInMap = true
+																		}
+																	}
+
+																	if !noneInMap {
+																		if _, found := rawSpecMap["none"]; found {
+																			noneInMap = true
+																		}
+																	}
+
+																	_, isNoneForBool := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+																	if noneInMap || isNoneForBool {
+																		chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																	}
 
 																	// --- End of Choices ---
@@ -9826,6 +10126,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															} else {
 																clientPrivateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// data specToModelNested BoolOfOneOfPointerField --> None
+														var noneInMap bool
+
+														if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+															if _, found := gcSpec["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														if !noneInMap {
+															if _, found := rawSpecMap["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														_, isNoneForBool := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+														if noneInMap || isNoneForBool {
+															clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -10100,6 +10422,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															}
 														}
 
+														// data specToModelNested BoolOfOneOfPointerField --> None
+														var noneInMap bool
+
+														if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+															if _, found := gcSpec["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														if !noneInMap {
+															if _, found := rawSpecMap["none"]; found {
+																noneInMap = true
+															}
+														}
+
+														_, isNoneForBool := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+														if noneInMap || isNoneForBool {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -10148,9 +10492,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												if len(netappBackendOntapSanElement.GetStorage()) > 0 {
 													// Step 1: Always create a slice of model structs from the spec data.
 													// This slice serves as an intermediate representation.
-													storageElements := make([]FleetFleetOntapVirtualStoragePoolType, 0, len(netappBackendOntapSanElement.GetStorage()))
+													storageElements := make([]FleetOntapVirtualStoragePoolType, 0, len(netappBackendOntapSanElement.GetStorage()))
 													for _, storageElement := range netappBackendOntapSanElement.GetStorage() {
-														fleetFleetOntapVirtualStoragePoolTypeModel := FleetFleetOntapVirtualStoragePoolType{}
+														fleetOntapVirtualStoragePoolTypeModel := FleetOntapVirtualStoragePoolType{}
 
 														// data specToModelNested MapOfStringField --> Labels
 														if storageElement.GetLabels() != nil {
@@ -10161,32 +10505,32 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																return
 															}
 															// Assign the typed map to the model
-															fleetFleetOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+															fleetOntapVirtualStoragePoolTypeModel.Labels = labelsMap
 														} else {
 															// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 															// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 															// API returned nil (Protobuf omits empty maps). Set to null.
 															// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-															fleetFleetOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+															fleetOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
 														}
 
 														// data specToModelNested PointerField --> VolumeDefaults
 														if storageElement.GetVolumeDefaults() != nil {
 															// Create the nested Go struct
-															fleetFleetOntapVolumeDefaultsModel := &FleetFleetOntapVolumeDefaults{}
+															fleetOntapVolumeDefaultsModel := &FleetOntapVolumeDefaults{}
 															volumeDefaultsElement := storageElement.GetVolumeDefaults()
 
 															// Recursively populate the nested struct
 
 															// data specToModelNested BoolField --> Encryption
-															fleetFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+															fleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 															// data specToModelNested StringField --> ExportPolicy
 															if volumeDefaultsElement.GetExportPolicy() != "" {
-																fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
 															// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -10257,67 +10601,67 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																}
 
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+																fleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 															} else {
-																fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																fleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 															}
 
 															// data specToModelNested StringField --> SecurityStyle
 															if volumeDefaultsElement.GetSecurityStyle() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+																fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 															}
 
 															// data specToModelNested BoolField --> SnapshotDir
-															fleetFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+															fleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 															// data specToModelNested StringField --> SnapshotPolicy
 															if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+																fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 															}
 
 															// data specToModelNested StringField --> SnapshotReserve
 															if volumeDefaultsElement.GetSnapshotReserve() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+																fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 															}
 
 															// data specToModelNested StringField --> SpaceReserve
 															if volumeDefaultsElement.GetSpaceReserve() != "" {
-																fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+																fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+																fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 															}
 
 															// data specToModelNested BoolField --> SplitOnClone
-															fleetFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+															fleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 															// data specToModelNested StringField --> TieringPolicy
 															if volumeDefaultsElement.GetTieringPolicy() != "" {
-																fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+																fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 															} else {
 																// Empty string, set to null
-																fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+																fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 															}
 
 															// data specToModelNested IntField --> UnixPermissions
-															fleetFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+															fleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 															// This field needs to be converted to a types.ObjectValue before assignment.
-															fleetFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap, fleetFleetOntapVolumeDefaultsModel)
+															fleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap, fleetOntapVolumeDefaultsModel)
 															response.Diagnostics.Append(objDiags...)
 															if response.Diagnostics.HasError() {
 																return
 															}
-															fleetFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = fleetFleetOntapVolumeDefaultsModelObj
+															fleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = fleetOntapVolumeDefaultsModelObj
 
 														} else {
 															// The source field is nil (e.g. redacted by the API).
@@ -10326,18 +10670,18 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															// because the API may always return a non-nil struct (with REDACTED values) for this field,
 															// making this else-branch unreachable. The child OneOf handles the actual healing.
 															// The target is a types.Object, so we use types.ObjectNull.
-															fleetFleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap)
+															fleetOntapVirtualStoragePoolTypeModel.VolumeDefaults = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsModelAttributeMap)
 														}
 
 														// data specToModelNested StringField --> Zone
 														if storageElement.GetZone() != "" {
-															fleetFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
+															fleetOntapVirtualStoragePoolTypeModel.Zone = types.StringValue(storageElement.GetZone())
 														} else {
 															// Empty string, set to null
-															fleetFleetOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
+															fleetOntapVirtualStoragePoolTypeModel.Zone = types.StringNull()
 														}
 
-														storageElements = append(storageElements, fleetFleetOntapVirtualStoragePoolTypeModel)
+														storageElements = append(storageElements, fleetOntapVirtualStoragePoolTypeModel)
 													}
 													// CASE 1: The target field is a `types.List` or an attribute map.
 													// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10398,20 +10742,20 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												// data specToModelNested PointerField --> VolumeDefaults
 												if netappBackendOntapSanElement.GetVolumeDefaults() != nil {
 													// Create the nested Go struct
-													fleetFleetOntapVolumeDefaultsModel := &FleetFleetOntapVolumeDefaults{}
+													fleetOntapVolumeDefaultsModel := &FleetOntapVolumeDefaults{}
 													volumeDefaultsElement := netappBackendOntapSanElement.GetVolumeDefaults()
 
 													// Recursively populate the nested struct
 
 													// data specToModelNested BoolField --> Encryption
-													fleetFleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
+													fleetOntapVolumeDefaultsModel.Encryption = types.BoolValue(bool(volumeDefaultsElement.GetEncryption()))
 
 													// data specToModelNested StringField --> ExportPolicy
 													if volumeDefaultsElement.GetExportPolicy() != "" {
-														fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
+														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringValue(volumeDefaultsElement.GetExportPolicy())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
+														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
 													// data specToModelNested RequiredOneOfField --> QosPolicyChoice
@@ -10482,67 +10826,67 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
+														fleetOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 													} else {
-														fleetFleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+														fleetOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap)
 													}
 
 													// data specToModelNested StringField --> SecurityStyle
 													if volumeDefaultsElement.GetSecurityStyle() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
+														fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringValue(volumeDefaultsElement.GetSecurityStyle())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SecurityStyle = types.StringNull()
 													}
 
 													// data specToModelNested BoolField --> SnapshotDir
-													fleetFleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
+													fleetOntapVolumeDefaultsModel.SnapshotDir = types.BoolValue(bool(volumeDefaultsElement.GetSnapshotDir()))
 
 													// data specToModelNested StringField --> SnapshotPolicy
 													if volumeDefaultsElement.GetSnapshotPolicy() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
+														fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringValue(volumeDefaultsElement.GetSnapshotPolicy())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SnapshotPolicy = types.StringNull()
 													}
 
 													// data specToModelNested StringField --> SnapshotReserve
 													if volumeDefaultsElement.GetSnapshotReserve() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
+														fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringValue(volumeDefaultsElement.GetSnapshotReserve())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SnapshotReserve = types.StringNull()
 													}
 
 													// data specToModelNested StringField --> SpaceReserve
 													if volumeDefaultsElement.GetSpaceReserve() != "" {
-														fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
+														fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringValue(volumeDefaultsElement.GetSpaceReserve())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
+														fleetOntapVolumeDefaultsModel.SpaceReserve = types.StringNull()
 													}
 
 													// data specToModelNested BoolField --> SplitOnClone
-													fleetFleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
+													fleetOntapVolumeDefaultsModel.SplitOnClone = types.BoolValue(bool(volumeDefaultsElement.GetSplitOnClone()))
 
 													// data specToModelNested StringField --> TieringPolicy
 													if volumeDefaultsElement.GetTieringPolicy() != "" {
-														fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
+														fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringValue(volumeDefaultsElement.GetTieringPolicy())
 													} else {
 														// Empty string, set to null
-														fleetFleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
+														fleetOntapVolumeDefaultsModel.TieringPolicy = types.StringNull()
 													}
 
 													// data specToModelNested IntField --> UnixPermissions
-													fleetFleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
+													fleetOntapVolumeDefaultsModel.UnixPermissions = types.Int32Value(volumeDefaultsElement.GetUnixPermissions())
 
 													// This field needs to be converted to a types.ObjectValue before assignment.
-													fleetFleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsModelAttributeMap, fleetFleetOntapVolumeDefaultsModel)
+													fleetOntapVolumeDefaultsModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsModelAttributeMap, fleetOntapVolumeDefaultsModel)
 													response.Diagnostics.Append(objDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
-													netappBackendOntapSanAttributeMap["volume_defaults"] = fleetFleetOntapVolumeDefaultsModelObj
+													netappBackendOntapSanAttributeMap["volume_defaults"] = fleetOntapVolumeDefaultsModelObj
 
 												} else {
 													// The source field is nil (e.g. redacted by the API).
@@ -10607,7 +10951,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 									// data specToModelNested RequiredPointerField --> Arrays
 									if pureServiceOrchestratorElement.GetArrays() != nil {
 										// Create the nested Go struct
-										fleetFleetPsoArrayConfigurationModel := &FleetFleetPsoArrayConfiguration{}
+										fleetPsoArrayCfgModel := &FleetPsoArrayCfg{}
 										arraysElement := pureServiceOrchestratorElement.GetArrays()
 
 										// Recursively populate the nested struct
@@ -10615,25 +10959,25 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 										// data specToModelNested PointerField --> FlashArray
 										if arraysElement.GetFlashArray() != nil {
 											// Create the nested Go struct
-											fleetFleetFlashArrayTypeModel := &FleetFleetFlashArrayType{}
+											fleetFlashArrayTypeModel := &FleetFlashArrayType{}
 											flashArrayElement := arraysElement.GetFlashArray()
 
 											// Recursively populate the nested struct
 
 											// data specToModelNested StringField --> DefaultFsOpt
 											if flashArrayElement.GetDefaultFsOpt() != "" {
-												fleetFleetFlashArrayTypeModel.DefaultFsOpt = types.StringValue(flashArrayElement.GetDefaultFsOpt())
+												fleetFlashArrayTypeModel.DefaultFsOpt = types.StringValue(flashArrayElement.GetDefaultFsOpt())
 											} else {
 												// Empty string, set to null
-												fleetFleetFlashArrayTypeModel.DefaultFsOpt = types.StringNull()
+												fleetFlashArrayTypeModel.DefaultFsOpt = types.StringNull()
 											}
 
 											// data specToModelNested RequiredStringField --> DefaultFsType
 											if flashArrayElement.GetDefaultFsType() != "" {
-												fleetFleetFlashArrayTypeModel.DefaultFsType = types.StringValue(flashArrayElement.GetDefaultFsType())
+												fleetFlashArrayTypeModel.DefaultFsType = types.StringValue(flashArrayElement.GetDefaultFsType())
 											} else {
 												// Empty string, set to null
-												fleetFleetFlashArrayTypeModel.DefaultFsType = types.StringNull()
+												fleetFlashArrayTypeModel.DefaultFsType = types.StringNull()
 											}
 
 											// data specToModelNested ArrayOfStringField --> DefaultMountOpts
@@ -10643,21 +10987,21 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												if response.Diagnostics.HasError() {
 													return
 												}
-												fleetFleetFlashArrayTypeModel.DefaultMountOpts = listValue
+												fleetFlashArrayTypeModel.DefaultMountOpts = listValue
 											} else {
-												fleetFleetFlashArrayTypeModel.DefaultMountOpts = types.ListNull(types.StringType)
+												fleetFlashArrayTypeModel.DefaultMountOpts = types.ListNull(types.StringType)
 											}
 
 											// data specToModelNested BoolField --> DisablePreemptAttachments
-											fleetFleetFlashArrayTypeModel.DisablePreemptAttachments = types.BoolValue(bool(flashArrayElement.GetDisablePreemptAttachments()))
+											fleetFlashArrayTypeModel.DisablePreemptAttachments = types.BoolValue(bool(flashArrayElement.GetDisablePreemptAttachments()))
 
 											// data specToModelNested RequiredArrayOfPointerField --> FlashArrays
 											if len(flashArrayElement.GetFlashArrays()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												flashArraysElements := make([]FleetFleetFlashArrayEndpoint, 0, len(flashArrayElement.GetFlashArrays()))
+												flashArraysElements := make([]FleetFlashArrayEndpoint, 0, len(flashArrayElement.GetFlashArrays()))
 												for _, flashArraysElement := range flashArrayElement.GetFlashArrays() {
-													fleetFleetFlashArrayEndpointModel := FleetFleetFlashArrayEndpoint{}
+													fleetFlashArrayEndpointModel := FleetFlashArrayEndpoint{}
 
 													// data specToModelNested PointerField --> ApiToken
 													if flashArraysElement.GetApiToken() != nil {
@@ -10762,6 +11106,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																}
 															}
 
+															// data specToModelNested BoolOfOneOfPointerField --> None
+															var noneInMap bool
+
+															if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+																if _, found := gcSpec["none"]; found {
+																	noneInMap = true
+																}
+															}
+
+															if !noneInMap {
+																if _, found := rawSpecMap["none"]; found {
+																	noneInMap = true
+																}
+															}
+
+															_, isNoneForBool := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+															if noneInMap || isNoneForBool {
+																apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+															} else {
+																apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+															}
+
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -10786,7 +11152,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														if response.Diagnostics.HasError() {
 															return
 														}
-														fleetFleetFlashArrayEndpointModel.ApiToken = fleetSecretTypeModelObj
+														fleetFlashArrayEndpointModel.ApiToken = fleetSecretTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -10795,7 +11161,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														// because the API may always return a non-nil struct (with REDACTED values) for this field,
 														// making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														fleetFleetFlashArrayEndpointModel.ApiToken = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenModelAttributeMap)
+														fleetFlashArrayEndpointModel.ApiToken = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenModelAttributeMap)
 													}
 
 													// data specToModelNested MapOfStringField --> Labels
@@ -10807,13 +11173,13 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															return
 														}
 														// Assign the typed map to the model
-														fleetFleetFlashArrayEndpointModel.Labels = labelsMap
+														fleetFlashArrayEndpointModel.Labels = labelsMap
 													} else {
 														// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 														// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 														// API returned nil (Protobuf omits empty maps). Set to null.
 														// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-														fleetFleetFlashArrayEndpointModel.Labels = types.MapNull(types.StringType)
+														fleetFlashArrayEndpointModel.Labels = types.MapNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredOneOfField --> MgmtEndpoint
@@ -10862,12 +11228,12 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														fleetFleetFlashArrayEndpointModel.MgmtEndpointChoice = finalObj
+														fleetFlashArrayEndpointModel.MgmtEndpointChoice = finalObj
 													} else {
-														fleetFleetFlashArrayEndpointModel.MgmtEndpointChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysMgmtEndpointModelAttributeMap)
+														fleetFlashArrayEndpointModel.MgmtEndpointChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysMgmtEndpointModelAttributeMap)
 													}
 
-													flashArraysElements = append(flashArraysElements, fleetFleetFlashArrayEndpointModel)
+													flashArraysElements = append(flashArraysElements, fleetFlashArrayEndpointModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10876,33 +11242,33 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												if response.Diagnostics.HasError() {
 													return
 												}
-												fleetFleetFlashArrayTypeModel.FlashArrays = flashArraysListValue
+												fleetFlashArrayTypeModel.FlashArrays = flashArraysListValue
 
 											} else {
 												// The source list is empty or nil.
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// Assign a null `types.ListValue`.
-												fleetFleetFlashArrayTypeModel.FlashArrays = types.ListNull(types.ObjectType{AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysModelAttributeMap})
+												fleetFlashArrayTypeModel.FlashArrays = types.ListNull(types.ObjectType{AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysModelAttributeMap})
 											}
 
 											// data specToModelNested RequiredIntField --> IscsiLoginTimeout
-											fleetFleetFlashArrayTypeModel.IscsiLoginTimeout = types.Int32Value(flashArrayElement.GetIscsiLoginTimeout())
+											fleetFlashArrayTypeModel.IscsiLoginTimeout = types.Int32Value(flashArrayElement.GetIscsiLoginTimeout())
 
 											// data specToModelNested RequiredStringField --> SanType
 											if flashArrayElement.GetSanType() != "" {
-												fleetFleetFlashArrayTypeModel.SanType = types.StringValue(flashArrayElement.GetSanType())
+												fleetFlashArrayTypeModel.SanType = types.StringValue(flashArrayElement.GetSanType())
 											} else {
 												// Empty string, set to null
-												fleetFleetFlashArrayTypeModel.SanType = types.StringNull()
+												fleetFlashArrayTypeModel.SanType = types.StringNull()
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											fleetFleetFlashArrayTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap, fleetFleetFlashArrayTypeModel)
+											fleetFlashArrayTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap, fleetFlashArrayTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											fleetFleetPsoArrayConfigurationModel.FlashArray = fleetFleetFlashArrayTypeModelObj
+											fleetPsoArrayCfgModel.FlashArray = fleetFlashArrayTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -10911,35 +11277,35 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 											// because the API may always return a non-nil struct (with REDACTED values) for this field,
 											// making this else-branch unreachable. The child OneOf handles the actual healing.
 											// The target is a types.Object, so we use types.ObjectNull.
-											fleetFleetPsoArrayConfigurationModel.FlashArray = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap)
+											fleetPsoArrayCfgModel.FlashArray = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayModelAttributeMap)
 										}
 
 										// data specToModelNested PointerField --> FlashBlade
 										if arraysElement.GetFlashBlade() != nil {
 											// Create the nested Go struct
-											fleetFleetFlashBladeTypeModel := &FleetFleetFlashBladeType{}
+											fleetFlashBladeTypeModel := &FleetFlashBladeType{}
 											flashBladeElement := arraysElement.GetFlashBlade()
 
 											// Recursively populate the nested struct
 
 											// data specToModelNested BoolField --> EnableSnapshotDirectory
-											fleetFleetFlashBladeTypeModel.EnableSnapshotDirectory = types.BoolValue(bool(flashBladeElement.GetEnableSnapshotDirectory()))
+											fleetFlashBladeTypeModel.EnableSnapshotDirectory = types.BoolValue(bool(flashBladeElement.GetEnableSnapshotDirectory()))
 
 											// data specToModelNested StringField --> ExportRules
 											if flashBladeElement.GetExportRules() != "" {
-												fleetFleetFlashBladeTypeModel.ExportRules = types.StringValue(flashBladeElement.GetExportRules())
+												fleetFlashBladeTypeModel.ExportRules = types.StringValue(flashBladeElement.GetExportRules())
 											} else {
 												// Empty string, set to null
-												fleetFleetFlashBladeTypeModel.ExportRules = types.StringNull()
+												fleetFlashBladeTypeModel.ExportRules = types.StringNull()
 											}
 
 											// data specToModelNested RequiredArrayOfPointerField --> FlashBlades
 											if len(flashBladeElement.GetFlashBlades()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												flashBladesElements := make([]FleetFleetFlashBladeEndpoint, 0, len(flashBladeElement.GetFlashBlades()))
+												flashBladesElements := make([]FleetFlashBladeEndpoint, 0, len(flashBladeElement.GetFlashBlades()))
 												for _, flashBladesElement := range flashBladeElement.GetFlashBlades() {
-													fleetFleetFlashBladeEndpointModel := FleetFleetFlashBladeEndpoint{}
+													fleetFlashBladeEndpointModel := FleetFlashBladeEndpoint{}
 
 													// data specToModelNested PointerField --> ApiToken
 													if flashBladesElement.GetApiToken() != nil {
@@ -11044,6 +11410,28 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 																}
 															}
 
+															// data specToModelNested BoolOfOneOfPointerField --> None
+															var noneInMap bool
+
+															if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+																if _, found := gcSpec["none"]; found {
+																	noneInMap = true
+																}
+															}
+
+															if !noneInMap {
+																if _, found := rawSpecMap["none"]; found {
+																	noneInMap = true
+																}
+															}
+
+															_, isNoneForBool := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+															if noneInMap || isNoneForBool {
+																apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+															} else {
+																apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+															}
+
 															// --- End of Choices ---
 
 															// Create the final ObjectValue for this OneOf field
@@ -11068,7 +11456,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														if response.Diagnostics.HasError() {
 															return
 														}
-														fleetFleetFlashBladeEndpointModel.ApiToken = fleetSecretTypeModelObj
+														fleetFlashBladeEndpointModel.ApiToken = fleetSecretTypeModelObj
 
 													} else {
 														// The source field is nil (e.g. redacted by the API).
@@ -11077,7 +11465,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														// because the API may always return a non-nil struct (with REDACTED values) for this field,
 														// making this else-branch unreachable. The child OneOf handles the actual healing.
 														// The target is a types.Object, so we use types.ObjectNull.
-														fleetFleetFlashBladeEndpointModel.ApiToken = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenModelAttributeMap)
+														fleetFlashBladeEndpointModel.ApiToken = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenModelAttributeMap)
 													}
 
 													// data specToModelNested MapOfStringField --> Lables
@@ -11089,13 +11477,13 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 															return
 														}
 														// Assign the typed map to the model
-														fleetFleetFlashBladeEndpointModel.Lables = lablesMap
+														fleetFlashBladeEndpointModel.Lables = lablesMap
 													} else {
 														// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 														// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 														// API returned nil (Protobuf omits empty maps). Set to null.
 														// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-														fleetFleetFlashBladeEndpointModel.Lables = types.MapNull(types.StringType)
+														fleetFlashBladeEndpointModel.Lables = types.MapNull(types.StringType)
 													}
 
 													// data specToModelNested RequiredOneOfField --> MgmtEndpoint
@@ -11144,9 +11532,9 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														fleetFleetFlashBladeEndpointModel.MgmtEndpointChoice = finalObj
+														fleetFlashBladeEndpointModel.MgmtEndpointChoice = finalObj
 													} else {
-														fleetFleetFlashBladeEndpointModel.MgmtEndpointChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesMgmtEndpointModelAttributeMap)
+														fleetFlashBladeEndpointModel.MgmtEndpointChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesMgmtEndpointModelAttributeMap)
 													}
 
 													// data specToModelNested RequiredOneOfField --> NfsEndpoint
@@ -11195,12 +11583,12 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 														}
 
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
-														fleetFleetFlashBladeEndpointModel.NfsEndpointChoice = finalObj
+														fleetFlashBladeEndpointModel.NfsEndpointChoice = finalObj
 													} else {
-														fleetFleetFlashBladeEndpointModel.NfsEndpointChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesNfsEndpointModelAttributeMap)
+														fleetFlashBladeEndpointModel.NfsEndpointChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesNfsEndpointModelAttributeMap)
 													}
 
-													flashBladesElements = append(flashBladesElements, fleetFleetFlashBladeEndpointModel)
+													flashBladesElements = append(flashBladesElements, fleetFlashBladeEndpointModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11209,22 +11597,22 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 												if response.Diagnostics.HasError() {
 													return
 												}
-												fleetFleetFlashBladeTypeModel.FlashBlades = flashBladesListValue
+												fleetFlashBladeTypeModel.FlashBlades = flashBladesListValue
 
 											} else {
 												// The source list is empty or nil.
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// Assign a null `types.ListValue`.
-												fleetFleetFlashBladeTypeModel.FlashBlades = types.ListNull(types.ObjectType{AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesModelAttributeMap})
+												fleetFlashBladeTypeModel.FlashBlades = types.ListNull(types.ObjectType{AttrTypes: FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesModelAttributeMap})
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											fleetFleetFlashBladeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap, fleetFleetFlashBladeTypeModel)
+											fleetFlashBladeTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap, fleetFlashBladeTypeModel)
 											response.Diagnostics.Append(objDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
-											fleetFleetPsoArrayConfigurationModel.FlashBlade = fleetFleetFlashBladeTypeModelObj
+											fleetPsoArrayCfgModel.FlashBlade = fleetFlashBladeTypeModelObj
 
 										} else {
 											// The source field is nil (e.g. redacted by the API).
@@ -11233,16 +11621,16 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 											// because the API may always return a non-nil struct (with REDACTED values) for this field,
 											// making this else-branch unreachable. The child OneOf handles the actual healing.
 											// The target is a types.Object, so we use types.ObjectNull.
-											fleetFleetPsoArrayConfigurationModel.FlashBlade = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap)
+											fleetPsoArrayCfgModel.FlashBlade = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeModelAttributeMap)
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
-										fleetFleetPsoArrayConfigurationModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysModelAttributeMap, fleetFleetPsoArrayConfigurationModel)
+										fleetPsoArrayCfgModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysModelAttributeMap, fleetPsoArrayCfgModel)
 										response.Diagnostics.Append(objDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
-										pureServiceOrchestratorAttributeMap["arrays"] = fleetFleetPsoArrayConfigurationModelObj
+										pureServiceOrchestratorAttributeMap["arrays"] = fleetPsoArrayCfgModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -11292,20 +11680,20 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							fleetFleetFleetStorageDeviceTypeModel.DeviceChoice = finalObj
+							fleetFleetStorageDeviceTypeModel.DeviceChoice = finalObj
 						} else {
-							fleetFleetFleetStorageDeviceTypeModel.DeviceChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceModelAttributeMap)
+							fleetFleetStorageDeviceTypeModel.DeviceChoice = types.ObjectNull(FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredStringField --> StorageDevice
 						if storageDevicesElement.GetStorageDevice() != "" {
-							fleetFleetFleetStorageDeviceTypeModel.StorageDevice = types.StringValue(storageDevicesElement.GetStorageDevice())
+							fleetFleetStorageDeviceTypeModel.StorageDevice = types.StringValue(storageDevicesElement.GetStorageDevice())
 						} else {
 							// Empty string, set to null
-							fleetFleetFleetStorageDeviceTypeModel.StorageDevice = types.StringNull()
+							fleetFleetStorageDeviceTypeModel.StorageDevice = types.StringNull()
 						}
 
-						storageDevicesElements = append(storageDevicesElements, fleetFleetFleetStorageDeviceTypeModel)
+						storageDevicesElements = append(storageDevicesElements, fleetFleetStorageDeviceTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -11384,10 +11772,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofStorageInterfaceChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		storageInterfaceChoiceChoices := rawSpecMap["storage_interface_choice"]
+		var storageInterfaceChoiceChoices interface{}
+		if v := rawSpecMap["storage_interface_choice"]; v != nil {
+			storageInterfaceChoiceChoices = v
+		} else {
+			storageInterfaceChoiceChoices = specData.GetStorageInterfaceChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var storageInterfaceChoiceChoicesModel = &FleetCreateSpecTypeStorageInterfaceChoice{}
+		var storageInterfaceChoiceChoicesModel = &FleetStorageIfaceChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -11534,10 +11927,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofStorageStaticRoutesChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		storageStaticRoutesChoiceChoices := rawSpecMap["storage_static_routes_choice"]
+		var storageStaticRoutesChoiceChoices interface{}
+		if v := rawSpecMap["storage_static_routes_choice"]; v != nil {
+			storageStaticRoutesChoiceChoices = v
+		} else {
+			storageStaticRoutesChoiceChoices = specData.GetStorageStaticRoutesChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var storageStaticRoutesChoiceChoicesModel = &FleetCreateSpecTypeStorageStaticRoutesChoice{}
+		var storageStaticRoutesChoiceChoicesModel = &FleetStorageStaticRoutesChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -11678,7 +12076,7 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 							// data specToModelNested PointerField --> NexthopAddress
 							if nexthopElement.GetNexthopAddress() != nil {
 								// Create the nested Go struct
-								fleetIpAddressTypeModel := &FleetIpAddressType{}
+								fleetIpAddrTypeModel := &FleetIpAddrType{}
 								nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 								// Recursively populate the nested struct
@@ -11708,26 +12106,26 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 											// data specToModelNested PointerField --> Ipv4
 											if dualStackElement.GetIpv4() != nil {
 												// Create the nested Go struct
-												fleetIpv4AddressTypeModel := &FleetIpv4AddressType{}
+												fleetIpv4AddrTypeModel := &FleetIpv4AddrType{}
 												ipv4Element := dualStackElement.GetIpv4()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested StringField --> Addr
 												if ipv4Element.GetAddr() != "" {
-													fleetIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+													fleetIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 												} else {
 													// Empty string, set to null
-													fleetIpv4AddressTypeModel.Addr = types.StringNull()
+													fleetIpv4AddrTypeModel.Addr = types.StringNull()
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												fleetIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, fleetIpv4AddressTypeModel)
+												fleetIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, fleetIpv4AddrTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dualStackAttributeMap["ipv4"] = fleetIpv4AddressTypeModelObj
+												dualStackAttributeMap["ipv4"] = fleetIpv4AddrTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -11742,26 +12140,26 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 											// data specToModelNested PointerField --> Ipv6
 											if dualStackElement.GetIpv6() != nil {
 												// Create the nested Go struct
-												fleetIpv6AddressTypeModel := &FleetIpv6AddressType{}
+												fleetIpv6AddrTypeModel := &FleetIpv6AddrType{}
 												ipv6Element := dualStackElement.GetIpv6()
 
 												// Recursively populate the nested struct
 
 												// data specToModelNested StringField --> Addr
 												if ipv6Element.GetAddr() != "" {
-													fleetIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+													fleetIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 												} else {
 													// Empty string, set to null
-													fleetIpv6AddressTypeModel.Addr = types.StringNull()
+													fleetIpv6AddrTypeModel.Addr = types.StringNull()
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												fleetIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, fleetIpv6AddressTypeModel)
+												fleetIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, fleetIpv6AddrTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												dualStackAttributeMap["ipv6"] = fleetIpv6AddressTypeModelObj
+												dualStackAttributeMap["ipv6"] = fleetIpv6AddrTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -11855,18 +12253,18 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									fleetIpAddressTypeModel.VerChoice = finalObj
+									fleetIpAddrTypeModel.VerChoice = finalObj
 								} else {
-									fleetIpAddressTypeModel.VerChoice = types.ObjectNull(FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressVerModelAttributeMap)
+									fleetIpAddrTypeModel.VerChoice = types.ObjectNull(FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressVerModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								fleetIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressModelAttributeMap, fleetIpAddressTypeModel)
+								fleetIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesNexthopNexthopAddressModelAttributeMap, fleetIpAddrTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								fleetNextHopTypeModel.NexthopAddress = fleetIpAddressTypeModelObj
+								fleetNextHopTypeModel.NexthopAddress = fleetIpAddrTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -12114,10 +12512,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofUsbPolicyChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		usbPolicyChoiceChoices := rawSpecMap["usb_policy_choice"]
+		var usbPolicyChoiceChoices interface{}
+		if v := rawSpecMap["usb_policy_choice"]; v != nil {
+			usbPolicyChoiceChoices = v
+		} else {
+			usbPolicyChoiceChoices = specData.GetUsbPolicyChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var usbPolicyChoiceChoicesModel = &FleetCreateSpecTypeUsbPolicyChoice{}
+		var usbPolicyChoiceChoicesModel = &FleetUsbPolicyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -12260,10 +12663,15 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	if oneofVmChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		vmChoiceChoices := rawSpecMap["vm_choice"]
+		var vmChoiceChoices interface{}
+		if v := rawSpecMap["vm_choice"]; v != nil {
+			vmChoiceChoices = v
+		} else {
+			vmChoiceChoices = specData.GetVmChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var vmChoiceChoicesModel = &FleetCreateSpecTypeVmChoice{}
+		var vmChoiceChoicesModel = &FleetVmChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -12332,12 +12740,8 @@ func (d *DataSourceF5XCFleet) Read(ctx context.Context, request datasource.ReadR
 	}
 
 	// data SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// Set state to fully populated data
 	diags := response.State.Set(ctx, &data)

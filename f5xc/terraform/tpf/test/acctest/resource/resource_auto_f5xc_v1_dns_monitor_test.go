@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCV1DnsMonitor_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-dns-monitor-" + acctest.RandString(t, 8)
+	name := "example-v1-dns-monitor-" + acctest.RandString(t, 8)
 	domain := fmt.Sprintf("%s.example.com", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -40,20 +40,20 @@ func TestAccResourceAutoF5XCV1DnsMonitor_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_basic(name, namespace, domain),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withDescription(name, namespace, domain, "dns monitor basic updated"),
+				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withDescription(name, namespace, domain, "dns monitor updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withIntervalChoiceTransition(t *testing
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-dns-monitor-" + acctest.RandString(t, 8)
+	name := "example-v1-dns-monitor-" + acctest.RandString(t, 8)
 	domain := fmt.Sprintf("%s.example.com", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,20 +76,20 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withIntervalChoiceTransition(t *testing
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withIntervalChoice(name, namespace, domain, "interval_30_secs = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withIntervalChoice(name, namespace, domain, "interval_1_min = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -100,7 +100,7 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withOnFailureToChoiceTransition(t *test
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-dns-monitor-" + acctest.RandString(t, 8)
+	name := "example-v1-dns-monitor-" + acctest.RandString(t, 8)
 	domain := fmt.Sprintf("%s.example.com", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -112,20 +112,20 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withOnFailureToChoiceTransition(t *test
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withOnFailureToChoice(name, namespace, domain, "on_failure_to_any = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withOnFailureToChoice(name, namespace, domain, "on_failure_to_all = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -136,7 +136,7 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withRecordTypeTransition(t *testing.T) 
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-dns-monitor-" + acctest.RandString(t, 8)
+	name := "example-v1-dns-monitor-" + acctest.RandString(t, 8)
 	domain := fmt.Sprintf("%s.example.com", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -148,20 +148,20 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withRecordTypeTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withRecordType(name, namespace, domain, "A"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withRecordType(name, namespace, domain, "AAAA"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -172,7 +172,7 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withProtocolTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-dns-monitor-" + acctest.RandString(t, 8)
+	name := "example-v1-dns-monitor-" + acctest.RandString(t, 8)
 	domain := fmt.Sprintf("%s.example.com", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -184,20 +184,20 @@ func TestAccResourceAutoF5XCV1DnsMonitor_withProtocolTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withProtocol(name, namespace, domain, "UDP"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_withProtocol(name, namespace, domain, "TCP"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -208,10 +208,10 @@ func TestAccResourceAutoF5XCV1DnsMonitor_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-dns-monitor-" + acctest.RandString(t, 8)
+	name := "example-v1-dns-monitor-" + acctest.RandString(t, 8)
 	domain := fmt.Sprintf("%s.example.com", name)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckV1DnsMonitorDestroyProducer(t),
@@ -220,24 +220,28 @@ func TestAccResourceAutoF5XCV1DnsMonitor_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_full(name, namespace, domain, "A", "UDP", "on_failure_to_any = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1DnsMonitorConfig_full(name, namespace, domain, "TXT", "TCP", "on_failure_to_all = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_dns_monitor.test",
+				ResourceName:                         "f5xc_v1_dns_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_dns_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCV1DnsMonitorConfig_full("example-v1-dns-monitor", acctest.SystemNamespace(), "example.example.com", "A", "UDP", "on_failure_to_any = true"),
+		})
 }
 
 func testAccCheckV1DnsMonitorDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -274,12 +278,15 @@ func testAccResourceAutoF5XCV1DnsMonitorConfig_full(name, namespace, domain, rec
   source_critical_threshold  = 1
   on_failure_count           = 2
   receive                    = "example"
+
   labels = {
-    env = "test"
+    env = "example"
   }
+
   annotations = {
     owner = "platform"
   }
+
   name_servers = [
     {
       name_server = "1.1.1.1"
@@ -290,7 +297,7 @@ func testAccResourceAutoF5XCV1DnsMonitorConfig_full(name, namespace, domain, rec
 
 func testAccResourceAutoF5XCV1DnsMonitorConfig_withChoices(name, namespace, domain, intervalChoice, onFailureToChoice, recordType, protocol, extra string) string {
 	return fmt.Sprintf(`
-resource "f5xc_v1_dns_monitor" "test" {
+resource "f5xc_v1_dns_monitor" "example" {
   name      = %q
   namespace = %q
 

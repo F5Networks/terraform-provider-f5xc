@@ -29,12 +29,12 @@ type DataSourceF5XCIpPrefixSet struct {
 	client *client.APIClient
 }
 
-type IpPrefixSetIpPrefixSetIpv4Prefix struct {
+type IpPrefixSetIpv4Prefix struct {
 	Description types.String `tfsdk:"description"`
 	Ipv4Prefix  types.String `tfsdk:"ipv4_prefix"`
 }
 
-type IpPrefixSetIpPrefixSetIpv6Prefix struct {
+type IpPrefixSetIpv6Prefix struct {
 	Description types.String `tfsdk:"description"`
 	Ipv6Prefix  types.String `tfsdk:"ipv6_prefix"`
 }
@@ -81,8 +81,8 @@ func (d *DataSourceF5XCIpPrefixSet) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCIpPrefixSet) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a ip_prefix_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ip_prefix_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a ip_prefix_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ip_prefix_set) etc. can be fetched",
+		MarkdownDescription: "An ip prefix set contains an unordered list of IP prefixes. It can can be used to whitelist or blacklist specific IP prefixes via network policy or service policy.",
+		Description:         "An ip prefix set contains an unordered list of IP prefixes. It can can be used to whitelist or blacklist specific IP prefixes via network policy or service policy.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -224,7 +224,7 @@ func (d *DataSourceF5XCIpPrefixSet) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_ip_prefix_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "ip_prefix_set", err))
 		return
 	}
 
@@ -287,28 +287,28 @@ func (d *DataSourceF5XCIpPrefixSet) Read(ctx context.Context, request datasource
 
 	// data SpecToModelRoot ArrayOfPointerField --> Ipv4Prefixes
 	if len(specData.GetIpv4Prefixes()) > 0 {
-		ipv4PrefixesElements := make([]IpPrefixSetIpPrefixSetIpv4Prefix, 0, len(specData.GetIpv4Prefixes()))
+		ipv4PrefixesElements := make([]IpPrefixSetIpv4Prefix, 0, len(specData.GetIpv4Prefixes()))
 
 		for _, ipv4PrefixesElement := range specData.GetIpv4Prefixes() {
-			ipPrefixSetIpPrefixSetIpv4PrefixModel := IpPrefixSetIpPrefixSetIpv4Prefix{}
+			ipPrefixSetIpv4PrefixModel := IpPrefixSetIpv4Prefix{}
 
 			// data specToModelNested StringField --> Description
 			if ipv4PrefixesElement.GetDescription() != "" {
-				ipPrefixSetIpPrefixSetIpv4PrefixModel.Description = types.StringValue(ipv4PrefixesElement.GetDescription())
+				ipPrefixSetIpv4PrefixModel.Description = types.StringValue(ipv4PrefixesElement.GetDescription())
 			} else {
 				// Empty string, set to null
-				ipPrefixSetIpPrefixSetIpv4PrefixModel.Description = types.StringNull()
+				ipPrefixSetIpv4PrefixModel.Description = types.StringNull()
 			}
 
 			// data specToModelNested RequiredStringField --> Ipv4Prefix
 			if ipv4PrefixesElement.GetIpv4Prefix() != "" {
-				ipPrefixSetIpPrefixSetIpv4PrefixModel.Ipv4Prefix = types.StringValue(ipv4PrefixesElement.GetIpv4Prefix())
+				ipPrefixSetIpv4PrefixModel.Ipv4Prefix = types.StringValue(ipv4PrefixesElement.GetIpv4Prefix())
 			} else {
 				// Empty string, set to null
-				ipPrefixSetIpPrefixSetIpv4PrefixModel.Ipv4Prefix = types.StringNull()
+				ipPrefixSetIpv4PrefixModel.Ipv4Prefix = types.StringNull()
 			}
 
-			ipv4PrefixesElements = append(ipv4PrefixesElements, ipPrefixSetIpPrefixSetIpv4PrefixModel)
+			ipv4PrefixesElements = append(ipv4PrefixesElements, ipPrefixSetIpv4PrefixModel)
 		}
 
 		{
@@ -335,28 +335,28 @@ func (d *DataSourceF5XCIpPrefixSet) Read(ctx context.Context, request datasource
 
 	// data SpecToModelRoot ArrayOfPointerField --> Ipv6Prefixes
 	if len(specData.GetIpv6Prefixes()) > 0 {
-		ipv6PrefixesElements := make([]IpPrefixSetIpPrefixSetIpv6Prefix, 0, len(specData.GetIpv6Prefixes()))
+		ipv6PrefixesElements := make([]IpPrefixSetIpv6Prefix, 0, len(specData.GetIpv6Prefixes()))
 
 		for _, ipv6PrefixesElement := range specData.GetIpv6Prefixes() {
-			ipPrefixSetIpPrefixSetIpv6PrefixModel := IpPrefixSetIpPrefixSetIpv6Prefix{}
+			ipPrefixSetIpv6PrefixModel := IpPrefixSetIpv6Prefix{}
 
 			// data specToModelNested StringField --> Description
 			if ipv6PrefixesElement.GetDescription() != "" {
-				ipPrefixSetIpPrefixSetIpv6PrefixModel.Description = types.StringValue(ipv6PrefixesElement.GetDescription())
+				ipPrefixSetIpv6PrefixModel.Description = types.StringValue(ipv6PrefixesElement.GetDescription())
 			} else {
 				// Empty string, set to null
-				ipPrefixSetIpPrefixSetIpv6PrefixModel.Description = types.StringNull()
+				ipPrefixSetIpv6PrefixModel.Description = types.StringNull()
 			}
 
 			// data specToModelNested RequiredStringField --> Ipv6Prefix
 			if ipv6PrefixesElement.GetIpv6Prefix() != "" {
-				ipPrefixSetIpPrefixSetIpv6PrefixModel.Ipv6Prefix = types.StringValue(ipv6PrefixesElement.GetIpv6Prefix())
+				ipPrefixSetIpv6PrefixModel.Ipv6Prefix = types.StringValue(ipv6PrefixesElement.GetIpv6Prefix())
 			} else {
 				// Empty string, set to null
-				ipPrefixSetIpPrefixSetIpv6PrefixModel.Ipv6Prefix = types.StringNull()
+				ipPrefixSetIpv6PrefixModel.Ipv6Prefix = types.StringNull()
 			}
 
-			ipv6PrefixesElements = append(ipv6PrefixesElements, ipPrefixSetIpPrefixSetIpv6PrefixModel)
+			ipv6PrefixesElements = append(ipv6PrefixesElements, ipPrefixSetIpv6PrefixModel)
 		}
 
 		{

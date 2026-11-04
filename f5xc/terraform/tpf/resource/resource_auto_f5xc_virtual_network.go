@@ -22,7 +22,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -38,6 +37,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -49,6 +49,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
@@ -282,8 +283,8 @@ func (r *ResourceF5XCVirtualNetwork) Metadata(ctx context.Context, request resou
 func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a virtual_network This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_network) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a virtual_network This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_network) etc. can be fetched",
+		MarkdownDescription: "Virtual network is an isolated L3 network. A virtual network can contain<br>one or more IP Subnets. Network elements in a virtual network (interface,<br>host, listener etc...) can talk to each other directly.<br><br>Two virtual networks can have overlapping ip address space. If two networks<br>are connected directly then they will have to guarantee unique ip addressing.<br><br>List of sites where virtual network configuration needs to be present can<br>be configured.",
+		Description:         "Virtual network is an isolated L3 network. A virtual network can contain one or more IP Subnets. Network elements in a virtual network (interface, host, listener etc...) can talk to each other directly. Two virtual networks can have overlapping ip address space. If two networks are connected directly then they will have to guarantee unique ip addressing. List of sites where virtual network configuration needs to be present can be configured.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -339,7 +340,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -425,14 +426,15 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 					Attributes: map[string]schema.Attribute{
 						"attrs": schema.ListAttribute{
 							Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-							MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+							MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 							ElementType:         types.StringType,
 							Required:            false,
 							Optional:            true,
-							Computed:            true,
-							Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+							Computed:            false,
 							Validators: []validator.List{
 								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+								listvalidator.SizeAtMost(4),
+								listvalidator.UniqueValues(),
 							},
 						},
 						"ip_prefixes": schema.ListAttribute{
@@ -538,7 +540,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -575,14 +577,15 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 					Attributes: map[string]schema.Attribute{
 						"attrs": schema.ListAttribute{
 							Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-							MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+							MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 							ElementType:         types.StringType,
 							Required:            false,
 							Optional:            true,
-							Computed:            true,
-							Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+							Computed:            false,
 							Validators: []validator.List{
 								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+								listvalidator.SizeAtMost(4),
+								listvalidator.UniqueValues(),
 							},
 						},
 						"ip_prefixes": schema.ListAttribute{
@@ -595,7 +598,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 							Validators: []validator.List{
 								listvalidator.SizeBetween(1, 256),
 								listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-									regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+									regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 									"must be a valid IPv6 prefix",
 								)),
 								listvalidator.UniqueValues(),
@@ -688,7 +691,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -773,9 +776,17 @@ func (r *ResourceF5XCVirtualNetwork) ModifyPlan(ctx context.Context, req resourc
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCVirtualNetworkModel
 
 	// Read Terraform plan data into the model
@@ -1222,7 +1233,7 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1245,7 +1256,7 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_virtual_network.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "virtual_network", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "virtual_network", err),
 		)
 		return
 	}
@@ -1823,6 +1834,7 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				virtualNetStaticRouteViewTypeModel.NextHopChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				virtualNetStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap)
 			}
 
@@ -1848,14 +1860,12 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 			AttrTypes: VirtualNetworkStaticRoutesModelAttributeMap,
 		}
 		nullStaticRoutesList := basetypes.NewListNull(staticRoutesObjectType)
-		var priorValStaticRoutes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("static_routes"), &priorValStaticRoutes)
-		if !priorValStaticRoutes.IsNull() && !priorValStaticRoutes.IsUnknown() {
-			data.StaticRoutes = priorValStaticRoutes
+		if !data.StaticRoutes.IsNull() && !data.StaticRoutes.IsUnknown() && len(data.StaticRoutes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.StaticRoutes = basetypes.NewListValueMust(staticRoutesObjectType, nil)
 		} else {
 			data.StaticRoutes = nullStaticRoutesList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> StaticV6Routes
@@ -1893,29 +1903,31 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 					if response.Diagnostics.HasError() {
 						return
 					}
-					// State Healing: preserve prior list representation for marked fields.
+					// Semantic List Reconciliation: reconcile backend list order against client representation.
 					var priorValIpPrefixes types.List
 					response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-					} else {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = listValue
+					reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+					response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+					if response.Diagnostics.HasError() {
+						return
 					}
+					virtualNetStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 				} else {
-					// State Healing: preserve prior list representation for marked fields.
+					// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 					var priorValIpPrefixes types.List
 					response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-					} else {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+					reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+					response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+					if response.Diagnostics.HasError() {
+						return
 					}
+					virtualNetStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 				}
 			}
 
@@ -2084,6 +2096,7 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap)
 			}
 
@@ -2110,14 +2123,12 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 			AttrTypes: VirtualNetworkStaticV6RoutesModelAttributeMap,
 		}
 		nullStaticV6RoutesList := basetypes.NewListNull(staticV6RoutesObjectType)
-		var priorValStaticV6Routes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("static_v6_routes"), &priorValStaticV6Routes)
-		if !priorValStaticV6Routes.IsNull() && !priorValStaticV6Routes.IsUnknown() {
-			data.StaticV6Routes = priorValStaticV6Routes
+		if !data.StaticV6Routes.IsNull() && !data.StaticV6Routes.IsUnknown() && len(data.StaticV6Routes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.StaticV6Routes = basetypes.NewListValueMust(staticV6RoutesObjectType, nil)
 		} else {
 			data.StaticV6Routes = nullStaticV6RoutesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2176,7 +2187,7 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_network.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "virtual_network", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "virtual_network", err),
 		)
 		return
 	}
@@ -2540,7 +2551,15 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.NetworkChoice = types.ObjectNull(VirtualNetworkNetworkChoiceModelAttributeMap)
+
+		if data.NetworkChoice.IsNull() || data.NetworkChoice.IsUnknown() || ((data.NetworkChoice.Attributes()["global_network"].IsNull() || data.NetworkChoice.Attributes()["global_network"].IsUnknown()) && (data.NetworkChoice.Attributes()["legacy_type"].IsNull() || data.NetworkChoice.Attributes()["legacy_type"].IsUnknown()) && (data.NetworkChoice.Attributes()["site_local_inside_network"].IsNull() || data.NetworkChoice.Attributes()["site_local_inside_network"].IsUnknown()) && (data.NetworkChoice.Attributes()["site_local_network"].IsNull() || data.NetworkChoice.Attributes()["site_local_network"].IsUnknown())) {
+			data.NetworkChoice = types.ObjectValueMust(VirtualNetworkNetworkChoiceModelAttributeMap, map[string]attr.Value{
+				"global_network":            types.BoolValue(true),
+				"legacy_type":               types.ListNull(types.StringType),
+				"site_local_inside_network": types.BoolNull(),
+				"site_local_network":        types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> StaticRoutes
@@ -2748,6 +2767,7 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				virtualNetStaticRouteViewTypeModel.NextHopChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				virtualNetStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap)
 			}
 
@@ -2773,14 +2793,12 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 			AttrTypes: VirtualNetworkStaticRoutesModelAttributeMap,
 		}
 		nullStaticRoutesList := basetypes.NewListNull(staticRoutesObjectType)
-		var priorValStaticRoutes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("static_routes"), &priorValStaticRoutes)
-		if !priorValStaticRoutes.IsNull() && !priorValStaticRoutes.IsUnknown() {
-			data.StaticRoutes = priorValStaticRoutes
+		if !data.StaticRoutes.IsNull() && !data.StaticRoutes.IsUnknown() && len(data.StaticRoutes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.StaticRoutes = basetypes.NewListValueMust(staticRoutesObjectType, nil)
 		} else {
 			data.StaticRoutes = nullStaticRoutesList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> StaticV6Routes
@@ -2818,29 +2836,31 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 					if response.Diagnostics.HasError() {
 						return
 					}
-					// State Healing: preserve prior list representation for marked fields.
+					// Semantic List Reconciliation: reconcile backend list order against client representation.
 					var priorValIpPrefixes types.List
 					response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-					} else {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = listValue
+					reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, listValue)
+					response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+					if response.Diagnostics.HasError() {
+						return
 					}
+					virtualNetStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 				} else {
-					// State Healing: preserve prior list representation for marked fields.
+					// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 					var priorValIpPrefixes types.List
 					response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-					} else {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+					reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+					response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+					if response.Diagnostics.HasError() {
+						return
 					}
+					virtualNetStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 				}
 			}
 
@@ -3009,6 +3029,7 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap)
 			}
 
@@ -3035,14 +3056,12 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 			AttrTypes: VirtualNetworkStaticV6RoutesModelAttributeMap,
 		}
 		nullStaticV6RoutesList := basetypes.NewListNull(staticV6RoutesObjectType)
-		var priorValStaticV6Routes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("static_v6_routes"), &priorValStaticV6Routes)
-		if !priorValStaticV6Routes.IsNull() && !priorValStaticV6Routes.IsUnknown() {
-			data.StaticV6Routes = priorValStaticV6Routes
+		if !data.StaticV6Routes.IsNull() && !data.StaticV6Routes.IsUnknown() && len(data.StaticV6Routes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.StaticV6Routes = basetypes.NewListValueMust(staticV6RoutesObjectType, nil)
 		} else {
 			data.StaticV6Routes = nullStaticV6RoutesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3054,6 +3073,12 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 }
 
 func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCVirtualNetworkModel
@@ -3520,7 +3545,7 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3536,7 +3561,7 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_network.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "virtual_network", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "virtual_network", err),
 		)
 		return
 	}
@@ -3551,7 +3576,7 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_network.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "virtual_network", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "virtual_network", err),
 		)
 		return
 	}
@@ -3657,34 +3682,27 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -3713,17 +3731,23 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -4123,6 +4147,7 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				virtualNetStaticRouteViewTypeModel.NextHopChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				virtualNetStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap)
 			}
 
@@ -4148,14 +4173,12 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 			AttrTypes: VirtualNetworkStaticRoutesModelAttributeMap,
 		}
 		nullStaticRoutesList := basetypes.NewListNull(staticRoutesObjectType)
-		var priorValStaticRoutes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("static_routes"), &priorValStaticRoutes)
-		if !priorValStaticRoutes.IsNull() && !priorValStaticRoutes.IsUnknown() {
-			data.StaticRoutes = priorValStaticRoutes
+		if !data.StaticRoutes.IsNull() && !data.StaticRoutes.IsUnknown() && len(data.StaticRoutes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.StaticRoutes = basetypes.NewListValueMust(staticRoutesObjectType, nil)
 		} else {
 			data.StaticRoutes = nullStaticRoutesList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> StaticV6Routes
@@ -4193,29 +4216,31 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 					if response.Diagnostics.HasError() {
 						return
 					}
-					// State Healing: preserve prior list representation for marked fields.
+					// Semantic List Reconciliation: reconcile backend list order against client representation.
 					var priorValIpPrefixes types.List
-					response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
+					response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-					} else {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = listValue
+					reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+					response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+					if response.Diagnostics.HasError() {
+						return
 					}
+					virtualNetStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 				} else {
-					// State Healing: preserve prior list representation for marked fields.
+					// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 					var priorValIpPrefixes types.List
-					response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
+					response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("static_v6_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-					} else {
-						virtualNetStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+					reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+					response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+					if response.Diagnostics.HasError() {
+						return
 					}
+					virtualNetStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 				}
 			}
 
@@ -4384,6 +4409,7 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				virtualNetStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap)
 			}
 
@@ -4410,14 +4436,12 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 			AttrTypes: VirtualNetworkStaticV6RoutesModelAttributeMap,
 		}
 		nullStaticV6RoutesList := basetypes.NewListNull(staticV6RoutesObjectType)
-		var priorValStaticV6Routes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("static_v6_routes"), &priorValStaticV6Routes)
-		if !priorValStaticV6Routes.IsNull() && !priorValStaticV6Routes.IsUnknown() {
-			data.StaticV6Routes = priorValStaticV6Routes
+		if !data.StaticV6Routes.IsNull() && !data.StaticV6Routes.IsUnknown() && len(data.StaticV6Routes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.StaticV6Routes = basetypes.NewListValueMust(staticV6RoutesObjectType, nil)
 		} else {
 			data.StaticV6Routes = nullStaticV6RoutesList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -4492,7 +4516,7 @@ func (r *ResourceF5XCVirtualNetwork) Delete(ctx context.Context, request resourc
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "virtual_network", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "virtual_network", err),
 		)
 		return
 	}

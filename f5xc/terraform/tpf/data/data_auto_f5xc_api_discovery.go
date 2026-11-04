@@ -29,31 +29,31 @@ type DataSourceF5XCApiDiscovery struct {
 	client *client.APIClient
 }
 
-type ApiDiscoveryApiDiscoveryCustomAuthType struct {
+type ApiDiscoveryCustomAuthType struct {
 	ParameterName types.String `tfsdk:"parameter_name"`
 	ParameterType types.List   `tfsdk:"parameter_type"`
 }
 
-type ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy struct {
+type ApiDiscoveryUserDefinedApiDiscoveryPolicy struct {
 	DefaultBehaviorChoice types.Object `tfsdk:"default_behavior_choice"`
 	DiscoveryRules        types.List   `tfsdk:"discovery_rules"`
 }
 
-type ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoice struct {
+type ApiDiscoveryDefaultBehaviorChoice struct {
 	Exclusive types.Object `tfsdk:"exclusive"`
 	Inclusive types.Bool   `tfsdk:"inclusive"`
 }
 
-type ApiDiscoveryUserDefinedApiDiscoveryPolicyExclusive struct {
+type ApiDiscoveryExclusive struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 }
 
-type ApiDiscoveryExclusionConfigActionChoice struct {
+type ApiDiscoveryActionChoice struct {
 	Archive types.Bool `tfsdk:"archive"`
 	Ignore  types.Bool `tfsdk:"ignore"`
 }
 
-type ApiDiscoveryApiDiscoveryDiscoveryRule struct {
+type ApiDiscoveryDiscoveryRule struct {
 	Labels         types.Map    `tfsdk:"labels"`
 	Metadata       types.Object `tfsdk:"metadata"`
 	RuleProperties types.Object `tfsdk:"rule_properties"`
@@ -64,29 +64,29 @@ type ApiDiscoveryMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type ApiDiscoveryApiDiscoveryRuleProperties struct {
+type ApiDiscoveryRuleProps struct {
 	CriteriaChoice types.Object `tfsdk:"criteria_choice"`
 	RuleTypeChoice types.Object `tfsdk:"rule_type_choice"`
 }
 
-type ApiDiscoveryRulePropertiesCriteriaChoice struct {
+type ApiDiscoveryCriteriaChoice struct {
 	HttpHeaderCriteria types.Object `tfsdk:"http_header_criteria"`
 	Pattern            types.String `tfsdk:"pattern"`
 }
 
-type ApiDiscoveryRulePropertiesHttpHeaderCriteria struct {
+type ApiDiscoveryHttpHeaderCriteria struct {
 	FieldName types.String `tfsdk:"field_name"`
 	Location  types.List   `tfsdk:"location"`
 	MatchType types.List   `tfsdk:"match_type"`
 	Value     types.String `tfsdk:"value"`
 }
 
-type ApiDiscoveryRulePropertiesRuleTypeChoice struct {
+type ApiDiscoveryRuleTypeChoice struct {
 	Exclusion types.Object `tfsdk:"exclusion"`
 	Inclusion types.Bool   `tfsdk:"inclusion"`
 }
 
-type ApiDiscoveryRulePropertiesExclusion struct {
+type ApiDiscoveryExclusion struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 }
 
@@ -98,13 +98,13 @@ type DataSourceF5XCApiDiscoveryModel struct {
 	Name                          types.String   `tfsdk:"name"`
 	Namespace                     types.String   `tfsdk:"namespace"`
 	Uid                           types.String   `tfsdk:"uid"`
-	CustomAuthTypes               types.List     `tfsdk:"custom_auth_types"`
+	CustomAuthTypes               types.Set      `tfsdk:"custom_auth_types"`
 	UserDefinedApiDiscoveryPolicy types.Object   `tfsdk:"user_defined_api_discovery_policy"`
 	Timeouts                      timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> CustomAuthTypes
+// Attribute map for SetOfPointerField --> CustomAuthTypes
 var ApiDiscoveryCustomAuthTypesModelAttributeMap = map[string]attr.Type{
 
 	"parameter_name": types.StringType,
@@ -265,8 +265,8 @@ func (d *DataSourceF5XCApiDiscovery) Metadata(ctx context.Context, request datas
 func (r *DataSourceF5XCApiDiscovery) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a api_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_discovery) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a api_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_discovery) etc. can be fetched",
+		MarkdownDescription: "The api_discovery contains settings for API discovery",
+		Description:         "The api_discovery contains settings for API discovery",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -307,7 +307,7 @@ func (r *DataSourceF5XCApiDiscovery) Schema(ctx context.Context, request datasou
 				Optional:    false,
 				Computed:    true,
 			},
-			"custom_auth_types": schema.ListNestedAttribute{
+			"custom_auth_types": schema.SetNestedAttribute{
 				Description: "custom_auth_types Select your custom authentication types to be detected in the API discovery",
 				Required:    false,
 				Optional:    false,
@@ -572,7 +572,7 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "api_discovery", err))
 		return
 	}
 
@@ -633,19 +633,19 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 	// data SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// data SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
+	// data SpecToModelRoot SetOfPointerField --> CustomAuthTypes
 	if len(specData.GetCustomAuthTypes()) > 0 {
-		customAuthTypesElements := make([]ApiDiscoveryApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
+		customAuthTypesElements := make([]ApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
 
 		for _, customAuthTypesElement := range specData.GetCustomAuthTypes() {
-			apiDiscoveryApiDiscoveryCustomAuthTypeModel := ApiDiscoveryApiDiscoveryCustomAuthType{}
+			apiDiscoveryCustomAuthTypeModel := ApiDiscoveryCustomAuthType{}
 
 			// data specToModelNested RequiredStringField --> ParameterName
 			if customAuthTypesElement.GetParameterName() != "" {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
 			} else {
 				// Empty string, set to null
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
 			}
 
 			// data specToModelNested RequiredEnumField --> ParameterType
@@ -657,39 +657,39 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 				if response.Diagnostics.HasError() {
 					return
 				}
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = listValue
+				apiDiscoveryCustomAuthTypeModel.ParameterType = listValue
 			} else {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
+				apiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
 			}
 
-			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryApiDiscoveryCustomAuthTypeModel)
+			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryCustomAuthTypeModel)
 		}
 
 		{
-			customAuthTypesList, listDiags := utils.GoStructSliceToListValue(
+			customAuthTypesSet, setDiags := utils.GoStructSliceToSetValue(
 				ctx,
 				ApiDiscoveryCustomAuthTypesModelAttributeMap,
 				customAuthTypesElements,
 			)
 
-			response.Diagnostics.Append(listDiags...)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
 
-			data.CustomAuthTypes = customAuthTypesList
+			data.CustomAuthTypes = customAuthTypesSet
 		}
 	} else {
 		var customAuthTypesObjectType = basetypes.ObjectType{
 			AttrTypes: ApiDiscoveryCustomAuthTypesModelAttributeMap,
 		}
-		nullCustomAuthTypesList := basetypes.NewListNull(customAuthTypesObjectType)
-		data.CustomAuthTypes = nullCustomAuthTypesList
+		nullCustomAuthTypesSet := basetypes.NewSetNull(customAuthTypesObjectType)
+		data.CustomAuthTypes = nullCustomAuthTypesSet
 	}
 
 	// data SpecToModelRoot PointerField --> UserDefinedApiDiscoveryPolicy
 	if specData.GetUserDefinedApiDiscoveryPolicy() != nil {
-		var apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy{}
+		var apiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryUserDefinedApiDiscoveryPolicy{}
 		userDefinedApiDiscoveryPolicyElement := specData.GetUserDefinedApiDiscoveryPolicy()
 
 		// data specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
@@ -796,19 +796,19 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested ArrayOfPointerField --> DiscoveryRules
 		if len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			discoveryRulesElements := make([]ApiDiscoveryApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
+			discoveryRulesElements := make([]ApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
 			for _, discoveryRulesElement := range userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules() {
-				apiDiscoveryApiDiscoveryDiscoveryRuleModel := ApiDiscoveryApiDiscoveryDiscoveryRule{}
+				apiDiscoveryDiscoveryRuleModel := ApiDiscoveryDiscoveryRule{}
 
 				// data specToModelNested MapOfStringField --> Labels
 				if discoveryRulesElement.GetLabels() != nil {
@@ -819,13 +819,13 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 						return
 					}
 					// Assign the typed map to the model
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+					apiDiscoveryDiscoveryRuleModel.Labels = labelsMap
 				} else {
 					// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 					// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 					// API returned nil (Protobuf omits empty maps). Set to null.
 					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
+					apiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
 				}
 
 				// data specToModelNested PointerField --> Metadata
@@ -858,7 +858,7 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
+					apiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -867,13 +867,13 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
 				}
 
 				// data specToModelNested PointerField --> RuleProperties
 				if discoveryRulesElement.GetRuleProperties() != nil {
 					// Create the nested Go struct
-					apiDiscoveryApiDiscoveryRulePropertiesModel := &ApiDiscoveryApiDiscoveryRuleProperties{}
+					apiDiscoveryRulePropsModel := &ApiDiscoveryRuleProps{}
 					rulePropertiesElement := discoveryRulesElement.GetRuleProperties()
 
 					// Recursively populate the nested struct
@@ -978,10 +978,10 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = finalObj
+						apiDiscoveryRulePropsModel.CriteriaChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
+						apiDiscoveryRulePropsModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
 					}
 
 					// data specToModelNested RequiredOneOfField --> RuleTypeChoice
@@ -1088,19 +1088,19 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = finalObj
+						apiDiscoveryRulePropsModel.RuleTypeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
+						apiDiscoveryRulePropsModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					apiDiscoveryApiDiscoveryRulePropertiesModelObj, objDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryApiDiscoveryRulePropertiesModel)
+					apiDiscoveryRulePropsModelObj, objDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryRulePropsModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryApiDiscoveryRulePropertiesModelObj
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryRulePropsModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -1109,10 +1109,10 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
 				}
 
-				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryApiDiscoveryDiscoveryRuleModel)
+				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryDiscoveryRuleModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1121,19 +1121,19 @@ func (d *DataSourceF5XCApiDiscovery) Read(ctx context.Context, request datasourc
 			if response.Diagnostics.HasError() {
 				return
 			}
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
 		}
 
 		userDefinedApiDiscoveryPolicyObj, userDefinedApiDiscoveryPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap,
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel,
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel,
 		)
 		response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDiags...)
 		data.UserDefinedApiDiscoveryPolicy = userDefinedApiDiscoveryPolicyObj

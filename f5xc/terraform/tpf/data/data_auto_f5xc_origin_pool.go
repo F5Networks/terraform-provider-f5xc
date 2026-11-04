@@ -32,7 +32,7 @@ type DataSourceF5XCOriginPool struct {
 	client *client.APIClient
 }
 
-type OriginPoolOriginPoolOriginPoolAdvancedOptions struct {
+type OriginPoolOriginPoolAdvancedOptions struct {
 	CircuitBreakerChoice           types.Object `tfsdk:"circuit_breaker_choice"`
 	ConnectionTimeout              types.Int64  `tfsdk:"connection_timeout"`
 	HttpIdleTimeout                types.Int64  `tfsdk:"http_idle_timeout"`
@@ -45,13 +45,13 @@ type OriginPoolOriginPoolOriginPoolAdvancedOptions struct {
 	SubsetChoice                   types.Object `tfsdk:"subset_choice"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsCircuitBreakerChoice struct {
+type OriginPoolCircuitBreakerChoice struct {
 	CircuitBreaker        types.Object `tfsdk:"circuit_breaker"`
 	DefaultCircuitBreaker types.Bool   `tfsdk:"default_circuit_breaker"`
 	DisableCircuitBreaker types.Bool   `tfsdk:"disable_circuit_breaker"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsCircuitBreaker struct {
+type OriginPoolCircuitBreaker struct {
 	ConnectionLimit types.Int64 `tfsdk:"connection_limit"`
 	MaxRequests     types.Int64 `tfsdk:"max_requests"`
 	PendingRequests types.Int64 `tfsdk:"pending_requests"`
@@ -59,13 +59,13 @@ type OriginPoolOriginPoolAdvancedOptionsCircuitBreaker struct {
 	Retries         types.Int64 `tfsdk:"retries"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsHttpProtocolTypeChoice struct {
+type OriginPoolHttpProtoTypeChoice struct {
 	AutoHttpConfig types.Bool   `tfsdk:"auto_http_config"`
 	Http1Config    types.Object `tfsdk:"http1_config"`
 	Http2Options   types.Object `tfsdk:"http2_options"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsHttp1Config struct {
+type OriginPoolHttp1Config struct {
 	HeaderTransformation types.Object `tfsdk:"header_transformation"`
 }
 
@@ -73,33 +73,33 @@ type OriginPoolHeaderTransformationType struct {
 	HeaderTransformationChoice types.Object `tfsdk:"header_transformation_choice"`
 }
 
-type OriginPoolHeaderTransformationTypeHeaderTransformationChoice struct {
+type OriginPoolHeaderTransformationChoice struct {
 	DefaultHeaderTransformation      types.Bool `tfsdk:"default_header_transformation"`
 	LegacyHeaderTransformation       types.Bool `tfsdk:"legacy_header_transformation"`
 	PreserveCaseHeaderTransformation types.Bool `tfsdk:"preserve_case_header_transformation"`
 	ProperCaseHeaderTransformation   types.Bool `tfsdk:"proper_case_header_transformation"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsHttp2Options struct {
+type OriginPoolHttp2Options struct {
 	Enabled types.Bool `tfsdk:"enabled"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsLbSourceIpPersistanceChoice struct {
+type OriginPoolLbSrcIpPersistanceChoice struct {
 	DisableLbSourceIpPersistance types.Bool `tfsdk:"disable_lb_source_ip_persistance"`
 	EnableLbSourceIpPersistance  types.Bool `tfsdk:"enable_lb_source_ip_persistance"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsMaxRequestsPerConnectionChoice struct {
+type OriginPoolMaxRequestsPerConnChoice struct {
 	MaxRequestsPerConnection    types.Int64 `tfsdk:"max_requests_per_connection"`
 	NoRequestLimitPerConnection types.Bool  `tfsdk:"no_request_limit_per_connection"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsOutlierDetectionChoice struct {
+type OriginPoolOutlierDetectionChoice struct {
 	DisableOutlierDetection types.Bool   `tfsdk:"disable_outlier_detection"`
 	OutlierDetection        types.Object `tfsdk:"outlier_detection"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsOutlierDetection struct {
+type OriginPoolOutlierDetection struct {
 	BaseEjectionTime          types.Int64 `tfsdk:"base_ejection_time"`
 	Consecutive_5Xx           types.Int64 `tfsdk:"consecutive_5xx"`
 	ConsecutiveGatewayFailure types.Int64 `tfsdk:"consecutive_gateway_failure"`
@@ -107,52 +107,52 @@ type OriginPoolOriginPoolAdvancedOptionsOutlierDetection struct {
 	MaxEjectionPercent        types.Int64 `tfsdk:"max_ejection_percent"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsPanicThresholdTypeChoice struct {
+type OriginPoolPanicThresholdTypeChoice struct {
 	NoPanicThreshold types.Bool  `tfsdk:"no_panic_threshold"`
 	PanicThreshold   types.Int64 `tfsdk:"panic_threshold"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsProxyProtocolChoice struct {
+type OriginPoolProxyProtoChoice struct {
 	DisableProxyProtocol types.Bool `tfsdk:"disable_proxy_protocol"`
 	ProxyProtocolV1      types.Bool `tfsdk:"proxy_protocol_v1"`
 	ProxyProtocolV2      types.Bool `tfsdk:"proxy_protocol_v2"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsSubsetChoice struct {
+type OriginPoolSubsetChoice struct {
 	DisableSubsets types.Bool   `tfsdk:"disable_subsets"`
 	EnableSubsets  types.Object `tfsdk:"enable_subsets"`
 }
 
-type OriginPoolOriginPoolAdvancedOptionsEnableSubsets struct {
+type OriginPoolEnableSubsets struct {
 	EndpointSubsets      types.List   `tfsdk:"endpoint_subsets"`
 	FallbackPolicyChoice types.Object `tfsdk:"fallback_policy_choice"`
 }
 
-type OriginPoolClusterEndpointSubsetSelectorType struct {
+type OriginPoolEndpointSubsetSelectorType struct {
 	Keys types.List `tfsdk:"keys"`
 }
 
-type OriginPoolOriginPoolSubsetsFallbackPolicyChoice struct {
+type OriginPoolFallbackPolicyChoice struct {
 	AnyEndpoint   types.Bool   `tfsdk:"any_endpoint"`
 	DefaultSubset types.Object `tfsdk:"default_subset"`
 	FailRequest   types.Bool   `tfsdk:"fail_request"`
 }
 
-type OriginPoolOriginPoolSubsetsDefaultSubset struct {
+type OriginPoolDefaultSubset struct {
 	DefaultSubset types.Map `tfsdk:"default_subset"`
 }
 
-type OriginPoolGlobalSpecTypeHealthCheckPortChoice struct {
+type OriginPoolHealthCheckPortChoice struct {
 	HealthCheckPort    types.Int64 `tfsdk:"health_check_port"`
 	SameAsEndpointPort types.Bool  `tfsdk:"same_as_endpoint_port"`
 }
 
-type OriginPoolOriginPoolOriginServerType struct {
+type OriginPoolOriginServerType struct {
 	Choice types.Object `tfsdk:"choice"`
 	Labels types.Map    `tfsdk:"labels"`
 }
 
-type OriginPoolOriginServerTypeChoice struct {
+type OriginPoolChoice struct {
 	CbipService          types.Object `tfsdk:"cbip_service"`
 	ConsulService        types.Object `tfsdk:"consul_service"`
 	CustomEndpointObject types.Object `tfsdk:"custom_endpoint_object"`
@@ -165,23 +165,23 @@ type OriginPoolOriginServerTypeChoice struct {
 	VnPrivateName        types.Object `tfsdk:"vn_private_name"`
 }
 
-type OriginPoolOriginServerTypeCbipService struct {
+type OriginPoolCbipSvc struct {
 	ServiceName types.String `tfsdk:"service_name"`
 }
 
-type OriginPoolOriginServerTypeConsulService struct {
+type OriginPoolConsulSvc struct {
 	NetworkChoice types.Object `tfsdk:"network_choice"`
 	ServiceName   types.String `tfsdk:"service_name"`
 	SiteLocator   types.Object `tfsdk:"site_locator"`
 	SnatPool      types.Object `tfsdk:"snat_pool"`
 }
 
-type OriginPoolOriginServerConsulServiceNetworkChoice struct {
+type OriginPoolNetChoice struct {
 	InsideNetwork  types.Bool `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool `tfsdk:"outside_network"`
 }
 
-type OriginPoolViewsSiteLocator struct {
+type OriginPoolSiteLocator struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -190,25 +190,25 @@ type OriginPoolSiteLocatorChoice struct {
 	VirtualSite types.Object `tfsdk:"virtual_site"`
 }
 
-type OriginPoolViewsSnatPoolConfiguration struct {
+type OriginPoolSnatPoolCfg struct {
 	SnatPoolChoice types.Object `tfsdk:"snat_pool_choice"`
 }
 
-type OriginPoolSnatPoolConfigurationSnatPoolChoice struct {
+type OriginPoolSnatPoolChoice struct {
 	NoSnatPool types.Bool   `tfsdk:"no_snat_pool"`
 	SnatPool   types.Object `tfsdk:"snat_pool"`
 }
 
-type OriginPoolSnatPoolConfigurationSnatPool struct {
+type OriginPoolSnatPool struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type OriginPoolOriginServerTypeCustomEndpointObject struct {
+type OriginPoolCustomEndpointObject struct {
 	Endpoint types.Object `tfsdk:"endpoint"`
 }
 
-type OriginPoolOriginServerTypeK8SService struct {
+type OriginPoolK8SSvc struct {
 	NetworkChoice     types.Object `tfsdk:"network_choice"`
 	Protocol          types.List   `tfsdk:"protocol"`
 	ServiceInfoChoice types.Object `tfsdk:"service_info_choice"`
@@ -216,35 +216,35 @@ type OriginPoolOriginServerTypeK8SService struct {
 	SnatPool          types.Object `tfsdk:"snat_pool"`
 }
 
-type OriginPoolOriginServerK8SServiceNetworkChoice struct {
+type OriginPoolOriginServerK8SSvcNetChoice struct {
 	InsideNetwork  types.Bool `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool `tfsdk:"outside_network"`
 	Vk8SNetworks   types.Bool `tfsdk:"vk8s_networks"`
 }
 
-type OriginPoolOriginServerK8SServiceServiceInfoChoice struct {
+type OriginPoolSvcInfoChoice struct {
 	ServiceName types.String `tfsdk:"service_name"`
 }
 
-type OriginPoolOriginServerTypePrivateIp struct {
+type OriginPoolPrivateIp struct {
 	NetworkChoice   types.Object `tfsdk:"network_choice"`
 	PrivateIpChoice types.Object `tfsdk:"private_ip_choice"`
 	SiteLocator     types.Object `tfsdk:"site_locator"`
 	SnatPool        types.Object `tfsdk:"snat_pool"`
 }
 
-type OriginPoolOriginServerPrivateIPNetworkChoice struct {
+type OriginPoolOriginServerPrivateIPNetChoice struct {
 	InsideNetwork  types.Bool   `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool   `tfsdk:"outside_network"`
 	Segment        types.Object `tfsdk:"segment"`
 }
 
-type OriginPoolOriginServerPrivateIPPrivateIpChoice struct {
+type OriginPoolPrivateIpChoice struct {
 	Ip   types.String `tfsdk:"ip"`
 	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
-type OriginPoolOriginServerTypePrivateName struct {
+type OriginPoolPrivateName struct {
 	DnsName         types.String `tfsdk:"dns_name"`
 	NetworkChoice   types.Object `tfsdk:"network_choice"`
 	RefreshInterval types.Int64  `tfsdk:"refresh_interval"`
@@ -252,53 +252,52 @@ type OriginPoolOriginServerTypePrivateName struct {
 	SnatPool        types.Object `tfsdk:"snat_pool"`
 }
 
-type OriginPoolOriginServerPrivateNameNetworkChoice struct {
+type OriginPoolOriginServerPrivateNameNetChoice struct {
 	InsideNetwork  types.Bool   `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool   `tfsdk:"outside_network"`
 	Segment        types.Object `tfsdk:"segment"`
 }
 
-type OriginPoolOriginServerTypePublicIp struct {
+type OriginPoolPublicIp struct {
 	PublicIpChoice types.Object `tfsdk:"public_ip_choice"`
 }
 
-type OriginPoolOriginServerPublicIPPublicIpChoice struct {
-	Ip   types.String `tfsdk:"ip"`
-	Ipv6 types.String `tfsdk:"ipv6"`
+type OriginPoolPublicIpChoice struct {
+	Ip types.String `tfsdk:"ip"`
 }
 
-type OriginPoolOriginServerTypePublicName struct {
+type OriginPoolPublicName struct {
 	DnsName         types.String `tfsdk:"dns_name"`
 	RefreshInterval types.Int64  `tfsdk:"refresh_interval"`
 }
 
-type OriginPoolOriginServerTypeVnPrivateIp struct {
+type OriginPoolVnPrivateIp struct {
 	VirtualNetwork         types.Object `tfsdk:"virtual_network"`
 	VirtualNetworkIpChoice types.Object `tfsdk:"virtual_network_ip_choice"`
 }
 
-type OriginPoolOriginServerVirtualNetworkIPVirtualNetworkIpChoice struct {
+type OriginPoolVirtualNetIpChoice struct {
 	Ip   types.String `tfsdk:"ip"`
 	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
-type OriginPoolOriginServerTypeVnPrivateName struct {
+type OriginPoolVnPrivateName struct {
 	DnsName        types.String `tfsdk:"dns_name"`
 	PrivateNetwork types.Object `tfsdk:"private_network"`
 }
 
-type OriginPoolGlobalSpecTypePortChoice struct {
+type OriginPoolPortChoice struct {
 	AutomaticPort types.Bool  `tfsdk:"automatic_port"`
 	LbPort        types.Bool  `tfsdk:"lb_port"`
 	Port          types.Int64 `tfsdk:"port"`
 }
 
-type OriginPoolGlobalSpecTypeTlsChoice struct {
+type OriginPoolTlsChoice struct {
 	NoTls  types.Bool   `tfsdk:"no_tls"`
 	UseTls types.Object `tfsdk:"use_tls"`
 }
 
-type OriginPoolGlobalSpecTypeUseTls struct {
+type OriginPoolUseTls struct {
 	MaxSessionKeysTypeChoice types.Object `tfsdk:"max_session_keys_type_choice"`
 	MtlsChoice               types.Object `tfsdk:"mtls_choice"`
 	ServerValidationChoice   types.Object `tfsdk:"server_validation_choice"`
@@ -306,36 +305,36 @@ type OriginPoolGlobalSpecTypeUseTls struct {
 	TlsConfig                types.Object `tfsdk:"tls_config"`
 }
 
-type OriginPoolUpstreamTlsParametersMaxSessionKeysTypeChoice struct {
+type OriginPoolMaxSessionKeysTypeChoice struct {
 	DefaultSessionKeyCaching types.Bool  `tfsdk:"default_session_key_caching"`
 	DisableSessionKeyCaching types.Bool  `tfsdk:"disable_session_key_caching"`
 	MaxSessionKeys           types.Int64 `tfsdk:"max_session_keys"`
 }
 
-type OriginPoolUpstreamTlsParametersMtlsChoice struct {
+type OriginPoolMtlsChoice struct {
 	NoMtls     types.Bool   `tfsdk:"no_mtls"`
 	UseMtls    types.Object `tfsdk:"use_mtls"`
 	UseMtlsObj types.Object `tfsdk:"use_mtls_obj"`
 }
 
-type OriginPoolUpstreamTlsParametersUseMtls struct {
+type OriginPoolUseMtls struct {
 	TlsCertificates types.List `tfsdk:"tls_certificates"`
 }
 
-type OriginPoolTlsCertificateType struct {
+type OriginPoolTlsCertType struct {
 	CertificateUrl     types.String `tfsdk:"certificate_url"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
 	PrivateKey         types.Object `tfsdk:"private_key"`
 }
 
-type OriginPoolTlsCertificateTypeOcspStaplingChoice struct {
+type OriginPoolOcspStaplingChoice struct {
 	CustomHashAlgorithms types.Object `tfsdk:"custom_hash_algorithms"`
 	DisableOcspStapling  types.Bool   `tfsdk:"disable_ocsp_stapling"`
 	UseSystemDefaults    types.Bool   `tfsdk:"use_system_defaults"`
 }
 
-type OriginPoolTlsCertificateTypeCustomHashAlgorithms struct {
+type OriginPoolCustomHashAlgorithms struct {
 	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
@@ -343,44 +342,45 @@ type OriginPoolSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type OriginPoolSecretTypeSecretInfoChoice struct {
+type OriginPoolSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type OriginPoolSecretTypeBlindfoldSecretInfo struct {
+type OriginPoolBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type OriginPoolSecretTypeClearSecretInfo struct {
+type OriginPoolClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type OriginPoolUpstreamTlsParametersServerValidationChoice struct {
+type OriginPoolServerValChoice struct {
 	SkipServerVerification types.Bool   `tfsdk:"skip_server_verification"`
 	UseServerVerification  types.Object `tfsdk:"use_server_verification"`
 	VolterraTrustedCa      types.Bool   `tfsdk:"volterra_trusted_ca"`
 }
 
-type OriginPoolUpstreamTlsParametersUseServerVerification struct {
+type OriginPoolUseServerVerification struct {
 	TrustedCaChoice types.Object `tfsdk:"trusted_ca_choice"`
 }
 
-type OriginPoolUpstreamTlsValidationContextTrustedCaChoice struct {
+type OriginPoolTrustedCaChoice struct {
 	TrustedCa    types.Object `tfsdk:"trusted_ca"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 }
 
-type OriginPoolUpstreamTlsParametersSniChoice struct {
+type OriginPoolSniChoice struct {
 	DisableSni         types.Bool   `tfsdk:"disable_sni"`
 	Sni                types.String `tfsdk:"sni"`
 	UseHostHeaderAsSni types.Bool   `tfsdk:"use_host_header_as_sni"`
 }
 
-type OriginPoolViewsTlsConfig struct {
+type OriginPoolTlsConfig struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -391,7 +391,7 @@ type OriginPoolTlsConfigChoice struct {
 	MediumSecurity  types.Bool   `tfsdk:"medium_security"`
 }
 
-type OriginPoolTlsConfigCustomSecurity struct {
+type OriginPoolCustomSec struct {
 	CipherSuites types.List `tfsdk:"cipher_suites"`
 	MaxVersion   types.List `tfsdk:"max_version"`
 	MinVersion   types.List `tfsdk:"min_version"`
@@ -401,7 +401,7 @@ type OriginPoolUpstreamConnPoolReuseType struct {
 	MapDownstreamToUpstreamConnPoolTypeChoice types.Object `tfsdk:"map_downstream_to_upstream_conn_pool_type_choice"`
 }
 
-type OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoice struct {
+type OriginPoolMapDownstreamToUpstreamConnPoolTypeChoice struct {
 	DisableConnPoolReuse types.Bool `tfsdk:"disable_conn_pool_reuse"`
 	EnableConnPoolReuse  types.Bool `tfsdk:"enable_conn_pool_reuse"`
 }
@@ -1122,8 +1122,7 @@ var OriginPoolOriginServersChoicePublicIpModelAttributeMap = map[string]attr.Typ
 // Attribute map for RequiredOneOfField --> PublicIpChoice
 var OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap = map[string]attr.Type{
 
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
+	"ip": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> PublicName
@@ -1311,6 +1310,7 @@ var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInf
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1441,8 +1441,8 @@ func (d *DataSourceF5XCOriginPool) Metadata(ctx context.Context, request datasou
 func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a origin_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of origin_pool) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a origin_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of origin_pool) etc. can be fetched",
+		MarkdownDescription: "Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer<br><br>It will create following child objects<br><br>* cluster<br>* endpoints<br>* healthcheck",
+		Description:         "Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer It will create following child objects cluster endpoints healthcheck",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2668,12 +2668,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 													Optional:    false,
 													Computed:    true,
 												},
-												"ipv6": schema.StringAttribute{
-													Description: "IPV6 Public IPV6 address",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 											},
 										},
 									},
@@ -3001,8 +2995,15 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 																					Required:    false,
 																					Optional:    false,
 																					Computed:    true,
+																					Sensitive:   true,
 																				},
 																			},
+																		},
+																		"none": schema.BoolAttribute{
+																			Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
 																		},
 																	},
 																},
@@ -3287,7 +3288,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "origin_pool", err))
 		return
 	}
 
@@ -3350,7 +3351,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> AdvancedOptions
 	if specData.GetAdvancedOptions() != nil {
-		var originPoolOriginPoolOriginPoolAdvancedOptionsModel = &OriginPoolOriginPoolOriginPoolAdvancedOptions{}
+		var originPoolOriginPoolAdvancedOptionsModel = &OriginPoolOriginPoolAdvancedOptions{}
 		advancedOptionsElement := specData.GetAdvancedOptions()
 
 		// data specToModelNested RequiredOneOfField --> CircuitBreakerChoice
@@ -3443,17 +3444,17 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested UintField --> ConnectionTimeout
-		originPoolOriginPoolOriginPoolAdvancedOptionsModel.ConnectionTimeout = types.Int64Value(int64(advancedOptionsElement.GetConnectionTimeout()))
+		originPoolOriginPoolAdvancedOptionsModel.ConnectionTimeout = types.Int64Value(int64(advancedOptionsElement.GetConnectionTimeout()))
 
 		// data specToModelNested UintField --> HttpIdleTimeout
-		originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpIdleTimeout = types.Int64Value(int64(advancedOptionsElement.GetHttpIdleTimeout()))
+		originPoolOriginPoolAdvancedOptionsModel.HttpIdleTimeout = types.Int64Value(int64(advancedOptionsElement.GetHttpIdleTimeout()))
 
 		// data specToModelNested RequiredOneOfField --> HttpProtocolType
 		// <no value>
@@ -3627,10 +3628,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap)
 		}
 
 		// data specToModelNested OneOfField --> LbSourceIpPersistanceChoice
@@ -3675,10 +3676,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = types.ObjectNull(OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = types.ObjectNull(OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
@@ -3725,10 +3726,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> OutlierDetectionChoice
@@ -3801,10 +3802,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> PanicThresholdType
@@ -3851,10 +3852,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap)
 		}
 
 		// data specToModelNested OneOfField --> ProxyProtocolChoice
@@ -3908,10 +3909,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = types.ObjectNull(OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = types.ObjectNull(OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> SubsetChoice
@@ -3949,9 +3950,9 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					if len(enableSubsetsElement.GetEndpointSubsets()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						endpointSubsetsElements := make([]OriginPoolClusterEndpointSubsetSelectorType, 0, len(enableSubsetsElement.GetEndpointSubsets()))
+						endpointSubsetsElements := make([]OriginPoolEndpointSubsetSelectorType, 0, len(enableSubsetsElement.GetEndpointSubsets()))
 						for _, endpointSubsetsElement := range enableSubsetsElement.GetEndpointSubsets() {
-							originPoolClusterEndpointSubsetSelectorTypeModel := OriginPoolClusterEndpointSubsetSelectorType{}
+							originPoolEndpointSubsetSelectorTypeModel := OriginPoolEndpointSubsetSelectorType{}
 
 							// data specToModelNested RequiredArrayOfStringField --> Keys
 							if len(endpointSubsetsElement.GetKeys()) > 0 {
@@ -3960,12 +3961,12 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 								if response.Diagnostics.HasError() {
 									return
 								}
-								originPoolClusterEndpointSubsetSelectorTypeModel.Keys = listValue
+								originPoolEndpointSubsetSelectorTypeModel.Keys = listValue
 							} else {
-								originPoolClusterEndpointSubsetSelectorTypeModel.Keys = types.ListNull(types.StringType)
+								originPoolEndpointSubsetSelectorTypeModel.Keys = types.ListNull(types.StringType)
 							}
 
-							endpointSubsetsElements = append(endpointSubsetsElements, originPoolClusterEndpointSubsetSelectorTypeModel)
+							endpointSubsetsElements = append(endpointSubsetsElements, originPoolEndpointSubsetSelectorTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4095,16 +4096,16 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.SubsetChoice = finalObj
+			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap)
 		}
 
 		advancedOptionsObj, advancedOptionsDiags := utils.GoStructToObjectValue(
 			ctx,
 			OriginPoolAdvancedOptionsModelAttributeMap,
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel,
+			originPoolOriginPoolAdvancedOptionsModel,
 		)
 		response.Diagnostics.Append(advancedOptionsDiags...)
 		data.AdvancedOptions = advancedOptionsObj
@@ -4139,7 +4140,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		healthCheckPortChoiceChoices := specData.GetHealthCheckPortChoice()
 
 		// The model struct that will be populated by the nested template.
-		var healthCheckPortChoiceChoicesModel = &OriginPoolGlobalSpecTypeHealthCheckPortChoice{}
+		var healthCheckPortChoiceChoicesModel = &OriginPoolHealthCheckPortChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4256,10 +4257,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> OriginServers
-	originServersElementsSpectToModel := make([]OriginPoolOriginPoolOriginServerType, 0, len(specData.GetOriginServers()))
+	originServersElementsSpectToModel := make([]OriginPoolOriginServerType, 0, len(specData.GetOriginServers()))
 
 	for _, originServersElement := range specData.GetOriginServers() {
-		originPoolOriginPoolOriginServerTypeModel := OriginPoolOriginPoolOriginServerType{}
+		originPoolOriginServerTypeModel := OriginPoolOriginServerType{}
 
 		// data specToModelNested RequiredOneOfField --> Choice
 		// <no value>
@@ -4372,7 +4373,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested RequiredPointerField --> SiteLocator
 					if consulServiceElement.GetSiteLocator() != nil {
 						// Create the nested Go struct
-						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
+						originPoolSiteLocatorModel := &OriginPoolSiteLocator{}
 						siteLocatorElement := consulServiceElement.GetSiteLocator()
 
 						// Recursively populate the nested struct
@@ -4492,19 +4493,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSiteLocatorModel.Choice = finalObj
+							originPoolSiteLocatorModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap)
+							originPoolSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
+						originPoolSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap, originPoolSiteLocatorModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						consulServiceAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
+						consulServiceAttributeMap["site_locator"] = originPoolSiteLocatorModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -4519,7 +4520,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested PointerField --> SnatPool
 					if consulServiceElement.GetSnatPool() != nil {
 						// Create the nested Go struct
-						originPoolViewsSnatPoolConfigurationModel := &OriginPoolViewsSnatPoolConfiguration{}
+						originPoolSnatPoolCfgModel := &OriginPoolSnatPoolCfg{}
 						snatPoolElement := consulServiceElement.GetSnatPool()
 
 						// Recursively populate the nested struct
@@ -4602,19 +4603,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = finalObj
+							originPoolSnatPoolCfgModel.SnatPoolChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSnatPoolSnatPoolChoiceModelAttributeMap)
+							originPoolSnatPoolCfgModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSnatPoolSnatPoolChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSnatPoolConfigurationModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceConsulServiceSnatPoolModelAttributeMap, originPoolViewsSnatPoolConfigurationModel)
+						originPoolSnatPoolCfgModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceConsulServiceSnatPoolModelAttributeMap, originPoolSnatPoolCfgModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						consulServiceAttributeMap["snat_pool"] = originPoolViewsSnatPoolConfigurationModelObj
+						consulServiceAttributeMap["snat_pool"] = originPoolSnatPoolCfgModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -4834,7 +4835,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested RequiredPointerField --> SiteLocator
 					if k8sServiceElement.GetSiteLocator() != nil {
 						// Create the nested Go struct
-						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
+						originPoolSiteLocatorModel := &OriginPoolSiteLocator{}
 						siteLocatorElement := k8sServiceElement.GetSiteLocator()
 
 						// Recursively populate the nested struct
@@ -4954,19 +4955,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSiteLocatorModel.Choice = finalObj
+							originPoolSiteLocatorModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceModelAttributeMap)
+							originPoolSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceK8SServiceSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
+						originPoolSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceK8SServiceSiteLocatorModelAttributeMap, originPoolSiteLocatorModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						k8sServiceAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
+						k8sServiceAttributeMap["site_locator"] = originPoolSiteLocatorModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -4981,7 +4982,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested PointerField --> SnatPool
 					if k8sServiceElement.GetSnatPool() != nil {
 						// Create the nested Go struct
-						originPoolViewsSnatPoolConfigurationModel := &OriginPoolViewsSnatPoolConfiguration{}
+						originPoolSnatPoolCfgModel := &OriginPoolSnatPoolCfg{}
 						snatPoolElement := k8sServiceElement.GetSnatPool()
 
 						// Recursively populate the nested struct
@@ -5064,19 +5065,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = finalObj
+							originPoolSnatPoolCfgModel.SnatPoolChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceSnatPoolSnatPoolChoiceModelAttributeMap)
+							originPoolSnatPoolCfgModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceSnatPoolSnatPoolChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSnatPoolConfigurationModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceK8SServiceSnatPoolModelAttributeMap, originPoolViewsSnatPoolConfigurationModel)
+						originPoolSnatPoolCfgModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceK8SServiceSnatPoolModelAttributeMap, originPoolSnatPoolCfgModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						k8sServiceAttributeMap["snat_pool"] = originPoolViewsSnatPoolConfigurationModelObj
+						k8sServiceAttributeMap["snat_pool"] = originPoolSnatPoolCfgModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -5256,7 +5257,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested RequiredPointerField --> SiteLocator
 					if privateIpElement.GetSiteLocator() != nil {
 						// Create the nested Go struct
-						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
+						originPoolSiteLocatorModel := &OriginPoolSiteLocator{}
 						siteLocatorElement := privateIpElement.GetSiteLocator()
 
 						// Recursively populate the nested struct
@@ -5376,19 +5377,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSiteLocatorModel.Choice = finalObj
+							originPoolSiteLocatorModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpSiteLocatorChoiceModelAttributeMap)
+							originPoolSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpSiteLocatorChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateIpSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
+						originPoolSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateIpSiteLocatorModelAttributeMap, originPoolSiteLocatorModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						privateIpAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
+						privateIpAttributeMap["site_locator"] = originPoolSiteLocatorModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -5403,7 +5404,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested PointerField --> SnatPool
 					if privateIpElement.GetSnatPool() != nil {
 						// Create the nested Go struct
-						originPoolViewsSnatPoolConfigurationModel := &OriginPoolViewsSnatPoolConfiguration{}
+						originPoolSnatPoolCfgModel := &OriginPoolSnatPoolCfg{}
 						snatPoolElement := privateIpElement.GetSnatPool()
 
 						// Recursively populate the nested struct
@@ -5486,19 +5487,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = finalObj
+							originPoolSnatPoolCfgModel.SnatPoolChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpSnatPoolSnatPoolChoiceModelAttributeMap)
+							originPoolSnatPoolCfgModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpSnatPoolSnatPoolChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSnatPoolConfigurationModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateIpSnatPoolModelAttributeMap, originPoolViewsSnatPoolConfigurationModel)
+						originPoolSnatPoolCfgModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateIpSnatPoolModelAttributeMap, originPoolSnatPoolCfgModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						privateIpAttributeMap["snat_pool"] = originPoolViewsSnatPoolConfigurationModelObj
+						privateIpAttributeMap["snat_pool"] = originPoolSnatPoolCfgModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -5638,7 +5639,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested RequiredPointerField --> SiteLocator
 					if privateNameElement.GetSiteLocator() != nil {
 						// Create the nested Go struct
-						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
+						originPoolSiteLocatorModel := &OriginPoolSiteLocator{}
 						siteLocatorElement := privateNameElement.GetSiteLocator()
 
 						// Recursively populate the nested struct
@@ -5758,19 +5759,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSiteLocatorModel.Choice = finalObj
+							originPoolSiteLocatorModel.Choice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap)
+							originPoolSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
+						originPoolSiteLocatorModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap, originPoolSiteLocatorModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						privateNameAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
+						privateNameAttributeMap["site_locator"] = originPoolSiteLocatorModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -5785,7 +5786,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					// data specToModelNested PointerField --> SnatPool
 					if privateNameElement.GetSnatPool() != nil {
 						// Create the nested Go struct
-						originPoolViewsSnatPoolConfigurationModel := &OriginPoolViewsSnatPoolConfiguration{}
+						originPoolSnatPoolCfgModel := &OriginPoolSnatPoolCfg{}
 						snatPoolElement := privateNameElement.GetSnatPool()
 
 						// Recursively populate the nested struct
@@ -5868,19 +5869,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = finalObj
+							originPoolSnatPoolCfgModel.SnatPoolChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap)
+							originPoolSnatPoolCfgModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSnatPoolConfigurationModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap, originPoolViewsSnatPoolConfigurationModel)
+						originPoolSnatPoolCfgModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap, originPoolSnatPoolCfgModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						privateNameAttributeMap["snat_pool"] = originPoolViewsSnatPoolConfigurationModelObj
+						privateNameAttributeMap["snat_pool"] = originPoolSnatPoolCfgModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -5933,16 +5934,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 						} else {
 							// Empty string, set to null
 							publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
-						}
-
-						// data specToModelNested StringOfOneOfField --> Ipv6
-						ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-						if isIpv6 {
-							publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-						} else {
-							// Empty string, set to null
-							publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
 						}
 
 						// --- End of Choices ---
@@ -6221,10 +6212,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginServerTypeModel.Choice = finalObj
+			originPoolOriginServerTypeModel.Choice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginServerTypeModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceModelAttributeMap)
+			originPoolOriginServerTypeModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested MapOfStringField --> Labels
@@ -6236,16 +6227,16 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 				return
 			}
 			// Assign the typed map to the model
-			originPoolOriginPoolOriginServerTypeModel.Labels = labelsMap
+			originPoolOriginServerTypeModel.Labels = labelsMap
 		} else {
 			// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 			// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 			// API returned nil (Protobuf omits empty maps). Set to null.
 			// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-			originPoolOriginPoolOriginServerTypeModel.Labels = types.MapNull(types.StringType)
+			originPoolOriginServerTypeModel.Labels = types.MapNull(types.StringType)
 		}
 
-		originServersElementsSpectToModel = append(originServersElementsSpectToModel, originPoolOriginPoolOriginServerTypeModel)
+		originServersElementsSpectToModel = append(originServersElementsSpectToModel, originPoolOriginServerTypeModel)
 	}
 
 	{
@@ -6273,7 +6264,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		portChoiceChoices := specData.GetPortChoice()
 
 		// The model struct that will be populated by the nested template.
-		var portChoiceChoicesModel = &OriginPoolGlobalSpecTypePortChoice{}
+		var portChoiceChoicesModel = &OriginPoolPortChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6335,7 +6326,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		tlsChoiceChoices := specData.GetTlsChoice()
 
 		// The model struct that will be populated by the nested template.
-		var tlsChoiceChoicesModel = &OriginPoolGlobalSpecTypeTlsChoice{}
+		var tlsChoiceChoicesModel = &OriginPoolTlsChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6452,24 +6443,24 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							if len(useMtlsElement.GetTlsCertificates()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								tlsCertificatesElements := make([]OriginPoolTlsCertificateType, 0, len(useMtlsElement.GetTlsCertificates()))
+								tlsCertificatesElements := make([]OriginPoolTlsCertType, 0, len(useMtlsElement.GetTlsCertificates()))
 								for _, tlsCertificatesElement := range useMtlsElement.GetTlsCertificates() {
-									originPoolTlsCertificateTypeModel := OriginPoolTlsCertificateType{}
+									originPoolTlsCertTypeModel := OriginPoolTlsCertType{}
 
 									// data specToModelNested RequiredStringField --> CertificateUrl
 									if tlsCertificatesElement.GetCertificateUrl() != "" {
-										originPoolTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+										originPoolTlsCertTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
 									} else {
 										// Empty string, set to null
-										originPoolTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+										originPoolTlsCertTypeModel.CertificateUrl = types.StringNull()
 									}
 
 									// data specToModelNested StringField --> Description
 									if tlsCertificatesElement.GetDescription() != "" {
-										originPoolTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
+										originPoolTlsCertTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
 									} else {
 										// Empty string, set to null
-										originPoolTlsCertificateTypeModel.Description = types.StringNull()
+										originPoolTlsCertTypeModel.Description = types.StringNull()
 									}
 
 									// data specToModelNested OneOfField --> OcspStaplingChoice
@@ -6553,10 +6544,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										originPoolTlsCertificateTypeModel.OcspStaplingChoice = finalObj
+										originPoolTlsCertTypeModel.OcspStaplingChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										originPoolTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+										originPoolTlsCertTypeModel.OcspStaplingChoice = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredPointerField --> PrivateKey
@@ -6661,6 +6652,15 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 												}
 											}
 
+											// data specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -6698,7 +6698,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 										if response.Diagnostics.HasError() {
 											return
 										}
-										originPoolTlsCertificateTypeModel.PrivateKey = originPoolSecretTypeModelObj
+										originPoolTlsCertTypeModel.PrivateKey = originPoolSecretTypeModelObj
 
 									} else {
 										// The source field is nil (e.g. redacted by the API).
@@ -6707,10 +6707,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 										// here because the API may always return a non-nil struct (with REDACTED values) for this
 										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 										// The target is a types.Object, so we use types.ObjectNull.
-										originPoolTlsCertificateTypeModel.PrivateKey = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap)
+										originPoolTlsCertTypeModel.PrivateKey = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap)
 									}
 
-									tlsCertificatesElements = append(tlsCertificatesElements, originPoolTlsCertificateTypeModel)
+									tlsCertificatesElements = append(tlsCertificatesElements, originPoolTlsCertTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7021,7 +7021,7 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 				// data specToModelNested RequiredPointerField --> TlsConfig
 				if useTlsElement.GetTlsConfig() != nil {
 					// Create the nested Go struct
-					originPoolViewsTlsConfigModel := &OriginPoolViewsTlsConfig{}
+					originPoolTlsConfigModel := &OriginPoolTlsConfig{}
 					tlsConfigElement := useTlsElement.GetTlsConfig()
 
 					// Recursively populate the nested struct
@@ -7139,19 +7139,19 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						originPoolViewsTlsConfigModel.Choice = finalObj
+						originPoolTlsConfigModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						originPoolViewsTlsConfigModel.Choice = types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap)
+						originPoolTlsConfigModel.Choice = types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					originPoolViewsTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap, originPoolViewsTlsConfigModel)
+					originPoolTlsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap, originPoolTlsConfigModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					useTlsAttributeMap["tls_config"] = originPoolViewsTlsConfigModelObj
+					useTlsAttributeMap["tls_config"] = originPoolTlsConfigModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).

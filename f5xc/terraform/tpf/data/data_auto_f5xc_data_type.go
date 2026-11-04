@@ -28,44 +28,44 @@ type DataSourceF5XCDataType struct {
 	client *client.APIClient
 }
 
-type DataTypeDataTypeDetectionRule struct {
+type DataTypeDetectionRule struct {
 	PatternChoice types.Object `tfsdk:"pattern_choice"`
 }
 
-type DataTypeDetectionRulePatternChoice struct {
+type DataTypePatternChoice struct {
 	KeyPattern      types.Object `tfsdk:"key_pattern"`
 	KeyValuePattern types.Object `tfsdk:"key_value_pattern"`
 	ValuePattern    types.Object `tfsdk:"value_pattern"`
 }
 
-type DataTypeDetectionRuleKeyPattern struct {
+type DataTypeKeyPattern struct {
 	TypeChoice types.Object `tfsdk:"type_choice"`
 }
 
-type DataTypeRulePatternTypeTypeChoice struct {
+type DataTypeTypeChoice struct {
 	ExactValues    types.Object `tfsdk:"exact_values"`
 	RegexValue     types.String `tfsdk:"regex_value"`
 	SubstringValue types.String `tfsdk:"substring_value"`
 }
 
-type DataTypeRulePatternTypeExactValues struct {
+type DataTypeExactValues struct {
 	ExactValues types.List `tfsdk:"exact_values"`
 }
 
-type DataTypeDetectionRuleKeyValuePattern struct {
+type DataTypeKeyValuePattern struct {
 	KeyPattern   types.Object `tfsdk:"key_pattern"`
 	ValuePattern types.Object `tfsdk:"value_pattern"`
 }
 
-type DataTypeDataTypeRulePatternType struct {
+type DataTypeRulePatternType struct {
 	TypeChoice types.Object `tfsdk:"type_choice"`
 }
 
-type DataTypeDetectionRuleValuePattern struct {
+type DataTypeValuePattern struct {
 	TypeChoice types.Object `tfsdk:"type_choice"`
 }
 
-type DataTypeDataTypeOriginType struct {
+type DataTypeOriginType struct {
 	TypeChoice types.Object `tfsdk:"type_choice"`
 }
 
@@ -261,8 +261,8 @@ func (d *DataSourceF5XCDataType) Metadata(ctx context.Context, request datasourc
 func (r *DataSourceF5XCDataType) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a data_type This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of data_type) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a data_type This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of data_type) etc. can be fetched",
+		MarkdownDescription: "A data_type is defined by a set of rules. these rules include the patterns for which that data type will be detected.<br>A data type also includes information like it's related compliances weather is sensitive data and is it also pii.<br>A data type is either predefined - defined in system. or custom - defined by the user.",
+		Description:         "A data_type is defined by a set of rules. these rules include the patterns for which that data type will be detected. A data type also includes information like it's related compliances weather is sensitive data and is it also pii. A data type is either predefined - defined in system. or custom - defined by the user.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -605,7 +605,7 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_data_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "data_type", err))
 		return
 	}
 
@@ -693,10 +693,10 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 	data.IsSensitiveData = types.BoolValue(specData.GetIsSensitiveData())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Rules
-	rulesElementsSpectToModel := make([]DataTypeDataTypeDetectionRule, 0, len(specData.GetRules()))
+	rulesElementsSpectToModel := make([]DataTypeDetectionRule, 0, len(specData.GetRules()))
 
 	for _, rulesElement := range specData.GetRules() {
-		dataTypeDataTypeDetectionRuleModel := DataTypeDataTypeDetectionRule{}
+		dataTypeDetectionRuleModel := DataTypeDetectionRule{}
 
 		// data specToModelNested RequiredOneOfField --> PatternChoice
 		// <no value>
@@ -828,7 +828,7 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 					// data specToModelNested RequiredPointerField --> KeyPattern
 					if keyValuePatternElement.GetKeyPattern() != nil {
 						// Create the nested Go struct
-						dataTypeDataTypeRulePatternTypeModel := &DataTypeDataTypeRulePatternType{}
+						dataTypeRulePatternTypeModel := &DataTypeRulePatternType{}
 						keyPatternElement := keyValuePatternElement.GetKeyPattern()
 
 						// Recursively populate the nested struct
@@ -911,19 +911,19 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							dataTypeDataTypeRulePatternTypeModel.TypeChoice = finalObj
+							dataTypeRulePatternTypeModel.TypeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							dataTypeDataTypeRulePatternTypeModel.TypeChoice = types.ObjectNull(DataTypeRulesPatternChoiceKeyValuePatternKeyPatternTypeChoiceModelAttributeMap)
+							dataTypeRulePatternTypeModel.TypeChoice = types.ObjectNull(DataTypeRulesPatternChoiceKeyValuePatternKeyPatternTypeChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						dataTypeDataTypeRulePatternTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DataTypeRulesPatternChoiceKeyValuePatternKeyPatternModelAttributeMap, dataTypeDataTypeRulePatternTypeModel)
+						dataTypeRulePatternTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DataTypeRulesPatternChoiceKeyValuePatternKeyPatternModelAttributeMap, dataTypeRulePatternTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						keyValuePatternAttributeMap["key_pattern"] = dataTypeDataTypeRulePatternTypeModelObj
+						keyValuePatternAttributeMap["key_pattern"] = dataTypeRulePatternTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -938,7 +938,7 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 					// data specToModelNested RequiredPointerField --> ValuePattern
 					if keyValuePatternElement.GetValuePattern() != nil {
 						// Create the nested Go struct
-						dataTypeDataTypeRulePatternTypeModel := &DataTypeDataTypeRulePatternType{}
+						dataTypeRulePatternTypeModel := &DataTypeRulePatternType{}
 						valuePatternElement := keyValuePatternElement.GetValuePattern()
 
 						// Recursively populate the nested struct
@@ -1021,19 +1021,19 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							dataTypeDataTypeRulePatternTypeModel.TypeChoice = finalObj
+							dataTypeRulePatternTypeModel.TypeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							dataTypeDataTypeRulePatternTypeModel.TypeChoice = types.ObjectNull(DataTypeRulesPatternChoiceKeyValuePatternValuePatternTypeChoiceModelAttributeMap)
+							dataTypeRulePatternTypeModel.TypeChoice = types.ObjectNull(DataTypeRulesPatternChoiceKeyValuePatternValuePatternTypeChoiceModelAttributeMap)
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
-						dataTypeDataTypeRulePatternTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DataTypeRulesPatternChoiceKeyValuePatternValuePatternModelAttributeMap, dataTypeDataTypeRulePatternTypeModel)
+						dataTypeRulePatternTypeModelObj, objDiags := types.ObjectValueFrom(ctx, DataTypeRulesPatternChoiceKeyValuePatternValuePatternModelAttributeMap, dataTypeRulePatternTypeModel)
 						response.Diagnostics.Append(objDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						keyValuePatternAttributeMap["value_pattern"] = dataTypeDataTypeRulePatternTypeModelObj
+						keyValuePatternAttributeMap["value_pattern"] = dataTypeRulePatternTypeModelObj
 
 					} else {
 						// The source field is nil (e.g. redacted by the API).
@@ -1174,13 +1174,13 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dataTypeDataTypeDetectionRuleModel.PatternChoice = finalObj
+			dataTypeDetectionRuleModel.PatternChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dataTypeDataTypeDetectionRuleModel.PatternChoice = types.ObjectNull(DataTypeRulesPatternChoiceModelAttributeMap)
+			dataTypeDetectionRuleModel.PatternChoice = types.ObjectNull(DataTypeRulesPatternChoiceModelAttributeMap)
 		}
 
-		rulesElementsSpectToModel = append(rulesElementsSpectToModel, dataTypeDataTypeDetectionRuleModel)
+		rulesElementsSpectToModel = append(rulesElementsSpectToModel, dataTypeDetectionRuleModel)
 	}
 
 	{
@@ -1200,7 +1200,7 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 
 	// data SpecToModelRoot PointerField --> Type
 	if specData.GetType() != nil {
-		var dataTypeDataTypeOriginTypeModel = &DataTypeDataTypeOriginType{}
+		var dataTypeOriginTypeModel = &DataTypeOriginType{}
 		typeElement := specData.GetType()
 
 		// data specToModelNested RequiredOneOfField --> TypeChoice
@@ -1246,16 +1246,16 @@ func (d *DataSourceF5XCDataType) Read(ctx context.Context, request datasource.Re
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			dataTypeDataTypeOriginTypeModel.TypeChoice = finalObj
+			dataTypeOriginTypeModel.TypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dataTypeDataTypeOriginTypeModel.TypeChoice = types.ObjectNull(DataTypeTypeTypeChoiceModelAttributeMap)
+			dataTypeOriginTypeModel.TypeChoice = types.ObjectNull(DataTypeTypeTypeChoiceModelAttributeMap)
 		}
 
 		typeObj, typeDiags := utils.GoStructToObjectValue(
 			ctx,
 			DataTypeTypeModelAttributeMap,
-			dataTypeDataTypeOriginTypeModel,
+			dataTypeOriginTypeModel,
 		)
 		response.Diagnostics.Append(typeDiags...)
 		data.Type = typeObj

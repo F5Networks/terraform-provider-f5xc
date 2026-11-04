@@ -14,18 +14,85 @@
 page_title: "f5xc_fleet Resource - F5 XC Distributed Cloud"
 subcategory: "Cloud & Infrastructure Sites"
 description: |-
-  Fleet Fleet is used to configure infrastructure components (like nodes) in one or more F5XC customer edge sites homogeneously. Fleet configuration has following information, * Software image release to be deployed on the fleet * List of devices to be configured on every node * Connections between the virtual networks in the site * Security policies applied in the site Fleet object must be created in the 'system' namespace for the tenant Associating Fleet with Site Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label 'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant. A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time. When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration is applied on all nodes that are member of the fleet. Fleet and Virtual Site Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site. However to enable other features like monitoring, deploying application or jobs on sites represented by fleet, system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
+  Fleet is used to configure infrastructure components (like nodes) in one or<br>more F5XC customer edge sites homogeneously. Fleet configuration has<br>following information,<br>* Software image release to be deployed on the fleet<br>* List of devices to be configured on every node<br>* Connections between the virtual networks in the site<br>* Security policies applied in the site<br><br>Fleet object must be created in the 'system' namespace for the tenant<br><br>Associating Fleet with Site<br><br>Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label<br>'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant.<br>A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label<br>of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time.<br><br>When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration<br>is applied on all nodes that are member of the fleet.<br><br>Fleet and Virtual Site<br><br>Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between<br>virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset<br>of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site.<br><br>However to enable other features like monitoring, deploying application or jobs on sites represented by fleet,<br>system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
 ---
 
 # f5xc_fleet (Resource)
 
-Fleet Fleet is used to configure infrastructure components (like nodes) in one or more F5XC customer edge sites homogeneously. Fleet configuration has following information, * Software image release to be deployed on the fleet * List of devices to be configured on every node * Connections between the virtual networks in the site * Security policies applied in the site Fleet object must be created in the 'system' namespace for the tenant Associating Fleet with Site Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label 'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant. A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time. When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration is applied on all nodes that are member of the fleet. Fleet and Virtual Site Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site. However to enable other features like monitoring, deploying application or jobs on sites represented by fleet, system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
+Fleet is used to configure infrastructure components (like nodes) in one or<br>more F5XC customer edge sites homogeneously. Fleet configuration has<br>following information,<br>* Software image release to be deployed on the fleet<br>* List of devices to be configured on every node<br>* Connections between the virtual networks in the site<br>* Security policies applied in the site<br><br>Fleet object must be created in the 'system' namespace for the tenant<br><br>Associating Fleet with Site<br><br>Fleet has a field called 'fleet_label'. When a fleet object is created, system automatically creates a known_label<br>'ves.io/fleet=<fleet_label>'. The known_label is created in the 'shared' namespace for the tenant.<br>A site is made 'member of fleet' when this known_label is added to the site. A site can have at most one known_label<br>of type 'ves.io/fleet' and hence belongs to exactly one fleet at any given time.<br><br>When a site becomes member of fleet, all nodes in site also become 'member of fleet'. The fleet configuration<br>is applied on all nodes that are member of the fleet.<br><br>Fleet and Virtual Site<br><br>Both Fleet and Virtual Sites select a list of sites based on the labels. But, there is a major difference between<br>virtual_site and Fleet. Virtual_sites are intersecting sub sets of available sites. Fleet is non intersecting subset<br>of available sites compared to other Fleets. As a result, at most one Fleet configuration if applied on a Site.<br><br>However to enable other features like monitoring, deploying application or jobs on sites represented by fleet,<br>system will automatically create a virtual_site in shared namespace representing all sites in a fleet.
 
 To get more information about f5xc_fleet, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/fleet)
 
+## Example Usage
 
+```terraform
+# Example: Fleet - Full
+
+resource "f5xc_fleet" "example" {
+  name        = "example-fleet"
+  namespace   = "system"
+  description = "Full fleet example"
+
+  fleet_label = "example-fleet"
+
+  labels = {
+    env  = "example"
+    tier = "full"
+  }
+
+  enable_default_fleet_config_download = true
+
+  bond_choice = {
+    no_bond_devices = true
+  }
+
+  dc_cluster_group_choice = {
+    no_dc_cluster_group = true
+  }
+
+  gpu_choice = {
+    disable_gpu = true
+  }
+
+  interface_choice = {
+    default_config = true
+  }
+
+  logs_receiver_choice = {
+    logs_streaming_disabled = true
+  }
+
+  sriov_interface_choice = {
+    default_sriov_interface = true
+  }
+
+  storage_class_choice = {
+    default_storage_class = true
+  }
+
+  storage_device_choice = {
+    no_storage_device = true
+  }
+
+  storage_interface_choice = {
+    no_storage_interfaces = true
+  }
+
+  storage_static_routes_choice = {
+    no_storage_static_routes = true
+  }
+
+  usb_policy_choice = {
+    deny_all_usb = true
+  }
+
+  vm_choice = {
+    disable_vm = true
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -58,12 +125,12 @@ To get more information about f5xc_fleet, refer:
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `network_connectors` (Attributes List) Network Connectors Network Connector defines connection between two virtual networks in a given site. Fleet defines one or more such network connectors. The network connectors configuration is applied on all sites that are member of the fleet. (see [below for nested schema](#nestedatt--network_connectors))
 - `network_firewall` (Attributes List) Network Firewall Network Firewall defines firewall to be applied for the virtual networks in the fleet. The network firewall configuration is applied on all sites that are member of the fleet. Constraints The Network Firewall is applied on Virtual Networks of type site local network and site local inside network (see [below for nested schema](#nestedatt--network_firewall))
-- `operating_system_version` (String) Operating System Version Desired Operating System version that is applied to all sites that are member of the fleet. Current Operating System version can be overridden via site config.<br>**Validation:** `Length LengthAtMost(256)`
+- `operating_system_version` (String) Operating System Version Desired Operating System version that is applied to all sites that are member of the fleet. Current Operating System version can be overridden via site config.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``
 - `outside_virtual_network` (Attributes List) Outside Virtual Network Default outside (site local) virtual network for the fleet (see [below for nested schema](#nestedatt--outside_virtual_network))
 - `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Performance Enhancement Mode to optimize for L3 or L7 networking (see [below for nested schema](#nestedatt--performance_enhancement_mode))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `vm_choice` (Attributes) Select VMs support Enable/Disable Enable or Disable VM support for this fleet (see [below for nested schema](#nestedatt--vm_choice))
-- `volterra_software_version` (String) Software Version F5XC software version is human readable string matching released set of version components. The given software version is applied to all sites that are member of the fleet. Current software installed can be overridden via site config.<br>**Validation:** `Length LengthAtMost(256)`
+- `volterra_software_version` (String) Software Version F5XC software version is human readable string matching released set of version components. The given software version is applied to all sites that are member of the fleet. Current software installed can be overridden via site config.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``
 
 ### Read-Only
 
@@ -398,7 +465,7 @@ Optional:
 
 Optional:
 
-- `backend` (String) Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.<br>**Default:** `block`
+- `backend` (String) Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.<br>**Default:** `block`<br>**Allowed Values (choose one):** `['block', 'file']`
 - `bandwidth_limit` (String) Bandwidth Limit It must be between 1 MB/s and 512 GB/s. Enter the size as a number (bytes must be multiple of 512) or number with a single character unit symbol. Valid unit symbols are K, M, G, representing KiB, MiB, and GiB.<br>**Validation:** `Length LengthAtMost(12)`
 - `iops_limit` (Number) IOPS Limit Enable IOPS limitation. It must be between 100 and 100 million. If value is 0, IOPS limit is not defined.<br>**Default:** `0`
 
@@ -474,13 +541,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -516,13 +584,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -583,7 +652,7 @@ Optional:
 - `password` (Attributes) Password Please Enter you password. Password to connect to the cluster/SVM (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password))
 - `region` (String) Backend Region Virtual Pool Region
 - `storage` (Attributes List) Virtual Storage Pools List of Virtual Storage Pool definitions which are referred back by Storage Class label match selection. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage))
-- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`
+- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`<br>**Allowed Values (choose one):** `['ontap-nas', 'ontap-nas-economy', 'ontap-nas-flexgroup']`
 - `storage_prefix` (String) Storage Prefix Prefix used when provisioning new volumes in the SVM. Once set this cannot be updated
 - `svm` (String) Backend SVM Storage virtual machine to use. Derived if an SVM managementLIF is specified<br>**Validation:** `Length LengthBetween(1, 256)`
 - `trusted_ca_certificate` (String) Trusted CA Certificate Please Enter Base64-encoded value of trusted CA certificate. Optional. Used for certificate-based auth..<br>**Validation:** `Length LengthAtMost(8192)`
@@ -621,13 +690,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -672,13 +742,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -724,7 +795,7 @@ Optional:
 - `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
 - `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
 - `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
 - `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
 - `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
 - `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
@@ -756,7 +827,7 @@ Optional:
 - `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
 - `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
 - `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
 - `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
 - `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
 - `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
@@ -794,7 +865,7 @@ Optional:
 - `password` (Attributes) Password Please Enter you password. Password to connect to the cluster/SVM (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password))
 - `region` (String) Backend Region Virtual Pool Region
 - `storage` (Attributes List) Virtual Storage Pools List of Virtual Storage Pool definitions which are referred back by Storage Class label match selection. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage))
-- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`
+- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`<br>**Allowed Values (choose one):** `['ontap-san', 'ontap-san-economy', 'ontap-nas-flexgroup']`
 - `storage_prefix` (String) Storage Prefix Prefix used when provisioning new volumes in the SVM. Once set this cannot be updated<br>**Validation:** `Length LengthBetween(1, 80)`
 - `svm` (String) Backend SVM Storage virtual machine to use. Derived if an SVM managementLIF is specified<br>**Validation:** `Length LengthBetween(1, 256)`
 - `trusted_ca_certificate` (String) Trusted CA Certificate Please Enter Base64-encoded value of trusted CA certificate. Optional. Used for certificate-based auth..<br>**Validation:** `Length LengthAtMost(8192)`
@@ -841,13 +912,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -883,13 +955,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -927,13 +1000,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -978,13 +1052,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -1030,7 +1105,7 @@ Optional:
 - `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
 - `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
 - `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
 - `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
 - `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
 - `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
@@ -1062,7 +1137,7 @@ Optional:
 - `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
 - `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
 - `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
 - `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
 - `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
 - `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
@@ -1112,11 +1187,11 @@ Required:
 Optional:
 
 - `default_fs_opt` (String) Default Filesystem Options Block volume default mkfs options. Not recommended to change!<br>**Validation:** `Length LengthBetween(1, 128)`
-- `default_fs_type` (String) Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`
+- `default_fs_type` (String) Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`<br>**Allowed Values (choose one):** `['xfs', 'ext4']`
 - `default_mount_opts` (List of String) Default Mount Options Block volume default filesystem mount options. Not recommended to change!
 - `disable_preempt_attachments` (Boolean) Disable Preempt Attachments Enable/Disable attachment preemption!<br>**Default:** `false`
 - `iscsi_login_timeout` (Number) iSCSI Login Timeout iSCSI login timeout in seconds. Not recommended to change!<br>**Default:** `20`
-- `san_type` (String) SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`
+- `san_type` (String) SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`<br>**Allowed Values (choose one):** `['ISCSI', 'FC']`
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays`
@@ -1153,13 +1228,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -1240,13 +1316,14 @@ Optional:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -1330,7 +1407,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`
+- `attrs` (List of String) Attributes List of route attributes associated with the static route<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)
 - `labels` (Map of String) Static Route labels Add Labels for this Static Route, these labels can be used in network policy
 - `nexthop` (Attributes) Nexthop Nexthop for the route (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop))
 
@@ -1660,7 +1737,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -1668,7 +1745,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_fleet.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

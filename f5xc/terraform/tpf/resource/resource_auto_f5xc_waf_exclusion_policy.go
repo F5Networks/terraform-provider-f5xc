@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -37,6 +36,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -299,8 +299,8 @@ func (r *ResourceF5XCWafExclusionPolicy) Metadata(ctx context.Context, request r
 func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a waf_exclusion_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of waf_exclusion_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a waf_exclusion_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of waf_exclusion_policy) etc. can be fetched",
+		MarkdownDescription: "WAF Exclusion Policy record",
+		Description:         "WAF Exclusion Policy record",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -474,14 +474,15 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 						},
 						"methods": schema.ListAttribute{
 							Description:         "Methods methods to be matched",
-							MarkdownDescription: "Methods methods to be matched<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)<br>**Default:** `ANY`",
+							MarkdownDescription: "Methods methods to be matched<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)",
 							ElementType:         types.StringType,
 							Required:            false,
 							Optional:            true,
-							Computed:            true,
-							Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ANY")),
+							Computed:            false,
 							Validators: []validator.List{
 								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ANY", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}...)),
+								listvalidator.SizeAtMost(16),
+								listvalidator.UniqueValues(),
 							},
 						},
 						"path_choice": schema.SingleNestedAttribute{
@@ -708,13 +709,13 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 													},
 													"exclude_violation": schema.ListAttribute{
 														Description:         "ViolationType",
-														MarkdownDescription: "ViolationType<br>**Allowed Values (choose one):** `['VIOL_ASM_COOKIE_MODIFIED', 'VIOL_COOKIE_MODIFIED', 'VIOL_EVASION_APACHE_WHITESPACE', 'VIOL_EVASION_BARE_BYTE_DECODING', 'VIOL_EVASION_DIRECTORY_TRAVERSALS', 'VIOL_EVASION_IIS_BACKSLASHES', 'VIOL_EVASION_IIS_UNICODE_CODEPOINTS', 'VIOL_EVASION_MULTIPLE_DECODING', 'VIOL_EVASION_PERCENT_U_DECODING', 'VIOL_FILETYPE', 'VIOL_FILE_UPLOAD', 'VIOL_FILE_UPLOAD_IN_BODY', 'VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE', 'VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION', 'VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING', 'VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER', 'VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START', 'VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS', 'VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST', 'VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST', 'VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS', 'VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT', 'VIOL_JSON_MALFORMED', 'VIOL_MALFORMED_REQUEST', 'VIOL_MANDATORY_HEADER', 'VIOL_METHOD', 'VIOL_REQUEST_MAX_LENGTH', 'VIOL_XML_MALFORMED']`",
+														MarkdownDescription: "ViolationType<br>**Allowed Values (choose one):** `['VIOL_ASM_COOKIE_MODIFIED', 'VIOL_COOKIE_MALFORMED', 'VIOL_COOKIE_MODIFIED', 'VIOL_ENCODING', 'VIOL_EVASION_APACHE_WHITESPACE', 'VIOL_EVASION_BAD_UNESCAPE', 'VIOL_EVASION_BARE_BYTE_DECODING', 'VIOL_EVASION_DIRECTORY_TRAVERSALS', 'VIOL_EVASION_IIS_BACKSLASHES', 'VIOL_EVASION_IIS_UNICODE_CODEPOINTS', 'VIOL_EVASION_MULTIPLE_DECODING', 'VIOL_EVASION_PERCENT_U_DECODING', 'VIOL_FILETYPE', 'VIOL_FILE_UPLOAD', 'VIOL_FILE_UPLOAD_IN_BODY', 'VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE', 'VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION', 'VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING', 'VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING', 'VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST', 'VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER', 'VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START', 'VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS', 'VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS', 'VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST', 'VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST', 'VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS', 'VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT', 'VIOL_JSON_MALFORMED', 'VIOL_MALFORMED_REQUEST', 'VIOL_MANDATORY_HEADER', 'VIOL_METHOD', 'VIOL_REQUEST_MAX_LENGTH', 'VIOL_XML_MALFORMED']`",
 														ElementType:         types.StringType,
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
 														Validators: []validator.List{
-															listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIOL_ASM_COOKIE_MODIFIED", "VIOL_COOKIE_MODIFIED", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_JSON_MALFORMED", "VIOL_MALFORMED_REQUEST", "VIOL_MANDATORY_HEADER", "VIOL_METHOD", "VIOL_REQUEST_MAX_LENGTH", "VIOL_XML_MALFORMED"}...)),
+															listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIOL_ASM_COOKIE_MODIFIED", "VIOL_COOKIE_MALFORMED", "VIOL_COOKIE_MODIFIED", "VIOL_ENCODING", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_JSON_MALFORMED", "VIOL_MALFORMED_REQUEST", "VIOL_MANDATORY_HEADER", "VIOL_METHOD", "VIOL_REQUEST_MAX_LENGTH", "VIOL_XML_MALFORMED"}...)),
 															listvalidator.SizeAtMost(1),
 														},
 													},
@@ -800,9 +801,17 @@ func (r *ResourceF5XCWafExclusionPolicy) ModifyPlan(ctx context.Context, req res
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCWafExclusionPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCWafExclusionPolicyModel
 
 	// Read Terraform plan data into the model
@@ -1292,7 +1301,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Create(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1315,7 +1324,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Create(ctx context.Context, request res
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "waf_exclusion_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "waf_exclusion_policy", err),
 		)
 		return
 	}
@@ -1971,7 +1980,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Read(ctx context.Context, request resou
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "waf_exclusion_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "waf_exclusion_policy", err),
 		)
 		return
 	}
@@ -2151,7 +2160,11 @@ func (r *ResourceF5XCWafExclusionPolicy) Read(ctx context.Context, request resou
 				wafExclusionPolicySimpleWafExclusionRuleModel.DomainChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				wafExclusionPolicySimpleWafExclusionRuleModel.DomainChoice = types.ObjectNull(WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap)
+				wafExclusionPolicySimpleWafExclusionRuleModel.DomainChoice = types.ObjectValueMust(WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap, map[string]attr.Value{
+					"any_domain":   types.BoolValue(true),
+					"exact_value":  types.StringNull(),
+					"suffix_value": types.StringNull(),
+				})
 			}
 
 			// resource specToModelNested TimeStampField --> ExpirationTimestamp
@@ -2279,7 +2292,11 @@ func (r *ResourceF5XCWafExclusionPolicy) Read(ctx context.Context, request resou
 				wafExclusionPolicySimpleWafExclusionRuleModel.PathChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				wafExclusionPolicySimpleWafExclusionRuleModel.PathChoice = types.ObjectNull(WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap)
+				wafExclusionPolicySimpleWafExclusionRuleModel.PathChoice = types.ObjectValueMust(WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap, map[string]attr.Value{
+					"any_path":    types.BoolValue(true),
+					"path_prefix": types.StringNull(),
+					"path_regex":  types.StringNull(),
+				})
 			}
 
 			// resource specToModelNested OneOfField --> WafAdvancedConfiguration
@@ -2586,6 +2603,12 @@ func (r *ResourceF5XCWafExclusionPolicy) Read(ctx context.Context, request resou
 }
 
 func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCWafExclusionPolicyModel
@@ -3095,7 +3118,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3111,7 +3134,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 	err = r.client.ReplaceObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "waf_exclusion_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "waf_exclusion_policy", err),
 		)
 		return
 	}
@@ -3120,7 +3143,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "waf_exclusion_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "waf_exclusion_policy", err),
 		)
 		return
 	}
@@ -3797,7 +3820,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Delete(ctx context.Context, request res
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "waf_exclusion_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "waf_exclusion_policy", err),
 		)
 		return
 	}

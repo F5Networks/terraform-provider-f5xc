@@ -5,9 +5,11 @@ package client
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,6 +17,12 @@ import (
 	"testing"
 	"time"
 )
+
+const testTerraformVersion = "1.5.7"
+
+func testProviderUserAgent() string {
+	return providerUserAgent(testTerraformVersion)
+}
 
 // ---------------------------------------------------------------------------
 // Helpers / mocks
@@ -90,7 +98,7 @@ func createTempFile(t *testing.T, content []byte) (string, error) {
 
 func TestNewAuthClient(t *testing.T) {
 	auth := &mockAuthenticator{clientData: "tok"}
-	ac := NewAuthClient("https://example.com", auth)
+	ac := NewAuthClient("https://example.com", auth, testProviderUserAgent())
 
 	if ac == nil {
 		t.Fatal("expected non-nil AuthClient")
@@ -105,9 +113,21 @@ func TestNewAuthClient(t *testing.T) {
 
 func TestNewAuthClient_EmptyURL(t *testing.T) {
 	auth := &mockAuthenticator{}
-	ac := NewAuthClient("", auth)
+	ac := NewAuthClient("", auth, testProviderUserAgent())
 	if ac.URL != "" {
 		t.Errorf("expected empty URL, got %q", ac.URL)
+	}
+}
+
+func TestProviderUserAgent(t *testing.T) {
+	ua := providerUserAgent(testTerraformVersion)
+	if !strings.HasPrefix(ua, "terraform/1.5.7 terraform-provider-f5xc/") {
+		t.Fatalf("User-Agent = %q, want terraform/<version> terraform-provider-f5xc/<version>", ua)
+	}
+
+	fallbackUA := providerUserAgent("")
+	if !strings.HasPrefix(fallbackUA, "terraform/unknown terraform-provider-f5xc/") {
+		t.Fatalf("fallback User-Agent = %q, want terraform/unknown terraform-provider-f5xc/<version>", fallbackUA)
 	}
 }
 
@@ -285,7 +305,7 @@ func TestAuthClient_Execute_Success(t *testing.T) {
 	defer srv.Close()
 
 	auth := &mockAuthenticator{client: srv.Client()}
-	ac := NewAuthClient(srv.URL, auth)
+	ac := NewAuthClient(srv.URL, auth, testProviderUserAgent())
 
 	body, err := ac.Execute(context.Background(), http.MethodGet, srv.URL+"/test", nil)
 	if err != nil {
@@ -314,7 +334,7 @@ func TestAuthClient_Execute_SetsAuthorizationHeader(t *testing.T) {
 		client:        srv.Client(),
 		appliedHeader: "APIToken my-test-token",
 	}
-	ac := NewAuthClient(srv.URL, auth)
+	ac := NewAuthClient(srv.URL, auth, testProviderUserAgent())
 
 	_, err := ac.Execute(context.Background(), http.MethodGet, srv.URL+"/test", nil)
 	if err != nil {
@@ -337,14 +357,14 @@ func TestAuthClient_Execute_SetsStandardHeaders(t *testing.T) {
 	defer srv.Close()
 
 	auth := &mockAuthenticator{client: srv.Client()}
-	ac := NewAuthClient(srv.URL, auth)
+	ac := NewAuthClient(srv.URL, auth, testProviderUserAgent())
 
 	_, err := ac.Execute(context.Background(), http.MethodGet, srv.URL+"/test", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if capturedUserAgent != "F5XC-Terraform-Provider/1.0.0 (Go-Client)" {
-		t.Errorf("User-Agent = %q, want %q", capturedUserAgent, "F5XC-Terraform-Provider/1.0.0 (Go-Client)")
+	if capturedUserAgent != testProviderUserAgent() {
+		t.Errorf("User-Agent = %q, want %q", capturedUserAgent, testProviderUserAgent())
 	}
 	if capturedAccept != "application/json" {
 		t.Errorf("Accept = %q, want application/json", capturedAccept)
@@ -362,7 +382,7 @@ func TestAuthClient_Execute_NonOKStatus(t *testing.T) {
 	defer srv.Close()
 
 	auth := &mockAuthenticator{client: srv.Client()}
-	ac := NewAuthClient(srv.URL, auth)
+	ac := NewAuthClient(srv.URL, auth, testProviderUserAgent())
 
 	_, err := ac.Execute(context.Background(), http.MethodGet, srv.URL+"/missing", nil)
 	if err == nil {
@@ -381,7 +401,7 @@ func TestAuthClient_Execute_500Error(t *testing.T) {
 	defer srv.Close()
 
 	auth := &mockAuthenticator{client: srv.Client()}
-	ac := NewAuthClient(srv.URL, auth)
+	ac := NewAuthClient(srv.URL, auth, testProviderUserAgent())
 
 	_, err := ac.Execute(context.Background(), http.MethodGet, srv.URL+"/fail", nil)
 	if err == nil {
@@ -397,7 +417,7 @@ func TestAuthClient_Execute_ApplyAuthError(t *testing.T) {
 		applyAuthErr: fmt.Errorf("auth failed"),
 		client:       &http.Client{},
 	}
-	ac := NewAuthClient("https://example.com", auth)
+	ac := NewAuthClient("https://example.com", auth, testProviderUserAgent())
 
 	_, err := ac.Execute(context.Background(), http.MethodGet, "https://example.com/test", nil)
 	if err == nil {
@@ -410,7 +430,7 @@ func TestAuthClient_Execute_ApplyAuthError(t *testing.T) {
 
 func TestAuthClient_Execute_InvalidURL(t *testing.T) {
 	auth := &mockAuthenticator{client: &http.Client{}}
-	ac := NewAuthClient("://bad-url", auth)
+	ac := NewAuthClient("://bad-url", auth, testProviderUserAgent())
 
 	_, err := ac.Execute(context.Background(), http.MethodGet, "://bad-url", nil)
 	if err == nil {
@@ -430,7 +450,7 @@ func TestAuthClient_Execute_WithBody(t *testing.T) {
 	defer srv.Close()
 
 	auth := &mockAuthenticator{client: srv.Client()}
-	ac := NewAuthClient(srv.URL, auth)
+	ac := NewAuthClient(srv.URL, auth, testProviderUserAgent())
 
 	payload := []byte(`{"key":"value"}`)
 	_, err := ac.Execute(context.Background(), http.MethodPost, srv.URL+"/create", payload)
@@ -663,6 +683,16 @@ func TestBuildTLSConfigFromP12_FileURIPrefix(t *testing.T) {
 	}
 }
 
+func TestBuildTLSConfigFromP12_NullByte(t *testing.T) {
+	_, err := buildTLSConfigFromP12("/path/with/\x00/null.p12", "password")
+	if err == nil {
+		t.Fatal("expected error for path with null byte, got nil")
+	}
+	if !strings.Contains(err.Error(), "contains null byte") {
+		t.Errorf("error = %q, expected to contain 'contains null byte'", err.Error())
+	}
+}
+
 func TestBuildTLSConfigFromP12_InvalidP12Data(t *testing.T) {
 	tmpFile, err := createTempFile(t, []byte("not-a-valid-p12-file"))
 	if err != nil {
@@ -710,7 +740,7 @@ func TestPrismURIRemapperFn_InvalidURL(t *testing.T) {
 	if policyErr != nil {
 		t.Fatalf("unexpected policy error: %v", policyErr)
 	}
-	_, err := prismURIRemapperFn("://invalid", policy, newResourceThrottleRegistry())
+	_, err := prismURIRemapperFn("://invalid", testProviderUserAgent(), policy, newResourceThrottleRegistry())
 	if err == nil {
 		t.Fatal("expected error for invalid URL, got nil")
 	}
@@ -721,7 +751,7 @@ func TestPrismURIRemapperFn_ValidURL(t *testing.T) {
 	if policyErr != nil {
 		t.Fatalf("unexpected policy error: %v", policyErr)
 	}
-	fn, err := prismURIRemapperFn("https://tenant.example.com/api", policy, newResourceThrottleRegistry())
+	fn, err := prismURIRemapperFn("https://tenant.example.com/api", testProviderUserAgent(), policy, newResourceThrottleRegistry())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -735,7 +765,7 @@ func TestPrismURIRemapperFn_NoSlugInContext(t *testing.T) {
 	if policyErr != nil {
 		t.Fatalf("unexpected policy error: %v", policyErr)
 	}
-	fn, err := prismURIRemapperFn("https://tenant.example.com/api", policy, newResourceThrottleRegistry())
+	fn, err := prismURIRemapperFn("https://tenant.example.com/api", testProviderUserAgent(), policy, newResourceThrottleRegistry())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -765,7 +795,7 @@ func TestPrismURIRemapperFn_WithSlugInContext(t *testing.T) {
 	if policyErr != nil {
 		t.Fatalf("unexpected policy error: %v", policyErr)
 	}
-	fn, err := prismURIRemapperFn("https://tenant.example.com/api", policy, newResourceThrottleRegistry())
+	fn, err := prismURIRemapperFn("https://tenant.example.com/api", testProviderUserAgent(), policy, newResourceThrottleRegistry())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -802,6 +832,9 @@ func TestPrismURIRemapperFn_WithSlugInContext(t *testing.T) {
 	if !strings.Contains(rt.lastReq.URL.Path, "/config") {
 		t.Errorf("URL path does not contain '/config': %s", rt.lastReq.URL.Path)
 	}
+	if got := rt.lastReq.Header.Get("User-Agent"); got != testProviderUserAgent() {
+		t.Errorf("User-Agent = %q, want %q", got, testProviderUserAgent())
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -813,7 +846,7 @@ func TestURIRemapperFn_SetsTenantHeader(t *testing.T) {
 	if policyErr != nil {
 		t.Fatalf("unexpected policy error: %v", policyErr)
 	}
-	fn := uriRemapperFn("my-tenant", policy, newResourceThrottleRegistry())
+	fn := uriRemapperFn("my-tenant", testProviderUserAgent(), policy, newResourceThrottleRegistry())
 
 	req, err := http.NewRequest(http.MethodGet, "https://example.com/api/test", nil)
 	if err != nil {
@@ -834,6 +867,9 @@ func TestURIRemapperFn_SetsTenantHeader(t *testing.T) {
 	if got := rt.lastReq.Header.Get("X-Volterra-Apigw-Tenant"); got != "my-tenant" {
 		t.Errorf("X-Volterra-Apigw-Tenant = %q, want %q", got, "my-tenant")
 	}
+	if got := rt.lastReq.Header.Get("User-Agent"); got != testProviderUserAgent() {
+		t.Errorf("User-Agent = %q, want %q", got, testProviderUserAgent())
+	}
 }
 
 func TestURIRemapperFn_EmptyTenant(t *testing.T) {
@@ -841,7 +877,7 @@ func TestURIRemapperFn_EmptyTenant(t *testing.T) {
 	if policyErr != nil {
 		t.Fatalf("unexpected policy error: %v", policyErr)
 	}
-	fn := uriRemapperFn("", policy, newResourceThrottleRegistry())
+	fn := uriRemapperFn("", testProviderUserAgent(), policy, newResourceThrottleRegistry())
 
 	req, err := http.NewRequest(http.MethodGet, "https://example.com/api/test", nil)
 	if err != nil {
@@ -862,6 +898,9 @@ func TestURIRemapperFn_EmptyTenant(t *testing.T) {
 	// Empty tenant should still set the header (to empty string)
 	if got := rt.lastReq.Header.Get("x-ves-tenant"); got != "" {
 		t.Errorf("x-ves-tenant = %q, want empty string", got)
+	}
+	if got := rt.lastReq.Header.Get("User-Agent"); got != testProviderUserAgent() {
+		t.Errorf("User-Agent = %q, want %q", got, testProviderUserAgent())
 	}
 }
 
@@ -1029,5 +1068,154 @@ func TestComputeBackoffDelay_Bounds(t *testing.T) {
 	}
 	if d := computeBackoffDelay(3, policy); d != 300*time.Millisecond {
 		t.Fatalf("attempt3 delay should cap at max_backoff, got %v", d)
+	}
+}
+
+func TestLogAndRoundTrip_RedactsSensitiveHeaders(t *testing.T) {
+	var loggedOutput strings.Builder
+	log.SetOutput(&loggedOutput)
+	defer log.SetOutput(os.Stderr)
+
+	mockRT := &mockRoundTripper{}
+	req, err := http.NewRequest(http.MethodGet, "https://tenant.example.com/api/test", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("Authorization", "APIToken secret-token-xyz")
+	req.Header.Set("X-Volterra-Token", "secret-volterra-token")
+	req.Header.Set("Cookie", "session=secret-session-cookie")
+
+	_, err = logAndRoundTrip(mockRT, req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// 1. Verify original request was NOT mutated
+	if req.Header.Get("Authorization") != "APIToken secret-token-xyz" {
+		t.Errorf("original Authorization was mutated: %s", req.Header.Get("Authorization"))
+	}
+	if req.Header.Get("X-Volterra-Token") != "secret-volterra-token" {
+		t.Errorf("original X-Volterra-Token was mutated: %s", req.Header.Get("X-Volterra-Token"))
+	}
+	if req.Header.Get("Cookie") != "session=secret-session-cookie" {
+		t.Errorf("original Cookie was mutated: %s", req.Header.Get("Cookie"))
+	}
+
+	// 2. Verify log output masked the sensitive headers
+	out := loggedOutput.String()
+	if strings.Contains(out, "secret-token-xyz") {
+		t.Errorf("log output contains plaintext token: %s", out)
+	}
+	if strings.Contains(out, "secret-volterra-token") {
+		t.Errorf("log output contains plaintext volterra token: %s", out)
+	}
+	if strings.Contains(out, "secret-session-cookie") {
+		t.Errorf("log output contains plaintext cookie: %s", out)
+	}
+	if !strings.Contains(out, "APIToken [REDACTED]") {
+		t.Errorf("log output does not contain redacted token placeholder: %s", out)
+	}
+}
+
+func TestAPITokenAuth_EnforcesTLS12(t *testing.T) {
+	auth := NewAPITokenAuth("test-token", 5*time.Second)
+	tr, ok := auth.Client.Transport.(*http.Transport)
+	if !ok {
+		t.Fatalf("expected *http.Transport, got %T", auth.Client.Transport)
+	}
+	if tr.TLSClientConfig == nil || tr.TLSClientConfig.MinVersion != tls.VersionTLS12 {
+		t.Errorf("expected MinVersion TLS 1.2, got %v", tr.TLSClientConfig)
+	}
+
+	authLazy := &APITokenAuth{Token: "test-token"}
+	lazyClient := authLazy.GetClient()
+	lazyTr, ok := lazyClient.Transport.(*http.Transport)
+	if !ok {
+		t.Fatalf("expected *http.Transport, got %T", lazyClient.Transport)
+	}
+	if lazyTr.TLSClientConfig == nil || lazyTr.TLSClientConfig.MinVersion != tls.VersionTLS12 {
+		t.Errorf("expected MinVersion TLS 1.2 in GetClient(), got %v", lazyTr.TLSClientConfig)
+	}
+}
+
+func TestLogAndRoundTrip_RedactsSetCookieInResponse(t *testing.T) {
+	var loggedOutput strings.Builder
+	log.SetOutput(&loggedOutput)
+	defer log.SetOutput(os.Stderr)
+
+	respHeader := make(http.Header)
+	respHeader.Set("Set-Cookie", "session=super-secret-cookie; Path=/")
+	respHeader.Set("Content-Type", "application/json")
+
+	mockRT := &mockRoundTripper{
+		response: &http.Response{
+			StatusCode:    http.StatusOK,
+			Proto:         "HTTP/1.1",
+			ProtoMajor:    1,
+			ProtoMinor:    1,
+			Header:        respHeader,
+			Body:          io.NopCloser(strings.NewReader(`{"status":"ok"}`)),
+			ContentLength: int64(len(`{"status":"ok"}`)),
+		},
+	}
+	req, err := http.NewRequest(http.MethodGet, "https://tenant.example.com/api/test", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	resp, err := logAndRoundTrip(mockRT, req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify original response still contains the Set-Cookie for the caller
+	if resp.Header.Get("Set-Cookie") != "session=super-secret-cookie; Path=/" {
+		t.Errorf("original Set-Cookie was modified: %s", resp.Header.Get("Set-Cookie"))
+	}
+
+	// Verify log output masked the cookie
+	out := loggedOutput.String()
+	if strings.Contains(out, "super-secret-cookie") {
+		t.Errorf("log output contains plaintext Set-Cookie secret: %s", out)
+	}
+	if !strings.Contains(out, "[REDACTED]") {
+		t.Errorf("log output does not contain [REDACTED]: %s", out)
+	}
+
+	// Verify response body is still readable
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body: %v", err)
+	}
+	if string(bodyBytes) != `{"status":"ok"}` {
+		t.Errorf("response body corrupted: got %s, want %s", string(bodyBytes), `{"status":"ok"}`)
+	}
+}
+
+func TestLogAndRoundTrip_PreservesRequestBody(t *testing.T) {
+	mockRT := &mockRoundTripper{
+		response: &http.Response{StatusCode: http.StatusOK},
+	}
+	bodyContent := `{"test":"payload-12345"}`
+	req, err := http.NewRequest(http.MethodPost, "https://tenant.example.com/api/test", strings.NewReader(bodyContent))
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	_, err = logAndRoundTrip(mockRT, req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if mockRT.lastReq == nil || mockRT.lastReq.Body == nil {
+		t.Fatal("expected mockRT.lastReq.Body to be non-nil")
+	}
+
+	receivedBytes, err := io.ReadAll(mockRT.lastReq.Body)
+	if err != nil {
+		t.Fatalf("failed to read body: %v", err)
+	}
+	if string(receivedBytes) != bodyContent {
+		t.Fatalf("request body was drained or modified: got %q, want %q", string(receivedBytes), bodyContent)
 	}
 }

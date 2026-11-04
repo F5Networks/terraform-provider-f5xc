@@ -14,18 +14,137 @@
 page_title: "f5xc_api_definition Resource - F5 XC Distributed Cloud"
 subcategory: "API Security & Management"
 description: |-
-  api definition object api definition object The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs. Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.
+  The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs.<br>Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.<br>In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.
 ---
 
 # f5xc_api_definition (Resource)
 
-api definition object api definition object The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs. Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.
+The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs.<br>Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.<br>In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.
 
 To get more information about f5xc_api_definition, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/views-api-definition)
 
+## Example Usage
 
+```terraform
+# Example: Api Definition - Basic
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  api_inventory_inclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/v1/orders/{order_id}"
+    }
+  ]
+  schema_updates_strategy_choice = {
+    strict_schema_origin = true
+  }
+}
+```
+
+```terraform
+# Example: Api Definition - Exclusion List
+
+resource "f5xc_api_definition_uploader" "spec" {
+  metadata = {
+    name      = "example-api-definition-spec"
+    namespace = "shared"
+  }
+  string_value = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"Test API\",\"version\":\"1.0.0\"},\"paths\":{\"/2.0/repositories/{username}\":{\"get\":{\"operationId\":\"getRepositoriesByOwner\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"repos\"}}}},\"/2.0/repositories/{username}/{slug}/pullrequests/{pid}/merge\":{\"post\":{\"operationId\":\"mergePullRequest\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}},{\"name\":\"slug\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}},{\"name\":\"pid\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"204\":{\"description\":\"merged\"}}}}}}"
+}
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  swagger_specs = [f5xc_api_definition_uploader.spec.metadata.url]
+
+  api_inventory_exclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/2.0/repositories/{username}"
+    }
+  ]
+
+  schema_updates_strategy_choice = {
+    strict_schema_origin = true
+  }
+}
+```
+
+```terraform
+# Example: Api Definition - Full
+
+resource "f5xc_api_definition_uploader" "spec" {
+  metadata = {
+    name      = "example-api-definition-spec"
+    namespace = "shared"
+  }
+  string_value = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"Full Test API\",\"version\":\"1.0.0\"},\"paths\":{\"/2.0/users/{username}\":{\"get\":{\"operationId\":\"getUserByName\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"The User\"}}}},\"/2.0/repositories/{username}\":{\"get\":{\"operationId\":\"getRepositoriesByOwner\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"repos\"}}}}}}"
+}
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  swagger_specs = [f5xc_api_definition_uploader.spec.metadata.url]
+
+  # Path is intentionally NOT present in the inline swagger above.
+  # Under mixed_schema_origin the API drops inclusion-list entries whose
+  # path is already declared in the swagger (auto-discovered), which
+  # causes a "provider produced inconsistent result after apply" error.
+  api_inventory_inclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/2.0/starred/{username}"
+    }
+  ]
+
+  non_api_endpoints = [
+    {
+      method = ["HEAD"]
+      path   = "/readyz"
+    }
+  ]
+
+  description = "API definition example"
+
+  labels = {
+    env = "example"
+  }
+
+  annotations = {
+    owner = "platform"
+  }
+
+  schema_updates_strategy_choice = {
+    mixed_schema_origin = true
+  }
+}
+```
+
+```terraform
+# Example: Api Definition - Inclusion List
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  api_inventory_inclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/v1/orders/{order_id}"
+    }
+  ]
+  schema_updates_strategy_choice = {
+    strict_schema_origin = true
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -102,7 +221,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -110,7 +229,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_api_definition.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

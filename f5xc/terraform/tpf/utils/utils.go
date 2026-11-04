@@ -12,7 +12,10 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -24,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -135,6 +139,75 @@ func IsNotFoundError(err error) bool {
 
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "status code 404") || strings.Contains(msg, "notfound")
+}
+
+// apiErrorBodyRE captures the trailing "status code <N>, body <json>" segment emitted
+// by the vendored vesapi client when a CRUD call fails. The message and code are
+// pulled from the JSON so callers surface a clean diagnostic instead of leaking
+// internal Go type names (e.g. "_protoutil.NilField") from details[].details.
+var apiErrorBodyRE = regexp.MustCompile(`status code (\d+),\s*body (\{.*\})\s*$`)
+
+// apiErrorBody mirrors the top-level shape of the JSON error payload returned by
+// the F5XC API gateway. Only the fields we intentionally surface are decoded.
+type apiErrorBody struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// SanitizeAPIError formats a CRUD error for a Terraform diagnostic without
+// leaking backend implementation details.
+//
+// Why: The vendored vesapi client returns the raw HTTP response body verbatim
+// in err.Error(). For 5xx responses that body contains internal validator
+// output such as "_protoutil.NilField is not _protoutil.PtrListField", which
+// is confusing to end users and exposes internal types.
+//
+// How: Extracts "status code N, body {json}" from err.Error(), parses the JSON,
+// and returns a message derived from the HTTP status class:
+//   - 5xx: a generic internal-server-error message (details are dropped).
+//   - 4xx: the parsed "message" field only (details[].details are dropped).
+//   - unparsable: falls back to the raw err.Error() so existing troubleshooting
+//     is preserved.
+//
+// The raw error is always debug-logged so it remains available with TF_LOG=debug.
+func SanitizeAPIError(ctx context.Context, action, resourceName string, err error) string {
+	raw := err.Error()
+	tflog.Debug(ctx, "raw API error", map[string]any{
+		"action":   action,
+		"resource": resourceName,
+		"error":    raw,
+	})
+
+	matches := apiErrorBodyRE.FindStringSubmatch(raw)
+	if len(matches) != 3 {
+		return fmt.Sprintf("Unable to %s %s, got error: %s", action, resourceName, raw)
+	}
+
+	var status int
+	if _, scanErr := fmt.Sscanf(matches[1], "%d", &status); scanErr != nil {
+		return fmt.Sprintf("Unable to %s %s, got error: %s", action, resourceName, raw)
+	}
+
+	var body apiErrorBody
+	if jsonErr := json.Unmarshal([]byte(matches[2]), &body); jsonErr != nil {
+		return fmt.Sprintf("Unable to %s %s, got error: %s", action, resourceName, raw)
+	}
+
+	switch {
+	case status >= 500:
+		return fmt.Sprintf(
+			"Unable to %s %s: internal server error (HTTP %d). Please retry; if the problem persists, contact support with the request timestamp.",
+			action, resourceName, status,
+		)
+	case status >= 400:
+		msg := body.Message
+		if msg == "" {
+			msg = "request rejected by API"
+		}
+		return fmt.Sprintf("Unable to %s %s (HTTP %d, code %d): %s", action, resourceName, status, body.Code, msg)
+	default:
+		return fmt.Sprintf("Unable to %s %s, got error: %s", action, resourceName, raw)
+	}
 }
 
 // IsTransientDeleteError reports whether err matches known transient delete failures.
@@ -764,6 +837,350 @@ func ValueContainsUnknown(value attr.Value) bool {
 	return false
 }
 
+// ResolveUnknowns merges planned attribute values with API response values,
+// resolving any unknown fields while preserving known planned configuration
+// and sensitive values.
+//
+// Why: When resources restore sensitive plan objects during an Update operation
+// to protect credentials from backend redaction masks, any newly added child
+// element or reference may contain unknown attributes (e.g. `tenant` planned
+// as unknown by `UseNonNullStateForUnknown`). Writing unknown values into
+// Terraform state triggers a post-apply fatal error ("Provider returned invalid
+// result object after apply"). ResolveUnknowns ensures all known user intents
+// and secrets from the plan are kept intact, while any unknown attributes are
+// replaced with resolved values from the API (or typed nulls if omitted by the API).
+//
+// How: A fast-path checks if planVal contains any unknowns via ValueContainsUnknown;
+// if none exist, planVal is returned immediately without modification. If unknowns
+// are detected, the function recursively walks composite structures (objects, lists,
+// sets, maps, tuples). Known fields from planVal are retained, while unknown fields
+// are resolved using the corresponding value from apiVal or defaulted to a typed
+// null matching the attribute's schema type.
+//
+// Parameters:
+//   - planVal: the attribute value from Terraform's plan containing user config
+//     and known sensitive data, but potentially containing unknown child fields.
+//   - apiVal: the attribute value populated from the backend API response containing
+//     resolved computed values.
+//
+// Return values:
+//   - T: a value of the same type as planVal where all nested unknown values have
+//     been resolved to known or typed null values.
+//
+// Example:
+//
+//	data.Routes = utils.ResolveUnknowns(planRoutes, data.Routes)
+func ResolveUnknowns[T attr.Value](planVal, apiVal T) T {
+	if !ValueContainsUnknown(planVal) {
+		return planVal
+	}
+
+	ctx := context.Background()
+	resolved := resolveUnknownsValue(ctx, planVal, apiVal, planVal.Type(ctx))
+	if typed, ok := resolved.(T); ok {
+		return typed
+	}
+
+	return planVal
+}
+
+// resolveUnknownsValue recursively replaces unknown leaf attributes within a plan
+// value using corresponding known values from the API value or typed null fallbacks.
+//
+// Why: Post-apply state must never contain unknown values. During composite object
+// restoration, unknown fields must be populated from the API response where available,
+// or safely converted to typed null values if omitted by the backend.
+//
+// How: If planVal is unknown, it returns apiVal (if valid and known) or a typed null.
+// If planVal is null or contains no unknowns, planVal is returned directly. For composite
+// types (ObjectValue, ListValue, SetValue, MapValue, TupleValue), each element or
+// attribute is recursively processed alongside the corresponding element from apiVal.
+//
+// Parameters:
+//   - ctx: context for type operations.
+//   - planVal: the planned attribute value to inspect and resolve.
+//   - apiVal: the candidate API attribute value to substitute for unknown fields.
+//   - attrType: expected Terraform attribute type used to construct typed nulls.
+//
+// Return values:
+//   - attr.Value: the resolved attribute value with no unknown nodes, or typed null.
+//
+// Example:
+//
+//	resolved := resolveUnknownsValue(ctx, planVal, apiVal, planVal.Type(ctx))
+func resolveUnknownsValue(ctx context.Context, planVal, apiVal attr.Value, attrType attr.Type) attr.Value {
+	if planVal == nil || planVal.IsUnknown() {
+		if apiVal != nil && !apiVal.IsUnknown() && !apiVal.IsNull() {
+			if attrType == nil || apiVal.Type(ctx).Equal(attrType) {
+				return apiVal
+			}
+		}
+		return typedNull(ctx, attrType)
+	}
+
+	if planVal.IsNull() || !ValueContainsUnknown(planVal) {
+		return planVal
+	}
+
+	switch v := planVal.(type) {
+	case basetypes.ObjectValue:
+		return resolveUnknownsObject(ctx, v, apiVal)
+	case basetypes.ListValue:
+		return resolveUnknownsList(ctx, v, apiVal)
+	case basetypes.SetValue:
+		return resolveUnknownsSet(ctx, v, apiVal)
+	case basetypes.MapValue:
+		return resolveUnknownsMap(ctx, v, apiVal)
+	case basetypes.TupleValue:
+		return resolveUnknownsTuple(ctx, v, apiVal)
+	default:
+		return planVal
+	}
+}
+
+// resolveUnknownsObject recursively resolves unknown attributes within an ObjectValue.
+//
+// Why: Composite object structures in Terraform plans may contain unknown leaf
+// fields that must be populated from the API response or defaulted to typed nulls.
+//
+// How: It iterates over each expected attribute type of the object, extracts
+// the corresponding API child attribute if available, and recursively resolves
+// unknown fields before constructing a new ObjectValue.
+//
+// Parameters:
+//   - ctx: context for schema type reflection.
+//   - v: the planned ObjectValue containing child attributes.
+//   - apiVal: the corresponding API attribute value, if any.
+//
+// Return values:
+//   - attr.Value: a new ObjectValue with resolved attributes, or the original value if construction fails.
+//
+// Example:
+//
+//	resolved := resolveUnknownsObject(ctx, objVal, apiObjVal)
+func resolveUnknownsObject(ctx context.Context, v basetypes.ObjectValue, apiVal attr.Value) attr.Value {
+	attrTypes := v.AttributeTypes(ctx)
+	planAttrs := v.Attributes()
+	var apiAttrs map[string]attr.Value
+	if apiObj, ok := apiVal.(basetypes.ObjectValue); ok && !apiObj.IsNull() && !apiObj.IsUnknown() {
+		apiAttrs = apiObj.Attributes()
+	}
+
+	resolvedAttrs := make(map[string]attr.Value, len(attrTypes))
+	for name, expectedType := range attrTypes {
+		var apiChild attr.Value
+		if apiAttrs != nil {
+			apiChild = apiAttrs[name]
+		}
+		resolvedAttrs[name] = resolveUnknownsValue(ctx, planAttrs[name], apiChild, expectedType)
+	}
+
+	newObj, diags := basetypes.NewObjectValue(attrTypes, resolvedAttrs)
+	if diags.HasError() {
+		return v
+	}
+	return newObj
+}
+
+// resolveUnknownsList recursively resolves unknown elements within a ListValue.
+//
+// Why: List attributes restored from plan may contain elements with unknown child fields.
+//
+// How: It iterates through the planned elements, matches them with corresponding
+// elements from apiVal by index if available, and recursively resolves each element.
+//
+// Parameters:
+//   - ctx: context for element type inspection.
+//   - v: the planned ListValue containing elements.
+//   - apiVal: the corresponding API list value, if available.
+//
+// Return values:
+//   - attr.Value: a new ListValue with resolved elements, or the original value if construction fails.
+//
+// Example:
+//
+//	resolved := resolveUnknownsList(ctx, listVal, apiListVal)
+func resolveUnknownsList(ctx context.Context, v basetypes.ListValue, apiVal attr.Value) attr.Value {
+	elemType := v.ElementType(ctx)
+	planElems := v.Elements()
+	var apiElems []attr.Value
+	if apiList, ok := apiVal.(basetypes.ListValue); ok && !apiList.IsNull() && !apiList.IsUnknown() {
+		apiElems = apiList.Elements()
+	}
+
+	resolvedElems := make([]attr.Value, len(planElems))
+	for i, planElem := range planElems {
+		var apiChild attr.Value
+		if i < len(apiElems) {
+			apiChild = apiElems[i]
+		}
+		resolvedElems[i] = resolveUnknownsValue(ctx, planElem, apiChild, elemType)
+	}
+
+	newList, diags := basetypes.NewListValue(elemType, resolvedElems)
+	if diags.HasError() {
+		return v
+	}
+	return newList
+}
+
+// resolveUnknownsSet recursively resolves unknown elements within a SetValue.
+//
+// Why: Set attributes restored from plan may contain elements with unknown child fields.
+//
+// How: It iterates through planned elements, pairs them by index with API elements if available,
+// and recursively resolves each element before creating a new SetValue.
+//
+// Parameters:
+//   - ctx: context for element type inspection.
+//   - v: the planned SetValue containing elements.
+//   - apiVal: the corresponding API set value, if available.
+//
+// Return values:
+//   - attr.Value: a new SetValue with resolved elements, or the original value if construction fails.
+//
+// Example:
+//
+//	resolved := resolveUnknownsSet(ctx, setVal, apiSetVal)
+func resolveUnknownsSet(ctx context.Context, v basetypes.SetValue, apiVal attr.Value) attr.Value {
+	elemType := v.ElementType(ctx)
+	planElems := v.Elements()
+	var apiElems []attr.Value
+	if apiSet, ok := apiVal.(basetypes.SetValue); ok && !apiSet.IsNull() && !apiSet.IsUnknown() {
+		apiElems = apiSet.Elements()
+	}
+
+	resolvedElems := make([]attr.Value, len(planElems))
+	for i, planElem := range planElems {
+		var apiChild attr.Value
+		if i < len(apiElems) {
+			apiChild = apiElems[i]
+		}
+		resolvedElems[i] = resolveUnknownsValue(ctx, planElem, apiChild, elemType)
+	}
+
+	newSet, diags := basetypes.NewSetValue(elemType, resolvedElems)
+	if diags.HasError() {
+		return v
+	}
+	return newSet
+}
+
+// resolveUnknownsMap recursively resolves unknown elements within a MapValue.
+//
+// Why: Map attributes restored from plan may contain map entries with unknown values.
+//
+// How: It iterates through planned map entries, retrieves the matching key from apiVal if present,
+// and recursively resolves each map value.
+//
+// Parameters:
+//   - ctx: context for map element type inspection.
+//   - v: the planned MapValue containing key-value pairs.
+//   - apiVal: the corresponding API map value, if available.
+//
+// Return values:
+//   - attr.Value: a new MapValue with resolved entries, or the original value if construction fails.
+//
+// Example:
+//
+//	resolved := resolveUnknownsMap(ctx, mapVal, apiMapVal)
+func resolveUnknownsMap(ctx context.Context, v basetypes.MapValue, apiVal attr.Value) attr.Value {
+	elemType := v.ElementType(ctx)
+	planElems := v.Elements()
+	var apiElems map[string]attr.Value
+	if apiMap, ok := apiVal.(basetypes.MapValue); ok && !apiMap.IsNull() && !apiMap.IsUnknown() {
+		apiElems = apiMap.Elements()
+	}
+
+	resolvedElems := make(map[string]attr.Value, len(planElems))
+	for k, planElem := range planElems {
+		var apiChild attr.Value
+		if apiElems != nil {
+			apiChild = apiElems[k]
+		}
+		resolvedElems[k] = resolveUnknownsValue(ctx, planElem, apiChild, elemType)
+	}
+
+	newMap, diags := basetypes.NewMapValue(elemType, resolvedElems)
+	if diags.HasError() {
+		return v
+	}
+	return newMap
+}
+
+// resolveUnknownsTuple recursively resolves unknown elements within a TupleValue.
+//
+// Why: Tuple attributes restored from plan may contain heterogenous elements with unknown child fields.
+//
+// How: It iterates through planned tuple elements alongside their respective element types,
+// resolves each against the matching index of apiVal, and constructs a new TupleValue.
+//
+// Parameters:
+//   - ctx: context for tuple element type inspection.
+//   - v: the planned TupleValue containing elements.
+//   - apiVal: the corresponding API tuple value, if available.
+//
+// Return values:
+//   - attr.Value: a new TupleValue with resolved elements, or the original value if construction fails.
+//
+// Example:
+//
+//	resolved := resolveUnknownsTuple(ctx, tupleVal, apiTupleVal)
+func resolveUnknownsTuple(ctx context.Context, v basetypes.TupleValue, apiVal attr.Value) attr.Value {
+	elemTypes := v.ElementTypes(ctx)
+	planElems := v.Elements()
+	var apiElems []attr.Value
+	if apiTuple, ok := apiVal.(basetypes.TupleValue); ok && !apiTuple.IsNull() && !apiTuple.IsUnknown() {
+		apiElems = apiTuple.Elements()
+	}
+
+	resolvedElems := make([]attr.Value, len(planElems))
+	for i, planElem := range planElems {
+		var apiChild attr.Value
+		if i < len(apiElems) {
+			apiChild = apiElems[i]
+		}
+		resolvedElems[i] = resolveUnknownsValue(ctx, planElem, apiChild, elemTypes[i])
+	}
+
+	newTuple, diags := basetypes.NewTupleValue(elemTypes, resolvedElems)
+	if diags.HasError() {
+		return v
+	}
+	return newTuple
+}
+
+// typedNull returns a typed null attr.Value for the given attribute type.
+//
+// Why: When an unknown attribute cannot be resolved from the API response
+// (for instance, because the backend omitted an optional field), writing an
+// untyped nil or unknown value causes Terraform schema validation to fail.
+// A typed null safely indicates the absence of a value without triggering errors.
+//
+// How: It constructs a null tftypes.Value using the schema type and converts
+// it back into the framework's native attr.Value representation.
+//
+// Parameters:
+//   - ctx: context for type operations.
+//   - attrType: the Terraform attribute type for which a null value is required.
+//
+// Return values:
+//   - attr.Value: a typed null value corresponding to attrType, or nil if attrType is nil.
+//
+// Example:
+//
+//	nullVal := typedNull(ctx, types.StringType)
+func typedNull(ctx context.Context, attrType attr.Type) attr.Value {
+	if attrType == nil {
+		return nil
+	}
+	nullVal, err := attrType.ValueFromTerraform(ctx, tftypes.NewValue(attrType.TerraformType(ctx), nil))
+	if err != nil {
+		return nil
+	}
+	return nullVal
+}
+
 // backendDefaultRRSet describes a single backend-injected default RRSet that the
 // F5 XC control plane adds automatically and that must never be tracked in
 // Terraform state.
@@ -792,6 +1209,18 @@ var backendDefaultRRSets = []backendDefaultRRSet{
 	{recordType: "NS", name: "", ttl: 86400, values: []string{"ns1crt.f5clouddns-test.com"}},
 	{recordType: "NS", name: "", ttl: 86400, values: []string{"ns1.f5clouddns.com", "ns2.f5clouddns.com"}},
 	{recordType: "NS", name: "", ttl: 86400, values: []string{"ns1staging.f5clouddns-test.com"}},
+}
+
+// backendDefaultNSValues is the closed set of backend-managed default nameserver
+// hostnames that the F5 XC control plane automatically appends to an apex NS
+// RRSet (`ns_record.name` omitted or empty).
+var backendDefaultNSValues = map[string]bool{
+	"ns1crt.f5clouddns-test.com":     true,
+	"ns2crt.f5clouddns-test.com":     true,
+	"ns1.f5clouddns.com":             true,
+	"ns2.f5clouddns.com":             true,
+	"ns1staging.f5clouddns-test.com": true,
+	"ns2staging.f5clouddns-test.com": true,
 }
 
 // isBackendDefaultRRSet reports whether the given RRSet object exactly matches one
@@ -921,6 +1350,488 @@ func filterOutBackendDefaultRRSets(elements []attr.Value) []attr.Value {
 	return filtered
 }
 
+// stripBackendDefaultNSValues removes backend-injected default nameserver hostnames
+// from an apex NS RRSet's values list unless those hostnames were explicitly
+// configured in the reference element.
+//
+// Why: When a user configures an apex NS record (`ns_record.name` omitted or empty),
+// the F5 XC control plane appends its default nameserver (e.g. "ns1crt.f5clouddns-test.com")
+// directly into that user-configured NS record's `values` list rather than creating a
+// separate standalone default NS RRSet. Because `ns_record.values` is a required
+// non-computed list in the Terraform schema, leaving the backend-injected hostname
+// in the API element causes Terraform core to abort post-apply with
+// `Provider produced inconsistent result after apply` (`new element 1 has appeared`)
+// or report perpetual drift on subsequent reads.
+//
+// How: It inspects `apiElem` to determine if the selected record branch is `ns_record`
+// with an empty or null `name`. If so, it collects any `ns_record.values` present in
+// `refElem` (the planned or prior state element) into a configured set and filters out
+// any hostname from `apiElem`'s `ns_record.values` that matches `backendDefaultNSValues`
+// and is not in the configured set. If at least one non-default value remains after
+// filtering, it reconstructs and returns the updated RRSet object; otherwise it returns
+// `apiElem` unchanged.
+//
+// Parameters:
+//   - refElem: the planned or prior state RRSet element (may be nil, null, or unknown).
+//   - apiElem: the API-derived RRSet element to sanitize.
+//
+// Return values:
+//   - attr.Value: the sanitized RRSet object, or `apiElem` unchanged if no stripping applies.
+//
+// Example:
+//
+//	cleaned := stripBackendDefaultNSValues(plannedElement, apiElement)
+func stripBackendDefaultNSValues(refElem, apiElem attr.Value) attr.Value {
+	rrset, ok := apiElem.(types.Object)
+	if !ok || rrset.IsNull() || rrset.IsUnknown() {
+		return apiElem
+	}
+
+	typeChoiceValue, exists := rrset.Attributes()["type_record_set_choice"]
+	if !exists {
+		return apiElem
+	}
+	typeChoice, ok := typeChoiceValue.(types.Object)
+	if !ok || typeChoice.IsNull() || typeChoice.IsUnknown() {
+		return apiElem
+	}
+
+	branchName, branchValue, ok := selectedKnownRRSetBranch(typeChoice)
+	if !ok || branchName != "ns_record" {
+		return apiElem
+	}
+
+	recordName := ""
+	if nameValue, hasName := branchValue.Attributes()["name"]; hasName {
+		nameAttr, isString := nameValue.(types.String)
+		if !isString || nameAttr.IsUnknown() {
+			return apiElem
+		}
+		if !nameAttr.IsNull() {
+			recordName = nameAttr.ValueString()
+		}
+	}
+	if recordName != "" {
+		return apiElem
+	}
+
+	apiValues, ok := rrsetBranchStringValues(branchValue)
+	if !ok {
+		return apiElem
+	}
+
+	configured := make(map[string]bool)
+	if refObj, isObj := refElem.(types.Object); isObj && !refObj.IsNull() && !refObj.IsUnknown() {
+		if refTCVal, hasTC := refObj.Attributes()["type_record_set_choice"]; hasTC {
+			if refTC, isTCObj := refTCVal.(types.Object); isTCObj && !refTC.IsNull() && !refTC.IsUnknown() {
+				if refBranchName, refBranchVal, refOK := selectedKnownRRSetBranch(refTC); refOK && refBranchName == "ns_record" {
+					if refVals, refValsOK := rrsetBranchStringValues(refBranchVal); refValsOK {
+						for _, v := range refVals {
+							configured[v] = true
+						}
+					}
+				}
+			}
+		}
+	}
+
+	filtered := make([]attr.Value, 0, len(apiValues))
+	changed := false
+	for _, v := range apiValues {
+		if backendDefaultNSValues[v] && !configured[v] {
+			changed = true
+			continue
+		}
+		filtered = append(filtered, types.StringValue(v))
+	}
+
+	if !changed || len(filtered) == 0 {
+		return apiElem
+	}
+
+	newValuesList, diags := types.ListValue(types.StringType, filtered)
+	if diags.HasError() {
+		return apiElem
+	}
+
+	ctx := context.Background()
+	newBranchAttrs := make(map[string]attr.Value, len(branchValue.Attributes()))
+	for k, v := range branchValue.Attributes() {
+		newBranchAttrs[k] = v
+	}
+	newBranchAttrs["values"] = newValuesList
+	newBranchObj, branchDiags := types.ObjectValue(branchValue.AttributeTypes(ctx), newBranchAttrs)
+	if branchDiags.HasError() {
+		return apiElem
+	}
+
+	newTCAttrs := make(map[string]attr.Value, len(typeChoice.Attributes()))
+	for k, v := range typeChoice.Attributes() {
+		newTCAttrs[k] = v
+	}
+	newTCAttrs[branchName] = newBranchObj
+	newTCObj, tcDiags := types.ObjectValue(typeChoice.AttributeTypes(ctx), newTCAttrs)
+	if tcDiags.HasError() {
+		return apiElem
+	}
+
+	newRRSetAttrs := make(map[string]attr.Value, len(rrset.Attributes()))
+	for k, v := range rrset.Attributes() {
+		newRRSetAttrs[k] = v
+	}
+	newRRSetAttrs["type_record_set_choice"] = newTCObj
+	newRRSetObj, rrsetDiags := types.ObjectValue(rrset.AttributeTypes(ctx), newRRSetAttrs)
+	if rrsetDiags.HasError() {
+		return apiElem
+	}
+
+	return newRRSetObj
+}
+
+// preserveRRSetEmptyFields preserves the reference element's representation (`""` vs `null`)
+// for RRSet `description`, the selected record branch's `name`, and semantically equivalent
+// `values` lists (such as IPv6 canonical casing or reordered multi-value slices).
+//
+// Why: The F5 XC API normalizes omitted (`null`) and empty (`""`) strings identically on
+// the wire, may lowercase IPv6 hex digits (e.g. "AAAA::111:111:111:111" -> "aaaa::111:111:111:111"),
+// or may reorder multi-value record slices. Additionally, when `refElem` has an unknown
+// `description` (omitted in HCL), positional healing in `specToModel` can copy a neighbor's
+// description onto `targetElem` when backend default records shift array indices. Preserving
+// the planned or prior state representation prevents post-apply consistency errors and false
+// read drift while keeping genuine out-of-band modifications visible.
+//
+// How: It compares the `description` attribute on the top-level RRSet object and the `name`
+// and `values` attributes on the active `type_record_set_choice` branch between `refElem`
+// and `targetElem`. When `refElem.description` is unknown, `targetElem.description` is reset
+// to `types.StringNull()`. When both empty strings differ only in nullness or when `values`
+// contain the exact same canonical multiset of values, the reference value from `refElem`
+// is copied into `targetElem`.
+//
+// Parameters:
+//   - refElem: the planned or prior state RRSet element whose representation takes precedence.
+//   - targetElem: the candidate merged or API RRSet element to adjust.
+//
+// Return values:
+//   - attr.Value: the adjusted RRSet object, or `targetElem` unchanged if no adjustment is needed.
+//
+// Example:
+//
+//	adjusted := preserveRRSetEmptyFields(priorElement, cleanedAPI)
+func preserveRRSetEmptyFields(refElem, targetElem attr.Value) attr.Value {
+	refObj, ok1 := refElem.(types.Object)
+	targetObj, ok2 := targetElem.(types.Object)
+	if !ok1 || !ok2 || refObj.IsNull() || refObj.IsUnknown() || targetObj.IsNull() || targetObj.IsUnknown() {
+		return targetElem
+	}
+
+	ctx := context.Background()
+	refAttrs := refObj.Attributes()
+	targetAttrs := targetObj.Attributes()
+	modified := false
+
+	newTargetAttrs := make(map[string]attr.Value, len(targetAttrs))
+	for k, v := range targetAttrs {
+		newTargetAttrs[k] = v
+	}
+
+	if refDesc, ok := refAttrs["description"].(types.String); ok {
+		if targetDesc, ok := targetAttrs["description"].(types.String); ok && !targetDesc.IsUnknown() {
+			if refDesc.IsUnknown() {
+				if !targetDesc.IsNull() {
+					newTargetAttrs["description"] = types.StringNull()
+					modified = true
+				}
+			} else {
+				refEmpty := refDesc.IsNull() || refDesc.ValueString() == ""
+				targetEmpty := targetDesc.IsNull() || targetDesc.ValueString() == ""
+				if refEmpty && targetEmpty && !refDesc.Equal(targetDesc) {
+					newTargetAttrs["description"] = refDesc
+					modified = true
+				}
+			}
+		}
+	}
+
+	refTC, okRefTC := refAttrs["type_record_set_choice"].(types.Object)
+	targetTC, okTargetTC := targetAttrs["type_record_set_choice"].(types.Object)
+	if okRefTC && okTargetTC && !refTC.IsNull() && !refTC.IsUnknown() && !targetTC.IsNull() && !targetTC.IsUnknown() {
+		refBranchName, refBranchObj, okRefBranch := selectedKnownRRSetBranch(refTC)
+		targetBranchName, targetBranchObj, okTargetBranch := selectedKnownRRSetBranch(targetTC)
+		if okRefBranch && okTargetBranch && refBranchName == targetBranchName {
+			branchModified := false
+			newBranchAttrs := make(map[string]attr.Value, len(targetBranchObj.Attributes()))
+			for k, v := range targetBranchObj.Attributes() {
+				newBranchAttrs[k] = v
+			}
+
+			refName, okRefName := refBranchObj.Attributes()["name"].(types.String)
+			targetName, okTargetName := targetBranchObj.Attributes()["name"].(types.String)
+			if okRefName && okTargetName && !refName.IsUnknown() && !targetName.IsUnknown() {
+				refNameEmpty := refName.IsNull() || refName.ValueString() == ""
+				targetNameEmpty := targetName.IsNull() || targetName.ValueString() == ""
+				if refNameEmpty && targetNameEmpty && !refName.Equal(targetName) {
+					newBranchAttrs["name"] = refName
+					branchModified = true
+				}
+			}
+
+			refValues, okRefValues := refBranchObj.Attributes()["values"].(types.List)
+			targetValues, okTargetValues := targetBranchObj.Attributes()["values"].(types.List)
+			if okRefValues && okTargetValues && !refValues.IsNull() && !refValues.IsUnknown() && !targetValues.IsNull() && !targetValues.IsUnknown() {
+				if !refValues.Equal(targetValues) && rrsetBranchValuesEquivalent(refBranchName, refBranchObj, targetBranchObj) {
+					newBranchAttrs["values"] = refValues
+					branchModified = true
+				}
+			}
+
+			if branchModified {
+				if newBranchObj, branchDiags := types.ObjectValue(targetBranchObj.AttributeTypes(ctx), newBranchAttrs); !branchDiags.HasError() {
+					newTCAttrs := make(map[string]attr.Value, len(targetTC.Attributes()))
+					for k, v := range targetTC.Attributes() {
+						newTCAttrs[k] = v
+					}
+					newTCAttrs[targetBranchName] = newBranchObj
+					if newTCObj, tcDiags := types.ObjectValue(targetTC.AttributeTypes(ctx), newTCAttrs); !tcDiags.HasError() {
+						newTargetAttrs["type_record_set_choice"] = newTCObj
+						modified = true
+					}
+				}
+			}
+		}
+	}
+
+	if !modified {
+		return targetElem
+	}
+
+	newTargetObj, diags := types.ObjectValue(targetObj.AttributeTypes(ctx), newTargetAttrs)
+	if diags.HasError() {
+		return targetElem
+	}
+	return newTargetObj
+}
+
+// canonicalRRSetRecordValue normalizes a single RRSet branch value string for semantic
+// equivalence comparison.
+//
+// Why: For IPv6 (`aaaa_record`), the F5 XC backend may canonicalize uppercase hex digits
+// (e.g. "AAAA::111:111:111:111") or expanded zero groups into standard RFC 5952 lowercase
+// representation ("aaaa::111:111:111:111"). Normalizing via `net.ParseIP` allows detecting
+// when the backend value is semantically identical to the user's configured representation.
+//
+// How: When `branchName` is `"aaaa_record"`, it parses `val` with `net.ParseIP` and returns
+// `ip.String()` if valid; for all other record types (or unparsable strings), it returns `val`
+// unchanged.
+//
+// Parameters:
+//   - branchName: the active `type_record_set_choice` branch name (e.g. `"aaaa_record"`).
+//   - val: the raw record value string.
+//
+// Return values:
+//   - string: the canonicalized value string.
+//
+// Example:
+//
+//	canon := canonicalRRSetRecordValue("aaaa_record", "AAAA::111:111:111:111")
+//	// canon == "aaaa::111:111:111:111"
+func canonicalRRSetRecordValue(branchName, val string) string {
+	if branchName == "aaaa_record" {
+		if ip := net.ParseIP(strings.TrimSpace(val)); ip != nil {
+			return ip.String()
+		}
+	}
+	return val
+}
+
+// rrsetBranchValuesEquivalent reports whether two RRSet branch objects contain the exact
+// same multiset of canonicalized string `values`.
+//
+// Why: The F5 XC API may return multi-value record slices in a different order than configured
+// or canonicalize IPv6 hex casing on `aaaa_record` values. Comparing canonical multisets
+// avoids false post-apply refresh drift while still surfacing any genuine value addition,
+// removal, or change.
+//
+// How: It extracts the string slice from `values` on both `refBranchObj` and `targetBranchObj`,
+// verifies equal length, and compares frequency counts of `canonicalRRSetRecordValue`.
+//
+// Parameters:
+//   - branchName: the active `type_record_set_choice` branch name.
+//   - refBranchObj: the planned or prior state branch object.
+//   - targetBranchObj: the API-derived branch object.
+//
+// Return values:
+//   - bool: `true` if both branches have semantically equivalent `values` multisets.
+//
+// Example:
+//
+//	equiv := rrsetBranchValuesEquivalent("aaaa_record", priorBranch, apiBranch)
+func rrsetBranchValuesEquivalent(branchName string, refBranchObj, targetBranchObj types.Object) bool {
+	refVals, okRef := rrsetBranchStringValues(refBranchObj)
+	targetVals, okTarget := rrsetBranchStringValues(targetBranchObj)
+	if !okRef || !okTarget || len(refVals) != len(targetVals) {
+		return false
+	}
+
+	counts := make(map[string]int, len(refVals))
+	for _, v := range refVals {
+		counts[canonicalRRSetRecordValue(branchName, v)]++
+	}
+	for _, v := range targetVals {
+		key := canonicalRRSetRecordValue(branchName, v)
+		count, exists := counts[key]
+		if !exists || count <= 0 {
+			return false
+		}
+		counts[key] = count - 1
+	}
+
+	return true
+}
+
+// sanitizeIndexShiftedDescriptions reverses positional `description` cross-contamination
+// caused by `specToModel` when backend-injected default records or record reordering shift
+// raw API slice indices relative to `refElements` (plan or prior state).
+//
+// Why: Generated `specToModel` code heals empty `description` strings positionally (`if
+// apiValDescription == "" && i < len(refList) { copy refList[i].Description }`) before
+// `MergeRRSetListForApply` or `MergeRRSetListForRead` filters out the backend-prepended
+// default NS record at `rawAPIElements[0]`. When `rawAPIElements[i]` is actually a different
+// record than `refElements[i]`, positional healing copies `refElements[i].description` onto
+// `rawAPIElements[i]`, contaminating records that had no description configured.
+//
+// How: For each raw index `i` where both `rawAPIElements[i]` and `refElements[i]` are valid
+// RRSet objects with different `rrsetAttrValueKey` identities, if `rawAPIElements[i].description`
+// equals `refElements[i].description`, it restores `rawAPIElements[i].description` to the
+// `description` of the true key-matched reference element (or `types.StringNull()` when the
+// matched reference element's description was null or unknown).
+//
+// Parameters:
+//   - refElements: the planned or prior state RRSet element slice.
+//   - rawAPIElements: the unfiltered API RRSet element slice produced by `specToModel`.
+//
+// Return values:
+//   - []attr.Value: a slice of API RRSet elements with index-shifted descriptions sanitized.
+//
+// Example:
+//
+//	sanitized := sanitizeIndexShiftedDescriptions(prior.Elements(), api.Elements())
+func sanitizeIndexShiftedDescriptions(refElements, rawAPIElements []attr.Value) []attr.Value {
+	if len(refElements) == 0 || len(rawAPIElements) == 0 {
+		return rawAPIElements
+	}
+
+	refByKey := make(map[string]types.Object, len(refElements))
+	for _, refElem := range refElements {
+		if key, ok := rrsetAttrValueKey(refElem); ok {
+			if obj, isObj := refElem.(types.Object); isObj && !obj.IsNull() && !obj.IsUnknown() {
+				refByKey[key] = obj
+			}
+		}
+	}
+
+	ctx := context.Background()
+	out := make([]attr.Value, len(rawAPIElements))
+	copy(out, rawAPIElements)
+
+	for i, apiElem := range rawAPIElements {
+		if i >= len(refElements) {
+			break
+		}
+		apiObj, okAPI := apiElem.(types.Object)
+		refAtPosObj, okRefPos := refElements[i].(types.Object)
+		if !okAPI || !okRefPos || apiObj.IsNull() || apiObj.IsUnknown() || refAtPosObj.IsNull() || refAtPosObj.IsUnknown() {
+			continue
+		}
+
+		apiKey, okAPIKey := rrsetAttrValueKey(apiObj)
+		refPosKey, okRefPosKey := rrsetAttrValueKey(refAtPosObj)
+		if !okAPIKey || !okRefPosKey || apiKey == refPosKey {
+			continue
+		}
+
+		apiDesc, okAPIDesc := apiObj.Attributes()["description"].(types.String)
+		refPosDesc, okRefPosDesc := refAtPosObj.Attributes()["description"].(types.String)
+		if !okAPIDesc || !okRefPosDesc || apiDesc.IsNull() || apiDesc.IsUnknown() || !apiDesc.Equal(refPosDesc) {
+			continue
+		}
+
+		replacementDesc := types.StringNull()
+		if matchedRefObj, exists := refByKey[apiKey]; exists {
+			if matchedDesc, okMatched := matchedRefObj.Attributes()["description"].(types.String); okMatched && !matchedDesc.IsUnknown() {
+				replacementDesc = matchedDesc
+			}
+		}
+
+		if apiDesc.Equal(replacementDesc) {
+			continue
+		}
+
+		newAttrs := make(map[string]attr.Value, len(apiObj.Attributes()))
+		for k, v := range apiObj.Attributes() {
+			newAttrs[k] = v
+		}
+		newAttrs["description"] = replacementDesc
+		if newObj, diags := types.ObjectValue(apiObj.AttributeTypes(ctx), newAttrs); !diags.HasError() {
+			out[i] = newObj
+		}
+	}
+
+	return out
+}
+
+// preserveRRSetGroupMetadataEmptyFields preserves `""` vs `null` on `rr_set_group[*].metadata.description`
+// when both the reference (plan or prior state) and target (API) values represent an empty string.
+//
+// Why: In `f5xc_dns_zone`, `rr_set_group[*].metadata.description` is `Optional: true, Computed: false`.
+// When a user configures `description = ""`, `specToModel` converts the empty string from the API
+// into `types.StringNull()`, causing drift on Read or a post-apply mismatch on Create/Update.
+//
+// How: It inspects the `description` attribute on `refMeta` and `targetMeta`. When both are known
+// and empty (`IsNull()` or `ValueString() == ""`) but differ in nullness, it copies `refDesc` into
+// `targetMeta`.
+//
+// Parameters:
+//   - refMeta: the planned or prior state group `metadata` object value.
+//   - targetMeta: the candidate merged or API group `metadata` object value.
+//
+// Return values:
+//   - attr.Value: the adjusted `metadata` object value, or `targetMeta` unchanged.
+//
+// Example:
+//
+//	mergedGroupAttrs["metadata"] = preserveRRSetGroupMetadataEmptyFields(priorMeta, apiMeta)
+func preserveRRSetGroupMetadataEmptyFields(refMeta, targetMeta attr.Value) attr.Value {
+	refObj, ok1 := refMeta.(types.Object)
+	targetObj, ok2 := targetMeta.(types.Object)
+	if !ok1 || !ok2 || refObj.IsNull() || refObj.IsUnknown() || targetObj.IsNull() || targetObj.IsUnknown() {
+		return targetMeta
+	}
+
+	refDesc, okRef := refObj.Attributes()["description"].(types.String)
+	targetDesc, okTarget := targetObj.Attributes()["description"].(types.String)
+	if !okRef || !okTarget || refDesc.IsUnknown() || targetDesc.IsUnknown() {
+		return targetMeta
+	}
+
+	refEmpty := refDesc.IsNull() || refDesc.ValueString() == ""
+	targetEmpty := targetDesc.IsNull() || targetDesc.ValueString() == ""
+	if !refEmpty || !targetEmpty || refDesc.Equal(targetDesc) {
+		return targetMeta
+	}
+
+	ctx := context.Background()
+	newAttrs := make(map[string]attr.Value, len(targetObj.Attributes()))
+	for k, v := range targetObj.Attributes() {
+		newAttrs[k] = v
+	}
+	newAttrs["description"] = refDesc
+	newObj, diags := types.ObjectValue(targetObj.AttributeTypes(ctx), newAttrs)
+	if diags.HasError() {
+		return targetMeta
+	}
+	return newObj
+}
+
 // newRRSetList builds a typed RRSet list from the given elements, returning a
 // null list (not an empty list) when there are no elements so an unconfigured
 // attribute normalises to null.
@@ -941,17 +1852,17 @@ func newRRSetList(elementType attr.Type, elements []attr.Value) (types.List, dia
 // matching planned RRsets with API-derived values when needed.
 //
 // Why: F5 XC appends a backend-managed default NS RRSet to `default_rr_set_group`
-// during create/update. Terraform still requires the immediate post-apply result
-// to match the planned list shape, but planned list elements can contain unknown
-// nested values such as computed `description`.
+// during create/update, or injects its default nameserver into a user-configured
+// apex NS RRSet. Terraform still requires the immediate post-apply result
+// to match the planned list shape, while planned list elements can contain unknown
+// nested values such as computed `description` or `lb_record.value.tenant`.
 //
 // How: If the planned list is null, return null. If it is top-level unknown,
-// return the API list with backend-default RRsets excluded. If it is fully known,
-// return it unchanged. Otherwise, index the API list by RRSet key `(type,name)`
-// and rebuild a result list using the planned element order/cardinality,
-// substituting API-derived elements for planned keys present in the API response.
-// Because the result follows the planned cardinality, backend-only RRsets (which
-// are never in the plan) are naturally excluded.
+// return the API list with backend-default RRsets and injected default apex NS
+// values excluded. If it is fully known, return it unchanged. Otherwise, index
+// the API list by RRSet key and rebuild a result list using the planned element
+// order/cardinality, resolving unknown fields in each planned element from the
+// sanitized matching API element via ResolveUnknowns.
 //
 // Parameters:
 //   - ctx: context used for typed list construction.
@@ -980,9 +1891,13 @@ func MergeRRSetListForApply(ctx context.Context, planned, api types.List) (types
 
 	if planned.IsUnknown() {
 		if api.IsNull() || api.IsUnknown() {
-			return api, diags
+			return types.ListNull(elementType), diags
 		}
-		return newRRSetList(elementType, filterOutBackendDefaultRRSets(api.Elements()))
+		filtered := filterOutBackendDefaultRRSets(api.Elements())
+		for i, elem := range filtered {
+			filtered[i] = stripBackendDefaultNSValues(nil, elem)
+		}
+		return newRRSetList(elementType, filtered)
 	}
 
 	if !ValueContainsUnknown(planned) {
@@ -993,9 +1908,20 @@ func MergeRRSetListForApply(ctx context.Context, planned, api types.List) (types
 		return planned, diags
 	}
 
-	apiByKey, ok := indexRRSetAttrValues(api.Elements())
+	// Dispatch for named group list (rr_set_group)
+	if isRRSetGroupType(elementType) || isRRSetGroupElements(planned.Elements()) || isRRSetGroupElements(api.Elements()) {
+		return mergeRRSetGroupListForApply(ctx, elementType, planned, api)
+	}
+
+	// Sanitize any positional description cross-contamination introduced by
+	// specToModel when backend default records shifted raw API indices, then
+	// filter out backend-injected default RRSets before indexing.
+	sanitizedAPIElems := sanitizeIndexShiftedDescriptions(planned.Elements(), api.Elements())
+	apiFiltered := filterOutBackendDefaultRRSets(sanitizedAPIElems)
+
+	apiByKey, ok := indexRRSetAttrValues(apiFiltered)
 	if !ok {
-		return planned, diags
+		return ResolveUnknowns(planned, api), diags
 	}
 
 	plannedElements := planned.Elements()
@@ -1003,11 +1929,14 @@ func MergeRRSetListForApply(ctx context.Context, planned, api types.List) (types
 	for _, plannedElement := range plannedElements {
 		key, ok := rrsetAttrValueKey(plannedElement)
 		if !ok {
-			return planned, diags
+			return ResolveUnknowns(planned, api), diags
 		}
 
 		if apiElement, exists := apiByKey[key]; exists {
-			mergedElements = append(mergedElements, apiElement)
+			cleanedAPI := stripBackendDefaultNSValues(plannedElement, apiElement)
+			resolved := ResolveUnknowns(plannedElement, cleanedAPI)
+			resolved = preserveRRSetEmptyFields(plannedElement, resolved)
+			mergedElements = append(mergedElements, resolved)
 			continue
 		}
 
@@ -1017,10 +1946,345 @@ func MergeRRSetListForApply(ctx context.Context, planned, api types.List) (types
 	mergedList, mergedDiags := types.ListValue(elementType, mergedElements)
 	diags.Append(mergedDiags...)
 	if diags.HasError() {
-		return planned, diags
+		return ResolveUnknowns(planned, api), diags
+	}
+
+	if ValueContainsUnknown(mergedList) {
+		mergedList = ResolveUnknowns(mergedList, api)
 	}
 
 	return mergedList, diags
+}
+
+// isRRSetGroupType checks if the given attribute type corresponds to an RRSetGroup object type.
+//
+// Why: Named record groups (rr_set_group) nest resource record sets under group metadata.
+// Detecting the schema type directly allows dispatching group-level reconciliation even
+// when lists are empty.
+//
+// How: It inspects if elemType is a types.ObjectType containing both "metadata" and "rr_set"
+// attribute types.
+//
+// Parameters:
+//   - elemType: attribute type of the list elements.
+//
+// Returns:
+//   - bool: true if elemType represents an RRSetGroup object.
+func isRRSetGroupType(elemType attr.Type) bool {
+	if elemType == nil {
+		return false
+	}
+	objType, ok := elemType.(types.ObjectType)
+	if !ok {
+		return false
+	}
+	_, hasMeta := objType.AttrTypes["metadata"]
+	_, hasRRSet := objType.AttrTypes["rr_set"]
+	return hasMeta && hasRRSet
+}
+
+// isRRSetGroupElements inspects elements to determine if they represent
+// RRSetGroup objects containing both "metadata" and "rr_set" attributes.
+//
+// Why: Provides runtime fallback detection for RRSetGroup objects when element type
+// reflection is indeterminate.
+//
+// How: Checks if the first valid non-null Object element possesses both
+// "metadata" and "rr_set" attribute keys.
+//
+// Parameters:
+//   - elements: slice of attr.Value representing list elements.
+//
+// Returns:
+//   - bool: true if elements represent RRSetGroup objects, false otherwise.
+func isRRSetGroupElements(elements []attr.Value) bool {
+	for _, element := range elements {
+		obj, ok := element.(types.Object)
+		if !ok || obj.IsNull() || obj.IsUnknown() {
+			continue
+		}
+		attrs := obj.Attributes()
+		_, hasMeta := attrs["metadata"]
+		_, hasRRSet := attrs["rr_set"]
+		if hasMeta && hasRRSet {
+			return true
+		}
+	}
+	return false
+}
+
+// rrsetGroupAttrValueKey extracts the unique group identifier from an
+// RRSetGroup object's metadata.name.
+//
+// Why: Provides a stable lookup key to match planned/prior record groups with
+// API response record groups.
+//
+// How: Traverses value -> metadata Object -> name String and returns its ValueString.
+//
+// Parameters:
+//   - value: attr.Value representing an RRSetGroup Object.
+//
+// Returns:
+//   - string: the group name if present and known.
+//   - bool: true if successfully extracted, false otherwise.
+func rrsetGroupAttrValueKey(value attr.Value) (string, bool) {
+	obj, ok := value.(types.Object)
+	if !ok || obj.IsNull() || obj.IsUnknown() {
+		return "", false
+	}
+	metaVal, exists := obj.Attributes()["metadata"]
+	if !exists {
+		return "", false
+	}
+	metaObj, ok := metaVal.(types.Object)
+	if !ok || metaObj.IsNull() || metaObj.IsUnknown() {
+		return "", false
+	}
+	nameVal, exists := metaObj.Attributes()["name"]
+	if !exists {
+		return "", false
+	}
+	nameStr, ok := nameVal.(types.String)
+	if !ok || nameStr.IsNull() || nameStr.IsUnknown() {
+		return "", false
+	}
+	return nameStr.ValueString(), true
+}
+
+// indexRRSetGroupAttrValues builds an RRSetGroup lookup keyed by group metadata.name.
+//
+// Why: Named record groups in DNS zones are identified by metadata.name. Looking up
+// groups in O(1) time and detecting duplicate keys or unkeyable elements upfront
+// ensures safe reconciliation during apply and read without silently dropping records.
+//
+// How: Iterates over the element slice and extracts the group name using
+// rrsetGroupAttrValueKey. If any element cannot be keyed or has a duplicate name,
+// it returns ok=false.
+//
+// Parameters:
+//   - elements: slice of attr.Value representing RRSetGroup objects.
+//
+// Returns:
+//   - map[string]attr.Value: map of group name to RRSetGroup object, or nil if !ok.
+//   - bool: true if all elements were keyable without duplicates, false otherwise.
+func indexRRSetGroupAttrValues(elements []attr.Value) (map[string]attr.Value, bool) {
+	indexed := make(map[string]attr.Value, len(elements))
+	for _, element := range elements {
+		key, ok := rrsetGroupAttrValueKey(element)
+		if !ok {
+			return nil, false
+		}
+		if _, exists := indexed[key]; exists {
+			return nil, false
+		}
+		indexed[key] = element
+	}
+
+	return indexed, true
+}
+
+// mergeRRSetGroupListForApply reconciles a planned list of RRSetGroup objects against the API response.
+//
+// Why: Named record groups (rr_set_group) nest resource record sets under group metadata.
+// Computed leaf fields like lb_record.value.tenant and rr_set.description are planned as
+// unknown and must be populated from the matching API group post-apply.
+//
+// How: Groups are matched by metadata.name. For each matching group, metadata is resolved
+// via ResolveUnknowns, and the nested rr_set list is recursively reconciled via
+// MergeRRSetListForApply so individual records match by (type, name).
+//
+// Parameters:
+//   - ctx: context for typed object/list value construction.
+//   - elementType: attr.Type representing the RRSetGroup object type.
+//   - planned: planned list containing possible unknown values.
+//   - api: API response list with concrete values.
+//
+// Returns:
+//   - types.List: merged list with all unknowns resolved.
+//   - diag.Diagnostics: error or warning diagnostics, if any.
+func mergeRRSetGroupListForApply(ctx context.Context, elementType attr.Type, planned, api types.List) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	apiGroupsByKey := make(map[string]attr.Value)
+	if !api.IsNull() && !api.IsUnknown() {
+		if indexed, ok := indexRRSetGroupAttrValues(api.Elements()); ok {
+			apiGroupsByKey = indexed
+		}
+	}
+
+	plannedElements := planned.Elements()
+	mergedElements := make([]attr.Value, 0, len(plannedElements))
+
+	for _, plannedElement := range plannedElements {
+		groupKey, ok := rrsetGroupAttrValueKey(plannedElement)
+		if !ok {
+			mergedElements = append(mergedElements, plannedElement)
+			continue
+		}
+
+		apiGroup, exists := apiGroupsByKey[groupKey]
+		if !exists {
+			mergedElements = append(mergedElements, plannedElement)
+			continue
+		}
+
+		plannedGroupObj, _ := plannedElement.(types.Object)
+		apiGroupObj, _ := apiGroup.(types.Object)
+
+		plannedAttrs := plannedGroupObj.Attributes()
+		apiAttrs := apiGroupObj.Attributes()
+
+		mergedGroupAttrs := make(map[string]attr.Value, len(plannedAttrs))
+		for k, v := range plannedAttrs {
+			mergedGroupAttrs[k] = v
+		}
+
+		// Resolve group metadata unknowns and preserve empty description representation
+		if plannedMeta, ok := plannedAttrs["metadata"]; ok {
+			if apiMeta, exists := apiAttrs["metadata"]; exists {
+				resolvedMeta := ResolveUnknowns(plannedMeta, apiMeta)
+				mergedGroupAttrs["metadata"] = preserveRRSetGroupMetadataEmptyFields(plannedMeta, resolvedMeta)
+			}
+		}
+
+		// Recursively merge inner rr_set list
+		if plannedRRSetList, ok := plannedAttrs["rr_set"].(types.List); ok {
+			var apiRRSetList types.List
+			if apiRRSet, exists := apiAttrs["rr_set"].(types.List); exists {
+				apiRRSetList = apiRRSet
+			} else {
+				apiRRSetList = types.ListNull(plannedRRSetList.ElementType(ctx))
+			}
+			mergedRRSetList, listDiags := MergeRRSetListForApply(ctx, plannedRRSetList, apiRRSetList)
+			diags.Append(listDiags...)
+			mergedGroupAttrs["rr_set"] = mergedRRSetList
+		}
+
+		mergedGroupObj, objDiags := types.ObjectValue(plannedGroupObj.AttributeTypes(ctx), mergedGroupAttrs)
+		diags.Append(objDiags...)
+		if diags.HasError() {
+			return ResolveUnknowns(planned, api), diags
+		}
+		mergedElements = append(mergedElements, mergedGroupObj)
+	}
+
+	mergedList, listDiags := types.ListValue(elementType, mergedElements)
+	diags.Append(listDiags...)
+	if diags.HasError() {
+		return ResolveUnknowns(planned, api), diags
+	}
+
+	// Defensive invariant: ensure zero unknown values remain
+	if ValueContainsUnknown(mergedList) {
+		mergedList = ResolveUnknowns(mergedList, api)
+	}
+
+	return mergedList, diags
+}
+
+// mergeRRSetGroupListForRead reconciles the prior state RRSetGroup list against the API response.
+//
+// Why: Out-of-band additions, deletions, or value modifications within named record groups
+// must be detected and surfaced as Terraform drift.
+//
+// How: Normalizes null/unknown prior state to newRRSetList(elementType, api.Elements()) on first
+// read / import. Indexes API groups using indexRRSetGroupAttrValues; if API groups are unkeyable
+// or contain duplicates, falls back to newRRSetList(elementType, api.Elements()) so unexpected
+// payloads are not dropped. Otherwise preserves prior group ordering for stability while dropping
+// out-of-band deleted groups, appending newly created groups, and recursively calling
+// MergeRRSetListForRead on nested rr_set lists.
+//
+// Parameters:
+//   - ctx: context for typed object/list value construction.
+//   - elementType: attr.Type representing the RRSetGroup object type.
+//   - prior: prior state list value.
+//   - api: API response list value.
+//
+// Returns:
+//   - types.List: reconciled list for state.
+//   - diag.Diagnostics: error or warning diagnostics, if any.
+func mergeRRSetGroupListForRead(ctx context.Context, elementType attr.Type, prior, api types.List) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if api.IsNull() || api.IsUnknown() {
+		return prior, diags
+	}
+	if prior.IsNull() || prior.IsUnknown() {
+		return newRRSetList(elementType, api.Elements())
+	}
+
+	apiGroupsByKey, ok := indexRRSetGroupAttrValues(api.Elements())
+	if !ok {
+		return newRRSetList(elementType, api.Elements())
+	}
+
+	priorElements := prior.Elements()
+	mergedElements := make([]attr.Value, 0, len(api.Elements()))
+	seen := make(map[string]bool, len(api.Elements()))
+
+	for _, priorElement := range priorElements {
+		groupKey, ok := rrsetGroupAttrValueKey(priorElement)
+		if !ok {
+			return newRRSetList(elementType, api.Elements())
+		}
+		apiGroup, exists := apiGroupsByKey[groupKey]
+		if !exists {
+			// Out-of-band deletion surfaces as drift
+			continue
+		}
+
+		priorGroupObj, _ := priorElement.(types.Object)
+		apiGroupObj, _ := apiGroup.(types.Object)
+
+		apiAttrs := apiGroupObj.Attributes()
+		priorAttrs := priorGroupObj.Attributes()
+
+		mergedGroupAttrs := make(map[string]attr.Value, len(apiAttrs))
+		for k, v := range apiAttrs {
+			mergedGroupAttrs[k] = v
+		}
+
+		if priorMeta, ok := priorAttrs["metadata"]; ok {
+			if apiMeta, exists := apiAttrs["metadata"]; exists {
+				mergedGroupAttrs["metadata"] = preserveRRSetGroupMetadataEmptyFields(priorMeta, apiMeta)
+			}
+		}
+
+		if priorRRSetList, ok := priorAttrs["rr_set"].(types.List); ok {
+			var apiRRSetList types.List
+			if apiRRSet, exists := apiAttrs["rr_set"].(types.List); exists {
+				apiRRSetList = apiRRSet
+			} else {
+				apiRRSetList = types.ListNull(priorRRSetList.ElementType(ctx))
+			}
+			mergedRRSetList, listDiags := MergeRRSetListForRead(ctx, priorRRSetList, apiRRSetList)
+			diags.Append(listDiags...)
+			mergedGroupAttrs["rr_set"] = mergedRRSetList
+		}
+
+		mergedGroupObj, objDiags := types.ObjectValue(apiGroupObj.AttributeTypes(ctx), mergedGroupAttrs)
+		diags.Append(objDiags...)
+		if diags.HasError() {
+			return prior, diags
+		}
+		mergedElements = append(mergedElements, mergedGroupObj)
+		seen[groupKey] = true
+	}
+
+	// Append out-of-band added groups
+	for _, apiElement := range api.Elements() {
+		groupKey, ok := rrsetGroupAttrValueKey(apiElement)
+		if !ok {
+			return newRRSetList(elementType, api.Elements())
+		}
+		if seen[groupKey] {
+			continue
+		}
+		mergedElements = append(mergedElements, apiElement)
+		seen[groupKey] = true
+	}
+
+	return newRRSetList(elementType, mergedElements)
 }
 
 // MergeRRSetListForRead reconciles the API RRSet list against prior state so that
@@ -1062,20 +2326,30 @@ func MergeRRSetListForRead(ctx context.Context, prior, api types.List) (types.Li
 		return prior, diags
 	}
 
-	apiFiltered := filterOutBackendDefaultRRSets(api.Elements())
+	// Dispatch for named group list (rr_set_group)
+	if isRRSetGroupType(elementType) || isRRSetGroupElements(prior.Elements()) || isRRSetGroupElements(api.Elements()) {
+		return mergeRRSetGroupListForRead(ctx, elementType, prior, api)
+	}
+
+	sanitizedAPIElems := sanitizeIndexShiftedDescriptions(prior.Elements(), api.Elements())
+	apiFiltered := filterOutBackendDefaultRRSets(sanitizedAPIElems)
+
+	// First read (no prior state, e.g. ImportState): state is the filtered API list
+	// with any backend-injected default apex NS values stripped.
+	if prior.IsNull() || prior.IsUnknown() {
+		sanitized := make([]attr.Value, len(apiFiltered))
+		for i, elem := range apiFiltered {
+			sanitized[i] = stripBackendDefaultNSValues(nil, elem)
+		}
+		return newRRSetList(elementType, sanitized)
+	}
 
 	apiByKey, ok := indexRRSetAttrValues(apiFiltered)
 	if !ok {
-		// The list is not keyable by RRSet identity (for example rr_set_group,
-		// whose elements are groups rather than flat RRSets). Default recognition
-		// does not apply; preserve prior state unchanged so these lists behave
-		// exactly as they did before default-aware reconciliation.
+		// The list is not keyable by RRSet identity (for example if elements have
+		// unkeyable branches, or duplicate keys). Default recognition does not apply;
+		// preserve prior state unchanged so these lists behave safely.
 		return prior, diags
-	}
-
-	// First read (no prior state): state is the filtered API list.
-	if prior.IsNull() || prior.IsUnknown() {
-		return newRRSetList(elementType, apiFiltered)
 	}
 
 	mergedElements := make([]attr.Value, 0, len(apiFiltered))
@@ -1089,7 +2363,9 @@ func MergeRRSetListForRead(ctx context.Context, prior, api types.List) (types.Li
 			return newRRSetList(elementType, apiFiltered)
 		}
 		if apiElement, exists := apiByKey[key]; exists {
-			mergedElements = append(mergedElements, apiElement)
+			cleanedAPI := stripBackendDefaultNSValues(priorElement, apiElement)
+			cleanedAPI = preserveRRSetEmptyFields(priorElement, cleanedAPI)
+			mergedElements = append(mergedElements, cleanedAPI)
 			seen[key] = true
 		}
 	}
@@ -1127,7 +2403,8 @@ func indexRRSetAttrValues(elements []attr.Value) (map[string]attr.Value, bool) {
 	return indexed, true
 }
 
-// rrsetAttrValueKey extracts the stable RRSet merge key in the form TYPE:name.
+// rrsetAttrValueKey extracts the stable RRSet merge key in the form TYPE:name
+// (or LB:name:namespace/targetName for lb_record branches).
 func rrsetAttrValueKey(value attr.Value) (string, bool) {
 	rrset, ok := value.(types.Object)
 	if !ok || rrset.IsNull() || rrset.IsUnknown() {
@@ -1158,6 +2435,29 @@ func rrsetAttrValueKey(value attr.Value) (string, bool) {
 		}
 		if !nameAttr.IsNull() {
 			recordName = nameAttr.ValueString()
+		}
+	}
+
+	if branchName == "lb_record" {
+		if valObj, hasVal := branchValue.Attributes()["value"].(types.Object); hasVal && !valObj.IsNull() && !valObj.IsUnknown() {
+			var valName, valNamespace string
+			if nAttr, ok := valObj.Attributes()["name"].(types.String); ok {
+				if nAttr.IsUnknown() {
+					return "", false
+				}
+				if !nAttr.IsNull() {
+					valName = nAttr.ValueString()
+				}
+			}
+			if nsAttr, ok := valObj.Attributes()["namespace"].(types.String); ok {
+				if nsAttr.IsUnknown() {
+					return "", false
+				}
+				if !nsAttr.IsNull() {
+					valNamespace = nsAttr.ValueString()
+				}
+			}
+			return fmt.Sprintf("%s:%s:%s/%s", recordType, recordName, valNamespace, valName), true
 		}
 	}
 

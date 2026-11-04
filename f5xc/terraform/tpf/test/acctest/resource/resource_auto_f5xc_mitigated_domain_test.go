@@ -16,6 +16,7 @@ package resource
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -24,13 +25,18 @@ import (
 	mitigatedDomainSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/shape/client_side_defense/mitigated_domain"
 )
 
+// testAccGenerateMitigatedDomainValue uses a base domain distinct from the allowed_domain tests to avoid cross-list subdomain conflicts.
+func testAccGenerateMitigatedDomainValue(t *testing.T, prefix string) string {
+	return fmt.Sprintf("%s-%s.mitigated-test.com", prefix, strings.ToLower(acctest.RandString(t, 8)))
+}
+
 func TestAccResourceAutoF5XCMitigatedDomain_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-mitigated-domain-" + acctest.RandString(t, 8)
-	domain := testAccGenerateDomainValue(t, "md-basic")
-	domainUpdated := testAccGenerateDomainValue(t, "md-basic-upd")
+	name := "example-mitigated-domain-" + acctest.RandString(t, 8)
+	domain := testAccGenerateMitigatedDomainValue(t, "md-basic")
+	domainUpdated := testAccGenerateMitigatedDomainValue(t, "md-basic-upd")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -40,9 +46,11 @@ func TestAccResourceAutoF5XCMitigatedDomain_basic(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_basic(name, namespace, domain),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_basic(name, namespace, domainUpdated),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 		},
 	})
 }
@@ -51,8 +59,8 @@ func TestAccResourceAutoF5XCMitigatedDomain_withDescriptionTransition(t *testing
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-mitigated-domain-" + acctest.RandString(t, 8)
-	domain := testAccGenerateDomainValue(t, "md-desc")
+	name := "example-mitigated-domain-" + acctest.RandString(t, 8)
+	domain := testAccGenerateMitigatedDomainValue(t, "md-desc")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -60,11 +68,13 @@ func TestAccResourceAutoF5XCMitigatedDomain_withDescriptionTransition(t *testing
 		CheckDestroy:             testAccCheckMitigatedDomainDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withDescription(name, namespace, domain, "mitigated domain one"),
+				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withDescription(name, namespace, domain, "Mitigated domain example one"),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 			{
-				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withDescription(name, namespace, domain, "mitigated domain two"),
+				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withDescription(name, namespace, domain, "Mitigated domain example two"),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 		},
 	})
 }
@@ -73,8 +83,8 @@ func TestAccResourceAutoF5XCMitigatedDomain_withAnnotationsTransition(t *testing
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-mitigated-domain-" + acctest.RandString(t, 8)
-	domain := testAccGenerateDomainValue(t, "md-annot")
+	name := "example-mitigated-domain-" + acctest.RandString(t, 8)
+	domain := testAccGenerateMitigatedDomainValue(t, "md-annot")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -84,9 +94,11 @@ func TestAccResourceAutoF5XCMitigatedDomain_withAnnotationsTransition(t *testing
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withAnnotations(name, namespace, domain, "appsec-team"),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withAnnotations(name, namespace, domain, "fraud-team"),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 		},
 	})
 }
@@ -95,8 +107,8 @@ func TestAccResourceAutoF5XCMitigatedDomain_withLabelsTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-mitigated-domain-" + acctest.RandString(t, 8)
-	domain := testAccGenerateDomainValue(t, "md-labels")
+	name := "example-mitigated-domain-" + acctest.RandString(t, 8)
+	domain := testAccGenerateMitigatedDomainValue(t, "md-labels")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -104,11 +116,13 @@ func TestAccResourceAutoF5XCMitigatedDomain_withLabelsTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckMitigatedDomainDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withLabels(name, namespace, domain, "test", "platform"),
+				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withLabels(name, namespace, domain, "example", "platform"),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 			{
-				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withLabels(name, namespace, domain, "prod", "security"),
+				Config: testAccResourceAutoF5XCMitigatedDomainConfig_withLabels(name, namespace, domain, "example", "security"),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 		},
 	})
 }
@@ -117,9 +131,9 @@ func TestAccResourceAutoF5XCMitigatedDomain_withDomainTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-mitigated-domain-" + acctest.RandString(t, 8)
-	domain := testAccGenerateDomainValue(t, "md-trans")
-	domainUpdated := testAccGenerateDomainValue(t, "md-trans-upd")
+	name := "example-mitigated-domain-" + acctest.RandString(t, 8)
+	domain := testAccGenerateMitigatedDomainValue(t, "md-trans")
+	domainUpdated := testAccGenerateMitigatedDomainValue(t, "md-trans-upd")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -129,9 +143,11 @@ func TestAccResourceAutoF5XCMitigatedDomain_withDomainTransition(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_basic(name, namespace, domain),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_basic(name, namespace, domainUpdated),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 		},
 	})
 }
@@ -140,11 +156,11 @@ func TestAccResourceAutoF5XCMitigatedDomain_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-mitigated-domain-" + acctest.RandString(t, 8)
-	domain := testAccGenerateDomainValue(t, "md-full")
-	domainUpdated := testAccGenerateDomainValue(t, "md-full-upd")
+	name := "example-mitigated-domain-" + acctest.RandString(t, 8)
+	domain := testAccGenerateMitigatedDomainValue(t, "md-full")
+	domainUpdated := testAccGenerateMitigatedDomainValue(t, "md-full-upd")
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckMitigatedDomainDestroyProducer(t),
@@ -152,16 +168,34 @@ func TestAccResourceAutoF5XCMitigatedDomain_full(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_full(name, namespace, domain),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCMitigatedDomainConfig_fullUpdated(name, namespace, domainUpdated),
 			},
+			testAccResourceAutoF5XCMitigatedDomainImportStep(),
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCMitigatedDomainConfig_full("example-mitigated-domain", namespace, domain),
+		})
+}
+
+// testAccResourceAutoF5XCMitigatedDomainImportStep imports by "namespace/mitigated_domain"; name, uid and description are not round-tripped.
+func testAccResourceAutoF5XCMitigatedDomainImportStep() resource.TestStep {
+	return resource.TestStep{
+		ResourceName:                         "f5xc_mitigated_domain.example",
+		ImportState:                          true,
+		ImportStateVerify:                    true,
+		ImportStateIdFunc:                    acctest.ImportStateIDWithFields("f5xc_mitigated_domain.example", "namespace", "mitigated_domain"),
+		ImportStateVerifyIdentifierAttribute: "mitigated_domain",
+		ImportStateVerifyIgnore:              []string{"uid", "description", "name", "labels", "annotations"},
+	}
 }
 
 func testAccResourceAutoF5XCMitigatedDomainConfig_basic(name, namespace, domain string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mitigated_domain" "test" {
+resource "f5xc_mitigated_domain" "example" {
   name             = %q
   namespace        = %q
   mitigated_domain = %q
@@ -171,7 +205,7 @@ resource "f5xc_mitigated_domain" "test" {
 
 func testAccResourceAutoF5XCMitigatedDomainConfig_withDescription(name, namespace, domain, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mitigated_domain" "test" {
+resource "f5xc_mitigated_domain" "example" {
   name             = %q
   namespace        = %q
   mitigated_domain = %q
@@ -182,7 +216,7 @@ resource "f5xc_mitigated_domain" "test" {
 
 func testAccResourceAutoF5XCMitigatedDomainConfig_withAnnotations(name, namespace, domain, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mitigated_domain" "test" {
+resource "f5xc_mitigated_domain" "example" {
   name             = %q
   namespace        = %q
   mitigated_domain = %q
@@ -196,7 +230,7 @@ resource "f5xc_mitigated_domain" "test" {
 
 func testAccResourceAutoF5XCMitigatedDomainConfig_withLabels(name, namespace, domain, env, team string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mitigated_domain" "test" {
+resource "f5xc_mitigated_domain" "example" {
   name             = %q
   namespace        = %q
   mitigated_domain = %q
@@ -211,14 +245,14 @@ resource "f5xc_mitigated_domain" "test" {
 
 func testAccResourceAutoF5XCMitigatedDomainConfig_full(name, namespace, domain string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mitigated_domain" "test" {
+resource "f5xc_mitigated_domain" "example" {
   name             = %q
   namespace        = %q
   mitigated_domain = %q
-  description      = "mitigated domain full"
+  description      = "Full mitigated domain example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -230,18 +264,18 @@ resource "f5xc_mitigated_domain" "test" {
 
 func testAccResourceAutoF5XCMitigatedDomainConfig_fullUpdated(name, namespace, domain string) string {
 	return fmt.Sprintf(`
-resource "f5xc_mitigated_domain" "test" {
+resource "f5xc_mitigated_domain" "example" {
   name             = %q
   namespace        = %q
   mitigated_domain = %q
-  description      = "mitigated domain full updated"
+  description      = "Updated full mitigated domain example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {
-    owner = "security-team"
+    owner = "netsec-team"
   }
 }
 `, name, namespace, domain)

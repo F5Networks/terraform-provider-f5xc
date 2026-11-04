@@ -24,6 +24,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listsizevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -32,6 +34,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/stdlib/codec"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	ves_io_schema_views_aws_tgw_site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/aws_tgw_site"
 )
@@ -197,8 +200,8 @@ func (r *ResourceF5XCTgwInfo) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCTgwInfo) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
+		MarkdownDescription: "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC.<br>It can be used to automatically site creation in the AWS TGW.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC. It can be used to automatically site creation in the AWS TGW. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -215,7 +218,7 @@ func (r *ResourceF5XCTgwInfo) Schema(ctx context.Context, request resource.Schem
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"direct_connect_info": schema.SingleNestedAttribute{
@@ -610,9 +613,17 @@ func (r *ResourceF5XCTgwInfo) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCTgwInfo) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCTgwInfoModel
 
 	// Read Terraform plan data into the model
@@ -876,7 +887,7 @@ func (r *ResourceF5XCTgwInfo) Create(ctx context.Context, request resource.Creat
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "tgw_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "tgw_info", err),
 		)
 		return
 	}
@@ -932,6 +943,12 @@ func (r *ResourceF5XCTgwInfo) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCTgwInfo) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCTgwInfoModel
@@ -1197,7 +1214,7 @@ func (r *ResourceF5XCTgwInfo) Update(ctx context.Context, request resource.Updat
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "tgw_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "tgw_info", err),
 		)
 		return
 	}
@@ -1270,7 +1287,7 @@ func (r *ResourceF5XCTgwInfo) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "tgw_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "tgw_info", err),
 		)
 		return
 	}

@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCIrule_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-irule-" + acctest.RandString(t, 8)
+	name := "example-irule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,18 +37,18 @@ func TestAccResourceAutoF5XCIrule_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCIruleConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_irule.test",
+				ResourceName:                         "f5xc_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCIruleConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_irule.test",
+				ResourceName:                         "f5xc_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -59,7 +59,7 @@ func TestAccResourceAutoF5XCIrule_withIruleContentTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-irule-" + acctest.RandString(t, 8)
+	name := "example-irule-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,18 +68,18 @@ func TestAccResourceAutoF5XCIrule_withIruleContentTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCIruleConfig_withIruleContent(name, namespace, "when DNS_REQUEST { DNS::drop }")},
 			{
-				ResourceName:                         "f5xc_irule.test",
+				ResourceName:                         "f5xc_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCIruleConfig_withIruleContent(name, namespace, "when HTTP_REQUEST { return }")},
 			{
-				ResourceName:                         "f5xc_irule.test",
+				ResourceName:                         "f5xc_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -90,31 +90,35 @@ func TestAccResourceAutoF5XCIrule_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-irule-" + acctest.RandString(t, 8)
+	name := "example-irule-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckIruleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCIruleConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_irule.test",
+				ResourceName:                         "f5xc_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCIruleConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_irule.test",
+				ResourceName:                         "f5xc_irule.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_irule.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCIruleConfig_full("example-irule", "default"),
+		})
 }
 
 func testAccCheckIruleDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -123,56 +127,56 @@ func testAccCheckIruleDestroyProducer(t *testing.T) func(*terraform.State) error
 
 func testAccResourceAutoF5XCIruleConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_irule" "test" {
+resource "f5xc_irule" "example" {
   name              = %q
   namespace         = %q
-  description       = "basic irule description"
-  irule_description = "basic irule description"
-  irule             = "when DNS_REQUEST { DNS::drop }"
+  description       = "Basic irule example"
+  irule_description = "Basic irule example"
+  irule             = base64encode("when DNS_REQUEST { DNS::drop }")
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCIruleConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_irule" "test" {
+resource "f5xc_irule" "example" {
   name              = %q
   namespace         = %q
-  description       = "basic irule description updated"
-  irule_description = "basic irule description updated"
-  irule             = "when HTTP_REQUEST { return }"
+  description       = "Updated basic irule example"
+  irule_description = "Updated basic irule example"
+  irule             = base64encode("when HTTP_REQUEST { return }")
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCIruleConfig_withIruleContent(name, namespace, iruleContent string) string {
 	return fmt.Sprintf(`
-resource "f5xc_irule" "test" {
+resource "f5xc_irule" "example" {
   name              = %q
   namespace         = %q
-  description       = "irule content transition"
-  irule_description = "irule content transition"
-  irule             = %q
+  description       = "Irule content transition example"
+  irule_description = "Irule content transition example"
+	irule             = base64encode(%q)
 }
 `, name, namespace, iruleContent)
 }
 
 func testAccResourceAutoF5XCIruleConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_irule" "test" {
+resource "f5xc_irule" "example" {
   name              = %q
   namespace         = %q
-  description       = "full irule"
-  irule_description = "full irule"
-  irule             = "when CLIENT_ACCEPTED { log local0. \"client accepted\" }"
+  description       = "Full irule example"
+  irule_description = "Full irule example"
+  irule             = base64encode("when CLIENT_ACCEPTED { log local0. \"client accepted\" }")
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "shared"
   }
 
   annotations = {
-    owner = "platform"
+    owner = "platform-team"
     team  = "edge"
   }
 }
@@ -181,20 +185,20 @@ resource "f5xc_irule" "test" {
 
 func testAccResourceAutoF5XCIruleConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_irule" "test" {
+resource "f5xc_irule" "example" {
   name              = %q
   namespace         = %q
-  description       = "full irule updated"
-  irule_description = "full irule updated"
-	irule             = "when HTTP_RESPONSE { return }"
+  description       = "Updated full irule example"
+  irule_description = "Updated full irule example"
+  irule             = base64encode("when HTTP_RESPONSE { return }")
 
   labels = {
-    env  = "prod"
+    env  = "example"
     tier = "edge"
   }
 
   annotations = {
-    owner = "security"
+    owner = "netsec-team"
     team  = "traffic"
   }
 }

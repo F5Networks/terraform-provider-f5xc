@@ -133,6 +133,9 @@ resources:
         api_url: https://docs.cloud.f5.com/docs-v2/api/healthcheck
     http_loadbalancer:
         api_url: https://docs.cloud.f5.com/docs-v2/api/views-http-loadbalancer
+    http_loadbalancer_service_policy_attachments:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-http-loadbalancer
+        category: App Security & Load Balancing
     ike_phase1_profile:
         api_url: https://docs.cloud.f5.com/docs-v2/api/views-ike-phase1-profile
     ike_phase2_profile:
@@ -213,6 +216,12 @@ resources:
         api_url: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site
     securemesh_site_v2:
         api_url: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
+    securemesh_site_v2_enhanced_firewall_policy_attachments:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
+        category: App Security & Load Balancing
+    securemesh_site_v2_forward_proxy_policy_attachments:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
+        category: App Security & Load Balancing
     segment:
         api_url: https://docs.cloud.f5.com/docs-v2/api/segment
     segment_connection:
@@ -231,6 +240,9 @@ resources:
         api_url: https://docs.cloud.f5.com/docs-v2/api/subnet
     tcp_loadbalancer:
         api_url: https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer
+    tcp_loadbalancer_service_policy_attachments:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer
+        category: App Security & Load Balancing
     tf_params_action:
         api_url: https://docs.cloud.f5.com/docs-v2/api/views-terraform-parameters
     tgw_info:

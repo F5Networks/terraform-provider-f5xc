@@ -14,18 +14,105 @@
 page_title: "f5xc_network_policy Resource - F5 XC Distributed Cloud"
 subcategory: "Networking & Connectivity"
 description: |-
-  Network Policy object Network Policy is applied to all IP packets to and from a given endpoint (called 'local_endpoint'). Local endpoint can be, prefix : list of ip prefixes representing local endpoint prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression. Label preference An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference, Labels from the interface for the address Labels from POD or Service for the address Labels from Virtual Network for the address Labels from Namespace for the address Network Policy Rules are applied from local_endpoint point of view. Egress rules are applied for packets transmitted from local_endpoint to endpoint specified in network policy rule. Ingress rules are applied for packets received on local_endpoint from endpoint specified in network policy rule Examples of local_endpoint are, containers, hosts on site-local or site-local-inside network Prefix selector labels (BNF grammar): <selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax> <requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ] <set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set> <inclusion-exclusion>     ::= <inclusion> | <exclusion> <exclusion>               ::= 'notin' <inclusion>               ::= 'in' <value-set>               ::= '(' <values> ')' <values>                  ::= VALUE | VALUE ',' <values> <exact-match-restriction> ::= ['='|'=='|'!='] VALUE KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\t') Note: (1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUE's in its requirement (2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUE's in its requirement or does not exist (3) The empty string is a valid VALUE (4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE. (5) A requirement with just !KEY requires that the KEY not exist.
+  Network Policy is applied to all IP packets to and from a given endpoint (called 'local_endpoint').<br><br>Local endpoint can be,<br><br>prefix : list of ip prefixes representing local endpoint<br><br>prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.<br><br>Label preference<br>An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,<br><br>Labels from the interface for the address<br>Labels from POD or Service for the address<br>Labels from Virtual Network for the address<br>Labels from Namespace for the address<br><br>Network Policy Rules are applied from local_endpoint point of view. Egress rules are applied for packets transmitted from local_endpoint to endpoint specified in network policy rule. Ingress rules are applied for packets received on local_endpoint from endpoint specified in network policy rule<br><br>Examples of local_endpoint are, containers, hosts on site-local or site-local-inside network<br><br>Prefix selector labels (BNF grammar):<br><br><selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax><br><br><requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ]<br><br><set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set><br><br><inclusion-exclusion>     ::= <inclusion> | <exclusion><br><br><exclusion>               ::= 'notin'<br><br><inclusion>               ::= 'in'<br><br><value-set>               ::= '(' <values> ')'<br><br><values>                  ::= VALUE | VALUE ',' <values><br><br><exact-match-restriction> ::= ['='|'=='|'!='] VALUE<br><br>KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\t')<br><br>Note:<br><br>(1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUE's in its requirement<br><br>(2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUE's in its requirement or does not exist<br><br>(3) The empty string is a valid VALUE<br><br>(4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE.<br><br>(5) A requirement with just !KEY requires that the KEY not exist.
 ---
 
 # f5xc_network_policy (Resource)
 
-Network Policy object Network Policy is applied to all IP packets to and from a given endpoint (called 'local_endpoint'). Local endpoint can be, prefix : list of ip prefixes representing local endpoint prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression. Label preference An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference, Labels from the interface for the address Labels from POD or Service for the address Labels from Virtual Network for the address Labels from Namespace for the address Network Policy Rules are applied from local_endpoint point of view. Egress rules are applied for packets transmitted from local_endpoint to endpoint specified in network policy rule. Ingress rules are applied for packets received on local_endpoint from endpoint specified in network policy rule Examples of local_endpoint are, containers, hosts on site-local or site-local-inside network Prefix selector labels (BNF grammar): <selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax> <requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ] <set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set> <inclusion-exclusion>     ::= <inclusion> | <exclusion> <exclusion>               ::= 'notin' <inclusion>               ::= 'in' <value-set>               ::= '(' <values> ')' <values>                  ::= VALUE | VALUE ',' <values> <exact-match-restriction> ::= ['='|'=='|'!='] VALUE KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\t') Note: (1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUE's in its requirement (2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUE's in its requirement or does not exist (3) The empty string is a valid VALUE (4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE. (5) A requirement with just !KEY requires that the KEY not exist.
+Network Policy is applied to all IP packets to and from a given endpoint (called 'local_endpoint').<br><br>Local endpoint can be,<br><br>prefix : list of ip prefixes representing local endpoint<br><br>prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.<br><br>Label preference<br>An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,<br><br>Labels from the interface for the address<br>Labels from POD or Service for the address<br>Labels from Virtual Network for the address<br>Labels from Namespace for the address<br><br>Network Policy Rules are applied from local_endpoint point of view. Egress rules are applied for packets transmitted from local_endpoint to endpoint specified in network policy rule. Ingress rules are applied for packets received on local_endpoint from endpoint specified in network policy rule<br><br>Examples of local_endpoint are, containers, hosts on site-local or site-local-inside network<br><br>Prefix selector labels (BNF grammar):<br><br><selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax><br><br><requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ]<br><br><set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set><br><br><inclusion-exclusion>     ::= <inclusion> | <exclusion><br><br><exclusion>               ::= 'notin'<br><br><inclusion>               ::= 'in'<br><br><value-set>               ::= '(' <values> ')'<br><br><values>                  ::= VALUE | VALUE ',' <values><br><br><exact-match-restriction> ::= ['='|'=='|'!='] VALUE<br><br>KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\t')<br><br>Note:<br><br>(1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUE's in its requirement<br><br>(2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUE's in its requirement or does not exist<br><br>(3) The empty string is a valid VALUE<br><br>(4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE.<br><br>(5) A requirement with just !KEY requires that the KEY not exist.
 
 To get more information about f5xc_network_policy, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/network-policy)
 
+## Example Usage
 
+```terraform
+# Example: Network Policy - Basic
+
+resource "f5xc_network_policy" "example" {
+  name      = "example-network-policy"
+  namespace = "default"
+
+  endpoint = {
+    endpoint_choice = {
+      any = true
+    }
+  }
+}
+```
+
+```terraform
+# Example: Network Policy - Full
+
+resource "f5xc_network_policy" "example" {
+  name        = "example-network-policy"
+  namespace   = "default"
+  description = "Full network policy example"
+
+  labels = {
+    env  = "example"
+    team = "platform"
+  }
+
+  annotations = {
+    owner = "example-owner"
+  }
+
+  endpoint = {
+    endpoint_choice = {
+      prefix_list = {
+        prefixes = ["10.0.0.0/24"]
+      }
+    }
+  }
+
+  rule_choice = {
+    rules = {
+      ingress_rules = [
+        {
+          metadata = {
+            name        = "example-ingress-rule"
+            description = "Ingress rule example"
+          }
+          action = ["DENY"]
+          adv_action = {
+            action = ["LOG"]
+          }
+          traffic_choice = {
+            protocol_port_range = {
+              protocol    = "TCP"
+              port_ranges = ["80", "443"]
+            }
+          }
+          other_endpoint_choice = {
+            prefix_list = {
+              prefixes = ["192.168.1.0/24"]
+            }
+          }
+          label_matcher = {
+            keys = ["environment"]
+          }
+        }
+      ]
+      egress_rules = [
+        {
+          metadata = {
+            name = "example-egress-rule"
+          }
+          action = ["DENY"]
+          traffic_choice = {
+            all_udp_traffic = true
+          }
+          other_endpoint_choice = {
+            any = true
+          }
+        }
+      ]
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -39,30 +126,14 @@ To get more information about f5xc_network_policy, refer:
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
-- `egress_rules` (Attributes List) egress rules List of rules that apply to outgoing session from local endpoint Sequence in which rule is configured (in repeated egress rules) is the sequence in which egress rules are applied If egress rules are not specified or is empty list, then policy will assume default deny and to ANY destination from local endpoint (see [below for nested schema](#nestedatt--egress_rules))
 - `endpoint` (Attributes) Policy Endpoint Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints. (see [below for nested schema](#nestedatt--endpoint))
-- `ingress_rules` (Attributes List) ingress rules List of rules that apply to incoming session for local endpoint Sequence in which rule is configured (in repeated ingress rules) is the sequence in which ingress rules are applied If ingress rules are not specified or is empty list, then policy will assume default deny and from ANY destination to local endpoint (see [below for nested schema](#nestedatt--ingress_rules))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `rule_choice` (Attributes) Rule Choice Style of rules used when the policy was created. This cannot be modified. (see [below for nested schema](#nestedatt--rule_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `local_endpoint_choice` (Attributes) Local Endpoint local_endpoint identifies the endpoint on which policy is applied. Egress rules are applied to traffic coming out of local endpoint, where local endpoint is source. Ingress rules are applied to traffic go to local endpoint, where local endpoint is destination. Not specifying any endpoint will result in creation of ANY endpoint (see [below for nested schema](#nestedatt--local_endpoint_choice))
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
-
-<a id="nestedatt--egress_rules"></a>
-### Nested Schema for `egress_rules`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
 
 <a id="nestedatt--endpoint"></a>
 ### Nested Schema for `endpoint`
@@ -99,19 +170,6 @@ Optional:
 - `prefixes` (List of String) ipv4 prefix list List of IPv4 prefixes that represent an endpoint
 
 
-
-
-<a id="nestedatt--ingress_rules"></a>
-### Nested Schema for `ingress_rules`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
 
 
 <a id="nestedatt--rule_choice"></a>
@@ -239,7 +297,7 @@ Optional:
 
 Optional:
 
-- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`
+- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rules--egress_rules--traffic_choice--protocol_port_range"></a>
@@ -248,7 +306,7 @@ Optional:
 Optional:
 
 - `port_ranges` (List of String) ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192
-- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`
+- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`
 
 
 
@@ -363,7 +421,7 @@ Optional:
 
 Optional:
 
-- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`
+- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rules--ingress_rules--traffic_choice--protocol_port_range"></a>
@@ -372,7 +430,7 @@ Optional:
 Optional:
 
 - `port_ranges` (List of String) ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192
-- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`
+- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`
 
 
 
@@ -388,38 +446,13 @@ Optional:
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-
-<a id="nestedatt--local_endpoint_choice"></a>
-### Nested Schema for `local_endpoint_choice`
-
-Optional:
-
-- `prefix` (Attributes) prefix list of ip prefixes that are member of set representing local endpoint prefix is the list of ip addresses to match For egress rules these ip prefixes are source For ingress rules these ip prefixes are destination (see [below for nested schema](#nestedatt--local_endpoint_choice--prefix))
-- `prefix_selector` (Attributes) prefix selector local end point is set of prefixes determined by label selector expression Labels can be specified in BNF grammar format (see [below for nested schema](#nestedatt--local_endpoint_choice--prefix_selector))
-
-<a id="nestedatt--local_endpoint_choice--prefix"></a>
-### Nested Schema for `local_endpoint_choice.prefix`
-
-Optional:
-
-- `ipv6_prefix` (List of String) ipv6 prefix
-- `prefix` (List of String) Prefix
-
-
-<a id="nestedatt--local_endpoint_choice--prefix_selector"></a>
-### Nested Schema for `local_endpoint_choice.prefix_selector`
-
-Required:
-
-- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -427,7 +460,7 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_network_policy.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 

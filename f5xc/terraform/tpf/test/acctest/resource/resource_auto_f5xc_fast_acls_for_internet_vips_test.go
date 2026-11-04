@@ -33,9 +33,9 @@ import (
 func TestAccResourceAutoF5XCFastAclsForInternetVips_basic(t *testing.T) {
 
 	namespace := "system"
-	aclOneName := "tf-acc-fast-acl-one-" + acctest.RandString(t, 8)
+	aclOneName := "example-fast-acl-one-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckFastAclsForInternetVipsDestroyProducer(t),
@@ -44,7 +44,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -54,21 +54,25 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withSingleFastAcl(namespace, aclOneName),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
 				ImportStateVerifyIdentifierAttribute: "namespace",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withSingleFastAcl(namespace, "example-fast-acl"),
+		})
 }
 
 func TestAccResourceAutoF5XCFastAclsForInternetVips_withSingleFastAclTransition(t *testing.T) {
 
 	namespace := "system"
-	aclOneName := "tf-acc-fast-acl-one-" + acctest.RandString(t, 8)
-	aclTwoName := "tf-acc-fast-acl-two-" + acctest.RandString(t, 8)
+	aclOneName := "example-fast-acl-one-" + acctest.RandString(t, 8)
+	aclTwoName := "example-fast-acl-two-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -79,7 +83,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withSingleFastAclTransition(
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withSingleFastAcl(namespace, aclOneName),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -89,7 +93,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withSingleFastAclTransition(
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withReplacementFastAcl(namespace, aclOneName, aclTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -102,9 +106,9 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withSingleFastAclTransition(
 func TestAccResourceAutoF5XCFastAclsForInternetVips_withMultipleFastAcls(t *testing.T) {
 
 	namespace := "system"
-	aclOneName := "tf-acc-fast-acl-one-" + acctest.RandString(t, 8)
-	aclTwoName := "tf-acc-fast-acl-two-" + acctest.RandString(t, 8)
-	aclThreeName := "tf-acc-fast-acl-three-" + acctest.RandString(t, 8)
+	aclOneName := "example-fast-acl-one-" + acctest.RandString(t, 8)
+	aclTwoName := "example-fast-acl-two-" + acctest.RandString(t, 8)
+	aclThreeName := "example-fast-acl-three-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -115,7 +119,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withMultipleFastAcls(t *test
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withTwoFastAcls(namespace, aclOneName, aclTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -125,7 +129,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withMultipleFastAcls(t *test
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withThreeFastAcls(namespace, aclOneName, aclTwoName, aclThreeName),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -138,8 +142,8 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withMultipleFastAcls(t *test
 func TestAccResourceAutoF5XCFastAclsForInternetVips_withFastAclsCleared(t *testing.T) {
 
 	namespace := "system"
-	aclOneName := "tf-acc-fast-acl-one-" + acctest.RandString(t, 8)
-	aclTwoName := "tf-acc-fast-acl-two-" + acctest.RandString(t, 8)
+	aclOneName := "example-fast-acl-one-" + acctest.RandString(t, 8)
+	aclTwoName := "example-fast-acl-two-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -150,7 +154,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withFastAclsCleared(t *testi
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withTwoFastAcls(namespace, aclOneName, aclTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -160,7 +164,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withFastAclsCleared(t *testi
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -173,8 +177,8 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withFastAclsCleared(t *testi
 func TestAccResourceAutoF5XCFastAclsForInternetVips_withUpdateCycle(t *testing.T) {
 
 	namespace := "system"
-	aclOneName := "tf-acc-fast-acl-one-" + acctest.RandString(t, 8)
-	aclTwoName := "tf-acc-fast-acl-two-" + acctest.RandString(t, 8)
+	aclOneName := "example-fast-acl-one-" + acctest.RandString(t, 8)
+	aclTwoName := "example-fast-acl-two-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -185,7 +189,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withUpdateCycle(t *testing.T
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -195,7 +199,7 @@ func TestAccResourceAutoF5XCFastAclsForInternetVips_withUpdateCycle(t *testing.T
 				Config: testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withTwoFastAcls(namespace, aclOneName, aclTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_fast_acls_for_internet_vips.test",
+				ResourceName:                         "f5xc_fast_acls_for_internet_vips.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -211,7 +215,7 @@ func testAccCheckFastAclsForInternetVipsDestroyProducer(t *testing.T) func(*terr
 
 func testAccResourceAutoF5XCFastAclsForInternetVipsConfig_basic(namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fast_acls_for_internet_vips" "test" {
+resource "f5xc_fast_acls_for_internet_vips" "example" {
   namespace = %q
 }
 `, namespace)
@@ -221,7 +225,7 @@ func testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withSingleFastAcl(name
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_fast_acls_for_internet_vips" "test" {
+resource "f5xc_fast_acls_for_internet_vips" "example" {
   namespace = %q
 
   fast_acls = [
@@ -240,7 +244,7 @@ func testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withReplacementFastAcl
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_fast_acls_for_internet_vips" "test" {
+resource "f5xc_fast_acls_for_internet_vips" "example" {
   namespace = %q
 
   fast_acls = [
@@ -260,7 +264,7 @@ func testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withTwoFastAcls(namesp
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_fast_acls_for_internet_vips" "test" {
+resource "f5xc_fast_acls_for_internet_vips" "example" {
   namespace = %q
 
   fast_acls = [
@@ -284,7 +288,7 @@ func testAccResourceAutoF5XCFastAclsForInternetVipsConfig_withThreeFastAcls(name
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_fast_acls_for_internet_vips" "test" {
+resource "f5xc_fast_acls_for_internet_vips" "example" {
   namespace = %q
 
   fast_acls = [

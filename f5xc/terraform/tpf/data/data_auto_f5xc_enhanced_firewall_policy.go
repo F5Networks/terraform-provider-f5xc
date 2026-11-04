@@ -30,7 +30,7 @@ type DataSourceF5XCEnhancedFirewallPolicy struct {
 	client *client.APIClient
 }
 
-type EnhancedFirewallPolicyGlobalSpecTypeRuleChoice struct {
+type EnhancedFirewallPolicyRuleChoice struct {
 	AllowAll            types.Bool   `tfsdk:"allow_all"`
 	AllowedDestinations types.Object `tfsdk:"allowed_destinations"`
 	AllowedSources      types.Object `tfsdk:"allowed_sources"`
@@ -40,31 +40,31 @@ type EnhancedFirewallPolicyGlobalSpecTypeRuleChoice struct {
 	RuleList            types.Object `tfsdk:"rule_list"`
 }
 
-type EnhancedFirewallPolicyGlobalSpecTypeAllowedDestinations struct {
+type EnhancedFirewallPolicyAllowedDestinations struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
 
-type EnhancedFirewallPolicyGlobalSpecTypeAllowedSources struct {
+type EnhancedFirewallPolicyAllowedSources struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
 
-type EnhancedFirewallPolicyGlobalSpecTypeDeniedDestinations struct {
+type EnhancedFirewallPolicyDeniedDestinations struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
 
-type EnhancedFirewallPolicyGlobalSpecTypeDeniedSources struct {
+type EnhancedFirewallPolicyDeniedSources struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
 
-type EnhancedFirewallPolicyGlobalSpecTypeRuleList struct {
+type EnhancedFirewallPolicyRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleType struct {
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleType struct {
 	ActionChoice      types.Object `tfsdk:"action_choice"`
 	AdvancedAction    types.Object `tfsdk:"advanced_action"`
 	DestinationChoice types.Object `tfsdk:"destination_choice"`
@@ -74,21 +74,21 @@ type EnhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleType 
 	TrafficChoice     types.Object `tfsdk:"traffic_choice"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeActionChoice struct {
+type EnhancedFirewallPolicyActionChoice struct {
 	Allow         types.Bool   `tfsdk:"allow"`
 	Deny          types.Bool   `tfsdk:"deny"`
 	InsertService types.Object `tfsdk:"insert_service"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeInsertService struct {
+type EnhancedFirewallPolicyInsertSvc struct {
 	NfvService types.Object `tfsdk:"nfv_service"`
 }
 
-type EnhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
+type EnhancedFirewallPolicyNetPolicyRuleAdvancedAction struct {
 	Action types.List `tfsdk:"action"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationChoice struct {
+type EnhancedFirewallPolicyDestChoice struct {
 	AllDestinations          types.Bool   `tfsdk:"all_destinations"`
 	AllSliVips               types.Bool   `tfsdk:"all_sli_vips"`
 	AllSloVips               types.Bool   `tfsdk:"all_slo_vips"`
@@ -100,19 +100,19 @@ type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationChoice struc
 	OutsideDestinations      types.Bool   `tfsdk:"outside_destinations"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationAwsVpcIds struct {
+type EnhancedFirewallPolicyDestAwsVpcIds struct {
 	VpcId types.List `tfsdk:"vpc_id"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationIpPrefixSet struct {
+type EnhancedFirewallPolicyDestIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationLabelSelector struct {
+type EnhancedFirewallPolicyDestLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationPrefixList struct {
+type EnhancedFirewallPolicyDestPrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
@@ -126,7 +126,7 @@ type EnhancedFirewallPolicyMessageMetaType struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceChoice struct {
+type EnhancedFirewallPolicySrcChoice struct {
 	AllSources          types.Bool   `tfsdk:"all_sources"`
 	InsideSources       types.Bool   `tfsdk:"inside_sources"`
 	OutsideSources      types.Bool   `tfsdk:"outside_sources"`
@@ -136,24 +136,24 @@ type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceChoice struct {
 	SourcePrefixList    types.Object `tfsdk:"source_prefix_list"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceAwsVpcIds struct {
+type EnhancedFirewallPolicySrcAwsVpcIds struct {
 	VpcId types.List `tfsdk:"vpc_id"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceIpPrefixSet struct {
+type EnhancedFirewallPolicySrcIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceLabelSelector struct {
+type EnhancedFirewallPolicySrcLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourcePrefixList struct {
+type EnhancedFirewallPolicySrcPrefixList struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeTrafficChoice struct {
+type EnhancedFirewallPolicyTrafficChoice struct {
 	AllTcpTraffic     types.Bool   `tfsdk:"all_tcp_traffic"`
 	AllTraffic        types.Bool   `tfsdk:"all_traffic"`
 	AllUdpTraffic     types.Bool   `tfsdk:"all_udp_traffic"`
@@ -161,36 +161,36 @@ type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeTrafficChoice struct {
 	ProtocolPortRange types.Object `tfsdk:"protocol_port_range"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeApplications struct {
+type EnhancedFirewallPolicyApplications struct {
 	Applications types.List `tfsdk:"applications"`
 }
 
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeProtocolPortRange struct {
+type EnhancedFirewallPolicyProtoPortRange struct {
 	PortRanges types.List   `tfsdk:"port_ranges"`
 	Protocol   types.String `tfsdk:"protocol"`
 }
 
-type EnhancedFirewallPolicyPolicySegmentPolicyType struct {
+type EnhancedFirewallPolicySegmentPolicyType struct {
 	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
 	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
 }
 
-type EnhancedFirewallPolicySegmentPolicyTypeDstSegmentChoice struct {
+type EnhancedFirewallPolicyDstSegmentChoice struct {
 	DstAny       types.Bool   `tfsdk:"dst_any"`
 	DstSegments  types.Object `tfsdk:"dst_segments"`
 	IntraSegment types.Bool   `tfsdk:"intra_segment"`
 }
 
-type EnhancedFirewallPolicySegmentPolicyTypeDstSegments struct {
+type EnhancedFirewallPolicyDstSegments struct {
 	Segments types.List `tfsdk:"segments"`
 }
 
-type EnhancedFirewallPolicySegmentPolicyTypeSrcSegmentChoice struct {
+type EnhancedFirewallPolicySrcSegmentChoice struct {
 	SrcAny      types.Bool   `tfsdk:"src_any"`
 	SrcSegments types.Object `tfsdk:"src_segments"`
 }
 
-type EnhancedFirewallPolicySegmentPolicyTypeSrcSegments struct {
+type EnhancedFirewallPolicySrcSegments struct {
 	Segments types.List `tfsdk:"segments"`
 }
 
@@ -641,8 +641,8 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Metadata(ctx context.Context, req
 func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Enhanced Firewall Policy Hits ID EnhancedFirewallPolicyHitsId uniquely identifies an entry in the response to Enhanced Firewall Policy hits request. Enhanced Firewall Policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the fields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
-		Description:         "Enhanced Firewall Policy Hits ID EnhancedFirewallPolicyHitsId uniquely identifies an entry in the response to Enhanced Firewall Policy hits request. Enhanced Firewall Policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the fields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		MarkdownDescription: "Enhanced Firewall Policy defined firewall rules applied in the site<br>Enhanced Firewall Policy defines rules in the form or 5 tuple,<br><source, source-port, destination, destination-port, protocol><br><br>Where,<br>source : source can be specified in the form of<br>- ip-address or ip-subnet to be matched with source-ip in packet<br>- labels associated with the source of packet<br>- tags associated with the source vpc, from where the packet originates<br>- vpc-id for the source address<br>source attributes are matched before any NAT processing of the packet<br><br>source-port: matches the source-port in the packet<br><br>destination: destination can be specified in the form of<br>- ip-address or ip-subnet to be matched with destination-ip in packet<br>- labels associated with the destination of packet<br>- tags associated with the destination vpc, to where the packet is sent<br>- vpc for the source address<br><br>destination-port: matches the destination-port in the packet<br><br>protocol: protocol of the IP packet<br><br>The Enhanced Firewall Policies are applied as part of route processing<br>The policies are always applied before any NAT processing so that source<br>matching always happens on the original packet",
+		Description:         "Enhanced Firewall Policy defined firewall rules applied in the site Enhanced Firewall Policy defines rules in the form or 5 tuple, <source, source-port, destination, destination-port, protocol> Where, source : source can be specified in the form of - ip-address or ip-subnet to be matched with source-ip in packet - labels associated with the source of packet - tags associated with the source vpc, from where the packet originates - vpc-id for the source address source attributes are matched before any NAT processing of the packet source-port: matches the source-port in the packet destination: destination can be specified in the form of - ip-address or ip-subnet to be matched with destination-ip in packet - labels associated with the destination of packet - tags associated with the destination vpc, to where the packet is sent - vpc for the source address destination-port: matches the destination-port in the packet protocol: protocol of the IP packet The Enhanced Firewall Policies are applied as part of route processing The policies are always applied before any NAT processing so that source matching always happens on the original packet",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1386,7 +1386,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "enhanced_firewall_policy", err))
 		return
 	}
 
@@ -1457,7 +1457,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &EnhancedFirewallPolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &EnhancedFirewallPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1673,9 +1673,9 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]EnhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleType, 0, len(ruleListElement.GetRules()))
+					rulesElements := make([]EnhancedFirewallPolicyEnhancedFirewallPolicyRuleType, 0, len(ruleListElement.GetRules()))
 					for _, rulesElement := range ruleListElement.GetRules() {
-						enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel := EnhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleType{}
+						enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel := EnhancedFirewallPolicyEnhancedFirewallPolicyRuleType{}
 
 						// data specToModelNested RequiredOneOfField --> ActionChoice
 						// <no value>
@@ -1791,16 +1791,16 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = finalObj
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> AdvancedAction
 						if rulesElement.GetAdvancedAction() != nil {
 							// Create the nested Go struct
-							enhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel := &EnhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+							enhancedFirewallPolicyNetPolicyRuleAdvancedActionModel := &EnhancedFirewallPolicyNetPolicyRuleAdvancedAction{}
 							advancedActionElement := rulesElement.GetAdvancedAction()
 
 							// Recursively populate the nested struct
@@ -1814,18 +1814,18 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 								if response.Diagnostics.HasError() {
 									return
 								}
-								enhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+								enhancedFirewallPolicyNetPolicyRuleAdvancedActionModel.Action = listValue
 							} else {
-								enhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+								enhancedFirewallPolicyNetPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							enhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj, objDiags := types.ObjectValueFrom(ctx, EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap, enhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel)
+							enhancedFirewallPolicyNetPolicyRuleAdvancedActionModelObj, objDiags := types.ObjectValueFrom(ctx, EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap, enhancedFirewallPolicyNetPolicyRuleAdvancedActionModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = enhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = enhancedFirewallPolicyNetPolicyRuleAdvancedActionModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1834,7 +1834,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> DestinationChoice
@@ -2089,10 +2089,10 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = finalObj
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> LabelMatcher
@@ -2121,7 +2121,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							if response.Diagnostics.HasError() {
 								return
 							}
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.LabelMatcher = enhancedFirewallPolicyLabelMatcherTypeModelObj
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.LabelMatcher = enhancedFirewallPolicyLabelMatcherTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2130,7 +2130,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesLabelMatcherModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesLabelMatcherModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
@@ -2163,7 +2163,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							if response.Diagnostics.HasError() {
 								return
 							}
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.Metadata = enhancedFirewallPolicyMessageMetaTypeModelObj
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.Metadata = enhancedFirewallPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2172,7 +2172,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.Metadata = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.Metadata = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> SourceChoice
@@ -2409,10 +2409,10 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = finalObj
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredOneOfField --> TrafficChoice
@@ -2547,13 +2547,13 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = finalObj
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap)
 						}
 
-						rulesElements = append(rulesElements, enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel)
+						rulesElements = append(rulesElements, enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2604,7 +2604,7 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 
 	// data SpecToModelRoot PointerField --> SegmentPolicy
 	if specData.GetSegmentPolicy() != nil {
-		var enhancedFirewallPolicyPolicySegmentPolicyTypeModel = &EnhancedFirewallPolicyPolicySegmentPolicyType{}
+		var enhancedFirewallPolicySegmentPolicyTypeModel = &EnhancedFirewallPolicySegmentPolicyType{}
 		segmentPolicyElement := specData.GetSegmentPolicy()
 
 		// data specToModelNested OneOfField --> DstSegmentChoice
@@ -2720,10 +2720,10 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
+			enhancedFirewallPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
+			enhancedFirewallPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested OneOfField --> SrcSegmentChoice
@@ -2830,16 +2830,16 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
+			enhancedFirewallPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(EnhancedFirewallPolicySegmentPolicySrcSegmentChoiceModelAttributeMap)
+			enhancedFirewallPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(EnhancedFirewallPolicySegmentPolicySrcSegmentChoiceModelAttributeMap)
 		}
 
 		segmentPolicyObj, segmentPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			EnhancedFirewallPolicySegmentPolicyModelAttributeMap,
-			enhancedFirewallPolicyPolicySegmentPolicyTypeModel,
+			enhancedFirewallPolicySegmentPolicyTypeModel,
 		)
 		response.Diagnostics.Append(segmentPolicyDiags...)
 		data.SegmentPolicy = segmentPolicyObj

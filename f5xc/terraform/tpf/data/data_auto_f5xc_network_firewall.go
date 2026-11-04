@@ -54,8 +54,8 @@ func (d *DataSourceF5XCNetworkFirewall) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCNetworkFirewall) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_firewall This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_firewall) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_firewall This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_firewall) etc. can be fetched",
+		MarkdownDescription: "Network Firewall is applicable when referred to by a Fleet. The Network Firewall will be applied to all<br>sites that are member of the referring Fleet.<br><br>It is applied on all virtual networks that are valid on this site that get instantiated due to fleet object.<br>Network Firewall defines following,<br>- network_policy_set - L3/L4 policies to be applied in all sites that are member of the fleet<br>- forward_proxy_policy_set - L7 firewall to be applied in all sites that are member of the fleet<br>- fast_acl_set - List of Fast ACL set to be applied in all sites that are member of the fleet.",
+		Description:         "Network Firewall is applicable when referred to by a Fleet. The Network Firewall will be applied to all sites that are member of the referring Fleet. It is applied on all virtual networks that are valid on this site that get instantiated due to fleet object. Network Firewall defines following, - network_policy_set - L3/L4 policies to be applied in all sites that are member of the fleet - forward_proxy_policy_set - L7 firewall to be applied in all sites that are member of the fleet - fast_acl_set - List of Fast ACL set to be applied in all sites that are member of the fleet.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -153,7 +153,7 @@ func (d *DataSourceF5XCNetworkFirewall) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_firewall.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "network_firewall", err))
 		return
 	}
 
